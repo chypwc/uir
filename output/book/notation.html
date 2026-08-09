@@ -1026,6 +1026,150 @@ window.Quarto = {
 </tr>
 </tbody>
 </table>
+</section>
+<section id="notation-introduced-in-sec-screw-motion-se3-exponential-spatial-integration" class="level3 unnumbered unlisted">
+<h3 class="unnumbered unlisted anchored" data-anchor-id="notation-introduced-in-sec-screw-motion-se3-exponential-spatial-integration">Notation introduced in <a href="08_screw_motion_se3_exponential_and_spatial_integration.html" class="quarto-xref"><span>8&nbsp; Screw Motion, the SE(3) Exponential, and Spatial Pose Integration</span></a></h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Symbol</th>
+<th>Meaning</th>
+<th>Units or convention</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(I,L_i,\mathcal B_i,\bigsqcup_{i\in I}\mathcal B_i\)</span></td>
+<td>Finite link-index set, link <span class="math inline">\(i\)</span>, its material-point set, and the disjoint union of all link point sets</td>
+<td>Abstract sets and labels</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(c_b:\mathcal B_b\to\mathbb R^3\)</span></td>
+<td>Fixed body-coordinate assignment mapping each material point of link <span class="math inline">\(b\)</span> to its coordinates in frame <span class="math inline">\(\{b\}\)</span></td>
+<td>Output in <span class="math inline">\(\mathrm m\)</span></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(A_{\mathbf T_{wb}}:\mathbb R^3\to\mathbb R^3\)</span></td>
+<td>Affine point-coordinate map induced by pose matrix <span class="math inline">\(\mathbf T_{wb}\)</span></td>
+<td>Input and output in <span class="math inline">\(\mathrm m\)</span></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\chi_{\mathbf T_{wb}}=A_{\mathbf T_{wb}}\circ c_b\)</span>, <span class="math inline">\(\Phi_b:SE(3)\to\mathcal C_b\)</span></td>
+<td>Rigid-link configuration induced by a pose and the one-to-one pose-to-configuration correspondence</td>
+<td>Mappings between the declared sets</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\mathcal Q\)</span>, <span class="math inline">\(N\)</span>, <span class="math inline">\(n\)</span>, <span class="math inline">\(j\)</span></td>
+<td>Generalised-coordinate domain, number of joints, number of coordinates, and joint index</td>
+<td><span class="math inline">\(\mathcal Q\)</span> may contain mixed-unit coordinates; counts and index are integers</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\({}^{a}\mathcal L\)</span>, <span class="math inline">\({}^{a}\mathbf p_\ell\)</span>, <span class="math inline">\({}^{a}\mathbf s\)</span>, <span class="math inline">\(\lambda\)</span></td>
+<td>Oriented axis line, a point on it, its unit positive direction, and signed distance along it</td>
+<td>Point and <span class="math inline">\(\lambda\)</span> in <span class="math inline">\(\mathrm m\)</span>; direction dimensionless</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\theta_j,\dot\theta_j,d_j,\dot d_j\)</span></td>
+<td>Revolute angle and angular rate, and prismatic displacement and rate, for joint <span class="math inline">\(j\)</span></td>
+<td><span class="math inline">\(\mathrm{rad}\)</span>, <span class="math inline">\(\mathrm{rad\,s^{-1}}\)</span>, <span class="math inline">\(\mathrm m\)</span>, <span class="math inline">\(\mathrm{m\,s^{-1}}\)</span></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\mathbf F_e:\mathcal Q\to SE(3)\)</span></td>
+<td>Forward-kinematics map returning the pose of selected frame <span class="math inline">\(\{e\}\)</span> relative to space frame <span class="math inline">\(\{s\}\)</span></td>
+<td>Rotation dimensionless; translation in <span class="math inline">\(\mathrm m\)</span></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(h\)</span></td>
+<td>Signed screw pitch: axial travel per positive radian of rotation</td>
+<td><span class="math inline">\(\mathrm{m\,rad^{-1}}\)</span></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\({}^{a}\mathbf S_R,{}^{a}\mathbf S_H,{}^{a}\mathbf S_P\)</span></td>
+<td>Normalised revolute, finite-pitch helical, and prismatic screw-axis coordinate columns expressed in frame <span class="math inline">\(\{a\}\)</span></td>
+<td>Linear-first six-entry columns with case-dependent mixed units</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\({}^{a}\mathbf S=[({}^{a}\mathbf s_v)^{\mathsf T}\;({}^{a}\mathbf s_\omega)^{\mathsf T}]^{\mathsf T}\)</span></td>
+<td>Normalised screw-axis coordinates with linear and angular coefficient blocks</td>
+<td><span class="math inline">\(\mathbf s_v\)</span> in <span class="math inline">\(\mathrm{m\,rad^{-1}}\)</span> for rotational screws and dimensionless for prismatic screws; <span class="math inline">\(\mathbf s_\omega\)</span> dimensionless</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\sigma,\dot\sigma\)</span></td>
+<td>Signed motion amount along a normalised screw and its rate</td>
+<td><span class="math inline">\(\mathrm{rad}\)</span> and <span class="math inline">\(\mathrm{rad\,s^{-1}}\)</span> for rotational screws; <span class="math inline">\(\mathrm m\)</span> and <span class="math inline">\(\mathrm{m\,s^{-1}}\)</span> for prismatic screws</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\widehat{{}^{a}\mathbf S}\)</span></td>
+<td>Hat-operator matrix representation of a screw axis in <span class="math inline">\(\mathfrak{se}(3)\)</span></td>
+<td>Mixed units follow <span class="math inline">\({}^{a}\mathbf S\)</span></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\({}^{a}\boldsymbol\eta=[({}^{a}\boldsymbol\rho)^{\mathsf T}\;({}^{a}\boldsymbol\phi)^{\mathsf T}]^{\mathsf T}\)</span></td>
+<td>Finite exponential-coordinate column with linear block <span class="math inline">\(\boldsymbol\rho\)</span> and rotation-vector block <span class="math inline">\(\boldsymbol\phi\)</span></td>
+<td>First three entries in <span class="math inline">\(\mathrm m\)</span>; final three labelled in <span class="math inline">\(\mathrm{rad}\)</span></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\mathbf T_\Delta\)</span></td>
+<td>Finite rigid-displacement transformation produced by a screw exponential or finite twist increment</td>
+<td>Element of <span class="math inline">\(SE(3)\)</span>; translation in <span class="math inline">\(\mathrm m\)</span></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\boldsymbol\Omega=[{}^{a}\mathbf s_\omega]_\times\)</span>, <span class="math inline">\(\mathbf G(\theta)\)</span></td>
+<td>Unit-axis cross-product matrix and normalised-screw translation map</td>
+<td><span class="math inline">\(\boldsymbol\Omega\)</span> dimensionless; <span class="math inline">\(\mathbf G\)</span> maps <span class="math inline">\(\mathrm{m\,rad^{-1}}\)</span> to <span class="math inline">\(\mathrm m\)</span></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\operatorname{Log}(\mathbf T)\)</span>, <span class="math inline">\(\log_{\mathrm{sel}}\)</span>, <span class="math inline">\(\mathcal D_{\mathrm{sel}}\)</span>, <span class="math inline">\(\log_{\mathrm p}\)</span></td>
+<td>Set of all real rigid-motion logarithms, a selected single-valued branch, its domain, and the chapter’s principal branch</td>
+<td>Logarithms are elements of <span class="math inline">\(\mathfrak{se}(3)\)</span> with finite mixed-unit blocks</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\boldsymbol\Phi=[{}^{a}\boldsymbol\phi]_\times\)</span></td>
+<td>Cross-product matrix of the finite rotation-vector block</td>
+<td>Entries labelled in <span class="math inline">\(\mathrm{rad}\)</span></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(A(\theta),B(\theta),C(\theta),D(\theta)\)</span></td>
+<td>Continuously extended scalar coefficients used in the rotation, left-Jacobian, and inverse-left-Jacobian formulas</td>
+<td>Dimensionless</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\mathbf J({}^{a}\boldsymbol\phi)\)</span></td>
+<td>Left Jacobian of <span class="math inline">\(SO(3)\)</span> mapping <span class="math inline">\(\boldsymbol\rho\)</span> to the finite translation column</td>
+<td>Dimensionless <span class="math inline">\(3\times3\)</span> matrix</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(c_\theta,{}^{a}\mathbf u,s_\theta,\mathbf Q\)</span></td>
+<td>Trace-derived cosine, skew-difference column, sine magnitude, and symmetric axis outer-product matrix used by the principal rotation logarithm</td>
+<td>Dimensionless</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\theta_{\mathrm{series}},\varepsilon_\pi,\varepsilon_{\mathrm{zero}},\varepsilon_{p,0}\)</span></td>
+<td>Series-selection, near-<span class="math inline">\(\pi\)</span>, angular-zero, and translation-zero thresholds</td>
+<td>First three in <span class="math inline">\(\mathrm{rad}\)</span>; <span class="math inline">\(\varepsilon_{p,0}\)</span> in <span class="math inline">\(\mathrm m\)</span></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\|\mathbf v\|_\infty\)</span></td>
+<td>Infinity norm: the largest absolute component of a finite column</td>
+<td>Same units as <span class="math inline">\(\mathbf v\)</span></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\widetilde{\mathbf T}\)</span>, <span class="math inline">\(e_{\mathrm{row}}\)</span></td>
+<td>Candidate homogeneous transformation and its bottom-row residual before validation</td>
+<td>Candidate translation in <span class="math inline">\(\mathrm m\)</span>; residual dimensionless</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(e_{R,\mathrm{rt}},e_{p,\mathrm{rt}}\)</span></td>
+<td>Rotation and translation residuals for an exponential/logarithm round trip</td>
+<td>Dimensionless and <span class="math inline">\(\mathrm m\)</span>, respectively</td>
+</tr>
+</tbody>
+</table>
 
 
 </section>

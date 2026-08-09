@@ -139,6 +139,36 @@ This note is the canonical notation registry for the project. Chapters may intro
 | $\boldsymbol\Omega_k=[\boldsymbol\omega_{b,k}]_\times$                             | Body-expressed angular-velocity matrix at sample $k$                                                       | $\mathrm{s^{-1}}$                                                                 |
 | $\widetilde{\mathbf R}_{k+1}$                                                      | Forward Euler candidate for the next orientation matrix                                                    | Dimensionless; not necessarily in $SO(3)$                                         |
 
+### Notation introduced in @sec-screw-motion-se3-exponential-spatial-integration {.unnumbered .unlisted}
+
+| Symbol | Meaning | Units or convention |
+|---|---|---|
+| $I,L_i,\mathcal B_i,\bigsqcup_{i\in I}\mathcal B_i$ | Finite link-index set, link $i$, its material-point set, and the disjoint union of all link point sets | Abstract sets and labels |
+| $c_b:\mathcal B_b\to\mathbb R^3$ | Fixed body-coordinate assignment mapping each material point of link $b$ to its coordinates in frame $\{b\}$ | Output in $\mathrm m$ |
+| $A_{\mathbf T_{wb}}:\mathbb R^3\to\mathbb R^3$ | Affine point-coordinate map induced by pose matrix $\mathbf T_{wb}$ | Input and output in $\mathrm m$ |
+| $\chi_{\mathbf T_{wb}}=A_{\mathbf T_{wb}}\circ c_b$, $\Phi_b:SE(3)\to\mathcal C_b$ | Rigid-link configuration induced by a pose and the one-to-one pose-to-configuration correspondence | Mappings between the declared sets |
+| $\mathcal Q$, $N$, $n$, $j$ | Generalised-coordinate domain, number of joints, number of coordinates, and joint index | $\mathcal Q$ may contain mixed-unit coordinates; counts and index are integers |
+| ${}^{a}\mathcal L$, ${}^{a}\mathbf p_\ell$, ${}^{a}\mathbf s$, $\lambda$ | Oriented axis line, a point on it, its unit positive direction, and signed distance along it | Point and $\lambda$ in $\mathrm m$; direction dimensionless |
+| $\theta_j,\dot\theta_j,d_j,\dot d_j$ | Revolute angle and angular rate, and prismatic displacement and rate, for joint $j$ | $\mathrm{rad}$, $\mathrm{rad\,s^{-1}}$, $\mathrm m$, $\mathrm{m\,s^{-1}}$ |
+| $\mathbf F_e:\mathcal Q\to SE(3)$ | Forward-kinematics map returning the pose of selected frame $\{e\}$ relative to space frame $\{s\}$ | Rotation dimensionless; translation in $\mathrm m$ |
+| $h$ | Signed screw pitch: axial travel per positive radian of rotation | $\mathrm{m\,rad^{-1}}$ |
+| ${}^{a}\mathbf S_R,{}^{a}\mathbf S_H,{}^{a}\mathbf S_P$ | Normalised revolute, finite-pitch helical, and prismatic screw-axis coordinate columns expressed in frame $\{a\}$ | Linear-first six-entry columns with case-dependent mixed units |
+| ${}^{a}\mathbf S=[({}^{a}\mathbf s_v)^{\mathsf T}\;({}^{a}\mathbf s_\omega)^{\mathsf T}]^{\mathsf T}$ | Normalised screw-axis coordinates with linear and angular coefficient blocks | $\mathbf s_v$ in $\mathrm{m\,rad^{-1}}$ for rotational screws and dimensionless for prismatic screws; $\mathbf s_\omega$ dimensionless |
+| $\sigma,\dot\sigma$ | Signed motion amount along a normalised screw and its rate | $\mathrm{rad}$ and $\mathrm{rad\,s^{-1}}$ for rotational screws; $\mathrm m$ and $\mathrm{m\,s^{-1}}$ for prismatic screws |
+| $\widehat{{}^{a}\mathbf S}$ | Hat-operator matrix representation of a screw axis in $\mathfrak{se}(3)$ | Mixed units follow ${}^{a}\mathbf S$ |
+| ${}^{a}\boldsymbol\eta=[({}^{a}\boldsymbol\rho)^{\mathsf T}\;({}^{a}\boldsymbol\phi)^{\mathsf T}]^{\mathsf T}$ | Finite exponential-coordinate column with linear block $\boldsymbol\rho$ and rotation-vector block $\boldsymbol\phi$ | First three entries in $\mathrm m$; final three labelled in $\mathrm{rad}$ |
+| $\mathbf T_\Delta$ | Finite rigid-displacement transformation produced by a screw exponential or finite twist increment | Element of $SE(3)$; translation in $\mathrm m$ |
+| $\boldsymbol\Omega=[{}^{a}\mathbf s_\omega]_\times$, $\mathbf G(\theta)$ | Unit-axis cross-product matrix and normalised-screw translation map | $\boldsymbol\Omega$ dimensionless; $\mathbf G$ maps $\mathrm{m\,rad^{-1}}$ to $\mathrm m$ |
+| $\operatorname{Log}(\mathbf T)$, $\log_{\mathrm{sel}}$, $\mathcal D_{\mathrm{sel}}$, $\log_{\mathrm p}$ | Set of all real rigid-motion logarithms, a selected single-valued branch, its domain, and the chapter's principal branch | Logarithms are elements of $\mathfrak{se}(3)$ with finite mixed-unit blocks |
+| $\boldsymbol\Phi=[{}^{a}\boldsymbol\phi]_\times$ | Cross-product matrix of the finite rotation-vector block | Entries labelled in $\mathrm{rad}$ |
+| $A(\theta),B(\theta),C(\theta),D(\theta)$ | Continuously extended scalar coefficients used in the rotation, left-Jacobian, and inverse-left-Jacobian formulas | Dimensionless |
+| $\mathbf J({}^{a}\boldsymbol\phi)$ | Left Jacobian of $SO(3)$ mapping $\boldsymbol\rho$ to the finite translation column | Dimensionless $3\times3$ matrix |
+| $c_\theta,{}^{a}\mathbf u,s_\theta,\mathbf Q$ | Trace-derived cosine, skew-difference column, sine magnitude, and symmetric axis outer-product matrix used by the principal rotation logarithm | Dimensionless |
+| $\theta_{\mathrm{series}},\varepsilon_\pi,\varepsilon_{\mathrm{zero}},\varepsilon_{p,0}$ | Series-selection, near-$\pi$, angular-zero, and translation-zero thresholds | First three in $\mathrm{rad}$; $\varepsilon_{p,0}$ in $\mathrm m$ |
+| $\|\mathbf v\|_\infty$ | Infinity norm: the largest absolute component of a finite column | Same units as $\mathbf v$ |
+| $\widetilde{\mathbf T}$, $e_{\mathrm{row}}$ | Candidate homogeneous transformation and its bottom-row residual before validation | Candidate translation in $\mathrm m$; residual dimensionless |
+| $e_{R,\mathrm{rt}},e_{p,\mathrm{rt}}$ | Rotation and translation residuals for an exponential/logarithm round trip | Dimensionless and $\mathrm m$, respectively |
+
 ```{=latex}
 \cleardoublepage
 \pagenumbering{arabic}

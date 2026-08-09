@@ -35,19 +35,31 @@ Add terminology from a chapter only after that chapter has been completed and re
 **Big-$O$ notation**
 : A bound describing how rapidly a quantity such as numerical error can scale as an argument approaches a limit. See @sec-differential-drive-model.
 
+**Body-coordinate assignment**
+: A fixed mapping from each material point of a rigid link to that point's coordinates in an attached body frame. See @sec-robot-configurations-joint-coordinates.
+
 **Body-to-wheel velocity mapping**
 : The inverse differential-drive velocity-kinematics calculation that maps desired body-forward speed and yaw rate to ideal left and right wheel angular speeds. See @sec-wheel-speeds-body-motion.
 
 **Body twist**
 : The instantaneous motion of a rigid body relative to the world, with its components expressed along the moving body axes and referenced to the body origin. See @sec-se2-body-twist.
 
+**Branch boundary**
+: A represented transformation at which a selected single-valued logarithm must switch coordinate representatives and therefore cannot remain continuous. See @sec-se3-logarithm-branch-meaning.
+
 **Build type**
 : The declared mechanism that tells ROS 2 and `colcon` how a package is built and installed. See @sec-ros2-package-development-workflow.
 
 ## C {.unnumbered}
 
+**Chasles--Mozzi theorem**
+: The theorem that every spatial rigid displacement with non-identity rotation can be represented by rotation about one line plus translation along that line, with pure translation and identity as separate cases. See @sec-appendix-chasles-mozzi.
+
 **Child process**
 : A process started by another process; changes made to the child's environment do not propagate back to its parent shell. See @sec-ros2-package-development-workflow.
+
+**Closed kinematic loop**
+: A link-and-joint structure in which a sequence reconnects to an earlier link, creating more than one joint path between some links. See @sec-robot-configurations-joint-coordinates.
 
 **Closure**
 : The group property that combining any two elements using the group operation produces another element of the same set. See @sec-se2-planar-rotations.
@@ -96,8 +108,14 @@ Add terminology from a chapter only after that chapter has been completed and re
 **Determinant**
 : A scalar associated with a square matrix whose magnitude gives oriented volume scaling and whose sign records whether orientation is preserved or reversed. See @sec-linear-algebra-foundations.
 
+**Deterministic branch policy**
+: A declared selection and evaluation policy that returns the same coordinates, status, and failure behaviour for the same validated input and numerical configuration. See @sec-se3-logarithm-branch-meaning.
+
 **Differential-drive robot**
 : A wheeled robot whose planar forward and yaw motion are produced by independently driven left and right wheels separated by a track width. See @sec-differential-drive-model.
+
+**Disjoint union**
+: A union whose elements retain which member set they came from, used here so each robot material point retains its link identity. See @sec-robot-configurations-joint-coordinates.
 
 **Dot product**
 : The Euclidean inner product of two coordinate columns, equal to the product of their lengths and the cosine of their included angle. See @sec-linear-algebra-foundations.
@@ -119,16 +137,28 @@ Add terminology from a chapter only after that chapter has been completed and re
 **Exponential coordinates of a rotation**
 : The rotation vector whose direction gives the rotation axis and whose norm gives the rotation-angle magnitude. See @sec-so3-axis-angle-exponential.
 
+**Exponential-coordinate column**
+: A finite six-entry rigid-motion generator obtained by multiplying normalised screw-axis coordinates by a signed motion amount. See @sec-se3-screw-exponential.
+
 **Exponential map**
 : The mapping that applies the matrix exponential to a Lie-algebra matrix to produce a finite Lie-group element, such as a rotation in $SO(3)$. See @sec-so3-axis-angle-exponential.
 
 ## F {.unnumbered}
+
+**Fixed-base robot**
+: A robot model whose base-link pose is constant relative to the world, so the base requires no motion coordinates. See @sec-robot-configurations-joint-coordinates.
+
+**Floating-base robot**
+: A robot model whose base pose can change relative to the world and must be represented in addition to its internal joint coordinates. See @sec-robot-configurations-joint-coordinates.
 
 **Forward differential-drive velocity kinematics**
 : Another name for the wheel-to-body velocity mapping; *forward* identifies the direction from wheel velocities to body velocity, not the robot's travel direction. See @sec-wheel-speeds-body-motion.
 
 **Forward Euler method**
 : A first-order numerical-integration method that advances the state using the derivative evaluated at the beginning of each time step. See @sec-differential-drive-model.
+
+**Forward-kinematics map**
+: A mapping from admissible joint-coordinate descriptions to the pose of a selected robot frame. See @sec-robot-configurations-joint-coordinates.
 
 **Free vector**
 : A vector with magnitude and direction but no fixed origin, so a coordinate-frame change rotates its components without adding a translation. See @sec-se2-transforming-point.
@@ -143,6 +173,9 @@ Add terminology from a chapter only after that chapter has been completed and re
 
 **Generalised coordinates**
 : A chosen set of scalar coordinates used locally to describe a configuration; the coordinate column is a representation, not the physical configuration itself. See @sec-spatial-configuration-dof.
+
+**Generalised-coordinate domain**
+: The set of valid generalised-coordinate descriptions for a model, including declared joint limits and representation conventions. See @sec-robot-configurations-joint-coordinates.
 
 **Geometric vector**
 : A basis-independent quantity with magnitude and direction; a coordinate column is its numerical representation in a chosen basis. See @sec-linear-algebra-foundations.
@@ -166,6 +199,9 @@ Add terminology from a chapter only after that chapter has been completed and re
 
 **Hat operator**
 : A mapping from a twist coordinate column to its structured Lie-algebra matrix representation. See @sec-se2-hat-operator.
+
+**Helical joint**
+: A one-degree-of-freedom joint model coupling rotation about an axis to translation along the same axis at a fixed pitch. See @sec-helical-motion-screw-pitch.
 
 **Holonomic constraint**
 : A constraint expressible as an equation involving configuration coordinates only, so it directly restricts the configuration space. See @sec-spatial-configuration-dof.
@@ -214,12 +250,23 @@ Add terminology from a chapter only after that chapter has been completed and re
 **Inverse transpose**
 : For a nonsingular matrix $\mathbf A$, the matrix $\mathbf A^{-\mathsf T}=(\mathbf A^{-1})^\mathsf T=(\mathbf A^\mathsf T)^{-1}$. See @sec-linear-algebra-cross-product-linear-map.
 
+## J {.unnumbered}
+
+**Joint axis**
+: An oriented geometric line that locates a joint's permitted rotation or supplies the positive direction of its translation. See @sec-robot-configurations-joint-coordinates.
+
+**Joint coordinate**
+: A scalar angle or displacement that states a joint's current motion amount relative to its declared zero arrangement. See @sec-robot-configurations-joint-coordinates.
+
 ## K {.unnumbered}
 
 **Kinematics**
 : The mathematical description of motion without modelling the forces or torques that cause it. See @sec-differential-drive-model.
 
 ## L {.unnumbered}
+
+**Left Jacobian of $SO(3)$**
+: The rotation-dependent matrix that maps a finite linear exponential-coordinate block to the translation accumulated along an $SE(3)$ exponential path. See @sec-se3-numerical-branches.
 
 **Lie algebra**
 : The linear space of instantaneous directions of a Lie group at its identity, together with a Lie-bracket operation. See @sec-se2-rotation-derivative-tangent and @sec-se2-hat-operator.
@@ -239,10 +286,19 @@ Add terminology from a chapter only after that chapter has been completed and re
 **Linear map**
 : A mapping that preserves vector addition and scalar multiplication and can be represented by a matrix after bases are chosen. See @sec-linear-algebra-foundations.
 
+**Link**
+: A collection of material points modelled as one rigid object, with fixed distance between every pair of its points. See @sec-robot-configurations-joint-coordinates.
+
 **Local truncation error**
 : The error introduced by one numerical-integration step when that step begins from the exact state. See @sec-differential-drive-model.
 
+**Logarithm branch**
+: A single-valued rule that selects one matrix logarithm from the set of logarithms that exponentiate to the same transformation. See @sec-se3-logarithm-branch-meaning.
+
 ## M {.unnumbered}
+
+**Material point**
+: An ideal labelled point fixed in one physical part of a robot, whose label persists while its coordinates may change. See @sec-robot-configurations-joint-coordinates.
 
 **Matrix**
 : A rectangular array of scalars that represents a linear mapping between coordinate spaces once the input and output bases are fixed. See @sec-linear-algebra-foundations.
@@ -252,6 +308,9 @@ Add terminology from a chapter only after that chapter has been completed and re
 
 **Matrix exponential**
 : The matrix function $\exp(\mathbf A)=\sum_{j=0}^{\infty}\mathbf A^j/j!$, used here to convert an accumulated skew-symmetric rotation coordinate into a finite rotation matrix. See @sec-so3-axis-angle-exponential.
+
+**Matrix logarithm**
+: A matrix $\mathbf X$ satisfying $\exp(\mathbf X)=\mathbf T$ for a given matrix $\mathbf T$; a rigid transformation may have more than one such logarithm. See @sec-se3-screw-exponential and @sec-se3-logarithm-branch-meaning.
 
 **Matrix rank**
 : The dimension of a matrix's column space, equivalently the number of linearly independent columns. See @sec-linear-algebra-foundations.
@@ -273,6 +332,9 @@ Add terminology from a chapter only after that chapter has been completed and re
 **Nonsingular matrix**
 : A square matrix with an inverse, full rank, and a null space containing only the zero vector. See @sec-linear-algebra-foundations.
 
+**Normalised screw-axis coordinates**
+: A linear-first six-entry column describing one permitted rigid motion per unit scalar rate, normalised through its angular block for rotational motion or its linear block for prismatic motion. See @sec-screw-axis-joint-motion.
+
 **Null space**
 : The set of all input vectors mapped to the zero output by a matrix. See @sec-linear-algebra-foundations.
 
@@ -282,10 +344,16 @@ Add terminology from a chapter only after that chapter has been completed and re
 **Numerical integration**
 : Approximation of a continuous-time state evolution using finite time steps and a finite number of derivative evaluations. See @sec-differential-drive-model.
 
+**Numerical formula branch**
+: A choice among algebraically equivalent formulas for evaluating one already selected mathematical result in different numerical regions. See @sec-se3-logarithm-branch-meaning.
+
 **Numerically stable formulation**
 : An algebraically equivalent computational form chosen to avoid avoidable loss of accuracy, undefined intermediate expressions, or fragile special cases. See @sec-kinematics-integration-implementation.
 
 ## O {.unnumbered}
+
+**Open serial chain**
+: A robot structure whose links are connected sequentially without any joint path closing back onto an earlier link. See @sec-robot-configurations-joint-coordinates.
 
 **Orientation**
 : The rotational placement of a body-attached frame relative to a reference frame; it describes the body's current angular alignment, not the turn used to reach it. See @sec-so3-spatial-orientation.
@@ -310,6 +378,9 @@ Add terminology from a chapter only after that chapter has been completed and re
 **Passive coordinate change**
 : A change in the coordinate frame used to describe an unchanged geometric object; nothing physically moves. See @sec-planar-rigid-body-motion.
 
+**Pitch (screw)**
+: The signed axial distance travelled per positive radian of rotation in a finite-pitch screw motion. See @sec-helical-motion-screw-pitch.
+
 **Placement map**
 : A mapping that assigns a world position to every labelled material point of a body while satisfying its geometric constraints. See @sec-spatial-configuration-dof.
 
@@ -330,6 +401,12 @@ Add terminology from a chapter only after that chapter has been completed and re
 
 **Premultiply**
 : Multiply an existing matrix on its left; a world-expressed incremental rotation premultiplies the current body-to-world orientation. See @sec-so3-fixed-body-increments.
+
+**Principal-branch rigid-motion logarithm**
+: The selected $SE(3)$ logarithm whose rotation-vector magnitude lies in $[0,\pi]$, with declared identity and axis-sign conventions at ambiguous cases. See @sec-se3-logarithm-branch-meaning.
+
+**Prismatic joint**
+: A one-degree-of-freedom joint that permits translation along one declared direction and no relative rotation. See @sec-screw-axis-joint-motion.
 
 **Pure quaternion**
 : A quaternion with zero scalar part, used to embed a three-dimensional vector in quaternion rotation calculations. See @sec-so3-unit-quaternion-yaw.
@@ -368,6 +445,9 @@ Add terminology from a chapter only after that chapter has been completed and re
 **Resource marker**
 : A file installed in the ament resource index whose filename registers a ROS 2 package. See @sec-ros2-package-development-workflow.
 
+**Revolute joint**
+: A one-degree-of-freedom joint that permits rotation about one oriented axis line and no translation along that axis. See @sec-screw-axis-joint-motion.
+
 **Rigid-body point-velocity relation**
 : The equation stating that a body-fixed point's velocity equals a reference point's translational velocity plus the rotational contribution from angular velocity and relative position. See @sec-geometry-coordinate-frames and @sec-se2-body-point-velocity.
 
@@ -394,6 +474,12 @@ Add terminology from a chapter only after that chapter has been completed and re
 **Scalar triple product**
 : The scalar $\mathbf a^\mathsf T(\mathbf b\times\mathbf c)$ whose magnitude is the volume of the parallelepiped spanned by three vectors and whose sign records their ordered orientation. See @sec-linear-algebra-scalar-triple-product.
 
+**Screw axis**
+: An oriented line together with a pitch that specifies the geometry of one rotational or helical rigid motion. See @sec-screw-axis-joint-motion.
+
+**Screw motion**
+: A rigid motion that combines rotation about one oriented line with translation along that same line in a fixed proportion. See @sec-screw-axis-joint-motion.
+
 **Signed turning radius**
 : The instantaneous distance from the body origin to the centre of curvature with a sign indicating which side of the robot contains that centre. See @sec-differential-drive-model.
 
@@ -411,6 +497,9 @@ Add terminology from a chapter only after that chapter has been completed and re
 
 **Source a shell script**
 : Execute a script in the current shell so its environment-variable changes persist after the script finishes. See @sec-ros2-package-development-workflow.
+
+**Space frame**
+: A coordinate frame fixed relative to the world and used to express robot geometry, poses, or space-referred twists. See @sec-robot-configurations-joint-coordinates.
 
 **Span**
 : The set of every linear combination that can be formed from a given collection of vectors. See @sec-linear-algebra-foundations.
@@ -446,6 +535,12 @@ Add terminology from a chapter only after that chapter has been completed and re
 
 **Tangent space**
 : The vector space containing all tangent directions of admissible differentiable curves through a selected point of a smooth set. See @sec-se2-rotation-derivative-tangent and @sec-se2-hat-operator.
+
+**Test oracle**
+: An independently obtained expected result or invariant used to judge whether a scientific calculation is correct. See @sec-se3-numerical-branches.
+
+**Threshold**
+: A declared numerical cutoff used by an implementation to select a formula, classify a case, or state interface resolution. See @sec-se3-numerical-branches.
 
 **Track width**
 : The lateral distance between the effective left and right wheel contact lines of a differential-drive robot. See @sec-wheel-speeds-body-motion.
@@ -493,6 +588,9 @@ Add terminology from a chapter only after that chapter has been completed and re
 : See **ROS 2 workspace**.
 
 ## Z {.unnumbered}
+
+**Zero arrangement**
+: The declared relative placement of the two links connected by a joint when that joint's coordinate is zero. See @sec-robot-configurations-joint-coordinates.
 
 **Zero-order hold**
 : The assumption that an input remains constant throughout one sampling or integration interval. See @sec-differential-drive-model.
