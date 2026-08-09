@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" role="img" aria-labelledby="title desc">
+  <title id="title">Helical motion at a fixed joint angle</title>
+  <desc id="desc">A body-fixed point follows a helix through a positive angle of pi over two about a vertical oriented axis while advancing a positive axial distance. At the current point, the rotational and axial velocity contributions add head to tail to give the tangent velocity. A point on the axis retains the axial velocity.</desc>
+  <defs>
+    <clipPath id="plot-clip"><rect x="24" y="24" width="820" height="672" rx="18"/></clipPath>
+    <marker id="arrow-neutral" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#73777a"/></marker>
+    <marker id="arrow-path" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#2f735e"/></marker>
+    <marker id="arrow-rotational" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#e2a52b"/></marker>
+    <marker id="arrow-axial" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#cf4f96"/></marker>
+    <marker id="arrow-result" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#3f7fe5"/></marker>
+  </defs>
+
+  <rect width="1200" height="720" fill="#faf9f5"/>
+  <rect class="panel" x="24" y="24" width="820" height="672" rx="18"/>
+  <rect class="panel" x="868" y="24" width="308" height="672" rx="18"/>
+
+  <g clip-path="url(#plot-clip)">
+    <ellipse class="section initial-section" cx="330" cy="520" rx="196" ry="113"/>
+    <ellipse class="section current-section" cx="330" cy="320" rx="196" ry="113"/>
+    <path class="cylinder-guide" d="M134 520V320M526 520V320"/>
+    <path class="axis" d="M330 635V72" marker-end="url(#arrow-neutral)"/>
+  </g>
+
+  <text class="axis-label" x="352" y="88"><tspan baseline-shift="super">a</tspan><tspan class="vector-symbol">s</tspan> = +e<tspan baseline-shift="sub">z</tspan></text>
+  <text class="axis-label" x="352" y="113">oriented axis <tspan class="calligraphic">ℒ</tspan></text>
+
+  <path class="initial-radius" d="M330 520L468.6 440"/>
+  <path class="current-radius" d="M330 320L191.4 240"/>
+  <circle class="initial-point" cx="468.6" cy="440" r="7"/>
+  <text class="point-label" x="486" y="461">P at θ<tspan baseline-shift="sub">j</tspan> = 0</text>
+
+  <path class="helix" d="M468.6 440C432 394 389 351 345 319C302 287 249 258 191.4 240" marker-end="url(#arrow-path)"/>
+  <text class="angle-label" x="214" y="193">θ<tspan baseline-shift="sub">j</tspan> = π/2</text>
+
+  <circle class="point-ring" cx="191.4" cy="240" r="24"/>
+  <circle class="point" cx="191.4" cy="240" r="7"/>
+  <text class="point-label" x="151" y="220">P</text>
+
+  <path class="rise-guide" d="M608 520H646M608 320H646M628 520V320"/>
+  <text class="rise-label" x="650" y="426">hθ<tspan baseline-shift="sub">j</tspan></text>
+  <text class="rise-note" x="650" y="452">axial displacement</text>
+
+  <circle class="axis-point" cx="330" cy="320" r="8"/>
+  <text class="axis-point-label" x="274" y="344"><tspan baseline-shift="super">a</tspan><tspan class="vector-symbol">p</tspan><tspan baseline-shift="sub">ℓ</tspan></text>
+  <path class="axis-velocity" d="M330 320V236" marker-end="url(#arrow-axial)"/>
+
+  <path class="rotational" d="M191.4 240L110.4 287" marker-end="url(#arrow-rotational)"/>
+  <path class="axial-copy" d="M110.4 287V222" marker-end="url(#arrow-axial)"/>
+  <path class="result" d="M191.4 240L110.4 222" marker-end="url(#arrow-result)"/>
+
+  <g class="legend" aria-label="Helical-motion legend">
+    <text class="legend-title" x="894" y="70">Fixed instant</text>
+    <text x="894" y="105">θ<tspan baseline-shift="sub">j</tspan> = π/2, θ̇<tspan baseline-shift="sub">j</tspan> &gt; 0</text>
+    <text x="894" y="137">h &gt; 0</text>
+
+    <path class="legend-path" d="M896 195H952" marker-end="url(#arrow-path)"/>
+    <text x="974" y="202">helical path</text>
+
+    <path class="legend-rotational" d="M896 259H952" marker-end="url(#arrow-rotational)"/>
+    <text x="974" y="252">rotational velocity</text>
+    <text x="974" y="278"><tspan baseline-shift="super">a</tspan><tspan class="vector-symbol">ω</tspan> × (<tspan baseline-shift="super">a</tspan><tspan class="vector-symbol">p</tspan><tspan baseline-shift="sub">P</tspan> − <tspan baseline-shift="super">a</tspan><tspan class="vector-symbol">p</tspan><tspan baseline-shift="sub">ℓ</tspan>)</text>
+
+    <path class="legend-axial" d="M896 343H952" marker-end="url(#arrow-axial)"/>
+    <text x="974" y="336">axial velocity</text>
+    <text x="974" y="362">h<tspan baseline-shift="super">a</tspan><tspan class="vector-symbol">s</tspan>θ̇<tspan baseline-shift="sub">j</tspan></text>
+
+    <path class="legend-result" d="M896 427H952" marker-end="url(#arrow-result)"/>
+    <text x="974" y="420">point velocity</text>
+    <text x="974" y="446"><tspan baseline-shift="super">a</tspan><tspan class="vector-symbol">v</tspan><tspan baseline-shift="sub">P</tspan></text>
+
+    <text class="legend-note" x="894" y="520">At P, the yellow and magenta</text>
+    <text class="legend-note" x="894" y="546">vectors add head to tail.</text>
+    <text class="legend-note" x="894" y="600">At <tspan baseline-shift="super">a</tspan><tspan class="vector-symbol">p</tspan><tspan baseline-shift="sub">ℓ</tspan>, only the magenta</text>
+    <text class="legend-note" x="894" y="626">axial velocity remains.</text>
+  </g>
+
+  <style>
+    text{fill:#202326;font-family:Arial,Helvetica,sans-serif;font-size:18px;font-weight:400}
+    .panel{fill:#fff;stroke:#ddd9d2;stroke-width:1.5}
+    .section{fill:none;stroke:#c9cdd1;stroke-width:1.8;stroke-dasharray:8 7}.initial-section{opacity:.65}.current-section{opacity:.9}
+    .cylinder-guide{fill:none;stroke:#d8dadd;stroke-width:1.5;stroke-dasharray:7 7}
+    .axis{fill:none;stroke:#73777a;stroke-width:2.4}.axis-label{font-size:17px}.calligraphic{font-family:Georgia,serif;font-style:italic}
+    .initial-radius,.current-radius{fill:none;stroke:#9aa2a9;stroke-width:1.8;stroke-dasharray:6 5}
+    .initial-point{fill:#777;stroke:#fff;stroke-width:2}.point-ring{fill:#e9e3f3;stroke:#7651a8;stroke-width:2}.point{fill:#7651a8;stroke:#fff;stroke-width:2}.point-label{font-size:18px;font-weight:600}
+    .helix,.legend-path{fill:none;stroke:#2f735e;stroke-width:4}.angle-label{font-size:19px;font-style:italic}
+    .rise-guide{fill:none;stroke:#9aa2a9;stroke-width:1.5}.axis-velocity,.axial-copy,.legend-axial{fill:none;stroke:#cf4f96;stroke-width:3.5}.rise-label{fill:#555;font-size:20px;font-style:italic}.rise-note{fill:#555;font-size:16px}
+    .axis-point{fill:#3ba8cb;stroke:#fff;stroke-width:2}.axis-point-label{font-size:17px}
+    .rotational,.legend-rotational{fill:none;stroke:#e2a52b;stroke-width:3.5}.result,.legend-result{fill:none;stroke:#3f7fe5;stroke-width:4}
+    .vector-symbol{font-weight:700;font-style:italic}
+    .legend-title{font-size:21px;font-weight:600}.legend text{font-size:17px}.legend-note{fill:#555;font-size:16px}
+  </style>
+</svg>

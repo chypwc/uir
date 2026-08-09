@@ -33,7 +33,7 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./10_general_robot_kinematics_and_jacobians.html" rel="next">
+<link href="./09_spatial_geometry_kernel_implementation.html" rel="next">
 <link href="./07_degrees_of_freedom_and_spatial_motion_so3_se3.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
@@ -378,8 +378,14 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="./09_spatial_geometry_kernel_implementation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Spatial Geometry Kernel Implementation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="./10_general_robot_kinematics_and_jacobians.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">General Robot Kinematics and Jacobians</span></span></a>
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">General Robot Kinematics and Jacobians</span></span></a>
   </div>
 </li>
       </ul>
@@ -443,6 +449,11 @@ window.Quarto = {
   <li><a href="#separating-geometry-from-motion-amount" id="toc-separating-geometry-from-motion-amount" class="nav-link" data-scroll-target="#separating-geometry-from-motion-amount">Separating geometry from motion amount</a></li>
   <li><a href="#symbol-and-purpose-reference" id="toc-symbol-and-purpose-reference" class="nav-link" data-scroll-target="#symbol-and-purpose-reference">Symbol and purpose reference</a></li>
   </ul></li>
+  <li><a href="#cumulative-chapter-review" id="toc-cumulative-chapter-review" class="nav-link" data-scroll-target="#cumulative-chapter-review">Cumulative chapter review</a>
+  <ul class="collapse">
+  <li><a href="#questions" id="toc-questions" class="nav-link" data-scroll-target="#questions">Questions</a></li>
+  <li><a href="#answers-and-derivation-hints" id="toc-answers-and-derivation-hints" class="nav-link" data-scroll-target="#answers-and-derivation-hints">Answers and derivation hints</a></li>
+  </ul></li>
   <li><a href="#sec-appendix-chasles-mozzi" id="toc-sec-appendix-chasles-mozzi" class="nav-link" data-scroll-target="#sec-appendix-chasles-mozzi">Appendix: Chasles–Mozzi theorem and proof</a>
   <ul class="collapse">
   <li><a href="#theorem" id="toc-theorem" class="nav-link" data-scroll-target="#theorem">Theorem</a></li>
@@ -483,7 +494,7 @@ window.Quarto = {
 <section id="sec-robot-configurations-joint-coordinates" class="level2" data-number="8.1">
 <h2 data-number="8.1" class="anchored" data-anchor-id="sec-robot-configurations-joint-coordinates"><span class="header-section-number">8.1</span> Robot configurations, poses, and joint coordinates</h2>
 <p>This chapter develops the spatial geometry needed to represent the motion permitted by one robot joint. It begins by reviewing configuration and pose for rigid links connected by joints, then introduces joint coordinates, screw-axis representations, finite rigid displacements through the <span class="math inline">\(SE(3)\)</span> exponential and logarithm, and constant-twist pose integration.</p>
-<p>The chapter treats ideal rigid links and one-degree-of-freedom revolute or prismatic joints. Finite-pitch helical motion is introduced to explain the general screw model, but it is not included as a supported robot-joint type. Composing several joints into a serial-chain forward map and differentiating that map to obtain robot Jacobians belong to <a href="10_general_robot_kinematics_and_jacobians.html" class="quarto-xref"><span>Chapter 9</span></a>. This chapter does not model joint compliance, backlash, closed kinematic loops, collision, forces, actuator dynamics, or feedback control.</p>
+<p>The chapter treats ideal rigid links and one-degree-of-freedom revolute or prismatic joints. Finite-pitch helical motion is introduced to explain the general screw model, but it is not included as a supported robot-joint type. Composing several joints into a serial-chain forward map and differentiating that map to obtain robot Jacobians belong to <a href="10_general_robot_kinematics_and_jacobians.html" class="quarto-xref"><span>Chapter 10</span></a>. This chapter does not model joint compliance, backlash, closed kinematic loops, collision, forces, actuator dynamics, or feedback control.</p>
 <section id="configuration-and-pose-for-links-and-joints" class="level3 unnumbered">
 <h3 class="unnumbered anchored" data-anchor-id="configuration-and-pose-for-links-and-joints">Configuration and pose for links and joints</h3>
 <p>An open serial robot consists of rigid links connected in sequence by joints. Each one-degree-of-freedom joint restricts the relative motion of two neighbouring links to one independent rotation or translation. Predicting the robot’s geometry therefore requires more than locating one free rigid body: it requires determining the simultaneous placement of every link while satisfying every joint constraint.</p>
@@ -830,6 +841,17 @@ d_j, &amp; \text{if joint $j$ is prismatic}.
 =
 -\left({}^{a}\mathbf s\times{}^{a}\mathbf p_{\ell}\right)\dot\theta_j.
 \]</span></p>
+<p>Figure <a href="#fig-revolute-spatial-velocity-field" class="quarto-xref">Figure&nbsp;<span>8.1</span></a> fixes one instant with <span class="math inline">\({}^{a}\mathbf s=[0\;0\;1]^{\mathsf T}\)</span>, <span class="math inline">\(\theta_j=\pi/6\)</span> measured from the illustrated <span class="math inline">\(+x_a\)</span> ray, and <span class="math inline">\(\dot\theta_j&gt;0\)</span>. The cross-section is perpendicular to the joint axis. The copy of <span class="math inline">\({}^{a}\boldsymbol\nu\)</span> that begins at <span class="math inline">\(P\)</span> and the rotational contribution <span class="math inline">\({}^{a}\boldsymbol\omega\times{}^{a}\mathbf p_P\)</span> are placed head to tail; their sum is <span class="math inline">\({}^{a}\mathbf v_P\)</span>, which is tangent to the circular path about the axis. The same velocity field evaluates to <span class="math inline">\({}^{a}\boldsymbol\nu\)</span> at <span class="math inline">\(O_a\)</span> and to <span class="math inline">\(\mathbf 0_3\)</span> at the selected axis point <span class="math inline">\({}^{a}\mathbf p_{\ell}\)</span>.</p>
+<div id="fig-revolute-spatial-velocity-field" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-pos="H">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-revolute-spatial-velocity-field-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/revolute_spatial_velocity_field.svg" class="img-fluid figure-img" style="width:100.0%" data-fig-pos="H">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-revolute-spatial-velocity-field-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8.1: Velocity-field construction for pure revolute motion about an axis line offset from the fixed-frame origin.
+</figcaption>
+</figure>
+</div>
 <p>Define the joint-induced spatial twist, referred to frame <span class="math inline">\(\{a\}\)</span>, by <span class="math inline">\({}^{a}\boldsymbol\xi:=[({}^{a}\boldsymbol\nu)^{\mathsf T}\;({}^{a}\boldsymbol\omega)^{\mathsf T}]^{\mathsf T}\in\mathbb R^6\)</span>. The <strong>normalised revolute screw-axis coordinate column</strong> <span class="math inline">\({}^{a}\mathbf S_R\in\mathbb R^6\)</span> is the column that maps the revolute joint rate to this spatial twist:</p>
 <p><span class="math display">\[
 {}^{a}\boldsymbol\xi
@@ -897,6 +919,42 @@ h{}^{a}\mathbf s
 \right)
 \dot\theta_j.
 \]</span></p>
+<p>To obtain the velocity of an arbitrary body-fixed point <span class="math inline">\(P\)</span>, substitute this linear part and <span class="math inline">\({}^{a}\boldsymbol\omega={}^{a}\mathbf s\dot\theta_j\)</span> into the spatial velocity field:</p>
+<p><span class="math display">\[
+\begin{aligned}
+{}^{a}\mathbf v_P
+&amp;=
+{}^{a}\boldsymbol\nu
++
+{}^{a}\boldsymbol\omega\times{}^{a}\mathbf p_P\\
+&amp;=
+\left(
+-{}^{a}\mathbf s\times{}^{a}\mathbf p_{\ell}
++h{}^{a}\mathbf s
+\right)\dot\theta_j
++
+\left({}^{a}\mathbf s\dot\theta_j\right)
+\times{}^{a}\mathbf p_P\\
+&amp;=
+{}^{a}\boldsymbol\omega
+\times
+\left({}^{a}\mathbf p_P-{}^{a}\mathbf p_{\ell}\right)
++
+h{}^{a}\mathbf s\dot\theta_j.
+\end{aligned}
+\]</span></p>
+<p>The first term is the rotational velocity about the axis line and is tangent to the circular cross-section through <span class="math inline">\(P\)</span>. The second term is the axial velocity parallel to <span class="math inline">\({}^{a}\mathbf s\)</span>. When <span class="math inline">\(P\)</span> is on the axis, <span class="math inline">\({}^{a}\mathbf p_P-{}^{a}\mathbf p_{\ell}=\mathbf 0_3\)</span>, so the rotational term vanishes and the equation reduces to <span class="math inline">\({}^{a}\mathbf v_{\ell}=h{}^{a}\mathbf s\dot\theta_j\)</span>.</p>
+<p>Figure <a href="#fig-helical-motion-fixed-angle" class="quarto-xref">Figure&nbsp;<span>8.2</span></a> fixes one instant with <span class="math inline">\(\theta_j=\pi/2\)</span>, <span class="math inline">\(\dot\theta_j&gt;0\)</span>, and positive pitch <span class="math inline">\(h&gt;0\)</span>. The body-fixed point <span class="math inline">\(P\)</span> has rotated through one quarter-turn and advanced by <span class="math inline">\(h\theta_j\)</span> along the oriented axis. Its rotational velocity about the line and its axial velocity are placed head to tail to produce the tangent velocity <span class="math inline">\({}^{a}\mathbf v_P\)</span>. A body-fixed point currently on the axis has no circular velocity contribution, but it retains the axial velocity <span class="math inline">\(h{}^{a}\mathbf s\dot\theta_j\)</span> and is therefore not stationary.</p>
+<div id="fig-helical-motion-fixed-angle" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-pos="H">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-helical-motion-fixed-angle-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/helical_motion_fixed_angle.svg" class="img-fluid figure-img" style="width:100.0%" data-fig-pos="H">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-helical-motion-fixed-angle-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8.2: Helical motion at a fixed joint angle, showing axial displacement and the instantaneous velocity components.
+</figcaption>
+</figure>
+</div>
 <p>Hence the normalised helical screw-axis coordinates are</p>
 <p><span class="math display">\[
 \boxed{
@@ -5130,6 +5188,395 @@ h
 <p>The shortest memory rule is: <span class="math inline">\({}^{a}\mathbf S\)</span> says <strong>how</strong>, <span class="math inline">\(\sigma\)</span> says <strong>how much</strong>, and <span class="math inline">\(\dot\sigma\)</span> says <strong>how fast</strong>. Multiplying <span class="math inline">\({}^{a}\mathbf S\)</span> by <span class="math inline">\(\sigma\)</span> produces the finite coordinates <span class="math inline">\({}^{a}\boldsymbol\eta\)</span>; multiplying it by <span class="math inline">\(\dot\sigma\)</span> produces the instantaneous twist <span class="math inline">\({}^{a}\boldsymbol\xi\)</span>. The exponential constructs <span class="math inline">\(\mathbf T_\Delta\)</span>. A selected logarithm recovers <span class="math inline">\({}^{a}\boldsymbol\eta\)</span> only when the inverse description is needed.</p>
 </section>
 </section>
+<section id="cumulative-chapter-review" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="cumulative-chapter-review">Cumulative chapter review</h2>
+<section id="questions" class="level3 unnumbered">
+<h3 class="unnumbered anchored" data-anchor-id="questions">Questions</h3>
+<ol type="1">
+<li><p><strong>Physical system and representations:</strong> Distinguish a link, a material point, a rigid-link configuration <span class="math inline">\(\chi\)</span>, an attached-frame pose <span class="math inline">\(\mathbf T_{wb}\)</span>, and a generalised-coordinate column <span class="math inline">\(\mathbf q\)</span>. State the correspondence between <span class="math inline">\(\chi\)</span> and <span class="math inline">\(\mathbf T_{wb}\)</span> for one rigid link and explain why <span class="math inline">\(\mathbf q\)</span> is not itself a pose.</p></li>
+<li><p><strong>Joint model:</strong> Define a zero arrangement and an oriented joint axis. Contrast revolute, prismatic, and finite-pitch helical motion, including the scalar coordinate and physical unit used by each model.</p></li>
+<li><p><strong>Screw-axis derivation:</strong> Let an oriented line expressed in frame <span class="math inline">\(\{a\}\)</span> have unit direction <span class="math inline">\({}^{a}\mathbf s_\omega\)</span> and pass through a point with position column <span class="math inline">\({}^{a}\mathbf p_\ell\)</span>. Derive the normalised linear-first screw-axis columns for pure revolute motion, finite-pitch helical motion with pitch <span class="math inline">\(h\)</span>, and pure prismatic motion.</p></li>
+<li><p><strong>Recovering physical screw geometry:</strong> A normalised rotational screw expressed in frame <span class="math inline">\(\{a\}\)</span> has</p>
+<p><span class="math display">\[
+{}^{a}\mathbf s_v
+=
+\begin{bmatrix}
+0\\-2\\0.05
+\end{bmatrix}
+\mathrm{m\,rad^{-1}},
+\qquad
+{}^{a}\mathbf s_\omega
+=
+\begin{bmatrix}
+0\\0\\1
+\end{bmatrix}.
+\]</span></p>
+<p>Recover its pitch and the position column of the axis point closest to <span class="math inline">\(O_a\)</span>. State the oriented axis line.</p></li>
+<li><p><strong>Velocity field:</strong> Starting from <span class="math inline">\({}^{a}\boldsymbol\xi={}^a\mathbf S\dot\theta=[({}^{a}\boldsymbol\nu)^{\mathsf T}\;({}^{a}\boldsymbol\omega)^{\mathsf T}]^{\mathsf T}\)</span>, write the velocity of a material point currently at <span class="math inline">\({}^{a}\mathbf x\)</span>. Explain why <span class="math inline">\({}^{a}\mathbf x\)</span> appears when the twist is evaluated but does not appear in <span class="math inline">\({}^{a}\mathbf S\)</span> or <span class="math inline">\({}^{a}\boldsymbol\xi\)</span>.</p></li>
+<li><p><strong>Change of reference frame:</strong> If <span class="math inline">\(\mathbf T_{ab}\)</span> transforms point coordinates from frame <span class="math inline">\(\{b\}\)</span> to frame <span class="math inline">\(\{a\}\)</span>, state the linear-first adjoint matrix and derive the rule that transforms screw-axis coordinates from <span class="math inline">\(\{b\}\)</span> to <span class="math inline">\(\{a\}\)</span>.</p></li>
+<li><p><strong>Finite-displacement workflow:</strong> Beginning with a normalised screw axis <span class="math inline">\({}^{a}\mathbf S\)</span> and signed motion amount <span class="math inline">\(\sigma\)</span>, write the complete sequence that produces <span class="math inline">\(\mathbf T_\Delta\)</span>. Then write the equivalent finite-coordinate form using <span class="math inline">\({}^{a}\boldsymbol\eta=[({}^{a}\boldsymbol\rho)^{\mathsf T}\;({}^{a}\boldsymbol\phi)^{\mathsf T}]^{\mathsf T}\)</span> and <span class="math inline">\(\mathbf J({}^{a}\boldsymbol\phi)\)</span>.</p></li>
+<li><p><strong>Cumulative screw application:</strong> Use the screw in Question 4 and the signed angle <span class="math inline">\(\theta=\pi/2\,\mathrm{rad}\)</span> to calculate <span class="math inline">\(\mathbf T_\Delta\)</span>. Apply the result to an arbitrary axis point <span class="math inline">\({}^{a}\mathbf x=[2\;0\;\lambda]^{\mathsf T}\,\mathrm m\)</span> and interpret its final position.</p></li>
+<li><p><strong>Principal inverse workflow:</strong> Given a validated transformation <span class="math inline">\(\mathbf T=[\mathbf R\;{}^{a}\mathbf p;\mathbf 0_3^{\mathsf T}\;1]\)</span>, state the identity, pure-translation, and rotation-present cases of the selected principal logarithm. Explain why the identity has no unique normalised screw axis.</p></li>
+<li><p><strong>Finite versus normalised coordinates:</strong> Suppose the selected logarithm returns <span class="math inline">\({}^{a}\boldsymbol\eta=[({}^{a}\boldsymbol\rho)^{\mathsf T}\;({}^{a}\boldsymbol\phi)^{\mathsf T}]^{\mathsf T}\)</span> with <span class="math inline">\(\|{}^{a}\boldsymbol\phi\|_2&gt;0\)</span>. Recover <span class="math inline">\(\theta\)</span>, <span class="math inline">\({}^{a}\mathbf s_\omega\)</span>, <span class="math inline">\({}^{a}\mathbf s_v\)</span>, <span class="math inline">\(h\)</span>, and the closest axis point <span class="math inline">\({}^{a}\mathbf p_\ell\)</span>. Why should this normalisation not be performed first near a pure translation?</p></li>
+<li><p><strong>Space and body integration:</strong> Let <span class="math inline">\(\mathbf T_0=\mathbf T_{sb}(t_0)\)</span>. Write the constant-space-twist and constant-body-twist updates over <span class="math inline">\(\Delta t\)</span>. State the adjoint relation required for them to represent the same physical motion and show the resulting equality of the two final poses.</p></li>
+<li><p><strong>Time-varying limitation:</strong> Explain why a time-varying twist generally requires chronologically ordered exponential increments. Why can neither <span class="math inline">\(\exp(\int\widehat{\boldsymbol\xi}(t)\,\mathrm dt)\)</span> nor an additive matrix Euler update be used as an unrestricted exact pose integrator?</p></li>
+<li><p><strong>Small angular displacement:</strong> Define <span class="math inline">\({}^{a}\boldsymbol\phi\)</span>, <span class="math inline">\(\theta\)</span>, and <span class="math inline">\(\boldsymbol\Phi\)</span>, then write the closed forms for <span class="math inline">\(\mathbf R({}^{a}\boldsymbol\phi)\)</span> and <span class="math inline">\(\mathbf J({}^{a}\boldsymbol\phi)\)</span>. Give the first two nonzero terms of the small-angle series for <span class="math inline">\(A(\theta)\)</span>, <span class="math inline">\(B(\theta)\)</span>, and <span class="math inline">\(C(\theta)\)</span> and explain why these series are needed in floating-point arithmetic.</p></li>
+<li><p><strong>Principal rotation near <span class="math inline">\(\pi\)</span>:</strong> Starting from Rodrigues’ formula, state the trace and skew-difference equations used to recover the principal angle and nominal axis. Explain why the skew-based axis calculation fails at <span class="math inline">\(\theta=\pi\)</span>, what symmetric matrix replaces it, and why a deterministic sign convention remains necessary.</p></li>
+<li><p><strong>Validation and numerical policy:</strong> List the structural checks required before treating a numerical array as an element of <span class="math inline">\(SE(3)\)</span>. Contrast <span class="math inline">\(\theta_{\mathrm{series}}\)</span>, <span class="math inline">\(\varepsilon_\pi\)</span>, <span class="math inline">\(\varepsilon_{\mathrm{zero}}\)</span>, and <span class="math inline">\(\varepsilon_{p,0}\)</span>, including which thresholds merely select a formula and which may change the returned model.</p></li>
+<li><p><strong>Chasles–Mozzi theorem:</strong> State the theorem’s rotation-present, pure-translation, and identity cases. What does the theorem prove about the endpoints of a displacement, and what does it not prove about the body’s actual past trajectory?</p></li>
+<li><p><strong>Round trips and branches:</strong> Explain why <span class="math inline">\(\exp(\log_{\mathrm{selected}}(\mathbf T))=\mathbf T\)</span> is expected for every validated input in the selected branch, whereas <span class="math inline">\(\log_{\mathrm{selected}}(\exp(\widehat{{}^{a}\boldsymbol\eta}))=\widehat{{}^{a}\boldsymbol\eta}\)</span> requires a qualification.</p></li>
+</ol>
+</section>
+<section id="answers-and-derivation-hints" class="level3 unnumbered">
+<h3 class="unnumbered anchored" data-anchor-id="answers-and-derivation-hints">Answers and derivation hints</h3>
+<ol type="1">
+<li><p>A material point is one labelled point fixed in the robot’s matter, and a link is a set of material points modelled as one rigid object. A rigid-link configuration <span class="math inline">\(\chi\)</span> maps every labelled point of that link to its world position. An attached-frame pose <span class="math inline">\(\mathbf T_{wb}\)</span> maps the fixed body-frame coordinates of those material points into world coordinates. If the link contains enough non-collinear labelled points to determine its placement, the complete rigid configuration and the attached-frame pose determine one another:</p>
+<p><span class="math display">\[
+\chi
+\quad\longleftrightarrow\quad
+\mathbf T_{wb}.
+\]</span></p>
+<p>The generalised-coordinate column <span class="math inline">\(\mathbf q\)</span> is an ordered numerical description used by the robot model to select an admissible complete configuration through <span class="math inline">\(\mathbf q\mapsto\chi(\mathbf q)\)</span>. Its entries may be joint angles and displacements; they are not generally the position and orientation coordinates of one body.</p></li>
+<li><p>The zero arrangement is the declared relative placement of the connected links at zero joint coordinate. An oriented joint axis is a geometric line with a selected positive direction. A revolute joint rotates through a signed angle <span class="math inline">\(\theta\)</span> in radians about that line. A prismatic joint translates through a signed distance <span class="math inline">\(d\)</span> in metres parallel to its direction. A finite-pitch helical joint rotates through <span class="math inline">\(\theta\)</span> while translating <span class="math inline">\(h\theta\)</span> metres along the same line, where <span class="math inline">\(h\)</span> is measured in <span class="math inline">\(\mathrm{m\,rad^{-1}}\)</span>.</p></li>
+<li><p>A point on a pure revolute axis has zero velocity, so substituting <span class="math inline">\({}^{a}\boldsymbol\omega={}^a\mathbf s_\omega\dot\theta\)</span> and <span class="math inline">\({}^{a}\mathbf x={}^a\mathbf p_\ell\)</span> into the velocity field gives <span class="math inline">\({}^{a}\boldsymbol\nu=-{}^a\mathbf s_\omega\times{}^a\mathbf p_\ell\dot\theta\)</span>. The three normalised columns are therefore</p>
+<p><span class="math display">\[
+\boxed{
+{}^{a}\mathbf S_R
+=
+\begin{bmatrix}
+-{}^{a}\mathbf s_\omega\times{}^{a}\mathbf p_\ell\\
+{}^{a}\mathbf s_\omega
+\end{bmatrix},
+\qquad
+{}^{a}\mathbf S_H
+=
+\begin{bmatrix}
+-{}^{a}\mathbf s_\omega\times{}^{a}\mathbf p_\ell+h{}^{a}\mathbf s_\omega\\
+{}^{a}\mathbf s_\omega
+\end{bmatrix},
+\qquad
+{}^{a}\mathbf S_P
+=
+\begin{bmatrix}
+{}^{a}\mathbf s_v\\
+\mathbf 0_3
+\end{bmatrix}
+},
+\]</span></p>
+<p>where <span class="math inline">\(\|{}^{a}\mathbf s_\omega\|_2=1\)</span> for the rotational cases and <span class="math inline">\(\|{}^{a}\mathbf s_v\|_2=1\)</span> for the prismatic case.</p></li>
+<li><p>As derived in <a href="#sec-se3-screw-exponential" class="quarto-xref"><span>Section 8.3</span></a>, start from <span class="math inline">\({}^{a}\mathbf s_v=-{}^{a}\mathbf s_\omega\times{}^{a}\mathbf p_\ell+h{}^{a}\mathbf s_\omega\)</span>, with <span class="math inline">\(\|{}^{a}\mathbf s_\omega\|_2=1\)</span> and <span class="math inline">\(({}^{a}\mathbf s_\omega)^{\mathsf T}{}^{a}\mathbf p_\ell=0\)</span> for the closest axis point. Taking the dot product with <span class="math inline">\({}^{a}\mathbf s_\omega\)</span> removes the perpendicular cross-product term, while crossing on the left with <span class="math inline">\({}^{a}\mathbf s_\omega\)</span> and using the vector triple-product identity gives</p>
+<p><span class="math display">\[
+\boxed{
+h=({}^{a}\mathbf s_\omega)^{\mathsf T}{}^{a}\mathbf s_v,
+\qquad
+{}^{a}\mathbf p_\ell={}^{a}\mathbf s_\omega\times{}^{a}\mathbf s_v
+}.
+\]</span></p>
+<p>Therefore the pitch is</p>
+<p><span class="math display">\[
+h
+=
+({}^{a}\mathbf s_\omega)^{\mathsf T}{}^{a}\mathbf s_v
+=
+0.05\,\mathrm{m\,rad^{-1}}.
+\]</span></p>
+<p>The closest axis point is</p>
+<p><span class="math display">\[
+{}^{a}\mathbf p_\ell
+=
+{}^{a}\mathbf s_\omega\times{}^{a}\mathbf s_v
+=
+\begin{bmatrix}
+2\\0\\0
+\end{bmatrix}
+\mathrm m.
+\]</span></p>
+<p>Hence the oriented axis line is</p>
+<p><span class="math display">\[
+{}^{a}\mathcal L
+=
+\left\{
+\begin{bmatrix}
+2\\0\\0
+\end{bmatrix}
++
+\lambda
+\begin{bmatrix}
+0\\0\\1
+\end{bmatrix}
+\;\middle|\;
+\lambda\in\mathbb R
+\right\},
+\]</span></p>
+<p>with the point coordinates and <span class="math inline">\(\lambda\)</span> measured in metres.</p></li>
+<li><p>The point velocity is</p>
+<p><span class="math display">\[
+\boxed{
+{}^{a}\mathbf v_P
+=
+{}^{a}\boldsymbol\nu
++
+{}^{a}\boldsymbol\omega\times{}^{a}\mathbf x
+}.
+\]</span></p>
+<p>The screw axis and twist store the position-independent coefficients of one complete rigid velocity field. The position <span class="math inline">\({}^{a}\mathbf x\)</span> is supplied only when that field is evaluated at a particular material point, so different points receive different rotational contributions without requiring different twists.</p></li>
+<li><p>Under the project’s linear-first convention,</p>
+<p><span class="math display">\[
+\operatorname{Ad}_{\mathbf T_{ab}}
+=
+\begin{bmatrix}
+\mathbf R_{ab}&amp;[{}^{a}\mathbf p_b]_\times\mathbf R_{ab}\\
+\mathbf 0_{3\times3}&amp;\mathbf R_{ab}
+\end{bmatrix}.
+\]</span></p>
+<p>In frame <span class="math inline">\(\{b\}\)</span>, <span class="math inline">\({}^{b}\boldsymbol\xi={}^b\mathbf S\dot q\)</span>. Transforming the twist gives <span class="math inline">\({}^{a}\boldsymbol\xi=\operatorname{Ad}_{\mathbf T_{ab}}{}^b\boldsymbol\xi\)</span>. Because the same scalar rate must also satisfy <span class="math inline">\({}^{a}\boldsymbol\xi={}^a\mathbf S\dot q\)</span>, comparison of the coefficients of <span class="math inline">\(\dot q\)</span> gives</p>
+<p><span class="math display">\[
+\boxed{
+{}^{a}\mathbf S
+=
+\operatorname{Ad}_{\mathbf T_{ab}}{}^{b}\mathbf S
+}.
+\]</span></p></li>
+<li><p>The normalised-coordinate workflow is</p>
+<p><span class="math display">\[
+\boxed{
+({}^{a}\mathbf S,\sigma)
+\longmapsto
+{}^{a}\boldsymbol\eta
+=
+{}^{a}\mathbf S\sigma
+\longmapsto
+\widehat{{}^{a}\boldsymbol\eta}
+\longmapsto
+\mathbf T_\Delta
+=
+\exp(\widehat{{}^{a}\boldsymbol\eta})
+}.
+\]</span></p>
+<p>With <span class="math inline">\({}^{a}\boldsymbol\eta=[({}^{a}\boldsymbol\rho)^{\mathsf T}\;({}^{a}\boldsymbol\phi)^{\mathsf T}]^{\mathsf T}\)</span> and <span class="math inline">\(\boldsymbol\Phi=[{}^{a}\boldsymbol\phi]_\times\)</span>,</p>
+<p><span class="math display">\[
+\boxed{
+\mathbf T_\Delta
+=
+\begin{bmatrix}
+\mathbf R({}^{a}\boldsymbol\phi)&amp;
+\mathbf J({}^{a}\boldsymbol\phi){}^{a}\boldsymbol\rho\\
+\mathbf 0_3^{\mathsf T}&amp;1
+\end{bmatrix}
+}.
+\]</span></p></li>
+<li><p>For <span class="math inline">\({}^{a}\mathbf s_\omega=[0\;0\;1]^{\mathsf T}\)</span>, the cross-product matrix and its square are</p>
+<p><span class="math display">\[
+\boldsymbol\Omega
+=
+[{}^{a}\mathbf s_\omega]_\times
+=
+\begin{bmatrix}
+0&amp;-1&amp;0\\
+1&amp;0&amp;0\\
+0&amp;0&amp;0
+\end{bmatrix},
+\qquad
+\boldsymbol\Omega^2
+=
+\begin{bmatrix}
+-1&amp;0&amp;0\\
+0&amp;-1&amp;0\\
+0&amp;0&amp;0
+\end{bmatrix}.
+\]</span></p>
+<p>Substituting <span class="math inline">\(\theta=\pi/2\)</span> into Rodrigues’ formula gives</p>
+<p><span class="math display">\[
+\begin{aligned}
+\mathbf R
+&amp;=
+\mathbf I_3+\sin\theta\,\boldsymbol\Omega+(1-\cos\theta)\boldsymbol\Omega^2\\
+&amp;=
+\mathbf I_3+\boldsymbol\Omega+\boldsymbol\Omega^2\\
+&amp;=
+\begin{bmatrix}
+0&amp;-1&amp;0\\
+1&amp;0&amp;0\\
+0&amp;0&amp;1
+\end{bmatrix}.
+\end{aligned}
+\]</span></p>
+<p>Using the axis point and pitch from Question 4,</p>
+<p><span class="math display">\[
+{}^{a}\mathbf p_\Delta
+=
+(\mathbf I_3-\mathbf R){}^{a}\mathbf p_\ell
++h\theta{}^{a}\mathbf s_\omega
+=
+\begin{bmatrix}
+2\\-2\\\pi/40
+\end{bmatrix}
+\mathrm m.
+\]</span></p>
+<p>Therefore</p>
+<p><span class="math display">\[
+\boxed{
+\mathbf T_\Delta
+=
+\begin{bmatrix}
+0&amp;-1&amp;0&amp;2\\
+1&amp;0&amp;0&amp;-2\\
+0&amp;0&amp;1&amp;\pi/40\\
+0&amp;0&amp;0&amp;1
+\end{bmatrix}
+}.
+\]</span></p>
+<p>An axis point satisfies</p>
+<p><span class="math display">\[
+\mathbf R
+\begin{bmatrix}
+2\\0\\\lambda
+\end{bmatrix}
++
+{}^{a}\mathbf p_\Delta
+=
+\begin{bmatrix}
+2\\0\\\lambda+\pi/40
+\end{bmatrix}
+\mathrm m.
+\]</span></p>
+<p>Rotation leaves the point on the axis line, while the pitch advances it by <span class="math inline">\(h\theta=\pi/40\,\mathrm m\)</span> along positive <span class="math inline">\(z_a\)</span>.</p></li>
+<li><p>If <span class="math inline">\(\mathbf R=\mathbf I_3\)</span> and <span class="math inline">\({}^{a}\mathbf p=\mathbf 0_3\)</span>, the selected logarithm is <span class="math inline">\(\mathbf 0_{4\times4}\)</span>. If <span class="math inline">\(\mathbf R=\mathbf I_3\)</span> and <span class="math inline">\({}^{a}\mathbf p\ne\mathbf 0_3\)</span>, the result is a pure translation with <span class="math inline">\(d=\|{}^{a}\mathbf p\|_2\)</span> and unit direction <span class="math inline">\({}^{a}\mathbf s={}^a\mathbf p/d\)</span>. If <span class="math inline">\(\mathbf R\ne\mathbf I_3\)</span>, recover the selected principal rotation vector <span class="math inline">\({}^{a}\boldsymbol\phi\)</span>, then calculate <span class="math inline">\({}^{a}\boldsymbol\rho=\mathbf J({}^{a}\boldsymbol\phi)^{-1}{}^a\mathbf p\)</span>. At the identity, every admissible screw axis multiplied by zero motion produces the same transformation, so the displacement cannot select one unique normalised axis.</p></li>
+<li><p>Recover the rotational motion amount and geometry through</p></li>
+</ol>
+<p><span class="math display">\[
+   \theta
+   =
+   \|{}^{a}\boldsymbol\phi\|_2,
+   \qquad
+   {}^{a}\mathbf s_\omega
+   =
+   \frac{{}^{a}\boldsymbol\phi}{\theta},
+   \qquad
+   {}^{a}\mathbf s_v
+   =
+   \frac{{}^{a}\boldsymbol\rho}{\theta}.
+   \]</span></p>
+<p>Then</p>
+<p><span class="math display">\[
+   h
+   =
+   ({}^{a}\mathbf s_\omega)^{\mathsf T}{}^{a}\mathbf s_v,
+   \qquad
+   {}^{a}\mathbf p_\ell
+   =
+   {}^{a}\mathbf s_\omega\times{}^{a}\mathbf s_v.
+   \]</span></p>
+<p>Dividing by a small <span class="math inline">\(\theta\)</span> magnifies numerical error as the rotation approaches zero. The finite blocks <span class="math inline">\({}^{a}\boldsymbol\rho\)</span> and <span class="math inline">\({}^{a}\boldsymbol\phi\)</span> remain the appropriate primary output; the identity and pure-translation cases use separate rules.</p>
+<ol start="11" type="1">
+<li>The two constant-twist updates are</li>
+</ol>
+<p><span class="math display">\[
+   \boxed{
+   \mathbf T(t_0+\Delta t)
+   =
+   \exp(\widehat{\boldsymbol\xi}_s\Delta t)\mathbf T_0
+   =
+   \mathbf T_0\exp(\widehat{\boldsymbol\xi}_b\Delta t)
+   }.
+   \]</span></p>
+<p>They describe the same physical motion when</p>
+<p><span class="math display">\[
+   \boldsymbol\xi_s
+   =
+   \operatorname{Ad}_{\mathbf T_0}\boldsymbol\xi_b,
+   \qquad
+   \widehat{\boldsymbol\xi}_s
+   =
+   \mathbf T_0\widehat{\boldsymbol\xi}_b\mathbf T_0^{-1}.
+   \]</span></p>
+<p>Similarity of the exponentials gives <span class="math inline">\(\exp(\widehat{\boldsymbol\xi}_s\Delta t)=\mathbf T_0\exp(\widehat{\boldsymbol\xi}_b\Delta t)\mathbf T_0^{-1}\)</span>; right-multiplying by <span class="math inline">\(\mathbf T_0\)</span> proves the equality of the final poses.</p>
+<ol start="12" type="1">
+<li><p>Twist matrices at different times need not commute, so exchanging their chronological multiplication order changes the resulting pose. An ordinary integral followed by one exponential generally discards this ordering. An additive Euler update uses matrix addition rather than the group operation and can leave <span class="math inline">\(SE(3)\)</span>. Piecewise exponential updates preserve chronological order and remain in <span class="math inline">\(SE(3)\)</span> in exact arithmetic.</p></li>
+<li><p>Define</p></li>
+</ol>
+<p><span class="math display">\[
+   {}^{a}\boldsymbol\phi
+   =
+   \theta{}^{a}\mathbf s_\omega,
+   \qquad
+   \theta
+   =
+   \|{}^{a}\boldsymbol\phi\|_2,
+   \qquad
+   \boldsymbol\Phi
+   =
+   [{}^{a}\boldsymbol\phi]_\times.
+   \]</span></p>
+<p>Then</p>
+<p><span class="math display">\[
+   \mathbf R
+   =
+   \mathbf I_3+A(\theta)\boldsymbol\Phi+B(\theta)\boldsymbol\Phi^2,
+   \qquad
+   \mathbf J
+   =
+   \mathbf I_3+B(\theta)\boldsymbol\Phi+C(\theta)\boldsymbol\Phi^2,
+   \]</span></p>
+<p>where</p>
+<p><span class="math display">\[
+   A(\theta)
+   =
+   \frac{\sin\theta}{\theta},
+   \qquad
+   B(\theta)
+   =
+   \frac{1-\cos\theta}{\theta^2},
+   \qquad
+   C(\theta)
+   =
+   \frac{\theta-\sin\theta}{\theta^3},
+   \]</span></p>
+<p>and their small-angle series begin with</p>
+<p><span class="math display">\[
+   \begin{aligned}
+   A(\theta)
+   &amp;=
+   1-\frac{\theta^2}{6}+O(\theta^4),\\
+   B(\theta)
+   &amp;=
+   \frac12-\frac{\theta^2}{24}+O(\theta^4),\\
+   C(\theta)
+   &amp;=
+   \frac16-\frac{\theta^2}{120}+O(\theta^4).
+   \end{aligned}
+   \]</span></p>
+<p>Direct trigonometric ratios form small results by subtracting nearly equal floating-point numbers near zero. The series evaluate the same mathematical functions without that cancellation.</p>
+<ol start="14" type="1">
+<li>Rodrigues’ formula gives</li>
+</ol>
+<p><span class="math display">\[
+   \frac{\operatorname{tr}(\mathbf R)-1}{2}
+   =
+   \cos\theta,
+   \qquad
+   \mathbf R-\mathbf R^{\mathsf T}
+   =
+   2\sin\theta[{}^{a}\mathbf s_\omega]_\times.
+   \]</span></p>
+<p>The skew entries form <span class="math inline">\({}^{a}\mathbf u=2\sin\theta{}^a\mathbf s_\omega\)</span>, and the principal angle follows from <span class="math inline">\(\theta=\operatorname{atan2}(\|{}^{a}\mathbf u\|_2/2,(\operatorname{tr}(\mathbf R)-1)/2)\)</span>. At <span class="math inline">\(\theta=\pi\)</span>, <span class="math inline">\(\sin\theta=0\)</span>, so the nonzero rotation has <span class="math inline">\({}^{a}\mathbf u=\mathbf 0_3\)</span> and the nominal axis division fails. The symmetric relation recovers the unsigned outer product</p>
+<p><span class="math display">\[
+   \mathbf Q
+   =
+   \frac{
+   \tfrac12(\mathbf R+\mathbf R^{\mathsf T})-\cos\theta\mathbf I_3
+   }{1-\cos\theta}
+   =
+   {}^{a}\mathbf s_\omega({}^{a}\mathbf s_\omega)^{\mathsf T}.
+   \]</span></p>
+<p>Because <span class="math inline">\(\mathbf Q\)</span> is unchanged when the axis sign is reversed, a declared component and sign rule is still needed for deterministic output.</p>
+<ol start="15" type="1">
+<li><p>Validate finiteness, the <span class="math inline">\(4\times4\)</span> shape, the homogeneous bottom row, rotation orthogonality, and <span class="math inline">\(\det(\mathbf R)=+1\)</span> before applying a logarithm. The threshold <span class="math inline">\(\theta_{\mathrm{series}}\)</span> selects series evaluation near zero, and <span class="math inline">\(\varepsilon_\pi\)</span> selects the stable near-<span class="math inline">\(\pi\)</span> axis formula; these should not change the represented motion. The angular resolution <span class="math inline">\(\varepsilon_{\mathrm{zero}}\)</span> may classify and canonicalise a small rotation as zero, while <span class="math inline">\(\varepsilon_{p,0}\)</span> classifies a small translation column as zero and changes the returned model only if the interface also canonicalises that translation. All thresholds and tolerances must be finite, nonnegative, dimensionally appropriate, and ordered so formula regions have declared precedence.</p></li>
+<li><p>If the rotation block is non-identity, every rigid displacement has a representation as rotation about one oriented line plus translation along that line. If the rotation is the identity and translation is nonzero, the displacement is pure translation. The identity is zero displacement and has no unique normalised screw axis. The theorem constructs a screw path connecting the same initial and final poses; endpoint data alone do not show that the body actually followed that path in the past.</p></li>
+<li><p>The selected logarithm is defined to choose a matrix whose exponential reconstructs its validated input, so <span class="math inline">\(\exp(\log_{\mathrm{selected}}(\mathbf T))=\mathbf T\)</span>. In the reverse direction, many exponential-coordinate columns can represent the same transformation because rotations repeat, the axis sign is ambiguous at <span class="math inline">\(\pi\)</span>, and the axis is undefined at zero motion. Therefore the selected logarithm returns its canonical representative, which equals the original <span class="math inline">\({}^{a}\boldsymbol\eta\)</span> only when that column already satisfies the selected branch conventions.</p></li>
+</ol>
+</section>
+</section>
 <section id="sec-appendix-chasles-mozzi" class="level2 unnumbered">
 <h2 class="unnumbered anchored" data-anchor-id="sec-appendix-chasles-mozzi">Appendix: Chasles–Mozzi theorem and proof</h2>
 <section id="theorem" class="level3 unnumbered">
@@ -6106,8 +6553,8 @@ h\theta{}^{a}\mathbf s.
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./10_general_robot_kinematics_and_jacobians.html" class="pagination-link" aria-label="General Robot Kinematics and Jacobians">
-        <span class="nav-page-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">General Robot Kinematics and Jacobians</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./09_spatial_geometry_kernel_implementation.html" class="pagination-link" aria-label="Spatial Geometry Kernel Implementation">
+        <span class="nav-page-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Spatial Geometry Kernel Implementation</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

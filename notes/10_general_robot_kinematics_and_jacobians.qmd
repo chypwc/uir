@@ -6,9 +6,38 @@ The reader should understand vectors, matrices, rank, null spaces, and constrain
 
 This chapter treats fixed-base open serial chains with ideal rigid links and independent one-degree-of-freedom revolute or prismatic joints. Frames are right-handed and orthonormal. Position and length are measured in metres, time in seconds, and angles in radians. The chapter develops forward and velocity kinematics; it does not yet solve inverse kinematics or model joint compliance, backlash, closed kinematic loops, collision, forces, actuator dynamics, or feedback control.
 
+## From one joint to a complete robot {#sec-general-kinematics-motivation .unnumbered}
+
+@sec-screw-motion-se3-exponential-spatial-integration answered a local geometric question: what finite displacement or instantaneous velocity field is produced by one declared screw motion? A serial robot creates a larger problem because several joints move several connected links. The **end effector** is the physical tool or final working link selected to perform the robot's task, and an **end-effector frame** is a coordinate frame rigidly attached to it. Predicting the pose of that frame requires the effects of all upstream joints to be combined in their physical chain order.
+
+Consider a simple arm consisting of a fixed base, a shoulder joint, an upper-arm link, an elbow joint, a forearm link, and a tool frame. Rotating the shoulder moves the upper arm and carries the elbow, forearm, and tool with it. Rotating the elbow changes the forearm and tool relative to their new placement after the shoulder motion, but it does not move the upper arm. The two joint effects therefore cannot be calculated as unrelated pose changes and added: each downstream motion starts from the placement produced by the joints before it.
+
+At one instant, suppose the kinematic model is given one signed coordinate for each of the robot's $n$ independent joints. Collect these values in the **joint-coordinate column**
+
+$$
+\mathbf q
+=
+\begin{bmatrix}
+q_1&\cdots&q_n
+\end{bmatrix}^{\mathsf T}
+\in\mathbb R^n,
+$$
+
+where a revolute entry is an angle in radians and a prismatic entry is a displacement in metres. The complete kinematic problem begins with three practical questions.
+
+1. **Pose:** Where is the selected end-effector frame for the current value of $\mathbf q$? **Forward kinematics** answers this question by composing the link and joint geometry into an end-effector pose.
+
+2. **Velocity:** If the joints move with rate column $\dot{\mathbf q}$, what is the instantaneous velocity of the end effector or another selected task output? A **Jacobian** is the local linear map that converts joint rates into that selected velocity.
+
+3. **Available motion:** Can the joints produce every desired instantaneous task direction at the current configuration? The rank of the relevant Jacobian answers this question. A **kinematic singularity for a declared task** is a configuration at which that Jacobian loses rank and at least one normally available instantaneous task direction is lost.
+
+These questions form a dependency chain. Forward kinematics must first define how joint coordinates determine a pose or another task output. Differentiating that forward relationship produces velocity kinematics and its Jacobian. Analysing the Jacobian then reveals available motion directions, joint motions that produce no first-order task change, and singular configurations. Inverse kinematics, trajectory generation, and control use these results later; they cannot be stated reliably before the forward map and its derivative are understood.
+
+@sec-screw-motion-se3-exponential-spatial-integration supplies the transformation, screw-axis, exponential, logarithm, adjoint, and twist tools for individual rigid motions. This chapter assembles those tools at robot scale. It first distinguishes complete configurations, joint-coordinate descriptions, and selected task outputs. It then constructs serial-chain poses using transform chains and products of exponentials, derives task and rigid-body Jacobians, and finishes by examining rank, singularities, numerical conditioning, and verification checks.
+
 ## Configuration coordinates and forward kinematics {#sec-general-forward-kinematics}
 
-The preceding sections described the finite or instantaneous motion permitted by one joint. A serial robot contains several joints, so its geometry must answer a larger question: given one value for every joint coordinate, where is the selected end-effector frame or task point? This section first clarifies the coordinate input, then defines the forward output, and finally differentiates that input--output relationship. It does not yet choose a transform-chain or product-of-exponentials formula for evaluating the forward map; those constructions begin in @sec-serial-product-of-exponentials.
+The motivation above identified the robot-level forward problem: given one value for every joint coordinate, where is the selected end-effector frame or task point? This section first clarifies the coordinate input, then defines the forward output, and finally differentiates that input--output relationship. It does not yet choose a transform-chain or product-of-exponentials formula for evaluating the forward map; those constructions begin in @sec-serial-product-of-exponentials.
 
 ### Configuration space and coordinate vectors
 
@@ -543,7 +572,7 @@ convert the same pose rate into the space twist $\boldsymbol\xi_s$, expressed us
 
 The derivative is local. It predicts first-order output change for a small coordinate increment and gives the exact instantaneous output rate along a differentiable motion; it does not by itself give an exact finite displacement, enforce joint limits, resolve angle-wrap boundaries, or prove that an inverse map exists. Equal input and output dimensions are also insufficient for local invertibility: the derivative must have the required rank, which will be studied in @sec-robot-jacobian-rank.
 
-### Quick test E: coordinates, forward maps, and total derivatives {.unnumbered}
+### Quick test A: coordinates, forward maps, and total derivatives {.unnumbered}
 
 1. **Recall:** Distinguish $\mathcal C$, $\mathcal Q$, and one coordinate column $\mathbf q$.
 2. **Explanation:** Why can two real angle values that differ by $2\pi$ describe the same revolute-joint configuration, and why does this make coordinates local?

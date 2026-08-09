@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" role="img" aria-labelledby="title desc">
+  <title id="title">Spatial velocity field for pure rotation about an offset revolute axis</title>
+  <desc id="desc">A cross-section perpendicular to a revolute axis shows a fixed-frame origin, a stationary point on the axis, and a body-fixed point P at joint angle pi over six. The spatial-twist linear part at the fixed origin and the rotational contribution at P add head to tail to give the tangent velocity of P.</desc>
+  <defs>
+    <clipPath id="plot-clip"><rect x="24" y="24" width="840" height="672" rx="18"/></clipPath>
+    <marker id="arrow-neutral" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#73777a"/></marker>
+    <marker id="arrow-position" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#2f735e"/></marker>
+    <marker id="arrow-linear" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#cf4f96"/></marker>
+    <marker id="arrow-rotational" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#e2a52b"/></marker>
+    <marker id="arrow-result" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#3f7fe5"/></marker>
+  </defs>
+
+  <rect width="1200" height="720" fill="#faf9f5"/>
+  <rect class="panel" x="24" y="24" width="840" height="672" rx="18"/>
+  <rect class="panel" x="888" y="24" width="288" height="672" rx="18"/>
+
+  <g clip-path="url(#plot-clip)">
+    <circle class="orbit" cx="250" cy="300" r="180"/>
+    <path class="axis-x" d="M100 540H790" marker-end="url(#arrow-neutral)"/>
+    <path class="axis-y" d="M100 540V95" marker-end="url(#arrow-neutral)"/>
+  </g>
+
+  <circle class="frame-origin" cx="100" cy="540" r="6"/>
+  <text class="frame-label" x="62" y="572">O<tspan baseline-shift="sub">a</tspan></text>
+  <text class="frame-label" x="800" y="547">+x<tspan baseline-shift="sub">a</tspan></text>
+  <text class="frame-label" x="77" y="83">+y<tspan baseline-shift="sub">a</tspan></text>
+
+  <path class="axis-position" d="M100 540L250 300" marker-end="url(#arrow-neutral)"/>
+  <text class="vector-label neutral-label" x="155" y="405"><tspan baseline-shift="super">a</tspan><tspan class="vector-symbol">p</tspan><tspan baseline-shift="sub">ℓ</tspan></text>
+
+  <circle class="axis-ring" cx="250" cy="300" r="27"/>
+  <circle class="axis-dot" cx="250" cy="300" r="7"/>
+  <text class="axis-label" x="282" y="324">joint-axis line <tspan class="calligraphic">ℒ</tspan></text>
+  <text class="axis-label" x="282" y="350"><tspan baseline-shift="super">a</tspan><tspan class="vector-symbol">s</tspan> = +e<tspan baseline-shift="sub">z</tspan></text>
+  <text class="zero-label" x="180" y="263"><tspan baseline-shift="super">a</tspan><tspan class="vector-symbol">v</tspan><tspan baseline-shift="sub">ℓ</tspan> = 0</text>
+
+  <path class="radius-guide" d="M250 300L406 210"/>
+  <path class="angle-reference" d="M250 300H315"/>
+  <path class="angle" d="M300 300A50 50 0 0 0 293.3 275"/>
+  <text class="angle-label" x="320" y="268">θ<tspan baseline-shift="sub">j</tspan> = π/6</text>
+
+  <path class="position" d="M100 540L406 210" marker-end="url(#arrow-position)"/>
+  <text class="vector-label position-label" x="260" y="385"><tspan baseline-shift="super">a</tspan><tspan class="vector-symbol">p</tspan><tspan baseline-shift="sub">P</tspan></text>
+
+  <circle class="point-ring" cx="406" cy="210" r="24"/>
+  <circle class="point" cx="406" cy="210" r="7"/>
+  <text class="point-label" x="430" y="194">P</text>
+
+  <path class="linear-at-origin" d="M100 540L184 592.5" marker-end="url(#arrow-linear)"/>
+  <text class="vector-label linear-label" x="198" y="590"><tspan baseline-shift="super">a</tspan><tspan class="vector-symbol">ν</tspan> = <tspan baseline-shift="super">a</tspan><tspan class="vector-symbol">v</tspan>(O<tspan baseline-shift="sub">a</tspan>)</text>
+
+  <path class="linear-copy" d="M406 210L490 262.5" marker-end="url(#arrow-linear)"/>
+  <path class="rotational" d="M490 262.5L374.5 155.4" marker-end="url(#arrow-rotational)"/>
+  <path class="result" d="M406 210L374.5 155.4" marker-end="url(#arrow-result)"/>
+
+  <text class="vector-label linear-label" x="464" y="229"><tspan baseline-shift="super">a</tspan><tspan class="vector-symbol">ν</tspan></text>
+  <text class="vector-label rotational-label" x="500" y="166"><tspan baseline-shift="super">a</tspan><tspan class="vector-symbol">ω</tspan> × <tspan baseline-shift="super">a</tspan><tspan class="vector-symbol">p</tspan><tspan baseline-shift="sub">P</tspan></text>
+  <text class="vector-label result-label" x="335" y="161"><tspan baseline-shift="super">a</tspan><tspan class="vector-symbol">v</tspan><tspan baseline-shift="sub">P</tspan></text>
+
+  <g class="legend" aria-label="Vector legend">
+    <text class="legend-title" x="912" y="70">Fixed instant</text>
+    <text x="912" y="104">θ<tspan baseline-shift="sub">j</tspan> = π/6, θ̇<tspan baseline-shift="sub">j</tspan> &gt; 0</text>
+    <text class="legend-note" x="912" y="135">Cross-section normal to +z<tspan baseline-shift="sub">a</tspan></text>
+
+    <path class="legend-position" d="M914 190H970" marker-end="url(#arrow-position)"/>
+    <text x="992" y="197"><tspan baseline-shift="super">a</tspan><tspan class="vector-symbol">p</tspan><tspan baseline-shift="sub">P</tspan></text>
+
+    <path class="legend-linear" d="M914 254H970" marker-end="url(#arrow-linear)"/>
+    <text x="992" y="261"><tspan baseline-shift="super">a</tspan><tspan class="vector-symbol">ν</tspan></text>
+
+    <path class="legend-rotational" d="M914 318H970" marker-end="url(#arrow-rotational)"/>
+    <text x="992" y="325"><tspan baseline-shift="super">a</tspan><tspan class="vector-symbol">ω</tspan> × <tspan baseline-shift="super">a</tspan><tspan class="vector-symbol">p</tspan><tspan baseline-shift="sub">P</tspan></text>
+
+    <path class="legend-result" d="M914 382H970" marker-end="url(#arrow-result)"/>
+    <text x="992" y="389"><tspan baseline-shift="super">a</tspan><tspan class="vector-symbol">v</tspan><tspan baseline-shift="sub">P</tspan></text>
+
+    <text class="equation" x="912" y="465"><tspan baseline-shift="super">a</tspan><tspan class="vector-symbol">v</tspan><tspan baseline-shift="sub">P</tspan> = <tspan baseline-shift="super">a</tspan><tspan class="vector-symbol">ν</tspan></text>
+    <text class="equation" x="936" y="501">+ <tspan baseline-shift="super">a</tspan><tspan class="vector-symbol">ω</tspan> × <tspan baseline-shift="super">a</tspan><tspan class="vector-symbol">p</tspan><tspan baseline-shift="sub">P</tspan></text>
+    <text class="legend-note" x="912" y="558">The two contributions at P</text>
+    <text class="legend-note" x="912" y="584">are placed head to tail.</text>
+    <text class="legend-note" x="912" y="628">Their sum is tangent to the</text>
+    <text class="legend-note" x="912" y="654">circular path about <tspan baseline-shift="super">a</tspan><tspan class="calligraphic">ℒ</tspan>.</text>
+  </g>
+
+  <style>
+    text{fill:#202326;font-family:Arial,Helvetica,sans-serif;font-size:18px;font-weight:400}
+    .panel{fill:#fff;stroke:#ddd9d2;stroke-width:1.5}
+    .orbit{fill:none;stroke:#c9cdd1;stroke-width:1.8;stroke-dasharray:8 7}
+    .axis-x,.axis-y{fill:none;stroke:#73777a;stroke-width:2}
+    .frame-origin{fill:#73777a;stroke:#fff;stroke-width:2}.frame-label{font-size:17px}
+    .axis-position{fill:none;stroke:#73777a;stroke-width:2.2;stroke-dasharray:7 6}
+    .axis-ring{fill:#e8f4f8;stroke:#3ba8cb;stroke-width:2.5}.axis-dot{fill:#3ba8cb}
+    .axis-label{font-size:17px}.zero-label{fill:#555;font-size:17px}
+    .radius-guide{fill:none;stroke:#9aa2a9;stroke-width:2}.angle-reference{fill:none;stroke:#9aa2a9;stroke-width:1.5;stroke-dasharray:5 5}
+    .angle{fill:none;stroke:#555;stroke-width:1.8}.angle-label{font-style:italic;font-size:17px}
+    .position,.legend-position{fill:none;stroke:#2f735e;stroke-width:3.5}
+    .linear-at-origin,.linear-copy,.legend-linear{fill:none;stroke:#cf4f96;stroke-width:3.5}.linear-copy{stroke-dasharray:8 6}
+    .rotational,.legend-rotational{fill:none;stroke:#e2a52b;stroke-width:3.5}
+    .result,.legend-result{fill:none;stroke:#3f7fe5;stroke-width:4}
+    .point-ring{fill:#e9e3f3;stroke:#7651a8;stroke-width:2}.point{fill:#7651a8;stroke:#fff;stroke-width:2}.point-label{font-size:20px;font-weight:600}
+    .vector-label{font-size:19px;font-style:italic;paint-order:stroke;stroke:#faf9f5;stroke-width:5;stroke-linejoin:round}
+    .vector-symbol{font-weight:700;font-style:italic}.calligraphic{font-family:Georgia,serif;font-style:italic}
+    .neutral-label{fill:#555}.position-label{fill:#2f735e}.linear-label{fill:#b43f82}.rotational-label{fill:#b47713}.result-label{fill:#2f68bd}
+    .tangent-marker-halo{fill:none;stroke:#fff;stroke-width:7}.tangent-marker{fill:none;stroke:#202326;stroke-width:2}
+    .legend-title{font-size:21px;font-weight:600}.legend text{font-size:17px}.legend-note{fill:#555;font-size:16px}.equation{font-size:20px}
+  </style>
+</svg>

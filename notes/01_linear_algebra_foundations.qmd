@@ -539,8 +539,6 @@ $$
 
 ## Quick test A: vectors and bases {.unnumbered}
 
-Complete this test without looking back at the section.
-
 1. **Recall:** What is the difference between a geometric vector $\mathbf v$ and a coordinate column ${}^{a}\mathbf v$?
 2. **Explanation:** Why must coordinate columns be associated with a basis?
 3. **Derivation:** Use the law of cosines and an algebraic expansion of $\|\mathbf u-\mathbf v\|_2^2$ to derive ${}^{a}\mathbf u^{\mathsf T}{}^{a}\mathbf v=\|\mathbf u\|_2\|\mathbf v\|_2\cos\theta$.

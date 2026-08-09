@@ -3494,8 +3494,6 @@ The round trip returns the original coordinates exactly. Point mapping through b
 
 ## Quick test F: spatial pose and $SE(3)$ {.unnumbered}
 
-Try these questions without looking back at the preceding sections.
-
 1. In the transformation
 
    $$
@@ -4004,8 +4002,6 @@ The tolerances should reflect the numerical precision and the application's geom
 The embedding represents only the three-degree-of-freedom subset of $SE(3)$ satisfying the planar restrictions. It is not a projection of an arbitrary spatial pose onto a plane: such a projection would discard vertical position and rotations about horizontal axes and could not be inverted uniquely.
 
 ## Quick test G: planar poses inside $SE(3)$ {.unnumbered}
-
-Try these questions without looking back at the section.
 
 1. Write the $SE(3)$ matrix that embeds the planar pose coordinates $(x,y,\theta)$.
 2. Which entries of the embedded matrix enforce the planar-motion restrictions?
@@ -4780,8 +4776,6 @@ $$
 The tolerance does not allow the norm error to remain: normalization reduces the accepted residual to floating-point precision. Instead, the tolerance decides whether the input is close enough to a unit quaternion to repair. If $e_q>\varepsilon_{\mathrm{norm}}$, silently normalizing could hide corrupted data or an incorrect calculation, so the input should be rejected unless the interface explicitly specifies a different projection policy. Normalization also cannot repair non-finite components, a zero or near-zero norm, an incorrect frame convention, or an incorrect rotation.
 
 ## Quick test H: unit quaternions and planar yaw {.unnumbered}
-
-Try these questions without looking back at the section.
 
 1. For a unit rotation axis $\mathbf a\in\mathbb R^3$ and signed angle $\alpha\in\mathbb R$, write the corresponding unit quaternion as a scalar--vector pair. What do its two parts mean?
 2. Why does a unit quaternion store four real components but describe only three local degrees of freedom?
@@ -6181,8 +6175,6 @@ If the two frame origins coincide, then $\mathbf p=\mathbf 0_3$ and the cross-pr
 
 ## Quick test I: spatial rigid-body velocity and twists {.unnumbered}
 
-Try these questions without looking back at the section.
-
 1. **Recall:** State the world-frame velocity of a body-fixed point $P$ in terms of the body-origin velocity, angular velocity, and relative-position vector.
 2. **Contrast:** Define the body- and spatial-twist hat matrices from $\mathbf T_{wb}$ and $\dot{\mathbf T}_{wb}$. Which side of the pose does each twist matrix multiply when reconstructing $\dot{\mathbf T}_{wb}$?
 3. **Explanation:** What physical quantity does $\boldsymbol\nu_b$ describe? What does $\boldsymbol\nu_w$ describe, and why is $\boldsymbol\nu_w$ generally not the velocity of the body origin?
@@ -6642,8 +6634,6 @@ The principal implementation rules from this chapter are therefore:
 - test representation invariants, inverse round trips, and equivalent conversion paths.
 
 ## Cumulative chapter review {.unnumbered}
-
-Try these questions without looking back. They test definitions, derivations, applications, and limitations from the whole chapter.
 
 1. What is the difference among a rigid body's physical configuration, a homogeneous transformation $\mathbf T_{wb}$, and a coordinate column such as $[\,x\;y\;\theta\,]^\mathsf T$?
 2. For constraints $\mathbf g(\mathbf z)=\mathbf 0$ at a regular configuration $\mathbf z_0\in\mathbb R^{n_v}$, state the Jacobian null-space description of allowable infinitesimal changes and the corresponding DOF formula. Why does a free spatial rigid body have six DOF?

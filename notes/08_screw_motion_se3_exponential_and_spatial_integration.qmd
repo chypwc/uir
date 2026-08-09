@@ -447,6 +447,10 @@ $$
 -\left({}^{a}\mathbf s\times{}^{a}\mathbf p_{\ell}\right)\dot\theta_j.
 $$
 
+Figure @fig-revolute-spatial-velocity-field fixes one instant with ${}^{a}\mathbf s=[0\;0\;1]^{\mathsf T}$, $\theta_j=\pi/6$ measured from the illustrated $+x_a$ ray, and $\dot\theta_j>0$. The cross-section is perpendicular to the joint axis. The copy of ${}^{a}\boldsymbol\nu$ that begins at $P$ and the rotational contribution ${}^{a}\boldsymbol\omega\times{}^{a}\mathbf p_P$ are placed head to tail; their sum is ${}^{a}\mathbf v_P$, which is tangent to the circular path about the axis. The same velocity field evaluates to ${}^{a}\boldsymbol\nu$ at $O_a$ and to $\mathbf 0_3$ at the selected axis point ${}^{a}\mathbf p_{\ell}$.
+
+![Velocity-field construction for pure revolute motion about an axis line offset from the fixed-frame origin.](figures/revolute_spatial_velocity_field.svg){#fig-revolute-spatial-velocity-field width=100% fig-pos="H"}
+
 Define the joint-induced spatial twist, referred to frame $\{a\}$, by ${}^{a}\boldsymbol\xi:=[({}^{a}\boldsymbol\nu)^{\mathsf T}\;({}^{a}\boldsymbol\omega)^{\mathsf T}]^{\mathsf T}\in\mathbb R^6$. The **normalised revolute screw-axis coordinate column** ${}^{a}\mathbf S_R\in\mathbb R^6$ is the column that maps the revolute joint rate to this spatial twist:
 
 $$
@@ -526,6 +530,38 @@ h{}^{a}\mathbf s
 \right)
 \dot\theta_j.
 $$
+
+To obtain the velocity of an arbitrary body-fixed point $P$, substitute this linear part and ${}^{a}\boldsymbol\omega={}^{a}\mathbf s\dot\theta_j$ into the spatial velocity field:
+
+$$
+\begin{aligned}
+{}^{a}\mathbf v_P
+&=
+{}^{a}\boldsymbol\nu
++
+{}^{a}\boldsymbol\omega\times{}^{a}\mathbf p_P\\
+&=
+\left(
+-{}^{a}\mathbf s\times{}^{a}\mathbf p_{\ell}
++h{}^{a}\mathbf s
+\right)\dot\theta_j
++
+\left({}^{a}\mathbf s\dot\theta_j\right)
+\times{}^{a}\mathbf p_P\\
+&=
+{}^{a}\boldsymbol\omega
+\times
+\left({}^{a}\mathbf p_P-{}^{a}\mathbf p_{\ell}\right)
++
+h{}^{a}\mathbf s\dot\theta_j.
+\end{aligned}
+$$
+
+The first term is the rotational velocity about the axis line and is tangent to the circular cross-section through $P$. The second term is the axial velocity parallel to ${}^{a}\mathbf s$. When $P$ is on the axis, ${}^{a}\mathbf p_P-{}^{a}\mathbf p_{\ell}=\mathbf 0_3$, so the rotational term vanishes and the equation reduces to ${}^{a}\mathbf v_{\ell}=h{}^{a}\mathbf s\dot\theta_j$.
+
+Figure @fig-helical-motion-fixed-angle fixes one instant with $\theta_j=\pi/2$, $\dot\theta_j>0$, and positive pitch $h>0$. The body-fixed point $P$ has rotated through one quarter-turn and advanced by $h\theta_j$ along the oriented axis. Its rotational velocity about the line and its axial velocity are placed head to tail to produce the tangent velocity ${}^{a}\mathbf v_P$. A body-fixed point currently on the axis has no circular velocity contribution, but it retains the axial velocity $h{}^{a}\mathbf s\dot\theta_j$ and is therefore not stationary.
+
+![Helical motion at a fixed joint angle, showing axial displacement and the instantaneous velocity components.](figures/helical_motion_fixed_angle.svg){#fig-helical-motion-fixed-angle width=100% fig-pos="H"}
 
 Hence the normalised helical screw-axis coordinates are
 
@@ -5276,6 +5312,466 @@ $$
 $$
 
 The shortest memory rule is: ${}^{a}\mathbf S$ says **how**, $\sigma$ says **how much**, and $\dot\sigma$ says **how fast**. Multiplying ${}^{a}\mathbf S$ by $\sigma$ produces the finite coordinates ${}^{a}\boldsymbol\eta$; multiplying it by $\dot\sigma$ produces the instantaneous twist ${}^{a}\boldsymbol\xi$. The exponential constructs $\mathbf T_\Delta$. A selected logarithm recovers ${}^{a}\boldsymbol\eta$ only when the inverse description is needed.
+
+## Cumulative chapter review {.unnumbered}
+
+### Questions {.unnumbered}
+
+1. **Physical system and representations:** Distinguish a link, a material point, a rigid-link configuration $\chi$, an attached-frame pose $\mathbf T_{wb}$, and a generalised-coordinate column $\mathbf q$. State the correspondence between $\chi$ and $\mathbf T_{wb}$ for one rigid link and explain why $\mathbf q$ is not itself a pose.
+
+2. **Joint model:** Define a zero arrangement and an oriented joint axis. Contrast revolute, prismatic, and finite-pitch helical motion, including the scalar coordinate and physical unit used by each model.
+
+3. **Screw-axis derivation:** Let an oriented line expressed in frame $\{a\}$ have unit direction ${}^{a}\mathbf s_\omega$ and pass through a point with position column ${}^{a}\mathbf p_\ell$. Derive the normalised linear-first screw-axis columns for pure revolute motion, finite-pitch helical motion with pitch $h$, and pure prismatic motion.
+
+4. **Recovering physical screw geometry:** A normalised rotational screw expressed in frame $\{a\}$ has
+
+   $$
+   {}^{a}\mathbf s_v
+   =
+   \begin{bmatrix}
+   0\\-2\\0.05
+   \end{bmatrix}
+   \mathrm{m\,rad^{-1}},
+   \qquad
+   {}^{a}\mathbf s_\omega
+   =
+   \begin{bmatrix}
+   0\\0\\1
+   \end{bmatrix}.
+   $$
+
+   Recover its pitch and the position column of the axis point closest to $O_a$. State the oriented axis line.
+
+5. **Velocity field:** Starting from ${}^{a}\boldsymbol\xi={}^a\mathbf S\dot\theta=[({}^{a}\boldsymbol\nu)^{\mathsf T}\;({}^{a}\boldsymbol\omega)^{\mathsf T}]^{\mathsf T}$, write the velocity of a material point currently at ${}^{a}\mathbf x$. Explain why ${}^{a}\mathbf x$ appears when the twist is evaluated but does not appear in ${}^{a}\mathbf S$ or ${}^{a}\boldsymbol\xi$.
+
+6. **Change of reference frame:** If $\mathbf T_{ab}$ transforms point coordinates from frame $\{b\}$ to frame $\{a\}$, state the linear-first adjoint matrix and derive the rule that transforms screw-axis coordinates from $\{b\}$ to $\{a\}$.
+
+7. **Finite-displacement workflow:** Beginning with a normalised screw axis ${}^{a}\mathbf S$ and signed motion amount $\sigma$, write the complete sequence that produces $\mathbf T_\Delta$. Then write the equivalent finite-coordinate form using ${}^{a}\boldsymbol\eta=[({}^{a}\boldsymbol\rho)^{\mathsf T}\;({}^{a}\boldsymbol\phi)^{\mathsf T}]^{\mathsf T}$ and $\mathbf J({}^{a}\boldsymbol\phi)$.
+
+8. **Cumulative screw application:** Use the screw in Question 4 and the signed angle $\theta=\pi/2\,\mathrm{rad}$ to calculate $\mathbf T_\Delta$. Apply the result to an arbitrary axis point ${}^{a}\mathbf x=[2\;0\;\lambda]^{\mathsf T}\,\mathrm m$ and interpret its final position.
+
+9. **Principal inverse workflow:** Given a validated transformation $\mathbf T=[\mathbf R\;{}^{a}\mathbf p;\mathbf 0_3^{\mathsf T}\;1]$, state the identity, pure-translation, and rotation-present cases of the selected principal logarithm. Explain why the identity has no unique normalised screw axis.
+
+10. **Finite versus normalised coordinates:** Suppose the selected logarithm returns ${}^{a}\boldsymbol\eta=[({}^{a}\boldsymbol\rho)^{\mathsf T}\;({}^{a}\boldsymbol\phi)^{\mathsf T}]^{\mathsf T}$ with $\|{}^{a}\boldsymbol\phi\|_2>0$. Recover $\theta$, ${}^{a}\mathbf s_\omega$, ${}^{a}\mathbf s_v$, $h$, and the closest axis point ${}^{a}\mathbf p_\ell$. Why should this normalisation not be performed first near a pure translation?
+
+11. **Space and body integration:** Let $\mathbf T_0=\mathbf T_{sb}(t_0)$. Write the constant-space-twist and constant-body-twist updates over $\Delta t$. State the adjoint relation required for them to represent the same physical motion and show the resulting equality of the two final poses.
+
+12. **Time-varying limitation:** Explain why a time-varying twist generally requires chronologically ordered exponential increments. Why can neither $\exp(\int\widehat{\boldsymbol\xi}(t)\,\mathrm dt)$ nor an additive matrix Euler update be used as an unrestricted exact pose integrator?
+
+13. **Small angular displacement:** Define ${}^{a}\boldsymbol\phi$, $\theta$, and $\boldsymbol\Phi$, then write the closed forms for $\mathbf R({}^{a}\boldsymbol\phi)$ and $\mathbf J({}^{a}\boldsymbol\phi)$. Give the first two nonzero terms of the small-angle series for $A(\theta)$, $B(\theta)$, and $C(\theta)$ and explain why these series are needed in floating-point arithmetic.
+
+14. **Principal rotation near $\pi$:** Starting from Rodrigues' formula, state the trace and skew-difference equations used to recover the principal angle and nominal axis. Explain why the skew-based axis calculation fails at $\theta=\pi$, what symmetric matrix replaces it, and why a deterministic sign convention remains necessary.
+
+15. **Validation and numerical policy:** List the structural checks required before treating a numerical array as an element of $SE(3)$. Contrast $\theta_{\mathrm{series}}$, $\varepsilon_\pi$, $\varepsilon_{\mathrm{zero}}$, and $\varepsilon_{p,0}$, including which thresholds merely select a formula and which may change the returned model.
+
+16. **Chasles--Mozzi theorem:** State the theorem's rotation-present, pure-translation, and identity cases. What does the theorem prove about the endpoints of a displacement, and what does it not prove about the body's actual past trajectory?
+
+17. **Round trips and branches:** Explain why $\exp(\log_{\mathrm{selected}}(\mathbf T))=\mathbf T$ is expected for every validated input in the selected branch, whereas $\log_{\mathrm{selected}}(\exp(\widehat{{}^{a}\boldsymbol\eta}))=\widehat{{}^{a}\boldsymbol\eta}$ requires a qualification.
+
+### Answers and derivation hints {.unnumbered}
+
+1. A material point is one labelled point fixed in the robot's matter, and a link is a set of material points modelled as one rigid object. A rigid-link configuration $\chi$ maps every labelled point of that link to its world position. An attached-frame pose $\mathbf T_{wb}$ maps the fixed body-frame coordinates of those material points into world coordinates. If the link contains enough non-collinear labelled points to determine its placement, the complete rigid configuration and the attached-frame pose determine one another:
+
+   $$
+   \chi
+   \quad\longleftrightarrow\quad
+   \mathbf T_{wb}.
+   $$
+
+   The generalised-coordinate column $\mathbf q$ is an ordered numerical description used by the robot model to select an admissible complete configuration through $\mathbf q\mapsto\chi(\mathbf q)$. Its entries may be joint angles and displacements; they are not generally the position and orientation coordinates of one body.
+
+2. The zero arrangement is the declared relative placement of the connected links at zero joint coordinate. An oriented joint axis is a geometric line with a selected positive direction. A revolute joint rotates through a signed angle $\theta$ in radians about that line. A prismatic joint translates through a signed distance $d$ in metres parallel to its direction. A finite-pitch helical joint rotates through $\theta$ while translating $h\theta$ metres along the same line, where $h$ is measured in $\mathrm{m\,rad^{-1}}$.
+
+3. A point on a pure revolute axis has zero velocity, so substituting ${}^{a}\boldsymbol\omega={}^a\mathbf s_\omega\dot\theta$ and ${}^{a}\mathbf x={}^a\mathbf p_\ell$ into the velocity field gives ${}^{a}\boldsymbol\nu=-{}^a\mathbf s_\omega\times{}^a\mathbf p_\ell\dot\theta$. The three normalised columns are therefore
+
+   $$
+   \boxed{
+   {}^{a}\mathbf S_R
+   =
+   \begin{bmatrix}
+   -{}^{a}\mathbf s_\omega\times{}^{a}\mathbf p_\ell\\
+   {}^{a}\mathbf s_\omega
+   \end{bmatrix},
+   \qquad
+   {}^{a}\mathbf S_H
+   =
+   \begin{bmatrix}
+   -{}^{a}\mathbf s_\omega\times{}^{a}\mathbf p_\ell+h{}^{a}\mathbf s_\omega\\
+   {}^{a}\mathbf s_\omega
+   \end{bmatrix},
+   \qquad
+   {}^{a}\mathbf S_P
+   =
+   \begin{bmatrix}
+   {}^{a}\mathbf s_v\\
+   \mathbf 0_3
+   \end{bmatrix}
+   },
+   $$
+
+   where $\|{}^{a}\mathbf s_\omega\|_2=1$ for the rotational cases and $\|{}^{a}\mathbf s_v\|_2=1$ for the prismatic case.
+
+4. As derived in @sec-se3-screw-exponential, start from ${}^{a}\mathbf s_v=-{}^{a}\mathbf s_\omega\times{}^{a}\mathbf p_\ell+h{}^{a}\mathbf s_\omega$, with $\|{}^{a}\mathbf s_\omega\|_2=1$ and $({}^{a}\mathbf s_\omega)^{\mathsf T}{}^{a}\mathbf p_\ell=0$ for the closest axis point. Taking the dot product with ${}^{a}\mathbf s_\omega$ removes the perpendicular cross-product term, while crossing on the left with ${}^{a}\mathbf s_\omega$ and using the vector triple-product identity gives
+
+   $$
+   \boxed{
+   h=({}^{a}\mathbf s_\omega)^{\mathsf T}{}^{a}\mathbf s_v,
+   \qquad
+   {}^{a}\mathbf p_\ell={}^{a}\mathbf s_\omega\times{}^{a}\mathbf s_v
+   }.
+   $$
+
+   Therefore the pitch is
+
+   $$
+   h
+   =
+   ({}^{a}\mathbf s_\omega)^{\mathsf T}{}^{a}\mathbf s_v
+   =
+   0.05\,\mathrm{m\,rad^{-1}}.
+   $$
+
+   The closest axis point is
+
+   $$
+   {}^{a}\mathbf p_\ell
+   =
+   {}^{a}\mathbf s_\omega\times{}^{a}\mathbf s_v
+   =
+   \begin{bmatrix}
+   2\\0\\0
+   \end{bmatrix}
+   \mathrm m.
+   $$
+
+   Hence the oriented axis line is
+
+   $$
+   {}^{a}\mathcal L
+   =
+   \left\{
+   \begin{bmatrix}
+   2\\0\\0
+   \end{bmatrix}
+   +
+   \lambda
+   \begin{bmatrix}
+   0\\0\\1
+   \end{bmatrix}
+   \;\middle|\;
+   \lambda\in\mathbb R
+   \right\},
+   $$
+
+   with the point coordinates and $\lambda$ measured in metres.
+
+5. The point velocity is
+
+   $$
+   \boxed{
+   {}^{a}\mathbf v_P
+   =
+   {}^{a}\boldsymbol\nu
+   +
+   {}^{a}\boldsymbol\omega\times{}^{a}\mathbf x
+   }.
+   $$
+
+   The screw axis and twist store the position-independent coefficients of one complete rigid velocity field. The position ${}^{a}\mathbf x$ is supplied only when that field is evaluated at a particular material point, so different points receive different rotational contributions without requiring different twists.
+
+6. Under the project's linear-first convention,
+
+   $$
+   \operatorname{Ad}_{\mathbf T_{ab}}
+   =
+   \begin{bmatrix}
+   \mathbf R_{ab}&[{}^{a}\mathbf p_b]_\times\mathbf R_{ab}\\
+   \mathbf 0_{3\times3}&\mathbf R_{ab}
+   \end{bmatrix}.
+   $$
+
+   In frame $\{b\}$, ${}^{b}\boldsymbol\xi={}^b\mathbf S\dot q$. Transforming the twist gives ${}^{a}\boldsymbol\xi=\operatorname{Ad}_{\mathbf T_{ab}}{}^b\boldsymbol\xi$. Because the same scalar rate must also satisfy ${}^{a}\boldsymbol\xi={}^a\mathbf S\dot q$, comparison of the coefficients of $\dot q$ gives
+
+   $$
+   \boxed{
+   {}^{a}\mathbf S
+   =
+   \operatorname{Ad}_{\mathbf T_{ab}}{}^{b}\mathbf S
+   }.
+   $$
+
+7. The normalised-coordinate workflow is
+
+   $$
+   \boxed{
+   ({}^{a}\mathbf S,\sigma)
+   \longmapsto
+   {}^{a}\boldsymbol\eta
+   =
+   {}^{a}\mathbf S\sigma
+   \longmapsto
+   \widehat{{}^{a}\boldsymbol\eta}
+   \longmapsto
+   \mathbf T_\Delta
+   =
+   \exp(\widehat{{}^{a}\boldsymbol\eta})
+   }.
+   $$
+
+   With ${}^{a}\boldsymbol\eta=[({}^{a}\boldsymbol\rho)^{\mathsf T}\;({}^{a}\boldsymbol\phi)^{\mathsf T}]^{\mathsf T}$ and $\boldsymbol\Phi=[{}^{a}\boldsymbol\phi]_\times$,
+
+   $$
+   \boxed{
+   \mathbf T_\Delta
+   =
+   \begin{bmatrix}
+   \mathbf R({}^{a}\boldsymbol\phi)&
+   \mathbf J({}^{a}\boldsymbol\phi){}^{a}\boldsymbol\rho\\
+   \mathbf 0_3^{\mathsf T}&1
+   \end{bmatrix}
+   }.
+   $$
+
+8. For ${}^{a}\mathbf s_\omega=[0\;0\;1]^{\mathsf T}$, the cross-product matrix and its square are
+
+   $$
+   \boldsymbol\Omega
+   =
+   [{}^{a}\mathbf s_\omega]_\times
+   =
+   \begin{bmatrix}
+   0&-1&0\\
+   1&0&0\\
+   0&0&0
+   \end{bmatrix},
+   \qquad
+   \boldsymbol\Omega^2
+   =
+   \begin{bmatrix}
+   -1&0&0\\
+   0&-1&0\\
+   0&0&0
+   \end{bmatrix}.
+   $$
+
+   Substituting $\theta=\pi/2$ into Rodrigues' formula gives
+
+   $$
+   \begin{aligned}
+   \mathbf R
+   &=
+   \mathbf I_3+\sin\theta\,\boldsymbol\Omega+(1-\cos\theta)\boldsymbol\Omega^2\\
+   &=
+   \mathbf I_3+\boldsymbol\Omega+\boldsymbol\Omega^2\\
+   &=
+   \begin{bmatrix}
+   0&-1&0\\
+   1&0&0\\
+   0&0&1
+   \end{bmatrix}.
+   \end{aligned}
+   $$
+
+   Using the axis point and pitch from Question 4,
+
+   $$
+   {}^{a}\mathbf p_\Delta
+   =
+   (\mathbf I_3-\mathbf R){}^{a}\mathbf p_\ell
+   +h\theta{}^{a}\mathbf s_\omega
+   =
+   \begin{bmatrix}
+   2\\-2\\\pi/40
+   \end{bmatrix}
+   \mathrm m.
+   $$
+
+   Therefore
+
+   $$
+   \boxed{
+   \mathbf T_\Delta
+   =
+   \begin{bmatrix}
+   0&-1&0&2\\
+   1&0&0&-2\\
+   0&0&1&\pi/40\\
+   0&0&0&1
+   \end{bmatrix}
+   }.
+   $$
+
+   An axis point satisfies
+
+   $$
+   \mathbf R
+   \begin{bmatrix}
+   2\\0\\\lambda
+   \end{bmatrix}
+   +
+   {}^{a}\mathbf p_\Delta
+   =
+   \begin{bmatrix}
+   2\\0\\\lambda+\pi/40
+   \end{bmatrix}
+   \mathrm m.
+   $$
+
+   Rotation leaves the point on the axis line, while the pitch advances it by $h\theta=\pi/40\,\mathrm m$ along positive $z_a$.
+
+9. If $\mathbf R=\mathbf I_3$ and ${}^{a}\mathbf p=\mathbf 0_3$, the selected logarithm is $\mathbf 0_{4\times4}$. If $\mathbf R=\mathbf I_3$ and ${}^{a}\mathbf p\ne\mathbf 0_3$, the result is a pure translation with $d=\|{}^{a}\mathbf p\|_2$ and unit direction ${}^{a}\mathbf s={}^a\mathbf p/d$. If $\mathbf R\ne\mathbf I_3$, recover the selected principal rotation vector ${}^{a}\boldsymbol\phi$, then calculate ${}^{a}\boldsymbol\rho=\mathbf J({}^{a}\boldsymbol\phi)^{-1}{}^a\mathbf p$. At the identity, every admissible screw axis multiplied by zero motion produces the same transformation, so the displacement cannot select one unique normalised axis.
+
+10. Recover the rotational motion amount and geometry through
+
+   $$
+   \theta
+   =
+   \|{}^{a}\boldsymbol\phi\|_2,
+   \qquad
+   {}^{a}\mathbf s_\omega
+   =
+   \frac{{}^{a}\boldsymbol\phi}{\theta},
+   \qquad
+   {}^{a}\mathbf s_v
+   =
+   \frac{{}^{a}\boldsymbol\rho}{\theta}.
+   $$
+
+   Then
+
+   $$
+   h
+   =
+   ({}^{a}\mathbf s_\omega)^{\mathsf T}{}^{a}\mathbf s_v,
+   \qquad
+   {}^{a}\mathbf p_\ell
+   =
+   {}^{a}\mathbf s_\omega\times{}^{a}\mathbf s_v.
+   $$
+
+   Dividing by a small $\theta$ magnifies numerical error as the rotation approaches zero. The finite blocks ${}^{a}\boldsymbol\rho$ and ${}^{a}\boldsymbol\phi$ remain the appropriate primary output; the identity and pure-translation cases use separate rules.
+
+11. The two constant-twist updates are
+
+   $$
+   \boxed{
+   \mathbf T(t_0+\Delta t)
+   =
+   \exp(\widehat{\boldsymbol\xi}_s\Delta t)\mathbf T_0
+   =
+   \mathbf T_0\exp(\widehat{\boldsymbol\xi}_b\Delta t)
+   }.
+   $$
+
+   They describe the same physical motion when
+
+   $$
+   \boldsymbol\xi_s
+   =
+   \operatorname{Ad}_{\mathbf T_0}\boldsymbol\xi_b,
+   \qquad
+   \widehat{\boldsymbol\xi}_s
+   =
+   \mathbf T_0\widehat{\boldsymbol\xi}_b\mathbf T_0^{-1}.
+   $$
+
+   Similarity of the exponentials gives $\exp(\widehat{\boldsymbol\xi}_s\Delta t)=\mathbf T_0\exp(\widehat{\boldsymbol\xi}_b\Delta t)\mathbf T_0^{-1}$; right-multiplying by $\mathbf T_0$ proves the equality of the final poses.
+
+12. Twist matrices at different times need not commute, so exchanging their chronological multiplication order changes the resulting pose. An ordinary integral followed by one exponential generally discards this ordering. An additive Euler update uses matrix addition rather than the group operation and can leave $SE(3)$. Piecewise exponential updates preserve chronological order and remain in $SE(3)$ in exact arithmetic.
+
+13. Define
+
+   $$
+   {}^{a}\boldsymbol\phi
+   =
+   \theta{}^{a}\mathbf s_\omega,
+   \qquad
+   \theta
+   =
+   \|{}^{a}\boldsymbol\phi\|_2,
+   \qquad
+   \boldsymbol\Phi
+   =
+   [{}^{a}\boldsymbol\phi]_\times.
+   $$
+
+   Then
+
+   $$
+   \mathbf R
+   =
+   \mathbf I_3+A(\theta)\boldsymbol\Phi+B(\theta)\boldsymbol\Phi^2,
+   \qquad
+   \mathbf J
+   =
+   \mathbf I_3+B(\theta)\boldsymbol\Phi+C(\theta)\boldsymbol\Phi^2,
+   $$
+
+   where
+
+   $$
+   A(\theta)
+   =
+   \frac{\sin\theta}{\theta},
+   \qquad
+   B(\theta)
+   =
+   \frac{1-\cos\theta}{\theta^2},
+   \qquad
+   C(\theta)
+   =
+   \frac{\theta-\sin\theta}{\theta^3},
+   $$
+
+   and their small-angle series begin with
+
+   $$
+   \begin{aligned}
+   A(\theta)
+   &=
+   1-\frac{\theta^2}{6}+O(\theta^4),\\
+   B(\theta)
+   &=
+   \frac12-\frac{\theta^2}{24}+O(\theta^4),\\
+   C(\theta)
+   &=
+   \frac16-\frac{\theta^2}{120}+O(\theta^4).
+   \end{aligned}
+   $$
+
+   Direct trigonometric ratios form small results by subtracting nearly equal floating-point numbers near zero. The series evaluate the same mathematical functions without that cancellation.
+
+14. Rodrigues' formula gives
+
+   $$
+   \frac{\operatorname{tr}(\mathbf R)-1}{2}
+   =
+   \cos\theta,
+   \qquad
+   \mathbf R-\mathbf R^{\mathsf T}
+   =
+   2\sin\theta[{}^{a}\mathbf s_\omega]_\times.
+   $$
+
+   The skew entries form ${}^{a}\mathbf u=2\sin\theta{}^a\mathbf s_\omega$, and the principal angle follows from $\theta=\operatorname{atan2}(\|{}^{a}\mathbf u\|_2/2,(\operatorname{tr}(\mathbf R)-1)/2)$. At $\theta=\pi$, $\sin\theta=0$, so the nonzero rotation has ${}^{a}\mathbf u=\mathbf 0_3$ and the nominal axis division fails. The symmetric relation recovers the unsigned outer product
+
+   $$
+   \mathbf Q
+   =
+   \frac{
+   \tfrac12(\mathbf R+\mathbf R^{\mathsf T})-\cos\theta\mathbf I_3
+   }{1-\cos\theta}
+   =
+   {}^{a}\mathbf s_\omega({}^{a}\mathbf s_\omega)^{\mathsf T}.
+   $$
+
+   Because $\mathbf Q$ is unchanged when the axis sign is reversed, a declared component and sign rule is still needed for deterministic output.
+
+15. Validate finiteness, the $4\times4$ shape, the homogeneous bottom row, rotation orthogonality, and $\det(\mathbf R)=+1$ before applying a logarithm. The threshold $\theta_{\mathrm{series}}$ selects series evaluation near zero, and $\varepsilon_\pi$ selects the stable near-$\pi$ axis formula; these should not change the represented motion. The angular resolution $\varepsilon_{\mathrm{zero}}$ may classify and canonicalise a small rotation as zero, while $\varepsilon_{p,0}$ classifies a small translation column as zero and changes the returned model only if the interface also canonicalises that translation. All thresholds and tolerances must be finite, nonnegative, dimensionally appropriate, and ordered so formula regions have declared precedence.
+
+16. If the rotation block is non-identity, every rigid displacement has a representation as rotation about one oriented line plus translation along that line. If the rotation is the identity and translation is nonzero, the displacement is pure translation. The identity is zero displacement and has no unique normalised screw axis. The theorem constructs a screw path connecting the same initial and final poses; endpoint data alone do not show that the body actually followed that path in the past.
+
+17. The selected logarithm is defined to choose a matrix whose exponential reconstructs its validated input, so $\exp(\log_{\mathrm{selected}}(\mathbf T))=\mathbf T$. In the reverse direction, many exponential-coordinate columns can represent the same transformation because rotations repeat, the axis sign is ambiguous at $\pi$, and the axis is undefined at zero motion. Therefore the selected logarithm returns its canonical representative, which equals the original ${}^{a}\boldsymbol\eta$ only when that column already satisfies the selected branch conventions.
 
 ## Appendix: Chasles--Mozzi theorem and proof {#sec-appendix-chasles-mozzi .unnumbered}
 

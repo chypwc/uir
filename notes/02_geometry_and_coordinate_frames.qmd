@@ -217,8 +217,6 @@ The point lies on the positive $x$-axis, while its instantaneous velocity points
 
 ## Quick test A: cross products and rigid-body velocity {.unnumbered}
 
-Complete this test without looking back at the section.
-
 1. **Recall:** What rule determines the direction of $\mathbf u\times\mathbf v$?
 2. **Explanation:** Why is $\mathbf u\times\mathbf v$ perpendicular to both input vectors?
 3. **Derivation:** Substitute the component formula for ${}^{a}\mathbf u\times{}^{a}\mathbf v$ into ${}^{a}\mathbf u^{\mathsf T}({}^{a}\mathbf u\times{}^{a}\mathbf v)$ and show that the terms cancel.
@@ -1019,8 +1017,6 @@ The first condition tests approximate orthonormality; the second tests approxima
    $$
 
 ## Cumulative chapter test {.unnumbered}
-
-Complete this test without looking back at the chapter. Show the intermediate steps in every calculation, preserve the frame labels, and state the physical units of every dimensional result.
 
 1. **Recall and meaning:** Define a three-dimensional coordinate frame $\{a\}$. Then state what the columns of $\mathbf R_{ab}\in\mathbb R^{3\times3}$ represent and the direction in which this matrix maps coordinate columns.
 2. **Derivation, application, and explanation:** Frame $\{b\}$ is rotated counter-clockwise by $\theta=\pi/2\,\mathrm{rad}$ relative to frame $\{a\}$. Derive $\mathbf R_{ab}(\pi/2)$ by expressing the three axes of frame $\{b\}$ in frame $\{a\}$. Then let

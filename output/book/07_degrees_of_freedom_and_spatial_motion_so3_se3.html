@@ -378,8 +378,14 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="./09_spatial_geometry_kernel_implementation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Spatial Geometry Kernel Implementation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="./10_general_robot_kinematics_and_jacobians.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">General Robot Kinematics and Jacobians</span></span></a>
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">General Robot Kinematics and Jacobians</span></span></a>
   </div>
 </li>
       </ul>
@@ -3630,7 +3636,6 @@ SE(3)
 </section>
 <section id="quick-test-f-spatial-pose-and-se3" class="level2 unnumbered">
 <h2 class="unnumbered anchored" data-anchor-id="quick-test-f-spatial-pose-and-se3">Quick test F: spatial pose and <span class="math inline">\(SE(3)\)</span></h2>
-<p>Try these questions without looking back at the preceding sections.</p>
 <ol type="1">
 <li><p>In the transformation</p>
 <p><span class="math display">\[
@@ -4076,7 +4081,6 @@ y=p_2,
 </section>
 <section id="quick-test-g-planar-poses-inside-se3" class="level2 unnumbered">
 <h2 class="unnumbered anchored" data-anchor-id="quick-test-g-planar-poses-inside-se3">Quick test G: planar poses inside <span class="math inline">\(SE(3)\)</span></h2>
-<p>Try these questions without looking back at the section.</p>
 <ol type="1">
 <li>Write the <span class="math inline">\(SE(3)\)</span> matrix that embeds the planar pose coordinates <span class="math inline">\((x,y,\theta)\)</span>.</li>
 <li>Which entries of the embedded matrix enforce the planar-motion restrictions?</li>
@@ -4753,7 +4757,6 @@ e_q
 </section>
 <section id="quick-test-h-unit-quaternions-and-planar-yaw" class="level2 unnumbered">
 <h2 class="unnumbered anchored" data-anchor-id="quick-test-h-unit-quaternions-and-planar-yaw">Quick test H: unit quaternions and planar yaw</h2>
-<p>Try these questions without looking back at the section.</p>
 <ol type="1">
 <li>For a unit rotation axis <span class="math inline">\(\mathbf a\in\mathbb R^3\)</span> and signed angle <span class="math inline">\(\alpha\in\mathbb R\)</span>, write the corresponding unit quaternion as a scalar–vector pair. What do its two parts mean?</li>
 <li>Why does a unit quaternion store four real components but describe only three local degrees of freedom?</li>
@@ -5959,7 +5962,6 @@ T_{\mathbf I_4}SE(3)
 </section>
 <section id="quick-test-i-spatial-rigid-body-velocity-and-twists" class="level2 unnumbered">
 <h2 class="unnumbered anchored" data-anchor-id="quick-test-i-spatial-rigid-body-velocity-and-twists">Quick test I: spatial rigid-body velocity and twists</h2>
-<p>Try these questions without looking back at the section.</p>
 <ol type="1">
 <li><strong>Recall:</strong> State the world-frame velocity of a body-fixed point <span class="math inline">\(P\)</span> in terms of the body-origin velocity, angular velocity, and relative-position vector.</li>
 <li><strong>Contrast:</strong> Define the body- and spatial-twist hat matrices from <span class="math inline">\(\mathbf T_{wb}\)</span> and <span class="math inline">\(\dot{\mathbf T}_{wb}\)</span>. Which side of the pose does each twist matrix multiply when reconstructing <span class="math inline">\(\dot{\mathbf T}_{wb}\)</span>?</li>
@@ -6364,7 +6366,6 @@ O(\Delta t^2).
 </section>
 <section id="cumulative-chapter-review" class="level2 unnumbered">
 <h2 class="unnumbered anchored" data-anchor-id="cumulative-chapter-review">Cumulative chapter review</h2>
-<p>Try these questions without looking back. They test definitions, derivations, applications, and limitations from the whole chapter.</p>
 <ol type="1">
 <li>What is the difference among a rigid body’s physical configuration, a homogeneous transformation <span class="math inline">\(\mathbf T_{wb}\)</span>, and a coordinate column such as <span class="math inline">\([\,x\;y\;\theta\,]^\mathsf T\)</span>?</li>
 <li>For constraints <span class="math inline">\(\mathbf g(\mathbf z)=\mathbf 0\)</span> at a regular configuration <span class="math inline">\(\mathbf z_0\in\mathbb R^{n_v}\)</span>, state the Jacobian null-space description of allowable infinitesimal changes and the corresponding DOF formula. Why does a free spatial rigid body have six DOF?</li>
