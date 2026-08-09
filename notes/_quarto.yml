@@ -3,8 +3,8 @@ project:
   output-dir: ../output/book
 
 book:
-  title: "Foundations of Autonomous Robotics"
-  subtitle: "Mathematics, Physics, Algorithms, and Engineering"
+  title: "Understanding Intelligence Through Robotics"
+  subtitle: "From Geometry and Control to Learning, World Models, and Safe Autonomy"
   author: "Chien-Hsiang Yeh"
   date: today
   date-format: "D MMMM YYYY"

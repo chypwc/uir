@@ -2,7 +2,7 @@
   {
     "objectID": "index.html",
     "href": "index.html",
-    "title": "Foundations of Autonomous Robotics",
+    "title": "Understanding Intelligence Through Robotics",
     "section": "",
     "text": "Preface\nThis book is my collection of learning notes for understanding intelligence, especially intelligence embodied in agents that perceive their environment, predict what may happen, choose actions, and act in the physical world. Writing the notes is part of the learning process: the aim is to make each idea precise enough that I can explain it, derive it, implement it, and test it.\nMy main algorithmic interests are reinforcement learning and world models. Reinforcement learning studies how an agent can improve its decisions through interaction and feedback. A world model is an internal model that predicts how the environment or system may evolve, allowing an agent to evaluate possible actions before or while taking them. These algorithms depend on more fundamental ideas from mathematics, dynamics, control, estimation, planning, perception, and software engineering, so the notes build those foundations first.",
     "crumbs": [
