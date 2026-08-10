@@ -1,1 +1,492 @@
-# Spatial Geometry Kernel Implementation
+# Spatial Geometry Kernel Implementation {#sec-spatial-geometry-kernel-implementation}
+
+The code explained in this companion is in [`ros_ws/src/rigid_body_kinematics`]({{< var repository-url >}}/tree/{{< var repository-branch >}}/ros_ws/src/rigid_body_kinematics). Public headers are under [`include/rigid_body_kinematics/`]({{< var repository-url >}}/tree/{{< var repository-branch >}}/ros_ws/src/rigid_body_kinematics/include/rigid_body_kinematics), compiled implementations are under [`src/`]({{< var repository-url >}}/tree/{{< var repository-branch >}}/ros_ws/src/rigid_body_kinematics/src), and deterministic GTests are under [`test/`]({{< var repository-url >}}/tree/{{< var repository-branch >}}/ros_ws/src/rigid_body_kinematics/test).
+
+## From C++ source to a reusable ROS 2 library {#sec-spatial-kernel-cpp-cmake-ament}
+
+The `Rotation3` code becomes useful to another program only after the compiler converts it to machine code, the build system packages that code as a library, and the installed package tells downstream software where to find the library and its headers. This section follows that complete path through the actual `rigid_body_kinematics` package.
+
+### The roles of C++, CMake, ament, and colcon
+
+These tools act at different layers:
+
+| Layer               | Concrete role in this package                                                                                                                                                               |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| C++ compiler        | Reads `rotation3.cpp` and the headers it includes, checks the language rules and types, and produces an object file containing machine code.                                                |
+| Archiver and linker | The archiver collects object files into the static library; the linker combines the test object file, the library, and GoogleTest into the `test_rotation3` executable.                     |
+| CMake               | Reads `CMakeLists.txt`, creates named targets, records how each target is compiled and linked, and generates the lower-level build and installation rules.                                  |
+| `ament_cmake`       | Adds ROS 2 package conventions to CMake, including GoogleTest registration, package metadata generation, dependency export, and downstream package discovery.                               |
+| colcon              | Finds packages in the workspace, invokes each package's configured build type in dependency order, runs its installation rules, and stores workspace-level build, install, and log results. |
+
+Using `ament_cmake` does not make the mathematical library a ROS 2 node. The core target does not link `rclcpp`, create publishers or subscribers, or depend on ROS middleware at run time. It is a ROS 2 package because `package.xml` declares the `ament_cmake` build type and because colcon and ament manage its build and discovery.
+
+`package.xml` and `CMakeLists.txt` therefore answer different questions. `package.xml` declares the package name, version, licence, build type, and named dependencies to ROS 2 workspace tools. `CMakeLists.txt` gives CMake the concrete rules for creating, testing, installing, and exporting C++ targets.
+
+### What compile and link mean
+
+The public header and source file have different jobs:
+
+- `rotation3.hpp` contains declarations that tell another source file which C++ types and operations exist.
+- `rotation3.cpp` contains the out-of-class function definitions that supply the compiled implementation.
+
+The header is included as source text wherever its declarations are needed. The compiler separately converts each `.cpp` file into an object file, conventionally ending in `.o`. An object file contains machine code and symbol information, but it is not yet the reusable package interface or a runnable program.
+
+For the present package, the concrete paths are
+
+```text
+include/rigid_body_kinematics/rotation3.hpp
+                         │ included while compiling
+                         ↓
+src/rotation3.cpp ── compile ──> rotation3.cpp.o
+                                      │
+                                      │ archive
+                                      ↓
+                         librigid_body_kinematics.a
+
+test/test_rotation3.cpp ── compile ──> test_rotation3.cpp.o
+                                      │
+                                      │ link with the static library
+                                      │ and GoogleTest
+                                      ↓
+                                test_rotation3
+```
+
+The extension `.a` means a static library archive. When a later executable links this library, the linker incorporates the required compiled library code into that executable. A shared Linux library would normally end in `.so` and would remain a separate run-time file. The configured package produces `librigid_body_kinematics.a`; it does not presently produce a `.so`.
+
+This split also explains two common error families. A compiler error means that one source file could not be translated, for example because a type is unknown or a semicolon is missing. An `undefined reference` from the linker means the declaration was sufficient to compile a call, but no linked object or library supplied the required compiled definition.
+
+### The CMake library target
+
+`CMakeLists.txt` is not C++ and is not compiled into the library. CMake reads it during the configure step and generates a build graph. The package begins by naming the project and locating its build-time dependencies:
+
+```cmake
+project(rigid_body_kinematics LANGUAGES CXX)
+
+find_package(ament_cmake REQUIRED)
+find_package(eigen3_cmake_module REQUIRED)
+find_package(Eigen3 REQUIRED)
+```
+
+`find_package(...)` asks CMake to locate the named package and load the CMake information it provides. `REQUIRED` makes configuration fail immediately if that dependency cannot be found.
+
+The library itself is a CMake **target**, meaning a named build product together with the rules and requirements attached to it:
+
+```cmake
+add_library(${PROJECT_NAME}
+  src/rotation3.cpp
+)
+
+add_library(${PROJECT_NAME}::${PROJECT_NAME}
+  ALIAS ${PROJECT_NAME}
+)
+```
+
+`${PROJECT_NAME}` expands to `rigid_body_kinematics`. The first command creates the library target from `rotation3.cpp`. The second creates the namespaced build-tree name `rigid_body_kinematics::rigid_body_kinematics` for the same target. The `name::name` form makes a library target visually distinct from a filename or a loose linker flag.
+
+The target's compilation and usage requirements are then attached to that same name:
+
+```cmake
+target_compile_features(${PROJECT_NAME}
+  PUBLIC cxx_std_17
+)
+
+target_compile_options(${PROJECT_NAME}
+  PRIVATE
+    "$<$<COMPILE_LANG_AND_ID:CXX,GNU,Clang>:-Wall;-Wextra;-Wpedantic>"
+)
+
+target_include_directories(${PROJECT_NAME}
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+
+target_link_libraries(${PROJECT_NAME}
+  PUBLIC Eigen3::Eigen
+)
+```
+
+`PUBLIC` means that a setting is needed both to build this library and to compile a target that uses its public interface. C++17 is public, and the public headers expose Eigen types, so the Eigen imported target and the header search location must reach consumers. `PRIVATE` means that a setting applies only while building this library; the warning flags do not have to be imposed on every downstream package.
+
+The two include interfaces solve the same header-search problem in two locations. While the library is being built, the headers live under the source package's `include/` directory, so `BUILD_INTERFACE` supplies that path. After installation, a consumer must not depend on the original source checkout, so `INSTALL_INTERFACE` supplies the installed `include/` path instead.
+
+Although Eigen is mainly a header-defined library, `target_link_libraries(... PUBLIC Eigen3::Eigen)` is still the target-based CMake spelling. `Eigen3::Eigen` carries the include paths and other usage requirements that CMake must propagate; this command does not imply that Eigen contributes a separate `.so` to this target.
+
+### The test is another compiled target
+
+When `BUILD_TESTING` is enabled, ament creates a separate test executable and CMake links it with the library:
+
+```cmake
+if(BUILD_TESTING)
+  find_package(ament_cmake_gtest REQUIRED)
+
+  ament_add_gtest(test_rotation3
+    test/test_rotation3.cpp
+  )
+
+  target_link_libraries(test_rotation3
+    ${PROJECT_NAME}
+  )
+endif()
+```
+
+`test_rotation3.cpp` is compiled independently from `rotation3.cpp`. Its declarations come from the installed-style public headers, while the function definitions come from linking `test_rotation3` with the `rigid_body_kinematics` library target. This is why changing a C++ test requires an incremental rebuild before the new test can run.
+
+### What `colcon build` does
+
+From the workspace root, the focused command is
+
+```bash
+source /opt/ros/jazzy/setup.zsh
+
+colcon build \
+  --packages-select rigid_body_kinematics \
+  --symlink-install
+```
+
+Sourcing the ROS 2 installation makes the Jazzy build tools and installed dependencies discoverable. Colcon then identifies `rigid_body_kinematics` as an `ament_cmake` package, invokes CMake configuration, builds the requested targets, and runs the CMake installation rules. The default workspace layout separates three kinds of result:
+
+```text
+ros_ws/
+├── src/       source packages edited by the developer
+├── build/     CMake state, object files, test executables, and other intermediates
+├── install/   installed libraries, headers, metadata, and environment hooks
+└── log/       command output and event records from colcon invocations
+```
+
+`--symlink-install` asks colcon to use symbolic links instead of copies where the package and platform permit it. It does not remove the C++ compile or link steps: changed `.cpp` files and tests still need to be rebuilt.
+
+### Install: create the consumer-facing file layout
+
+Building creates artifacts in CMake's working area. Installation selects the finished artifacts and places them in a predictable package layout:
+
+```cmake
+install(
+  TARGETS ${PROJECT_NAME}
+  EXPORT export_${PROJECT_NAME}
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+)
+
+install(
+  DIRECTORY include/
+  DESTINATION include/
+)
+```
+
+`TARGETS` installs the compiled target. `ARCHIVE DESTINATION lib` places the current static `.a` library under `lib/`; `LIBRARY` provides the corresponding location if the target becomes a shared library; and `RUNTIME` covers executable or platform-specific run-time artifacts. The second command installs the complete public header tree.
+
+After the focused build, the important installed files have this shape:
+
+```text
+install/rigid_body_kinematics/
+├── include/rigid_body_kinematics/
+│   ├── geometry_error.hpp
+│   ├── numerical_policy.hpp
+│   └── rotation3.hpp
+├── lib/
+│   └── librigid_body_kinematics.a
+└── share/rigid_body_kinematics/
+    ├── cmake/             generated package and target metadata
+    ├── package.xml
+    └── environment hooks
+```
+
+The `build/` tree is CMake's private workspace and may contain temporary or generator-specific paths. The `install/` tree is the stable boundary intended for consumers. In short, **build creates the binary; install places the binary, headers, and metadata in their reusable locations**.
+
+### Export: teach another package how to use the installation
+
+Physical files under `include/` and `lib/` are not enough. A downstream CMake package also needs to know the target name, header path, library location, required C++ features, and public dependencies. The export rules generate and install that information:
+
+```cmake
+ament_export_targets(
+  export_${PROJECT_NAME}
+  HAS_LIBRARY_TARGET
+)
+
+ament_export_dependencies(
+  eigen3_cmake_module
+  Eigen3
+)
+
+ament_package()
+```
+
+The earlier `EXPORT export_${PROJECT_NAME}` inside `install(TARGETS ...)` places the installed library in an export set. `ament_export_targets(...)` exposes that set through the package's generated CMake configuration. `ament_export_dependencies(...)` records the public Eigen dependency so it can be found for downstream consumers. Finally, `ament_package()` generates and installs the ament package metadata and must appear after the other ament export declarations.
+
+After the workspace installation has been sourced, another CMake package can consume the library through its exported target:
+
+```cmake
+find_package(rigid_body_kinematics REQUIRED)
+
+add_executable(example_consumer
+  src/example_consumer.cpp
+)
+
+target_link_libraries(example_consumer
+  PRIVATE
+    rigid_body_kinematics::rigid_body_kinematics
+)
+```
+
+`find_package` loads the installed configuration. Linking the namespaced target gives `example_consumer` the installed header path, the static library location, the C++17 requirement, and the public Eigen dependency recorded by the export. The consumer does not hard-code a source checkout path or search manually for `librigid_body_kinematics.a`.
+
+Exporting does not upload or publish the library, and it does not copy the library into the downstream source tree. It creates installed CMake metadata that describes how another configured build should compile and link against the package. The complete mental model is therefore: **build creates compiled artifacts; install creates the reusable file layout; export publishes the target's usage information inside that installation**.
+
+The target, installation, and export behaviour described here follows the official [CMake `add_library` documentation](https://cmake.org/cmake/help/latest/command/add_library.html), [CMake `install` documentation](https://cmake.org/cmake/help/latest/command/install.html), [ROS 2 ament CMake guidance](https://docs.ros.org/en/jazzy/How-To-Guides.html), and [colcon workspace description](https://colcon.readthedocs.io/en/released/user/what-is-a-workspace.html).
+
+## Validated rotations and free-vector action {#sec-spatial-kernel-rotation3}
+
+This implementation block answers two connected questions: how can the library prevent an arbitrary $3\times3$ array from being mistaken for a rotation, and how can a validated rotation re-express a free-vector column without adding translation? The mathematical requirements come from the definition of $SO(3)$ in @sec-so3-definition. The implementation uses fixed-size Eigen columns and matrices with IEEE 754 binary64 entries, represented in C++ by `Eigen::Vector3d` and `Eigen::Matrix3d`.
+
+### Mathematical contract
+
+A dimensionless matrix $\mathbf R_{ab}\in\mathbb R^{3\times3}$ represents the orientation of frame $\{b\}$ relative to frame $\{a\}$ only if
+
+$$
+\mathbf R_{ab}^{\mathsf T}\mathbf R_{ab}=\mathbf I_3,
+\qquad
+\det(\mathbf R_{ab})=1.
+$$
+
+The first condition requires unit, mutually perpendicular columns. It is also satisfied by a reflection, so the determinant condition is required to select a proper right-handed rotation. The implementation tests the floating-point residuals
+
+$$
+e_{\mathrm{orth}}
+=
+\left\|
+\mathbf R_{ab}^{\mathsf T}\mathbf R_{ab}-\mathbf I_3
+\right\|_{F},
+\qquad
+e_{\det}
+=
+\left|
+\det(\mathbf R_{ab})-1
+\right|,
+$$
+
+against the dimensionless policy values `orthogonality_tolerance` and `determinant_tolerance`. Equality with a tolerance is accepted because rejection uses a strict `>` comparison. Acceptance does not project, orthogonalise, or otherwise change the supplied entries.
+
+For a free vector, the validated matrix performs only the coordinate change recalled in @sec-se3-point-transformation:
+
+$$
+{}^{a}\mathbf v
+=
+\mathbf R_{ab}\,{}^{b}\mathbf v.
+$$
+
+The input column ${}^{b}\mathbf v$ contains components expressed along frame $\{b\}$, and the output column ${}^{a}\mathbf v$ contains components of the same free vector expressed along frame $\{a\}$. Rotation preserves the vector's physical units. Translation is absent because a free vector has no point of application.
+
+### The complete class design
+
+The complete `Rotation3` declaration is short enough to read as one unit:
+
+```cpp
+class Rotation3
+{
+public:
+    // Create identity rotation.
+    static Rotation3 identity();
+
+    // Create a rotation after validating the supplied matrix.
+    static Rotation3 from_matrix(
+        const Eigen::Matrix3d &matrix,
+        const NumericalPolicy &policy = NumericalPolicy{});
+
+    // Apply this rotation to a free vector.
+    [[nodiscard]] Eigen::Vector3d rotate_vector(
+        const Eigen::Vector3d &vector_b) const;
+
+private:
+    // Store a matrix that has already passed validation.
+    explicit Rotation3(const Eigen::Matrix3d &matrix);
+
+    Eigen::Matrix3d matrix_;
+};
+```
+
+The `public` part lists what a caller may do. `identity()` constructs the identity rotation, `from_matrix()` validates an external matrix before constructing a rotation, and `rotate_vector()` applies the stored matrix to a free-vector column. Both construction operations are `static`, so they are called on the class, for example `Rotation3::from_matrix(matrix_ab)`, rather than on an existing rotation object.
+
+The `private` constructor is the key safety choice. Only the class's own functions may call `Rotation3(matrix)`, so ordinary callers cannot place an unchecked matrix directly into `matrix_`. The word `explicit` prevents C++ from silently converting an `Eigen::Matrix3d` into a `Rotation3`. The trailing underscore in `matrix_` is a naming convention indicating a data member stored inside each object.
+
+The parameter type `const Eigen::Matrix3d &` passes the existing matrix without copying it and prevents the function from changing it. The default argument `NumericalPolicy{}` constructs a policy containing the default tolerances when the caller supplies no policy. The same `const &` form is used for the input vector. The final `const` in `rotate_vector(...) const` prevents the operation from changing `matrix_`, while `[[nodiscard]]` asks the compiler to warn if the caller ignores the returned vector.
+
+### Numerical policy and error types
+
+The two tolerances needed by this block are stored together:
+
+```cpp
+struct NumericalPolicy
+{
+    double orthogonality_tolerance{1.0e-12};
+    double determinant_tolerance{1.0e-12};
+};
+```
+
+A `struct` is used because these two values are simple public settings. The braces after each member give the default value used by `NumericalPolicy{}`. Both values are dimensionless because they are compared with dimensionless rotation residuals.
+
+Failures contain both a category that code can test and a message that a person can read:
+
+```cpp
+enum class GeometryError
+{
+    non_finite,
+    invalid_rotation,
+    invalid_policy,
+    unsupported_magnitude
+};
+
+class GeometryException : public std::runtime_error
+{
+public:
+    GeometryException(GeometryError code, const char *message)
+        : std::runtime_error(message), code_(code)
+    {
+    }
+
+    [[nodiscard]] GeometryError code() const noexcept
+    {
+        return code_;
+    }
+
+private:
+    GeometryError code_;
+};
+```
+
+`enum class` keeps the names inside the `GeometryError` scope, producing names such as `GeometryError::invalid_rotation`, and prevents their accidental use as unrelated integers. `GeometryException : public std::runtime_error` means that `GeometryException` is a specialised standard run-time exception. The constructor initialiser list passes `message` to the `std::runtime_error` part and stores `code` in `code_`. A caller reads the message with `what()` and reads the category with `code()`. The final `noexcept` promises that reading the category will not throw another exception.
+
+The four categories have distinct meanings:
+
+- `invalid_policy`: a rotation tolerance is negative or non-finite; policy validation occurs before matrix validation.
+- `non_finite`: a supplied matrix or free-vector component is `NaN` or infinity.
+- `invalid_rotation`: finite residuals show that the matrix violates orthogonality or the proper-determinant condition.
+- `unsupported_magnitude`: finite inputs cause a required intermediate or output to leave the finite binary64 range.
+
+When `GeometryException` is thrown, construction or vector rotation stops and returns no geometric value.
+
+### Complete `from_matrix` implementation
+
+The complete function shows the validation order directly:
+
+```cpp
+Rotation3 Rotation3::from_matrix(
+    const Eigen::Matrix3d &matrix,
+    const NumericalPolicy &policy)
+{
+    const bool policy_is_valid =
+        std::isfinite(policy.orthogonality_tolerance) &&
+        std::isfinite(policy.determinant_tolerance) &&
+        policy.orthogonality_tolerance >= 0.0 &&
+        policy.determinant_tolerance >= 0.0;
+
+    if (!policy_is_valid)
+    {
+        throw GeometryException(
+            GeometryError::invalid_policy,
+            "Rotation tolerance must be finite and non-negative.");
+    }
+
+    if (!matrix.allFinite())
+    {
+        throw GeometryException(
+            GeometryError::non_finite,
+            "Rotation matrix entries must be finite.");
+    }
+
+    const Eigen::Matrix3d orthogonality_error =
+        matrix.transpose() * matrix - Eigen::Matrix3d::Identity();
+
+    const double orthogonality_residual =
+        orthogonality_error.reshaped().stableNorm();
+
+    const double determinant = matrix.determinant();
+
+    if (!std::isfinite(orthogonality_residual) ||
+        !std::isfinite(determinant))
+    {
+        throw GeometryException(
+            GeometryError::unsupported_magnitude,
+            "Rotation validation produced a non-finite result.");
+    }
+
+    const double determinant_error = std::abs(determinant - 1.0);
+
+    if (orthogonality_residual > policy.orthogonality_tolerance ||
+        determinant_error > policy.determinant_tolerance)
+    {
+        throw GeometryException(
+            GeometryError::invalid_rotation,
+            "Matrix does not satisfy the SO(3) conditions.");
+    }
+
+    return Rotation3(matrix);
+}
+```
+
+The name before `::` identifies the class that owns the function: the first `Rotation3` is the return type, while `Rotation3::from_matrix` is the function's full name. The default policy appears only in the class declaration; callers use that default, but the function definition receives an ordinary `policy` reference.
+
+The function proceeds in four concrete stages. First, `std::isfinite` and the comparisons with zero validate both tolerances. Second, `matrix.allFinite()` checks all nine input entries before matrix arithmetic begins. Third, `transpose()`, matrix multiplication, `Identity()`, `stableNorm()`, and `determinant()` calculate $e_{\mathrm{orth}}$ and the determinant needed for $e_{\det}$. Fourth, the two residual comparisons either throw `invalid_rotation` or allow the private constructor to store the matrix.
+
+The intermediate finiteness check is separate from input finiteness. A matrix may contain only finite entries while products used by $\mathbf R^{\mathsf T}\mathbf R$ or $\det(\mathbf R)$ overflow. Such a calculation fails as `unsupported_magnitude`, not as `non_finite`, because the caller supplied finite entries.
+
+Eigen 3.4.0's direct matrix form `orthogonality_error.stableNorm()` triggered an internal block-index assertion in the project environment. Reshaping the nine entries into a vector selects Eigen's vector implementation. This substitution preserves the required quantity because the Euclidean norm of the vectorised entries equals the matrix Frobenius norm:
+
+$$
+\left\|\operatorname{vec}(\mathbf E)\right\|_2
+=
+\left\|\mathbf E\right\|_F.
+$$
+
+### Complete `rotate_vector` implementation
+
+Once construction has established that `matrix_` is an accepted rotation, the second operation checks its vector input, performs the reviewed matrix--column product, and checks the output:
+
+```cpp
+Eigen::Vector3d Rotation3::rotate_vector(
+    const Eigen::Vector3d &vector_b) const
+{
+    if (!vector_b.allFinite())
+    {
+        throw GeometryException(
+            GeometryError::non_finite,
+            "Free-vector components must be finite.");
+    }
+
+    const Eigen::Vector3d vector_a = matrix_ * vector_b;
+
+    if (!vector_a.allFinite())
+    {
+        throw GeometryException(
+            GeometryError::unsupported_magnitude,
+            "Rotated free vector is outside the finite numerical range.");
+    }
+
+    return vector_a;
+}
+```
+
+The expression `matrix_ * vector_b` is the direct code form of ${}^{a}\mathbf v=\mathbf R_{ab}{}^{b}\mathbf v$. If an input component is already `NaN` or infinity, the function throws `non_finite` before multiplication. If every input component is finite but the multiplication produces a non-finite component, the function throws `unsupported_magnitude`. Otherwise, `return vector_a;` gives the caller the re-expressed vector column.
+
+### Analytic example and focused tests
+
+The normal non-identity fixture uses the dimensionless quarter-turn matrix
+
+$$
+\mathbf R_{ab}
+=
+\begin{bmatrix}
+0&-1&0\\
+1&0&0\\
+0&0&1
+\end{bmatrix}
+$$
+
+and the free-vector input ${}^{b}\mathbf v=[1\;0\;0]^{\mathsf T}\,\mathrm m$. The expected output is ${}^{a}\mathbf v=[0\;1\;0]^{\mathsf T}\,\mathrm m$, calculated independently by matrix--column multiplication.
+
+The focused GTest executable protects the governing behaviour with nine deterministic cases: identity leaves a vector unchanged; the quarter-turn produces the analytic result; a reflection isolates the determinant requirement; a shear isolates the orthogonality requirement; `NaN` matrix input returns `non_finite`; a negative tolerance is rejected before an invalid matrix is inspected; finite matrix entries whose validation overflows return `unsupported_magnitude`; an infinite free-vector component returns `non_finite`; and finite vector components whose rotated output overflows return `unsupported_magnitude`.
+
+### Deliberate limits
+
+`Eigen::Matrix3d` fixes the matrix shape at compile time, so this entry point cannot receive a wrong-shaped dynamic array; a future external-array adapter must own shape validation. `Rotation3` does not store frame names or physical units, so call sites must preserve the $\mathbf R_{ab}$, ${}^{b}\mathbf v$, and ${}^{a}\mathbf v$ relationship through their variable and interface contracts. The tolerance test admits a bounded residual but never repairs the matrix. Point transformation remains a separate operation because adding translation to a free vector would change the represented physical object.

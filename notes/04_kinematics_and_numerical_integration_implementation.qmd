@@ -1,5 +1,7 @@
 # Differential-Drive Kinematics and Numerical Integration: Implementation {#sec-kinematics-integration-implementation}
 
+The code explained in this companion is in [`ros_ws/src/differential_drive_motion_model`]({{< var repository-url >}}/tree/{{< var repository-branch >}}/ros_ws/src/differential_drive_motion_model).
+
 ## Purpose and scope {.unnumbered}
 
 This companion translates the differential-drive mathematics derived in [Differential-Drive Kinematics and Numerical Integration: Model and Derivation](03_kinematics_and_numerical_integration.qmd) into reusable software contracts, invariants, validation rules, and tests. It records how those equations map into dependable software without repeating the derivations.

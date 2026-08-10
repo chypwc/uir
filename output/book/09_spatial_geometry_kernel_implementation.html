@@ -23,6 +23,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -395,8 +430,33 @@ window.Quarto = {
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#sec-spatial-kernel-cpp-cmake-ament" id="toc-sec-spatial-kernel-cpp-cmake-ament" class="nav-link active" data-scroll-target="#sec-spatial-kernel-cpp-cmake-ament"><span class="header-section-number">9.1</span> From C++ source to a reusable ROS 2 library</a>
+  <ul class="collapse">
+  <li><a href="#the-roles-of-c-cmake-ament-and-colcon" id="toc-the-roles-of-c-cmake-ament-and-colcon" class="nav-link" data-scroll-target="#the-roles-of-c-cmake-ament-and-colcon"><span class="header-section-number">9.1.1</span> The roles of C++, CMake, ament, and colcon</a></li>
+  <li><a href="#what-compile-and-link-mean" id="toc-what-compile-and-link-mean" class="nav-link" data-scroll-target="#what-compile-and-link-mean"><span class="header-section-number">9.1.2</span> What compile and link mean</a></li>
+  <li><a href="#the-cmake-library-target" id="toc-the-cmake-library-target" class="nav-link" data-scroll-target="#the-cmake-library-target"><span class="header-section-number">9.1.3</span> The CMake library target</a></li>
+  <li><a href="#the-test-is-another-compiled-target" id="toc-the-test-is-another-compiled-target" class="nav-link" data-scroll-target="#the-test-is-another-compiled-target"><span class="header-section-number">9.1.4</span> The test is another compiled target</a></li>
+  <li><a href="#what-colcon-build-does" id="toc-what-colcon-build-does" class="nav-link" data-scroll-target="#what-colcon-build-does"><span class="header-section-number">9.1.5</span> What <code>colcon build</code> does</a></li>
+  <li><a href="#install-create-the-consumer-facing-file-layout" id="toc-install-create-the-consumer-facing-file-layout" class="nav-link" data-scroll-target="#install-create-the-consumer-facing-file-layout"><span class="header-section-number">9.1.6</span> Install: create the consumer-facing file layout</a></li>
+  <li><a href="#export-teach-another-package-how-to-use-the-installation" id="toc-export-teach-another-package-how-to-use-the-installation" class="nav-link" data-scroll-target="#export-teach-another-package-how-to-use-the-installation"><span class="header-section-number">9.1.7</span> Export: teach another package how to use the installation</a></li>
+  </ul></li>
+  <li><a href="#sec-spatial-kernel-rotation3" id="toc-sec-spatial-kernel-rotation3" class="nav-link" data-scroll-target="#sec-spatial-kernel-rotation3"><span class="header-section-number">9.2</span> Validated rotations and free-vector action</a>
+  <ul class="collapse">
+  <li><a href="#mathematical-contract" id="toc-mathematical-contract" class="nav-link" data-scroll-target="#mathematical-contract"><span class="header-section-number">9.2.1</span> Mathematical contract</a></li>
+  <li><a href="#the-complete-class-design" id="toc-the-complete-class-design" class="nav-link" data-scroll-target="#the-complete-class-design"><span class="header-section-number">9.2.2</span> The complete class design</a></li>
+  <li><a href="#numerical-policy-and-error-types" id="toc-numerical-policy-and-error-types" class="nav-link" data-scroll-target="#numerical-policy-and-error-types"><span class="header-section-number">9.2.3</span> Numerical policy and error types</a></li>
+  <li><a href="#complete-from_matrix-implementation" id="toc-complete-from_matrix-implementation" class="nav-link" data-scroll-target="#complete-from_matrix-implementation"><span class="header-section-number">9.2.4</span> Complete <code>from_matrix</code> implementation</a></li>
+  <li><a href="#complete-rotate_vector-implementation" id="toc-complete-rotate_vector-implementation" class="nav-link" data-scroll-target="#complete-rotate_vector-implementation"><span class="header-section-number">9.2.5</span> Complete <code>rotate_vector</code> implementation</a></li>
+  <li><a href="#analytic-example-and-focused-tests" id="toc-analytic-example-and-focused-tests" class="nav-link" data-scroll-target="#analytic-example-and-focused-tests"><span class="header-section-number">9.2.6</span> Analytic example and focused tests</a></li>
+  <li><a href="#deliberate-limits" id="toc-deliberate-limits" class="nav-link" data-scroll-target="#deliberate-limits"><span class="header-section-number">9.2.7</span> Deliberate limits</a></li>
+  </ul></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -404,7 +464,7 @@ window.Quarto = {
 
 <header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./01_linear_algebra_foundations.html"><span>Part I:</span> Motion, Mechanics, and Control</a></li><li class="breadcrumb-item"><a href="./09_spatial_geometry_kernel_implementation.html"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Spatial Geometry Kernel Implementation</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Spatial Geometry Kernel Implementation</span></h1>
+<h1 class="title"><span id="sec-spatial-geometry-kernel-implementation" class="quarto-section-identifier"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Spatial Geometry Kernel Implementation</span></span></h1>
 </div>
 
 
@@ -421,8 +481,430 @@ window.Quarto = {
 </header>
 
 
+<p>The code explained in this companion is in <a href="https://github.com/chypwc/robotics-learning-lab/tree/main/ros_ws/src/rigid_body_kinematics"><code>ros_ws/src/rigid_body_kinematics</code></a>. Public headers are under <a href="https://github.com/chypwc/robotics-learning-lab/tree/main/ros_ws/src/rigid_body_kinematics/include/rigid_body_kinematics"><code>include/rigid_body_kinematics/</code></a>, compiled implementations are under <a href="https://github.com/chypwc/robotics-learning-lab/tree/main/ros_ws/src/rigid_body_kinematics/src"><code>src/</code></a>, and deterministic GTests are under <a href="https://github.com/chypwc/robotics-learning-lab/tree/main/ros_ws/src/rigid_body_kinematics/test"><code>test/</code></a>.</p>
+<section id="sec-spatial-kernel-cpp-cmake-ament" class="level2" data-number="9.1">
+<h2 data-number="9.1" class="anchored" data-anchor-id="sec-spatial-kernel-cpp-cmake-ament"><span class="header-section-number">9.1</span> From C++ source to a reusable ROS 2 library</h2>
+<p>The <code>Rotation3</code> code becomes useful to another program only after the compiler converts it to machine code, the build system packages that code as a library, and the installed package tells downstream software where to find the library and its headers. This section follows that complete path through the actual <code>rigid_body_kinematics</code> package.</p>
+<section id="the-roles-of-c-cmake-ament-and-colcon" class="level3" data-number="9.1.1">
+<h3 data-number="9.1.1" class="anchored" data-anchor-id="the-roles-of-c-cmake-ament-and-colcon"><span class="header-section-number">9.1.1</span> The roles of C++, CMake, ament, and colcon</h3>
+<p>These tools act at different layers:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 9%">
+<col style="width: 90%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Layer</th>
+<th>Concrete role in this package</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>C++ compiler</td>
+<td>Reads <code>rotation3.cpp</code> and the headers it includes, checks the language rules and types, and produces an object file containing machine code.</td>
+</tr>
+<tr class="even">
+<td>Archiver and linker</td>
+<td>The archiver collects object files into the static library; the linker combines the test object file, the library, and GoogleTest into the <code>test_rotation3</code> executable.</td>
+</tr>
+<tr class="odd">
+<td>CMake</td>
+<td>Reads <code>CMakeLists.txt</code>, creates named targets, records how each target is compiled and linked, and generates the lower-level build and installation rules.</td>
+</tr>
+<tr class="even">
+<td><code>ament_cmake</code></td>
+<td>Adds ROS 2 package conventions to CMake, including GoogleTest registration, package metadata generation, dependency export, and downstream package discovery.</td>
+</tr>
+<tr class="odd">
+<td>colcon</td>
+<td>Finds packages in the workspace, invokes each package’s configured build type in dependency order, runs its installation rules, and stores workspace-level build, install, and log results.</td>
+</tr>
+</tbody>
+</table>
+<p>Using <code>ament_cmake</code> does not make the mathematical library a ROS 2 node. The core target does not link <code>rclcpp</code>, create publishers or subscribers, or depend on ROS middleware at run time. It is a ROS 2 package because <code>package.xml</code> declares the <code>ament_cmake</code> build type and because colcon and ament manage its build and discovery.</p>
+<p><code>package.xml</code> and <code>CMakeLists.txt</code> therefore answer different questions. <code>package.xml</code> declares the package name, version, licence, build type, and named dependencies to ROS 2 workspace tools. <code>CMakeLists.txt</code> gives CMake the concrete rules for creating, testing, installing, and exporting C++ targets.</p>
+</section>
+<section id="what-compile-and-link-mean" class="level3" data-number="9.1.2">
+<h3 data-number="9.1.2" class="anchored" data-anchor-id="what-compile-and-link-mean"><span class="header-section-number">9.1.2</span> What compile and link mean</h3>
+<p>The public header and source file have different jobs:</p>
+<ul>
+<li><code>rotation3.hpp</code> contains declarations that tell another source file which C++ types and operations exist.</li>
+<li><code>rotation3.cpp</code> contains the out-of-class function definitions that supply the compiled implementation.</li>
+</ul>
+<p>The header is included as source text wherever its declarations are needed. The compiler separately converts each <code>.cpp</code> file into an object file, conventionally ending in <code>.o</code>. An object file contains machine code and symbol information, but it is not yet the reusable package interface or a runnable program.</p>
+<p>For the present package, the concrete paths are</p>
+<pre class="text"><code>include/rigid_body_kinematics/rotation3.hpp
+                         │ included while compiling
+                         ↓
+src/rotation3.cpp ── compile ──&gt; rotation3.cpp.o
+                                      │
+                                      │ archive
+                                      ↓
+                         librigid_body_kinematics.a
+
+test/test_rotation3.cpp ── compile ──&gt; test_rotation3.cpp.o
+                                      │
+                                      │ link with the static library
+                                      │ and GoogleTest
+                                      ↓
+                                test_rotation3</code></pre>
+<p>The extension <code>.a</code> means a static library archive. When a later executable links this library, the linker incorporates the required compiled library code into that executable. A shared Linux library would normally end in <code>.so</code> and would remain a separate run-time file. The configured package produces <code>librigid_body_kinematics.a</code>; it does not presently produce a <code>.so</code>.</p>
+<p>This split also explains two common error families. A compiler error means that one source file could not be translated, for example because a type is unknown or a semicolon is missing. An <code>undefined reference</code> from the linker means the declaration was sufficient to compile a call, but no linked object or library supplied the required compiled definition.</p>
+</section>
+<section id="the-cmake-library-target" class="level3" data-number="9.1.3">
+<h3 data-number="9.1.3" class="anchored" data-anchor-id="the-cmake-library-target"><span class="header-section-number">9.1.3</span> The CMake library target</h3>
+<p><code>CMakeLists.txt</code> is not C++ and is not compiled into the library. CMake reads it during the configure step and generates a build graph. The package begins by naming the project and locating its build-time dependencies:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode cmake code-with-copy"><code class="sourceCode cmake"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">project</span>(rigid_body_kinematics <span class="ot">LANGUAGES</span> <span class="ot">CXX</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="kw">find_package</span>(ament_cmake <span class="ot">REQUIRED</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="kw">find_package</span>(eigen3_cmake_module <span class="ot">REQUIRED</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="kw">find_package</span>(Eigen3 <span class="ot">REQUIRED</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>find_package(...)</code> asks CMake to locate the named package and load the CMake information it provides. <code>REQUIRED</code> makes configuration fail immediately if that dependency cannot be found.</p>
+<p>The library itself is a CMake <strong>target</strong>, meaning a named build product together with the rules and requirements attached to it:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode cmake code-with-copy"><code class="sourceCode cmake"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">add_library</span>(<span class="dv">${PROJECT_NAME}</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="bn">src</span>/rotation3.cpp</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="kw">add_library</span>(<span class="dv">${PROJECT_NAME}</span>::<span class="dv">${PROJECT_NAME}</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="bn">ALIAS</span> <span class="dv">${PROJECT_NAME}</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>${PROJECT_NAME}</code> expands to <code>rigid_body_kinematics</code>. The first command creates the library target from <code>rotation3.cpp</code>. The second creates the namespaced build-tree name <code>rigid_body_kinematics::rigid_body_kinematics</code> for the same target. The <code>name::name</code> form makes a library target visually distinct from a filename or a loose linker flag.</p>
+<p>The target’s compilation and usage requirements are then attached to that same name:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode cmake code-with-copy"><code class="sourceCode cmake"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">target_compile_features</span>(<span class="dv">${PROJECT_NAME}</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="bn">PUBLIC</span> <span class="ot">cxx_std_17</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="kw">target_compile_options</span>(<span class="dv">${PROJECT_NAME}</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="bn">PRIVATE</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"</span><span class="ot">$&lt;$&lt;</span><span class="kw">COMPILE_LANG_AND_ID</span><span class="ot">:CXX,GNU,Clang&gt;:-Wall;-Wextra;-Wpedantic&gt;</span><span class="st">"</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="kw">target_include_directories</span>(<span class="dv">${PROJECT_NAME}</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>  <span class="bn">PUBLIC</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    <span class="ot">$&lt;</span><span class="kw">BUILD_INTERFACE</span><span class="ot">:</span><span class="dv">${CMAKE_CURRENT_SOURCE_DIR}</span><span class="ot">/include&gt;</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    <span class="ot">$&lt;</span><span class="kw">INSTALL_INTERFACE</span><span class="ot">:include&gt;</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="kw">target_link_libraries</span>(<span class="dv">${PROJECT_NAME}</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>  <span class="bn">PUBLIC</span> <span class="bn">Eigen3::Eigen</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>PUBLIC</code> means that a setting is needed both to build this library and to compile a target that uses its public interface. C++17 is public, and the public headers expose Eigen types, so the Eigen imported target and the header search location must reach consumers. <code>PRIVATE</code> means that a setting applies only while building this library; the warning flags do not have to be imposed on every downstream package.</p>
+<p>The two include interfaces solve the same header-search problem in two locations. While the library is being built, the headers live under the source package’s <code>include/</code> directory, so <code>BUILD_INTERFACE</code> supplies that path. After installation, a consumer must not depend on the original source checkout, so <code>INSTALL_INTERFACE</code> supplies the installed <code>include/</code> path instead.</p>
+<p>Although Eigen is mainly a header-defined library, <code>target_link_libraries(... PUBLIC Eigen3::Eigen)</code> is still the target-based CMake spelling. <code>Eigen3::Eigen</code> carries the include paths and other usage requirements that CMake must propagate; this command does not imply that Eigen contributes a separate <code>.so</code> to this target.</p>
+</section>
+<section id="the-test-is-another-compiled-target" class="level3" data-number="9.1.4">
+<h3 data-number="9.1.4" class="anchored" data-anchor-id="the-test-is-another-compiled-target"><span class="header-section-number">9.1.4</span> The test is another compiled target</h3>
+<p>When <code>BUILD_TESTING</code> is enabled, ament creates a separate test executable and CMake links it with the library:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode cmake code-with-copy"><code class="sourceCode cmake"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="dv">BUILD_TESTING</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">find_package</span>(ament_cmake_gtest <span class="ot">REQUIRED</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ament_add_gtest</span>(test_rotation3</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    test/test_rotation3.cpp</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  <span class="kw">target_link_libraries</span>(<span class="bn">test_rotation3</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="dv">${PROJECT_NAME}</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="cf">endif</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>test_rotation3.cpp</code> is compiled independently from <code>rotation3.cpp</code>. Its declarations come from the installed-style public headers, while the function definitions come from linking <code>test_rotation3</code> with the <code>rigid_body_kinematics</code> library target. This is why changing a C++ test requires an incremental rebuild before the new test can run.</p>
+</section>
+<section id="what-colcon-build-does" class="level3" data-number="9.1.5">
+<h3 data-number="9.1.5" class="anchored" data-anchor-id="what-colcon-build-does"><span class="header-section-number">9.1.5</span> What <code>colcon build</code> does</h3>
+<p>From the workspace root, the focused command is</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="bu">source</span> /opt/ros/jazzy/setup.zsh</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="ex">colcon</span> build <span class="dt">\</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">--packages-select</span> rigid_body_kinematics <span class="dt">\</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">--symlink-install</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Sourcing the ROS 2 installation makes the Jazzy build tools and installed dependencies discoverable. Colcon then identifies <code>rigid_body_kinematics</code> as an <code>ament_cmake</code> package, invokes CMake configuration, builds the requested targets, and runs the CMake installation rules. The default workspace layout separates three kinds of result:</p>
+<pre class="text"><code>ros_ws/
+├── src/       source packages edited by the developer
+├── build/     CMake state, object files, test executables, and other intermediates
+├── install/   installed libraries, headers, metadata, and environment hooks
+└── log/       command output and event records from colcon invocations</code></pre>
+<p><code>--symlink-install</code> asks colcon to use symbolic links instead of copies where the package and platform permit it. It does not remove the C++ compile or link steps: changed <code>.cpp</code> files and tests still need to be rebuilt.</p>
+</section>
+<section id="install-create-the-consumer-facing-file-layout" class="level3" data-number="9.1.6">
+<h3 data-number="9.1.6" class="anchored" data-anchor-id="install-create-the-consumer-facing-file-layout"><span class="header-section-number">9.1.6</span> Install: create the consumer-facing file layout</h3>
+<p>Building creates artifacts in CMake’s working area. Installation selects the finished artifacts and places them in a predictable package layout:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode cmake code-with-copy"><code class="sourceCode cmake"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">install</span>(</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="ot">TARGETS</span> <span class="dv">${PROJECT_NAME}</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="ot">EXPORT</span> export_<span class="dv">${PROJECT_NAME}</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="ot">ARCHIVE</span> <span class="ot">DESTINATION</span> lib</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="ot">LIBRARY</span> <span class="ot">DESTINATION</span> lib</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  <span class="ot">RUNTIME</span> <span class="ot">DESTINATION</span> bin</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="kw">install</span>(</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  <span class="ot">DIRECTORY</span> include/</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>  <span class="ot">DESTINATION</span> include/</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>TARGETS</code> installs the compiled target. <code>ARCHIVE DESTINATION lib</code> places the current static <code>.a</code> library under <code>lib/</code>; <code>LIBRARY</code> provides the corresponding location if the target becomes a shared library; and <code>RUNTIME</code> covers executable or platform-specific run-time artifacts. The second command installs the complete public header tree.</p>
+<p>After the focused build, the important installed files have this shape:</p>
+<pre class="text"><code>install/rigid_body_kinematics/
+├── include/rigid_body_kinematics/
+│   ├── geometry_error.hpp
+│   ├── numerical_policy.hpp
+│   └── rotation3.hpp
+├── lib/
+│   └── librigid_body_kinematics.a
+└── share/rigid_body_kinematics/
+    ├── cmake/             generated package and target metadata
+    ├── package.xml
+    └── environment hooks</code></pre>
+<p>The <code>build/</code> tree is CMake’s private workspace and may contain temporary or generator-specific paths. The <code>install/</code> tree is the stable boundary intended for consumers. In short, <strong>build creates the binary; install places the binary, headers, and metadata in their reusable locations</strong>.</p>
+</section>
+<section id="export-teach-another-package-how-to-use-the-installation" class="level3" data-number="9.1.7">
+<h3 data-number="9.1.7" class="anchored" data-anchor-id="export-teach-another-package-how-to-use-the-installation"><span class="header-section-number">9.1.7</span> Export: teach another package how to use the installation</h3>
+<p>Physical files under <code>include/</code> and <code>lib/</code> are not enough. A downstream CMake package also needs to know the target name, header path, library location, required C++ features, and public dependencies. The export rules generate and install that information:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode cmake code-with-copy"><code class="sourceCode cmake"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ament_export_targets</span>(</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  export_<span class="dv">${PROJECT_NAME}</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  HAS_LIBRARY_TARGET</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="fu">ament_export_dependencies</span>(</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  eigen3_cmake_module</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  Eigen3</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="fu">ament_package</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The earlier <code>EXPORT export_${PROJECT_NAME}</code> inside <code>install(TARGETS ...)</code> places the installed library in an export set. <code>ament_export_targets(...)</code> exposes that set through the package’s generated CMake configuration. <code>ament_export_dependencies(...)</code> records the public Eigen dependency so it can be found for downstream consumers. Finally, <code>ament_package()</code> generates and installs the ament package metadata and must appear after the other ament export declarations.</p>
+<p>After the workspace installation has been sourced, another CMake package can consume the library through its exported target:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode cmake code-with-copy"><code class="sourceCode cmake"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">find_package</span>(rigid_body_kinematics <span class="ot">REQUIRED</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="kw">add_executable</span>(<span class="bn">example_consumer</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  src/example_consumer.cpp</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="kw">target_link_libraries</span>(<span class="bn">example_consumer</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  <span class="ot">PRIVATE</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    <span class="bn">rigid_body_kinematics::rigid_body_kinematics</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>find_package</code> loads the installed configuration. Linking the namespaced target gives <code>example_consumer</code> the installed header path, the static library location, the C++17 requirement, and the public Eigen dependency recorded by the export. The consumer does not hard-code a source checkout path or search manually for <code>librigid_body_kinematics.a</code>.</p>
+<p>Exporting does not upload or publish the library, and it does not copy the library into the downstream source tree. It creates installed CMake metadata that describes how another configured build should compile and link against the package. The complete mental model is therefore: <strong>build creates compiled artifacts; install creates the reusable file layout; export publishes the target’s usage information inside that installation</strong>.</p>
+<p>The target, installation, and export behaviour described here follows the official <a href="https://cmake.org/cmake/help/latest/command/add_library.html">CMake <code>add_library</code> documentation</a>, <a href="https://cmake.org/cmake/help/latest/command/install.html">CMake <code>install</code> documentation</a>, <a href="https://docs.ros.org/en/jazzy/How-To-Guides.html">ROS 2 ament CMake guidance</a>, and <a href="https://colcon.readthedocs.io/en/released/user/what-is-a-workspace.html">colcon workspace description</a>.</p>
+</section>
+</section>
+<section id="sec-spatial-kernel-rotation3" class="level2" data-number="9.2">
+<h2 data-number="9.2" class="anchored" data-anchor-id="sec-spatial-kernel-rotation3"><span class="header-section-number">9.2</span> Validated rotations and free-vector action</h2>
+<p>This implementation block answers two connected questions: how can the library prevent an arbitrary <span class="math inline">\(3\times3\)</span> array from being mistaken for a rotation, and how can a validated rotation re-express a free-vector column without adding translation? The mathematical requirements come from the definition of <span class="math inline">\(SO(3)\)</span> in <a href="07_degrees_of_freedom_and_spatial_motion_so3_se3.html#sec-so3-definition" class="quarto-xref"><span>Section 7.2.2</span></a>. The implementation uses fixed-size Eigen columns and matrices with IEEE 754 binary64 entries, represented in C++ by <code>Eigen::Vector3d</code> and <code>Eigen::Matrix3d</code>.</p>
+<section id="mathematical-contract" class="level3" data-number="9.2.1">
+<h3 data-number="9.2.1" class="anchored" data-anchor-id="mathematical-contract"><span class="header-section-number">9.2.1</span> Mathematical contract</h3>
+<p>A dimensionless matrix <span class="math inline">\(\mathbf R_{ab}\in\mathbb R^{3\times3}\)</span> represents the orientation of frame <span class="math inline">\(\{b\}\)</span> relative to frame <span class="math inline">\(\{a\}\)</span> only if</p>
+<p><span class="math display">\[
+\mathbf R_{ab}^{\mathsf T}\mathbf R_{ab}=\mathbf I_3,
+\qquad
+\det(\mathbf R_{ab})=1.
+\]</span></p>
+<p>The first condition requires unit, mutually perpendicular columns. It is also satisfied by a reflection, so the determinant condition is required to select a proper right-handed rotation. The implementation tests the floating-point residuals</p>
+<p><span class="math display">\[
+e_{\mathrm{orth}}
+=
+\left\|
+\mathbf R_{ab}^{\mathsf T}\mathbf R_{ab}-\mathbf I_3
+\right\|_{F},
+\qquad
+e_{\det}
+=
+\left|
+\det(\mathbf R_{ab})-1
+\right|,
+\]</span></p>
+<p>against the dimensionless policy values <code>orthogonality_tolerance</code> and <code>determinant_tolerance</code>. Equality with a tolerance is accepted because rejection uses a strict <code>&gt;</code> comparison. Acceptance does not project, orthogonalise, or otherwise change the supplied entries.</p>
+<p>For a free vector, the validated matrix performs only the coordinate change recalled in <a href="07_degrees_of_freedom_and_spatial_motion_so3_se3.html#sec-se3-point-transformation" class="quarto-xref"><span>Section 7.6.1</span></a>:</p>
+<p><span class="math display">\[
+{}^{a}\mathbf v
+=
+\mathbf R_{ab}\,{}^{b}\mathbf v.
+\]</span></p>
+<p>The input column <span class="math inline">\({}^{b}\mathbf v\)</span> contains components expressed along frame <span class="math inline">\(\{b\}\)</span>, and the output column <span class="math inline">\({}^{a}\mathbf v\)</span> contains components of the same free vector expressed along frame <span class="math inline">\(\{a\}\)</span>. Rotation preserves the vector’s physical units. Translation is absent because a free vector has no point of application.</p>
+</section>
+<section id="the-complete-class-design" class="level3" data-number="9.2.2">
+<h3 data-number="9.2.2" class="anchored" data-anchor-id="the-complete-class-design"><span class="header-section-number">9.2.2</span> The complete class design</h3>
+<p>The complete <code>Rotation3</code> declaration is short enough to read as one unit:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Rotation3</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span><span class="op">:</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Create identity rotation.</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">static</span> Rotation3 identity<span class="op">();</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Create a rotation after validating the supplied matrix.</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">static</span> Rotation3 from_matrix<span class="op">(</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>        <span class="at">const</span> Eigen<span class="op">::</span>Matrix3d <span class="op">&amp;</span>matrix<span class="op">,</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>        <span class="at">const</span> NumericalPolicy <span class="op">&amp;</span>policy <span class="op">=</span> NumericalPolicy<span class="op">{});</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Apply this rotation to a free vector.</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    <span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> Eigen<span class="op">::</span>Vector3d rotate_vector<span class="op">(</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>        <span class="at">const</span> Eigen<span class="op">::</span>Vector3d <span class="op">&amp;</span>vector_b<span class="op">)</span> <span class="at">const</span><span class="op">;</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a><span class="kw">private</span><span class="op">:</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Store a matrix that has already passed validation.</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">explicit</span> Rotation3<span class="op">(</span><span class="at">const</span> Eigen<span class="op">::</span>Matrix3d <span class="op">&amp;</span>matrix<span class="op">);</span></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>    Eigen<span class="op">::</span>Matrix3d <span class="va">matrix_</span><span class="op">;</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The <code>public</code> part lists what a caller may do. <code>identity()</code> constructs the identity rotation, <code>from_matrix()</code> validates an external matrix before constructing a rotation, and <code>rotate_vector()</code> applies the stored matrix to a free-vector column. Both construction operations are <code>static</code>, so they are called on the class, for example <code>Rotation3::from_matrix(matrix_ab)</code>, rather than on an existing rotation object.</p>
+<p>The <code>private</code> constructor is the key safety choice. Only the class’s own functions may call <code>Rotation3(matrix)</code>, so ordinary callers cannot place an unchecked matrix directly into <code>matrix_</code>. The word <code>explicit</code> prevents C++ from silently converting an <code>Eigen::Matrix3d</code> into a <code>Rotation3</code>. The trailing underscore in <code>matrix_</code> is a naming convention indicating a data member stored inside each object.</p>
+<p>The parameter type <code>const Eigen::Matrix3d &amp;</code> passes the existing matrix without copying it and prevents the function from changing it. The default argument <code>NumericalPolicy{}</code> constructs a policy containing the default tolerances when the caller supplies no policy. The same <code>const &amp;</code> form is used for the input vector. The final <code>const</code> in <code>rotate_vector(...) const</code> prevents the operation from changing <code>matrix_</code>, while <code>[[nodiscard]]</code> asks the compiler to warn if the caller ignores the returned vector.</p>
+</section>
+<section id="numerical-policy-and-error-types" class="level3" data-number="9.2.3">
+<h3 data-number="9.2.3" class="anchored" data-anchor-id="numerical-policy-and-error-types"><span class="header-section-number">9.2.3</span> Numerical policy and error types</h3>
+<p>The two tolerances needed by this block are stored together:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> NumericalPolicy</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">double</span> orthogonality_tolerance<span class="op">{</span><span class="fl">1.0e-12</span><span class="op">};</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">double</span> determinant_tolerance<span class="op">{</span><span class="fl">1.0e-12</span><span class="op">};</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>A <code>struct</code> is used because these two values are simple public settings. The braces after each member give the default value used by <code>NumericalPolicy{}</code>. Both values are dimensionless because they are compared with dimensionless rotation residuals.</p>
+<p>Failures contain both a category that code can test and a message that a person can read:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">enum</span> <span class="kw">class</span> GeometryError</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    non_finite<span class="op">,</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    invalid_rotation<span class="op">,</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    invalid_policy<span class="op">,</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    unsupported_magnitude</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> GeometryException <span class="op">:</span> <span class="kw">public</span> <span class="bu">std::</span>runtime_error</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span><span class="op">:</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    GeometryException<span class="op">(</span>GeometryError code<span class="op">,</span> <span class="at">const</span> <span class="dt">char</span> <span class="op">*</span>message<span class="op">)</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>        <span class="op">:</span> <span class="bu">std::</span>runtime_error<span class="op">(</span>message<span class="op">),</span> <span class="va">code_</span><span class="op">(</span>code<span class="op">)</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>    <span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> GeometryError code<span class="op">()</span> <span class="at">const</span> <span class="kw">noexcept</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">code_</span><span class="op">;</span></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a><span class="kw">private</span><span class="op">:</span></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>    GeometryError <span class="va">code_</span><span class="op">;</span></span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>enum class</code> keeps the names inside the <code>GeometryError</code> scope, producing names such as <code>GeometryError::invalid_rotation</code>, and prevents their accidental use as unrelated integers. <code>GeometryException : public std::runtime_error</code> means that <code>GeometryException</code> is a specialised standard run-time exception. The constructor initialiser list passes <code>message</code> to the <code>std::runtime_error</code> part and stores <code>code</code> in <code>code_</code>. A caller reads the message with <code>what()</code> and reads the category with <code>code()</code>. The final <code>noexcept</code> promises that reading the category will not throw another exception.</p>
+<p>The four categories have distinct meanings:</p>
+<ul>
+<li><code>invalid_policy</code>: a rotation tolerance is negative or non-finite; policy validation occurs before matrix validation.</li>
+<li><code>non_finite</code>: a supplied matrix or free-vector component is <code>NaN</code> or infinity.</li>
+<li><code>invalid_rotation</code>: finite residuals show that the matrix violates orthogonality or the proper-determinant condition.</li>
+<li><code>unsupported_magnitude</code>: finite inputs cause a required intermediate or output to leave the finite binary64 range.</li>
+</ul>
+<p>When <code>GeometryException</code> is thrown, construction or vector rotation stops and returns no geometric value.</p>
+</section>
+<section id="complete-from_matrix-implementation" class="level3" data-number="9.2.4">
+<h3 data-number="9.2.4" class="anchored" data-anchor-id="complete-from_matrix-implementation"><span class="header-section-number">9.2.4</span> Complete <code>from_matrix</code> implementation</h3>
+<p>The complete function shows the validation order directly:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>Rotation3 Rotation3<span class="op">::</span>from_matrix<span class="op">(</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> Eigen<span class="op">::</span>Matrix3d <span class="op">&amp;</span>matrix<span class="op">,</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> NumericalPolicy <span class="op">&amp;</span>policy<span class="op">)</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> <span class="dt">bool</span> policy_is_valid <span class="op">=</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>        <span class="bu">std::</span>isfinite<span class="op">(</span>policy<span class="op">.</span>orthogonality_tolerance<span class="op">)</span> <span class="op">&amp;&amp;</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>        <span class="bu">std::</span>isfinite<span class="op">(</span>policy<span class="op">.</span>determinant_tolerance<span class="op">)</span> <span class="op">&amp;&amp;</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>        policy<span class="op">.</span>orthogonality_tolerance <span class="op">&gt;=</span> <span class="fl">0.0</span> <span class="op">&amp;&amp;</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>        policy<span class="op">.</span>determinant_tolerance <span class="op">&gt;=</span> <span class="fl">0.0</span><span class="op">;</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(!</span>policy_is_valid<span class="op">)</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">throw</span> GeometryException<span class="op">(</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>            GeometryError<span class="op">::</span>invalid_policy<span class="op">,</span></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>            <span class="st">"Rotation tolerance must be finite and non-negative."</span><span class="op">);</span></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(!</span>matrix<span class="op">.</span>allFinite<span class="op">())</span></span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">throw</span> GeometryException<span class="op">(</span></span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>            GeometryError<span class="op">::</span>non_finite<span class="op">,</span></span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>            <span class="st">"Rotation matrix entries must be finite."</span><span class="op">);</span></span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> Eigen<span class="op">::</span>Matrix3d orthogonality_error <span class="op">=</span></span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>        matrix<span class="op">.</span>transpose<span class="op">()</span> <span class="op">*</span> matrix <span class="op">-</span> Eigen<span class="op">::</span>Matrix3d<span class="op">::</span>Identity<span class="op">();</span></span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> <span class="dt">double</span> orthogonality_residual <span class="op">=</span></span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a>        orthogonality_error<span class="op">.</span>reshaped<span class="op">().</span>stableNorm<span class="op">();</span></span>
+<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> <span class="dt">double</span> determinant <span class="op">=</span> matrix<span class="op">.</span>determinant<span class="op">();</span></span>
+<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(!</span><span class="bu">std::</span>isfinite<span class="op">(</span>orthogonality_residual<span class="op">)</span> <span class="op">||</span></span>
+<span id="cb15-34"><a href="#cb15-34" aria-hidden="true" tabindex="-1"></a>        <span class="op">!</span><span class="bu">std::</span>isfinite<span class="op">(</span>determinant<span class="op">))</span></span>
+<span id="cb15-35"><a href="#cb15-35" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb15-36"><a href="#cb15-36" aria-hidden="true" tabindex="-1"></a>        <span class="cf">throw</span> GeometryException<span class="op">(</span></span>
+<span id="cb15-37"><a href="#cb15-37" aria-hidden="true" tabindex="-1"></a>            GeometryError<span class="op">::</span>unsupported_magnitude<span class="op">,</span></span>
+<span id="cb15-38"><a href="#cb15-38" aria-hidden="true" tabindex="-1"></a>            <span class="st">"Rotation validation produced a non-finite result."</span><span class="op">);</span></span>
+<span id="cb15-39"><a href="#cb15-39" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb15-40"><a href="#cb15-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-41"><a href="#cb15-41" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> <span class="dt">double</span> determinant_error <span class="op">=</span> <span class="bu">std::</span>abs<span class="op">(</span>determinant <span class="op">-</span> <span class="fl">1.0</span><span class="op">);</span></span>
+<span id="cb15-42"><a href="#cb15-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-43"><a href="#cb15-43" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>orthogonality_residual <span class="op">&gt;</span> policy<span class="op">.</span>orthogonality_tolerance <span class="op">||</span></span>
+<span id="cb15-44"><a href="#cb15-44" aria-hidden="true" tabindex="-1"></a>        determinant_error <span class="op">&gt;</span> policy<span class="op">.</span>determinant_tolerance<span class="op">)</span></span>
+<span id="cb15-45"><a href="#cb15-45" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb15-46"><a href="#cb15-46" aria-hidden="true" tabindex="-1"></a>        <span class="cf">throw</span> GeometryException<span class="op">(</span></span>
+<span id="cb15-47"><a href="#cb15-47" aria-hidden="true" tabindex="-1"></a>            GeometryError<span class="op">::</span>invalid_rotation<span class="op">,</span></span>
+<span id="cb15-48"><a href="#cb15-48" aria-hidden="true" tabindex="-1"></a>            <span class="st">"Matrix does not satisfy the SO(3) conditions."</span><span class="op">);</span></span>
+<span id="cb15-49"><a href="#cb15-49" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb15-50"><a href="#cb15-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-51"><a href="#cb15-51" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Rotation3<span class="op">(</span>matrix<span class="op">);</span></span>
+<span id="cb15-52"><a href="#cb15-52" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The name before <code>::</code> identifies the class that owns the function: the first <code>Rotation3</code> is the return type, while <code>Rotation3::from_matrix</code> is the function’s full name. The default policy appears only in the class declaration; callers use that default, but the function definition receives an ordinary <code>policy</code> reference.</p>
+<p>The function proceeds in four concrete stages. First, <code>std::isfinite</code> and the comparisons with zero validate both tolerances. Second, <code>matrix.allFinite()</code> checks all nine input entries before matrix arithmetic begins. Third, <code>transpose()</code>, matrix multiplication, <code>Identity()</code>, <code>stableNorm()</code>, and <code>determinant()</code> calculate <span class="math inline">\(e_{\mathrm{orth}}\)</span> and the determinant needed for <span class="math inline">\(e_{\det}\)</span>. Fourth, the two residual comparisons either throw <code>invalid_rotation</code> or allow the private constructor to store the matrix.</p>
+<p>The intermediate finiteness check is separate from input finiteness. A matrix may contain only finite entries while products used by <span class="math inline">\(\mathbf R^{\mathsf T}\mathbf R\)</span> or <span class="math inline">\(\det(\mathbf R)\)</span> overflow. Such a calculation fails as <code>unsupported_magnitude</code>, not as <code>non_finite</code>, because the caller supplied finite entries.</p>
+<p>Eigen 3.4.0’s direct matrix form <code>orthogonality_error.stableNorm()</code> triggered an internal block-index assertion in the project environment. Reshaping the nine entries into a vector selects Eigen’s vector implementation. This substitution preserves the required quantity because the Euclidean norm of the vectorised entries equals the matrix Frobenius norm:</p>
+<p><span class="math display">\[
+\left\|\operatorname{vec}(\mathbf E)\right\|_2
+=
+\left\|\mathbf E\right\|_F.
+\]</span></p>
+</section>
+<section id="complete-rotate_vector-implementation" class="level3" data-number="9.2.5">
+<h3 data-number="9.2.5" class="anchored" data-anchor-id="complete-rotate_vector-implementation"><span class="header-section-number">9.2.5</span> Complete <code>rotate_vector</code> implementation</h3>
+<p>Once construction has established that <code>matrix_</code> is an accepted rotation, the second operation checks its vector input, performs the reviewed matrix–column product, and checks the output:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>Eigen<span class="op">::</span>Vector3d Rotation3<span class="op">::</span>rotate_vector<span class="op">(</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> Eigen<span class="op">::</span>Vector3d <span class="op">&amp;</span>vector_b<span class="op">)</span> <span class="at">const</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(!</span>vector_b<span class="op">.</span>allFinite<span class="op">())</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">throw</span> GeometryException<span class="op">(</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>            GeometryError<span class="op">::</span>non_finite<span class="op">,</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>            <span class="st">"Free-vector components must be finite."</span><span class="op">);</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> Eigen<span class="op">::</span>Vector3d vector_a <span class="op">=</span> <span class="va">matrix_</span> <span class="op">*</span> vector_b<span class="op">;</span></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(!</span>vector_a<span class="op">.</span>allFinite<span class="op">())</span></span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">throw</span> GeometryException<span class="op">(</span></span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>            GeometryError<span class="op">::</span>unsupported_magnitude<span class="op">,</span></span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>            <span class="st">"Rotated free vector is outside the finite numerical range."</span><span class="op">);</span></span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> vector_a<span class="op">;</span></span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The expression <code>matrix_ * vector_b</code> is the direct code form of <span class="math inline">\({}^{a}\mathbf v=\mathbf R_{ab}{}^{b}\mathbf v\)</span>. If an input component is already <code>NaN</code> or infinity, the function throws <code>non_finite</code> before multiplication. If every input component is finite but the multiplication produces a non-finite component, the function throws <code>unsupported_magnitude</code>. Otherwise, <code>return vector_a;</code> gives the caller the re-expressed vector column.</p>
+</section>
+<section id="analytic-example-and-focused-tests" class="level3" data-number="9.2.6">
+<h3 data-number="9.2.6" class="anchored" data-anchor-id="analytic-example-and-focused-tests"><span class="header-section-number">9.2.6</span> Analytic example and focused tests</h3>
+<p>The normal non-identity fixture uses the dimensionless quarter-turn matrix</p>
+<p><span class="math display">\[
+\mathbf R_{ab}
+=
+\begin{bmatrix}
+0&amp;-1&amp;0\\
+1&amp;0&amp;0\\
+0&amp;0&amp;1
+\end{bmatrix}
+\]</span></p>
+<p>and the free-vector input <span class="math inline">\({}^{b}\mathbf v=[1\;0\;0]^{\mathsf T}\,\mathrm m\)</span>. The expected output is <span class="math inline">\({}^{a}\mathbf v=[0\;1\;0]^{\mathsf T}\,\mathrm m\)</span>, calculated independently by matrix–column multiplication.</p>
+<p>The focused GTest executable protects the governing behaviour with nine deterministic cases: identity leaves a vector unchanged; the quarter-turn produces the analytic result; a reflection isolates the determinant requirement; a shear isolates the orthogonality requirement; <code>NaN</code> matrix input returns <code>non_finite</code>; a negative tolerance is rejected before an invalid matrix is inspected; finite matrix entries whose validation overflows return <code>unsupported_magnitude</code>; an infinite free-vector component returns <code>non_finite</code>; and finite vector components whose rotated output overflows return <code>unsupported_magnitude</code>.</p>
+</section>
+<section id="deliberate-limits" class="level3" data-number="9.2.7">
+<h3 data-number="9.2.7" class="anchored" data-anchor-id="deliberate-limits"><span class="header-section-number">9.2.7</span> Deliberate limits</h3>
+<p><code>Eigen::Matrix3d</code> fixes the matrix shape at compile time, so this entry point cannot receive a wrong-shaped dynamic array; a future external-array adapter must own shape validation. <code>Rotation3</code> does not store frame names or physical units, so call sites must preserve the <span class="math inline">\(\mathbf R_{ab}\)</span>, <span class="math inline">\({}^{b}\mathbf v\)</span>, and <span class="math inline">\({}^{a}\mathbf v\)</span> relationship through their variable and interface contracts. The tolerance test admits a bounded residual but never repairs the matrix. Point transformation remains a separate operation because adding translation to a free vector would change the represented physical object.</p>
 
 
+</section>
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

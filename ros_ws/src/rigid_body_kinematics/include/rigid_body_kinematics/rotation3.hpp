@@ -3,6 +3,8 @@
 
 #include <Eigen/Core>
 
+#include "rigid_body_kinematics/numerical_policy.hpp"
+
 namespace rigid_body_kinematics
 {
 
@@ -11,6 +13,11 @@ namespace rigid_body_kinematics
     public:
         // Create identity rotation
         static Rotation3 identity();
+
+        // Create a rotation after validating the supplied matrix
+        static Rotation3 from_matrix(
+            const Eigen::Matrix3d &matrix,
+            const NumericalPolicy &policy = NumericalPolicy{});
 
         // Apply this rotation to a vector
         [[nodiscard]] Eigen::Vector3d rotate_vector(
@@ -26,4 +33,4 @@ namespace rigid_body_kinematics
 
 } // namespace rigid_body_kinematics
 
-#endif
+#endif // RIGID_BODY_KINEMATICS_ROTATION3_HPP_
