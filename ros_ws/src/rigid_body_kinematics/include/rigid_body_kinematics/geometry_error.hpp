@@ -1,19 +1,19 @@
-#ifndef RIGID_BODY_KINEMATICS_GEOMETRY_ERROR_HPP_
-#define RIGID_BODY_KINEMATICS_GEOMETRY_ERROR_HPP_
+#ifndef RIGID_BODY_KINEMATICS__GEOMETRY_ERROR_HPP_
+#define RIGID_BODY_KINEMATICS__GEOMETRY_ERROR_HPP_
 
 #include <stdexcept>
 
 namespace rigid_body_kinematics
 {
-    enum class GeometryError
-    {
-        non_finite,
-        invalid_rotation,
-        invalid_policy,       // a tolerance is invalid.
-        unsupported_magnitude // exceeds the finite numerical domain
-    };
+enum class GeometryError
+{
+  non_finite,
+  invalid_rotation,
+  invalid_policy,        // a tolerance is invalid.
+  unsupported_magnitude  // exceeds the finite numerical domain
+};
 
-    /*
+/*
         Exception carrying both a human-readable message and a machine-readable
         GeometryError code.
 
@@ -29,23 +29,19 @@ namespace rigid_body_kinematics
         e.code();
         // -> GeometryError::non_finite
     */
-    class GeometryException : public std::runtime_error
-    {
-    public:
-        GeometryException(GeometryError code, const char *message)
-            : std::runtime_error(message), code_(code)
-        {
-        }
+class GeometryException : public std::runtime_error
+{
+public:
+  GeometryException(GeometryError code, const char * message)
+  : std::runtime_error(message), code_(code)
+  {
+  }
 
-        [[nodiscard]] GeometryError code() const noexcept
-        {
-            return code_;
-        }
+  [[nodiscard]] GeometryError code() const noexcept { return code_; }
 
-    private:
-        GeometryError code_;
-    };
+private:
+  GeometryError code_;
+};
+}  // namespace rigid_body_kinematics
 
-} // namespace rigid_body_kinematics
-
-#endif
+#endif  // RIGID_BODY_KINEMATICS__GEOMETRY_ERROR_HPP_

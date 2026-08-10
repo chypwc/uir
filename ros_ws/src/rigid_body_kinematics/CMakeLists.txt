@@ -40,7 +40,7 @@ target_compile_features(${PROJECT_NAME}
 # Enable additional compiler warnings when using GCC or Clang.
 # PRIVATE means these warning flags apply only when compiling this library
 # and are not propagated to downstream targets.
-# 
+#
 # IF:
 #     language is C++
 #     AND compiler is GNU or Clang
@@ -82,19 +82,42 @@ if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
 
   ament_add_gtest(test_rotation3
-    test/test_rotation3.cpp 
+    test/test_rotation3.cpp
   )
 
   target_link_libraries(test_rotation3
-    ${PROJECT_NAME} 
+    ${PROJECT_NAME}
   )
 
   # Enable automatic ROS 2 linting support.
   find_package(ament_lint_auto REQUIRED)
+  find_package(ament_cmake_clang_format REQUIRED)
+  find_package(ament_cmake_cpplint REQUIRED)
+
+  # Do not let ament_lint_auto register these checks automatically:
+  # - copyright is intentionally skipped;
+  # - cpplint and clang-format are registered manually below;
+  # - uncrustify is replaced by clang-format.
+  set(AMENT_LINT_AUTO_EXCLUDE
+    ament_cmake_clang_format
+    ament_cmake_copyright
+    ament_cmake_cpplint
+    ament_cmake_uncrustify
+  )
 
   # Find and register lint test dependencies declared by the package.
   ament_lint_auto_find_test_dependencies()
 
+  ament_clang_format(
+    CONFIG_FILE "${CMAKE_CURRENT_SOURCE_DIR}/.clang-format"
+    include
+    src
+    test
+  )
+  ament_cpplint(
+    FILTERS
+      -legal/copyright
+  )
 endif()
 
 

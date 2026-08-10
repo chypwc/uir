@@ -49,7 +49,7 @@ format:
     - twoside
     pdf-engine: pdflatex
     fontsize: 12pt
-    fontenc: OT1
+    fontenc: T1
     fontfamily: fix-cm
     include-in-header:
       text: |

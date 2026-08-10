@@ -726,24 +726,25 @@ e_{\det}
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Rotation3</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span><span class="op">:</span></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Create identity rotation.</span></span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">static</span> Rotation3 identity<span class="op">();</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Create identity rotation</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">static</span> Rotation3 identity<span class="op">();</span></span>
 <span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Create a rotation after validating the supplied matrix.</span></span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">static</span> Rotation3 from_matrix<span class="op">(</span></span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>        <span class="at">const</span> Eigen<span class="op">::</span>Matrix3d <span class="op">&amp;</span>matrix<span class="op">,</span></span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>        <span class="at">const</span> NumericalPolicy <span class="op">&amp;</span>policy <span class="op">=</span> NumericalPolicy<span class="op">{});</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Create a rotation after validating the supplied matrix</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">static</span> Rotation3 from_matrix<span class="op">(</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> Eigen<span class="op">::</span>Matrix3d <span class="op">&amp;</span> matrix<span class="op">,</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> NumericalPolicy <span class="op">&amp;</span> policy <span class="op">=</span> NumericalPolicy<span class="op">{});</span></span>
 <span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Apply this rotation to a free vector.</span></span>
-<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    <span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> Eigen<span class="op">::</span>Vector3d rotate_vector<span class="op">(</span></span>
-<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>        <span class="at">const</span> Eigen<span class="op">::</span>Vector3d <span class="op">&amp;</span>vector_b<span class="op">)</span> <span class="at">const</span><span class="op">;</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Apply this rotation to a vector</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>  <span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> Eigen<span class="op">::</span>Vector3d rotate_vector<span class="op">(</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> Eigen<span class="op">::</span>Vector3d <span class="op">&amp;</span> vector_b<span class="op">)</span> <span class="at">const</span><span class="op">;</span></span>
 <span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a><span class="kw">private</span><span class="op">:</span></span>
-<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Store a matrix that has already passed validation.</span></span>
-<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">explicit</span> Rotation3<span class="op">(</span><span class="at">const</span> Eigen<span class="op">::</span>Matrix3d <span class="op">&amp;</span>matrix<span class="op">);</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Construct from underlying matrix</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>  <span class="kw">explicit</span> Rotation3<span class="op">(</span><span class="at">const</span> Eigen<span class="op">::</span>Matrix3d <span class="op">&amp;</span> matrix<span class="op">);</span></span>
 <span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>    Eigen<span class="op">::</span>Matrix3d <span class="va">matrix_</span><span class="op">;</span></span>
-<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Internal representation</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>  Eigen<span class="op">::</span>Matrix3d <span class="va">matrix_</span><span class="op">;</span></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The <code>public</code> part lists what a caller may do. <code>identity()</code> constructs the identity rotation, <code>from_matrix()</code> validates an external matrix before constructing a rotation, and <code>rotate_vector()</code> applies the stored matrix to a free-vector column. Both construction operations are <code>static</code>, so they are called on the class, for example <code>Rotation3::from_matrix(matrix_ab)</code>, rather than on an existing rotation object.</p>
 <p>The <code>private</code> constructor is the key safety choice. Only the class’s own functions may call <code>Rotation3(matrix)</code>, so ordinary callers cannot place an unchecked matrix directly into <code>matrix_</code>. The word <code>explicit</code> prevents C++ from silently converting an <code>Eigen::Matrix3d</code> into a <code>Rotation3</code>. The trailing underscore in <code>matrix_</code> is a naming convention indicating a data member stored inside each object.</p>
 <p>The parameter type <code>const Eigen::Matrix3d &amp;</code> passes the existing matrix without copying it and prevents the function from changing it. The default argument <code>NumericalPolicy{}</code> constructs a policy containing the default tolerances when the caller supplies no policy. The same <code>const &amp;</code> form is used for the input vector. The final <code>const</code> in <code>rotate_vector(...) const</code> prevents the operation from changing <code>matrix_</code>, while <code>[[nodiscard]]</code> asks the compiler to warn if the caller ignores the returned vector.</p>
@@ -753,35 +754,32 @@ e_{\det}
 <p>The two tolerances needed by this block are stored together:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> NumericalPolicy</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">double</span> orthogonality_tolerance<span class="op">{</span><span class="fl">1.0e-12</span><span class="op">};</span></span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">double</span> determinant_tolerance<span class="op">{</span><span class="fl">1.0e-12</span><span class="op">};</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">double</span> orthogonality_tolerance<span class="op">{</span><span class="fl">1.0e-12</span><span class="op">};</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">double</span> determinant_tolerance<span class="op">{</span><span class="fl">1.0e-12</span><span class="op">};</span></span>
 <span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>A <code>struct</code> is used because these two values are simple public settings. The braces after each member give the default value used by <code>NumericalPolicy{}</code>. Both values are dimensionless because they are compared with dimensionless rotation residuals.</p>
 <p>Failures contain both a category that code can test and a message that a person can read:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">enum</span> <span class="kw">class</span> GeometryError</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    non_finite<span class="op">,</span></span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    invalid_rotation<span class="op">,</span></span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    invalid_policy<span class="op">,</span></span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    unsupported_magnitude</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  non_finite<span class="op">,</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  invalid_rotation<span class="op">,</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  invalid_policy<span class="op">,</span>        <span class="co">// a tolerance is invalid.</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  unsupported_magnitude  <span class="co">// exceeds the finite numerical domain</span></span>
 <span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span>
 <span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> GeometryException <span class="op">:</span> <span class="kw">public</span> <span class="bu">std::</span>runtime_error</span>
 <span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
 <span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span><span class="op">:</span></span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    GeometryException<span class="op">(</span>GeometryError code<span class="op">,</span> <span class="at">const</span> <span class="dt">char</span> <span class="op">*</span>message<span class="op">)</span></span>
-<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>        <span class="op">:</span> <span class="bu">std::</span>runtime_error<span class="op">(</span>message<span class="op">),</span> <span class="va">code_</span><span class="op">(</span>code<span class="op">)</span></span>
-<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
-<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>  GeometryException<span class="op">(</span>GeometryError code<span class="op">,</span> <span class="at">const</span> <span class="dt">char</span> <span class="op">*</span> message<span class="op">)</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>  <span class="op">:</span> <span class="bu">std::</span>runtime_error<span class="op">(</span>message<span class="op">),</span> <span class="va">code_</span><span class="op">(</span>code<span class="op">)</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>  <span class="op">{</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
 <span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>    <span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> GeometryError code<span class="op">()</span> <span class="at">const</span> <span class="kw">noexcept</span></span>
-<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
-<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">code_</span><span class="op">;</span></span>
-<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a><span class="kw">private</span><span class="op">:</span></span>
-<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>    GeometryError <span class="va">code_</span><span class="op">;</span></span>
-<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>  <span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> GeometryError code<span class="op">()</span> <span class="at">const</span> <span class="kw">noexcept</span> <span class="op">{</span> <span class="cf">return</span> <span class="va">code_</span><span class="op">;</span> <span class="op">}</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a><span class="kw">private</span><span class="op">:</span></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>  GeometryError <span class="va">code_</span><span class="op">;</span></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><code>enum class</code> keeps the names inside the <code>GeometryError</code> scope, producing names such as <code>GeometryError::invalid_rotation</code>, and prevents their accidental use as unrelated integers. <code>GeometryException : public std::runtime_error</code> means that <code>GeometryException</code> is a specialised standard run-time exception. The constructor initialiser list passes <code>message</code> to the <code>std::runtime_error</code> part and stores <code>code</code> in <code>code_</code>. A caller reads the message with <code>what()</code> and reads the category with <code>code()</code>. The final <code>noexcept</code> promises that reading the category will not throw another exception.</p>
 <p>The four categories have distinct meanings:</p>
 <ul>
@@ -796,57 +794,50 @@ e_{\det}
 <h3 data-number="9.2.4" class="anchored" data-anchor-id="complete-from_matrix-implementation"><span class="header-section-number">9.2.4</span> Complete <code>from_matrix</code> implementation</h3>
 <p>The complete function shows the validation order directly:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>Rotation3 Rotation3<span class="op">::</span>from_matrix<span class="op">(</span></span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> Eigen<span class="op">::</span>Matrix3d <span class="op">&amp;</span>matrix<span class="op">,</span></span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> NumericalPolicy <span class="op">&amp;</span>policy<span class="op">)</span></span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> <span class="dt">bool</span> policy_is_valid <span class="op">=</span></span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>        <span class="bu">std::</span>isfinite<span class="op">(</span>policy<span class="op">.</span>orthogonality_tolerance<span class="op">)</span> <span class="op">&amp;&amp;</span></span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>        <span class="bu">std::</span>isfinite<span class="op">(</span>policy<span class="op">.</span>determinant_tolerance<span class="op">)</span> <span class="op">&amp;&amp;</span></span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>        policy<span class="op">.</span>orthogonality_tolerance <span class="op">&gt;=</span> <span class="fl">0.0</span> <span class="op">&amp;&amp;</span></span>
-<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>        policy<span class="op">.</span>determinant_tolerance <span class="op">&gt;=</span> <span class="fl">0.0</span><span class="op">;</span></span>
-<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(!</span>policy_is_valid<span class="op">)</span></span>
-<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
-<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">throw</span> GeometryException<span class="op">(</span></span>
-<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>            GeometryError<span class="op">::</span>invalid_policy<span class="op">,</span></span>
-<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>            <span class="st">"Rotation tolerance must be finite and non-negative."</span><span class="op">);</span></span>
-<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(!</span>matrix<span class="op">.</span>allFinite<span class="op">())</span></span>
-<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
-<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">throw</span> GeometryException<span class="op">(</span></span>
-<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>            GeometryError<span class="op">::</span>non_finite<span class="op">,</span></span>
-<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>            <span class="st">"Rotation matrix entries must be finite."</span><span class="op">);</span></span>
-<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> Eigen<span class="op">::</span>Matrix3d orthogonality_error <span class="op">=</span></span>
-<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>        matrix<span class="op">.</span>transpose<span class="op">()</span> <span class="op">*</span> matrix <span class="op">-</span> Eigen<span class="op">::</span>Matrix3d<span class="op">::</span>Identity<span class="op">();</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> Eigen<span class="op">::</span>Matrix3d <span class="op">&amp;</span> matrix<span class="op">,</span> <span class="at">const</span> NumericalPolicy <span class="op">&amp;</span> policy<span class="op">)</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> <span class="dt">bool</span> policy_is_valid <span class="op">=</span> <span class="bu">std::</span>isfinite<span class="op">(</span>policy<span class="op">.</span>orthogonality_tolerance<span class="op">)</span> <span class="op">&amp;&amp;</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>                               <span class="bu">std::</span>isfinite<span class="op">(</span>policy<span class="op">.</span>determinant_tolerance<span class="op">)</span> <span class="op">&amp;&amp;</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>                               policy<span class="op">.</span>orthogonality_tolerance <span class="op">&gt;=</span> <span class="fl">0.0</span> <span class="op">&amp;&amp;</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>                               policy<span class="op">.</span>determinant_tolerance <span class="op">&gt;=</span> <span class="fl">0.0</span><span class="op">;</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(!</span>policy_is_valid<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">throw</span> GeometryException<span class="op">(</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>      GeometryError<span class="op">::</span>invalid_policy<span class="op">,</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Rotation tolerance must be finite and non-negative."</span><span class="op">);</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(!</span>matrix<span class="op">.</span>allFinite<span class="op">())</span> <span class="op">{</span></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">throw</span> GeometryException<span class="op">(</span></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>      GeometryError<span class="op">::</span>non_finite<span class="op">,</span> <span class="st">"Rotation matrix entries must be finite."</span><span class="op">);</span></span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> Eigen<span class="op">::</span>Matrix3d orthogonality_error <span class="op">=</span></span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>    matrix<span class="op">.</span>transpose<span class="op">()</span> <span class="op">*</span> matrix <span class="op">-</span> Eigen<span class="op">::</span>Matrix3d<span class="op">::</span>Identity<span class="op">();</span></span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> <span class="dt">double</span> orthogonality_residual <span class="op">=</span></span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>    orthogonality_error<span class="op">.</span>reshaped<span class="op">().</span>stableNorm<span class="op">();</span>  <span class="co">// Frobenius norm</span></span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> <span class="dt">double</span> determinant <span class="op">=</span> matrix<span class="op">.</span>determinant<span class="op">();</span></span>
 <span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> <span class="dt">double</span> orthogonality_residual <span class="op">=</span></span>
-<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a>        orthogonality_error<span class="op">.</span>reshaped<span class="op">().</span>stableNorm<span class="op">();</span></span>
-<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> <span class="dt">double</span> determinant <span class="op">=</span> matrix<span class="op">.</span>determinant<span class="op">();</span></span>
-<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(!</span><span class="bu">std::</span>isfinite<span class="op">(</span>orthogonality_residual<span class="op">)</span> <span class="op">||</span></span>
-<span id="cb15-34"><a href="#cb15-34" aria-hidden="true" tabindex="-1"></a>        <span class="op">!</span><span class="bu">std::</span>isfinite<span class="op">(</span>determinant<span class="op">))</span></span>
-<span id="cb15-35"><a href="#cb15-35" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
-<span id="cb15-36"><a href="#cb15-36" aria-hidden="true" tabindex="-1"></a>        <span class="cf">throw</span> GeometryException<span class="op">(</span></span>
-<span id="cb15-37"><a href="#cb15-37" aria-hidden="true" tabindex="-1"></a>            GeometryError<span class="op">::</span>unsupported_magnitude<span class="op">,</span></span>
-<span id="cb15-38"><a href="#cb15-38" aria-hidden="true" tabindex="-1"></a>            <span class="st">"Rotation validation produced a non-finite result."</span><span class="op">);</span></span>
-<span id="cb15-39"><a href="#cb15-39" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb15-40"><a href="#cb15-40" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-41"><a href="#cb15-41" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> <span class="dt">double</span> determinant_error <span class="op">=</span> <span class="bu">std::</span>abs<span class="op">(</span>determinant <span class="op">-</span> <span class="fl">1.0</span><span class="op">);</span></span>
-<span id="cb15-42"><a href="#cb15-42" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-43"><a href="#cb15-43" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>orthogonality_residual <span class="op">&gt;</span> policy<span class="op">.</span>orthogonality_tolerance <span class="op">||</span></span>
-<span id="cb15-44"><a href="#cb15-44" aria-hidden="true" tabindex="-1"></a>        determinant_error <span class="op">&gt;</span> policy<span class="op">.</span>determinant_tolerance<span class="op">)</span></span>
-<span id="cb15-45"><a href="#cb15-45" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
-<span id="cb15-46"><a href="#cb15-46" aria-hidden="true" tabindex="-1"></a>        <span class="cf">throw</span> GeometryException<span class="op">(</span></span>
-<span id="cb15-47"><a href="#cb15-47" aria-hidden="true" tabindex="-1"></a>            GeometryError<span class="op">::</span>invalid_rotation<span class="op">,</span></span>
-<span id="cb15-48"><a href="#cb15-48" aria-hidden="true" tabindex="-1"></a>            <span class="st">"Matrix does not satisfy the SO(3) conditions."</span><span class="op">);</span></span>
-<span id="cb15-49"><a href="#cb15-49" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb15-50"><a href="#cb15-50" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-51"><a href="#cb15-51" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Rotation3<span class="op">(</span>matrix<span class="op">);</span></span>
-<span id="cb15-52"><a href="#cb15-52" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(!</span><span class="bu">std::</span>isfinite<span class="op">(</span>orthogonality_residual<span class="op">)</span> <span class="op">||</span> <span class="op">!</span><span class="bu">std::</span>isfinite<span class="op">(</span>determinant<span class="op">))</span> <span class="op">{</span></span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">throw</span> GeometryException<span class="op">(</span></span>
+<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a>      GeometryError<span class="op">::</span>unsupported_magnitude<span class="op">,</span></span>
+<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Rotation validation produced a non-finite result."</span><span class="op">);</span></span>
+<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-34"><a href="#cb15-34" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> <span class="dt">double</span> determinant_error <span class="op">=</span> <span class="bu">std::</span>abs<span class="op">(</span>determinant <span class="op">-</span> <span class="fl">1.0</span><span class="op">);</span></span>
+<span id="cb15-35"><a href="#cb15-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-36"><a href="#cb15-36" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(</span></span>
+<span id="cb15-37"><a href="#cb15-37" aria-hidden="true" tabindex="-1"></a>    orthogonality_residual <span class="op">&gt;</span> policy<span class="op">.</span>orthogonality_tolerance <span class="op">||</span></span>
+<span id="cb15-38"><a href="#cb15-38" aria-hidden="true" tabindex="-1"></a>    determinant_error <span class="op">&gt;</span> policy<span class="op">.</span>determinant_tolerance<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb15-39"><a href="#cb15-39" aria-hidden="true" tabindex="-1"></a>    <span class="cf">throw</span> GeometryException<span class="op">(</span></span>
+<span id="cb15-40"><a href="#cb15-40" aria-hidden="true" tabindex="-1"></a>      GeometryError<span class="op">::</span>invalid_rotation<span class="op">,</span></span>
+<span id="cb15-41"><a href="#cb15-41" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Matrix does not satisfy the SO(3) conditions."</span><span class="op">);</span></span>
+<span id="cb15-42"><a href="#cb15-42" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb15-43"><a href="#cb15-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-44"><a href="#cb15-44" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> Rotation3<span class="op">(</span>matrix<span class="op">);</span></span>
+<span id="cb15-45"><a href="#cb15-45" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The name before <code>::</code> identifies the class that owns the function: the first <code>Rotation3</code> is the return type, while <code>Rotation3::from_matrix</code> is the function’s full name. The default policy appears only in the class declaration; callers use that default, but the function definition receives an ordinary <code>policy</code> reference.</p>
 <p>The function proceeds in four concrete stages. First, <code>std::isfinite</code> and the comparisons with zero validate both tolerances. Second, <code>matrix.allFinite()</code> checks all nine input entries before matrix arithmetic begins. Third, <code>transpose()</code>, matrix multiplication, <code>Identity()</code>, <code>stableNorm()</code>, and <code>determinant()</code> calculate <span class="math inline">\(e_{\mathrm{orth}}\)</span> and the determinant needed for <span class="math inline">\(e_{\det}\)</span>. Fourth, the two residual comparisons either throw <code>invalid_rotation</code> or allow the private constructor to store the matrix.</p>
 <p>The intermediate finiteness check is separate from input finiteness. A matrix may contain only finite entries while products used by <span class="math inline">\(\mathbf R^{\mathsf T}\mathbf R\)</span> or <span class="math inline">\(\det(\mathbf R)\)</span> overflow. Such a calculation fails as <code>unsupported_magnitude</code>, not as <code>non_finite</code>, because the caller supplied finite entries.</p>
@@ -860,27 +851,22 @@ e_{\det}
 <section id="complete-rotate_vector-implementation" class="level3" data-number="9.2.5">
 <h3 data-number="9.2.5" class="anchored" data-anchor-id="complete-rotate_vector-implementation"><span class="header-section-number">9.2.5</span> Complete <code>rotate_vector</code> implementation</h3>
 <p>Once construction has established that <code>matrix_</code> is an accepted rotation, the second operation checks its vector input, performs the reviewed matrix–column product, and checks the output:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>Eigen<span class="op">::</span>Vector3d Rotation3<span class="op">::</span>rotate_vector<span class="op">(</span></span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> Eigen<span class="op">::</span>Vector3d <span class="op">&amp;</span>vector_b<span class="op">)</span> <span class="at">const</span></span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(!</span>vector_b<span class="op">.</span>allFinite<span class="op">())</span></span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">throw</span> GeometryException<span class="op">(</span></span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>            GeometryError<span class="op">::</span>non_finite<span class="op">,</span></span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>            <span class="st">"Free-vector components must be finite."</span><span class="op">);</span></span>
-<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> Eigen<span class="op">::</span>Vector3d vector_a <span class="op">=</span> <span class="va">matrix_</span> <span class="op">*</span> vector_b<span class="op">;</span></span>
-<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(!</span>vector_a<span class="op">.</span>allFinite<span class="op">())</span></span>
-<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
-<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">throw</span> GeometryException<span class="op">(</span></span>
-<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>            GeometryError<span class="op">::</span>unsupported_magnitude<span class="op">,</span></span>
-<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>            <span class="st">"Rotated free vector is outside the finite numerical range."</span><span class="op">);</span></span>
-<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> vector_a<span class="op">;</span></span>
-<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>Eigen<span class="op">::</span>Vector3d Rotation3<span class="op">::</span>rotate_vector<span class="op">(</span><span class="at">const</span> Eigen<span class="op">::</span>Vector3d <span class="op">&amp;</span> vector_b<span class="op">)</span> <span class="at">const</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(!</span>vector_b<span class="op">.</span>allFinite<span class="op">())</span> <span class="op">{</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">throw</span> GeometryException<span class="op">(</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>      GeometryError<span class="op">::</span>non_finite<span class="op">,</span> <span class="st">"Free-vector components must be finite."</span><span class="op">);</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> Eigen<span class="op">::</span>Vector3d vector_a <span class="op">=</span> <span class="va">matrix_</span> <span class="op">*</span> vector_b<span class="op">;</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(!</span>vector_a<span class="op">.</span>allFinite<span class="op">())</span> <span class="op">{</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">throw</span> GeometryException<span class="op">(</span></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>      GeometryError<span class="op">::</span>unsupported_magnitude<span class="op">,</span></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Rotated free vector is outside the finite numerical range."</span><span class="op">);</span></span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> vector_a<span class="op">;</span></span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The expression <code>matrix_ * vector_b</code> is the direct code form of <span class="math inline">\({}^{a}\mathbf v=\mathbf R_{ab}{}^{b}\mathbf v\)</span>. If an input component is already <code>NaN</code> or infinity, the function throws <code>non_finite</code> before multiplication. If every input component is finite but the multiplication produces a non-finite component, the function throws <code>unsupported_magnitude</code>. Otherwise, <code>return vector_a;</code> gives the caller the re-expressed vector column.</p>
 </section>
 <section id="analytic-example-and-focused-tests" class="level3" data-number="9.2.6">
