@@ -34,7 +34,7 @@ All phases belong to the learning programme. Phase 9 and Phase 12 are distinct r
 - **Milestone:** `M1` — Classical intelligence foundation.
 - **Phase:** Phase 1 — Geometry, mechanics, and control.
 - **Capability:** `P1.2` — Spatial geometry kernel.
-- **Active task:** Review and approve the [minimum spatial geometry kernel specification](docs/02_spatial_kinematics/spatial_geometry_kernel.md) before implementation begins.
+- **Active task:** Implement, test, understand, and retrospectively document the validated $SO(3)$ rotation and free-vector-rotation mathematical cycle, completing only the package infrastructure required by that cycle.
 - **Next capability:** `P1.3` — General robot kinematics and Jacobians.
 - **Blockers:** None.
 
@@ -87,7 +87,7 @@ Phase 1 closes when two bounded learning systems pass. First, a deterministic 2R
 | Capability | Learning artifact | Side project and principal tools | Status |
 |---|---|---|---|
 | `P1.1` — Ideal planar motion kernel | Close Chapters 2–3 and preserve Chapters 4 and 6 | Existing `differential_drive_motion_model`, Python and `pytest` | Complete |
-| `P1.2` — Spatial geometry kernel | Complete Chapter 8 and its Chapter 9 implementation companion | `rigid_body_kinematics`, modern C++, CMake, Eigen, and GTest | Active: Chapter 8 approved and closed; specification next |
+| `P1.2` — Spatial geometry kernel | Complete Chapter 8 and its Chapter 9 implementation companion | `rigid_body_kinematics`, modern C++, CMake, Eigen, and GTest | Active: first mathematical implementation cycle |
 | `P1.3` — General kinematics and Jacobians | Complete Chapter 10 and its Chapter 11 implementation companion | Extend `rigid_body_kinematics` with bounded forward and velocity kinematics | Queued: opening theory block drafted; review and remaining blocks pending |
 | `P1.4` — Planar manipulator kinematics laboratory | Chapter 12 and its Chapter 13 implementation companion | Begin `planar_manipulator_lab` with 2R/3R inverse kinematics, modern C++, Eigen, GTest, and offline visualisation | Queued |
 | `P1.5` — Wheel-odometry pipeline | Chapter 14 and its Chapter 15 implementation companion | `differential_drive_odometry`, pure Python core plus thin ROS 2 adapter, `nav_msgs`, and `tf2` | Queued |
@@ -146,15 +146,19 @@ The outcome is the geometry layer of the spatial and general kinematics workbenc
 #### Specify
 
 - [x] Create `docs/02_spatial_kinematics/spatial_geometry_kernel.md` with the linear-first twist convention, frames, types, tolerances, valid domains, invalid-input behaviour, exclusions, and library-independent acceptance cases.
-- [ ] **Active:** Review and approve the [minimum spatial geometry kernel specification](docs/02_spatial_kinematics/spatial_geometry_kernel.md) before implementation begins.
+- [x] Review and approve the [minimum spatial geometry kernel specification](docs/02_spatial_kinematics/spatial_geometry_kernel.md) before implementation begins.
 
 #### Implement and document
 
-- [ ] When implementation begins, create `notes/09_spatial_geometry_kernel_implementation.qmd` and document the CMake target, Eigen representation choices, public headers, validation policy, and test strategy.
-- [ ] Create `ros_ws/src/rigid_body_kinematics` as an `ament_cmake` C++ package with Eigen, GTest, explicit compiler warnings, and no ROS runtime dependency in the mathematical core.
-- [ ] Implement distinct vector rotation and point transformation operations together with bounded $SO(3)$ and $SE(3)$ validation, composition, and inversion.
-- [ ] Implement hat and vee maps, $SO(3)$ and $SE(3)$ exponential and logarithm maps, constant-twist integration, and the $SE(3)$ adjoint using the project's linear-first twist order.
-- [ ] Implement planar-pose embedding and extraction plus normalised planar-yaw quaternion conversion without attempting to replace `tf2`.
+- [ ] **Active:** Implement, test, understand, and retrospectively document the validated $SO(3)$ rotation and free-vector-rotation mathematical cycle; complete the minimum `ament_cmake` library target, Eigen and GTest linkage, C++17 requirement, explicit compiler warnings, and public header/source/test layout needed by this cycle without adding a ROS runtime dependency to the mathematical core.
+- [ ] Implement, test, understand, and retrospectively document the validated $SE(3)$ representation and point-transformation mathematical cycle.
+- [ ] Implement, test, understand, and retrospectively document the $SO(3)$ and $SE(3)$ composition-and-inversion mathematical cycle.
+- [ ] Run the checklist-declared intermediate C++ quality gate after the representations, vector and point operations, composition, inversion, public API, and package structure are stable.
+- [ ] Implement, test, understand, and retrospectively document the hat-and-vee mathematical cycle using the project's linear-first twist order.
+- [ ] Implement, test, understand, and retrospectively document the $SO(3)$ exponential-and-logarithm mathematical cycle, splitting identity, nominal-angle, and near-$\pi$ numerical branches into manageable subcycles where required.
+- [ ] Implement, test, understand, and retrospectively document the $SE(3)$ exponential, logarithm, and constant-twist-integration mathematical cycle, keeping linear and angular blocks and their units distinct.
+- [ ] Implement, test, understand, and retrospectively document the $SE(3)$ adjoint mathematical cycle using the project's linear-first twist order.
+- [ ] Implement, test, understand, and retrospectively document planar-pose embedding and extraction plus normalised planar-yaw quaternion conversion without attempting to replace `tf2`.
 
 #### Verify and close
 
@@ -162,6 +166,7 @@ The outcome is the geometry layer of the spatial and general kinematics workbenc
 - [ ] Test exponential/logarithm round trips away from declared branch ambiguities and the identity $\widehat{\operatorname{Ad}_{T}\boldsymbol\xi}=T\widehat{\boldsymbol\xi}T^{-1}$.
 - [ ] Test the identity and small-angle series path, deterministic near-$\pi$ axis handling, and documented rejection or canonicalisation at ambiguous logarithm branches.
 - [ ] Reject non-finite, malformed, non-orthogonal, reflective, and inapplicable non-planar inputs without returning a valid-looking result.
+- [ ] Run the checklist-declared pre-closure C++ quality gate across the stable package, public API, Eigen representations, CMake export, and focused GTest evidence.
 - [ ] Link the approved note blocks, specification, companion, package, and tests and close `P1.2`.
 
 ### P1.3 — General robot kinematics and Jacobians

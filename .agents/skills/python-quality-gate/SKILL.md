@@ -1,11 +1,15 @@
 ---
 name: python-quality-gate
-description: Review and verify Python modules, packages, public APIs, type contracts, pytest suites, analysis scripts, and ament_python changes in this robotics repository. Use when adding, modifying, diagnosing, or reviewing Python code or tests; changing Python package metadata or tooling; preparing a Python capability for verification; or explicitly requesting a Python quality gate.
+description: Run a focused Python package and interface audit only at a CHECKLIST-declared stability checkpoint, before closing a Python capability, when the user explicitly requests the gate, or when a difficult defect requires systematic diagnosis. Do not use for teaching, terminology explanations, implementation-note drafting, routine learner-authored blocks, or ordinary focused test runs.
 ---
 
 # Python Quality Gate
 
 Apply a focused quality gate using the repository's configured environment and contracts. Keep scientific and robotics semantics visible rather than relying only on lint success.
+
+## Invocation boundary
+
+Invoke this gate only at a stability checkpoint named in `CHECKLIST.md`, before closing a Python capability, when the user explicitly requests a Python quality gate, or when a difficult defect requires a systematic audit. Routine implementation cycles use the focused testing cadence in `AGENTS.md` without invoking this skill. Do not invoke the gate merely because a conversation explains Python, reviews one learner-authored block, drafts an implementation companion, or runs an ordinary focused test.
 
 ## Establish the contract
 

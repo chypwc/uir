@@ -1,11 +1,15 @@
 ---
 name: cpp-quality-gate
-description: Review and verify C++ source, headers, CMake, ament_cmake packages, Eigen code, public interfaces, and GTest changes in this robotics repository. Use when adding, modifying, diagnosing, or reviewing C++ implementation or tests; changing CMake targets or compiler settings; preparing a C++ capability for verification; or explicitly requesting a C++ quality gate.
+description: Run a focused C++ package and interface audit only at a CHECKLIST-declared stability checkpoint, before closing a C++ capability, when the user explicitly requests the gate, or when a difficult defect requires systematic diagnosis. Do not use for teaching, terminology explanations, implementation-note drafting, routine learner-authored blocks, or ordinary focused builds and tests.
 ---
 
 # C++ Quality Gate
 
 Apply a focused, evidence-backed quality gate to the C++ work in scope. Follow the repository's own contracts and tools instead of imposing a generic style rewrite.
+
+## Invocation boundary
+
+Invoke this gate only at a stability checkpoint named in `CHECKLIST.md`, before closing a C++ capability, when the user explicitly requests a C++ quality gate, or when a difficult defect requires a systematic audit. Routine implementation cycles use the focused compilation and testing cadence in `AGENTS.md` without invoking this skill. Do not invoke the gate merely because a conversation explains C++, reviews one learner-authored block, drafts an implementation companion, or runs an ordinary target or package test.
 
 ## Establish the contract
 

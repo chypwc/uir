@@ -196,10 +196,31 @@ $$
 
 ### Exponential and principal logarithm
 
-Let $\boldsymbol\Phi=[\boldsymbol\phi]_\times$ and $\theta=\|\boldsymbol\phi\|_2$. The $SO(3)$ exponential is
+Following Chapter 8, this specification uses the lowercase symbol $\exp$ for the matrix exponential and does not introduce separate $\operatorname{Exp}_{SO(3)}$ or $\operatorname{Exp}_{SE(3)}$ operators. For any square matrix $\mathbf A\in\mathbb R^{m\times m}$,
 
 $$
-\mathbf R
+\exp(\mathbf A)
+\mathrel{:=}
+\sum_{k=0}^{\infty}\frac{\mathbf A^k}{k!}.
+$$
+
+The **$SO(3)$ exponential map** first uses the hat map to write a finite rotation-vector column $\boldsymbol\phi\in\mathbb R^3$ as the skew matrix $\boldsymbol\Phi=[\boldsymbol\phi]_\times\in\mathfrak{so}(3)$ and then applies the matrix exponential:
+
+$$
+\boldsymbol\phi
+\longmapsto
+\boldsymbol\Phi
+\longmapsto
+\mathbf R(\boldsymbol\phi)
+\mathrel{:=}
+\exp(\boldsymbol\Phi)
+\in SO(3).
+$$
+
+Thus the direction of a nonzero $\boldsymbol\phi$ is the oriented rotation axis and $\theta=\|\boldsymbol\phi\|_2$ is the rotation angle in radians. Rodrigues' formula evaluates this map as
+
+$$
+\mathbf R(\boldsymbol\phi)
 =
 \mathbf I_3
 +A(\theta)\boldsymbol\Phi
@@ -242,16 +263,42 @@ C(\theta)
 \end{aligned}
 $$
 
-The linear-first $SE(3)$ exponential is
+The **$SE(3)$ exponential map** acts on the complete finite linear-first exponential-coordinate column
 
 $$
-\operatorname{Exp}_{SE(3)}(\boldsymbol\eta)
+{}^{a}\boldsymbol\eta
 =
 \begin{bmatrix}
-\operatorname{Exp}_{SO(3)}(\boldsymbol\phi)&\mathbf J(\boldsymbol\phi)\boldsymbol\rho\\
+{}^{a}\boldsymbol\rho\\
+{}^{a}\boldsymbol\phi
+\end{bmatrix}
+\in\mathbb R^6,
+\qquad
+\widehat{{}^{a}\boldsymbol\eta}
+=
+\begin{bmatrix}
+[{}^{a}\boldsymbol\phi]_\times&{}^{a}\boldsymbol\rho\\
+\mathbf 0_3^{\mathsf T}&0
+\end{bmatrix}
+\in\mathfrak{se}(3).
+$$
+
+Both blocks are expressed in frame $\{a\}$; ${}^{a}\boldsymbol\rho$ is measured in metres and ${}^{a}\boldsymbol\phi$ in radians. Applying the same matrix exponential produces the finite rigid-displacement transformation
+
+$$
+\mathbf T_\Delta
+\mathrel{:=}
+\exp\!\left(
+\widehat{{}^{a}\boldsymbol\eta}
+\right)
+=
+\begin{bmatrix}
+\mathbf R({}^{a}\boldsymbol\phi)&\mathbf J({}^{a}\boldsymbol\phi){}^{a}\boldsymbol\rho\\
 \mathbf 0_3^{\mathsf T}&1
 \end{bmatrix}.
 $$
+
+Therefore $\mathbf R({}^{a}\boldsymbol\phi)=\exp([{}^{a}\boldsymbol\phi]_\times)$ is the $SO(3)$ exponential result and $\mathbf T_\Delta=\exp(\widehat{{}^{a}\boldsymbol\eta})$ is the $SE(3)$ exponential result. These names describe two uses of the same matrix exponential, not two unrelated scalar exponential functions. In general the final translation is ${}^{a}\mathbf p=\mathbf J({}^{a}\boldsymbol\phi){}^{a}\boldsymbol\rho$, so ${}^{a}\boldsymbol\rho$ equals the translation column only when the rotation is zero or in another special case where the mapping leaves it unchanged.
 
 The $SO(3)$ and $SE(3)$ logarithms shall select the principal rotation magnitude $\theta\in[0,\pi]$. For a validated rotation, define
 
@@ -336,7 +383,10 @@ For a finite interval $\Delta t\geq0$ seconds with a constant space twist expres
 $$
 \mathbf T_{ab}(t+\Delta t)
 =
-\operatorname{Exp}_{SE(3)}({}^{a}\boldsymbol\xi_s\Delta t)\mathbf T_{ab}(t).
+\exp\!\left(
+\widehat{{}^{a}\boldsymbol\xi}_s\Delta t
+\right)
+\mathbf T_{ab}(t).
 $$
 
 For a constant body twist expressed in frame $\{b\}$,
@@ -344,7 +394,10 @@ For a constant body twist expressed in frame $\{b\}$,
 $$
 \mathbf T_{ab}(t+\Delta t)
 =
-\mathbf T_{ab}(t)\operatorname{Exp}_{SE(3)}({}^{b}\boldsymbol\xi_b\Delta t).
+\mathbf T_{ab}(t)
+\exp\!\left(
+\widehat{{}^{b}\boldsymbol\xi}_b\Delta t
+\right).
 $$
 
 The two updates describe the same instantaneous motion when ${}^{a}\boldsymbol\xi_s=\operatorname{Ad}_{\mathbf T_{ab}(t)}{}^{b}\boldsymbol\xi_b$. A zero interval shall return the input pose unchanged. A negative interval is outside this integration interface; signed finite exponential coordinates remain available through the exponential map.
@@ -483,7 +536,7 @@ The following expected values come from analytic geometry or algebra, not from E
 | SGK-ACC-011 | Start with $\mathbf T_0=[\mathbf I_3,[1\;0\;0]^{\mathsf T};\mathbf0^{\mathsf T},1]$, body twist $\boldsymbol\xi_b=[0\;1\;0\;0\;0\;1]^{\mathsf T}$, space twist $\boldsymbol\xi_s=\operatorname{Ad}_{\mathbf T_0}\boldsymbol\xi_b=[0\;0\;0\;0\;0\;1]^{\mathsf T}$, and $\Delta t=\pi/2\,\mathrm s$. | Left space integration and right body integration both return $[\mathbf R_z(\pi/2),[0\;1\;0]^{\mathsf T};\mathbf0^{\mathsf T},1]$. With $\Delta t=0$, both return $\mathbf T_0$ unchanged. |
 | SGK-ACC-012 | Embed $[2\;-1\;\pi/2]^{\mathsf T}$ and extract it. | The transform is $\begin{bmatrix}0&-1&0&2\\1&0&0&-1\\0&0&1&0\\0&0&0&1\end{bmatrix}$ and extraction returns $[2\;-1\;\pi/2]^{\mathsf T}$ within separate unit-aware tolerances. |
 | SGK-ACC-013 | Convert yaw $\pi/2$ and yaw $\pi/2+2\pi$ to ROS-order quaternions. | The first is $[0\;0\;\sqrt2/2\;\sqrt2/2]^{\mathsf T}$, the second is its negative, both have unit norm, and both induce the same rotation. |
-| SGK-ACC-014 | Round-trip representative small, nominal, and near-$\pi$ transforms through $\operatorname{Exp}(\operatorname{Log}(\mathbf T))$. | Each reconstructed transform satisfies $e_{R,\mathrm{rt}}\leq10^{-10}$ and $e_{p,\mathrm{rt}}\leq10^{-10}\,\mathrm m$. The reverse $\operatorname{Log}(\operatorname{Exp}(\boldsymbol\eta))=\boldsymbol\eta$ is required only for principal inputs with $\|\boldsymbol\phi\|_2<\pi$; at $\pi$, compare the canonical result or reconstructed rotation. |
+| SGK-ACC-014 | Round-trip representative small, nominal, and near-$\pi$ transforms through $\exp(\log_{\mathrm{selected}}(\mathbf T))$. | Each reconstructed transform satisfies $e_{R,\mathrm{rt}}\leq10^{-10}$ and $e_{p,\mathrm{rt}}\leq10^{-10}\,\mathrm m$. The reverse $\operatorname{vee}(\log_{\mathrm{selected}}(\exp(\widehat{\boldsymbol\eta})))=\boldsymbol\eta$ is required only for principal inputs with $\|\boldsymbol\phi\|_2<\pi$; at $\pi$, compare the canonical result or reconstructed rotation. |
 | SGK-ACC-015 | Test $\theta_{\mathrm{series}}$ and $\pi-\varepsilon_\pi$ immediately below, exactly on, and immediately above each boundary using fixed `nextafter` values. | Inclusive comparisons select the declared branch deterministically, adjacent formula branches reconstruct the same transform within round-trip limits, and no value is silently canonicalized to zero. |
 | SGK-ACC-016 | Supply a NaN or infinity; a wrong shape; $\operatorname{diag}(1,1,-1)$; a materially non-orthogonal matrix; a malformed homogeneous row; a non-skew vee input; negative $\Delta t$; or an angular increment greater than $\theta_{\max}$. | The documented failure category is returned and no geometric value is present. The reflection fails even though its orthogonality residual is zero. |
 | SGK-ACC-017 | Attempt planar extraction after adding either $10^{-6}\,\mathrm m$ of vertical translation or a $10^{-6}\,\mathrm{rad}$ roll to an otherwise planar pose. | With default tolerances, both inputs fail as `non_planar`; neither is flattened or projected. |
