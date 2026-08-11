@@ -4293,7 +4293,7 @@ $$
 This comparison is measured in metres and cannot use an angular tolerance. By itself, the classification does not replace ${}^{a}\mathbf p$ or ${}^{a}\boldsymbol\rho$ with $\mathbf 0_3$; an interface that also canonicalises the stored or returned translation to zero must declare that separate behaviour. An interface that preserves every representable nonzero translation should set $\varepsilon_{p,0}=0\,\mathrm m$.
 
 | Threshold | Unit | Numerical role | Does it change the represented motion? |
-|---|---:|---|---|
+|-----------|---------:|-----------------------------------|-----------------------------------|
 | $\theta_{\mathrm{series}}$ | rad | Selects series or trigonometric evaluation near zero | No |
 | $\varepsilon_\pi$ | rad | Selects the symmetric near-$\pi$ axis extraction | No |
 | $\varepsilon_{\mathrm{zero}}$ | rad | Declares an angle indistinguishable from zero at an interface | Yes, if a nonzero angle is canonicalised to zero |
@@ -4421,17 +4421,17 @@ $$
 
 The rotation residual $e_{R,\mathrm{rt}}$ is dimensionless and measures the matrix difference between the reconstructed and original orientations. The translation residual $e_{p,\mathrm{rt}}$ is measured in metres and measures the Euclidean distance between their translation columns. They require separate tolerances because they have different meanings and units. Useful deterministic cases and independent expectations include:
 
-| Case | Independent expectation |
-|---|---|
-| Identity | The logarithm is the zero matrix; no normalised axis is claimed |
-| Pure translation | ${}^{a}\boldsymbol\phi=\mathbf 0_3$ and ${}^{a}\boldsymbol\rho={}^a\mathbf p$ |
-| Small nonzero rotation | Series and trigonometric formula branches agree near $\theta_{\mathrm{series}}$ and the rotation is not silently erased |
-| Revolute axis through an offset point | The chosen axis point is fixed by the finite displacement |
-| Finite-pitch screw | Every axis point advances by $h\theta$ and the logarithm recovers the same finite exponential coordinates |
-| Exact $\pi$ rotations | Coordinate-axis and non-coordinate-axis cases follow the declared index and sign rules |
-| Principal round trip | $\exp(\log(\mathbf T))\approx\mathbf T$ with separate rotation and translation residuals |
-| Left-Jacobian inverse | $\mathbf J\mathbf J^{-1}\approx\mathbf I_3$ for small, nominal, and near-$\pi$ angles |
-| Invalid representations | Reflections, malformed bottom rows, non-orthogonal rotations, and non-finite values return no valid logarithm |
+| Case                                  | Independent expectation                                                                                                 |
+| ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Identity                              | The logarithm is the zero matrix; no normalised axis is claimed                                                         |
+| Pure translation                      | ${}^{a}\boldsymbol\phi=\mathbf 0_3$ and ${}^{a}\boldsymbol\rho={}^a\mathbf p$                                           |
+| Small nonzero rotation                | Series and trigonometric formula branches agree near $\theta_{\mathrm{series}}$ and the rotation is not silently erased |
+| Revolute axis through an offset point | The chosen axis point is fixed by the finite displacement                                                               |
+| Finite-pitch screw                    | Every axis point advances by $h\theta$ and the logarithm recovers the same finite exponential coordinates               |
+| Exact $\pi$ rotations                 | Coordinate-axis and non-coordinate-axis cases follow the declared index and sign rules                                  |
+| Principal round trip                  | $\exp(\log(\mathbf T))\approx\mathbf T$ with separate rotation and translation residuals                                |
+| Left-Jacobian inverse                 | $\mathbf J\mathbf J^{-1}\approx\mathbf I_3$ for small, nominal, and near-$\pi$ angles                                   |
+| Invalid representations               | Reflections, malformed bottom rows, non-orthogonal rotations, and non-finite values return no valid logarithm           |
 
 The reverse expression $\log(\exp(\widehat{{}^{a}\boldsymbol\eta}))\approx\widehat{{}^{a}\boldsymbol\eta}$ needs a branch qualification. It is expected when $\|{}^a\boldsymbol\phi\|_2<\pi$ and the input already follows the selected principal convention. For angles beyond the principal interval, the reconstructed transformation may be exact while the returned logarithm legitimately uses different exponential coordinates. At $\theta=\pi$, raw axis columns should be compared only after applying the canonical sign rule, or the reconstructed rotations should be compared instead.
 

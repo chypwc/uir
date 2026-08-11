@@ -11,7 +11,7 @@ The `Rotation3` code becomes useful to another program only after the compiler c
 These tools act at different layers:
 
 | Layer               | Concrete role in this package                                                                                                                                                               |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ------------------- | --------------------------------------------------------- |
 | C++ compiler        | Reads `rotation3.cpp` and the headers it includes, checks the language rules and types, and produces an object file containing machine code.                                                |
 | Archiver and linker | The archiver collects object files into the static library; the linker combines the test object file, the library, and GoogleTest into the `test_rotation3` executable.                     |
 | CMake               | Reads `CMakeLists.txt`, creates named targets, records how each target is compiled and linked, and generates the lower-level build and installation rules.                                  |
@@ -35,19 +35,19 @@ For the present package, the concrete paths are
 
 ```text
 include/rigid_body_kinematics/rotation3.hpp
-                         │ included while compiling
-                         ↓
-src/rotation3.cpp ── compile ──> rotation3.cpp.o
-                                      │
-                                      │ archive
-                                      ↓
+                         | included while compiling
+                         v
+src/rotation3.cpp -- compile --> rotation3.cpp.o
+                                      |
+                                      | archive
+                                      v
                          librigid_body_kinematics.a
 
-test/test_rotation3.cpp ── compile ──> test_rotation3.cpp.o
-                                      │
-                                      │ link with the static library
-                                      │ and GoogleTest
-                                      ↓
+test/test_rotation3.cpp -- compile --> test_rotation3.cpp.o
+                                      |
+                                      | link with the static library
+                                      | and GoogleTest
+                                      v
                                 test_rotation3
 ```
 

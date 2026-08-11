@@ -46,15 +46,43 @@ format:
   pdf:
     documentclass: scrreprt
     classoption:
-    - twoside
-    pdf-engine: pdflatex
+      - twoside
+    pdf-engine: xelatex
     fontsize: 12pt
-    fontenc: T1
-    fontfamily: fix-cm
+    mainfont: "Palatino Linotype"
+    mathfont: "NewComputerModern Math"  # "TeX Gyre Pagella Math" 
+    monofont: "Roboto Mono"
+    monofontoptions:
+      - Scale=0.80
     include-in-header:
       text: |
         \usepackage{pmboxdraw}
-        \usepackage[scaled=0.90]{roboto-mono}
+
+        % Title-page typography
+        \setkomafont{author}{\normalsize\rmfamily}
+
+        % Inline code color
+        \usepackage{xcolor}
+        \definecolor{InlineCodeColour}{HTML}{1F4E79}
+
+        \let\OriginalTexttt\texttt
+        \DeclareRobustCommand{\StyledTexttt}[1]{%
+          \textcolor{InlineCodeColour}{\OriginalTexttt{#1}}%
+        }
+        \AtBeginDocument{\let\texttt\StyledTexttt}
+
+        % Keep Unicode-math symbols in headings safe for PDF bookmarks.
+        \AtBeginDocument{%
+          \pdfstringdefDisableCommands{%
+            \def\texttt#1{#1}%
+            \def\boldsymbol#1{#1}%
+            \def\mathbf#1{#1}%
+            \def\eta{eta}%
+            \def\Delta{Delta}%
+          }%
+        }
+      
+        \setkomafont{disposition}{\rmfamily\bfseries}
 
         % Roman-numbered page numbering
         \AtBeginDocument{\pagenumbering{roman}}
@@ -75,6 +103,7 @@ format:
         \cfoot*{\pagemark}
 
         \setkomafont{pageheadfoot}{\small\sffamily}
+
     toc: true
     geometry:
       - top=22mm
