@@ -41,6 +41,7 @@ format:
       dark: solar
     css: styles.css
     mainfont: "Roboto"
+    monofont: "Roboto Mono"
     toc: true
     code-copy: true
   pdf:

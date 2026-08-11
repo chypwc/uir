@@ -1,4 +1,4 @@
-# Autonomous Robotics Notes
+# Understanding Intelligence Through Robotics
 
 This repository contains my learning notes and small implementations for robotics. It records my study of the mathematics, mechanics, algorithms, and engineering foundations needed to understand autonomous systems.
 
