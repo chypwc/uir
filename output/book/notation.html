@@ -441,117 +441,95 @@ window.Quarto = {
 <h3 class="unnumbered unlisted anchored" data-anchor-id="notation-introduced-in-sec-linear-algebra-foundations">Notation introduced in <a href="01_linear_algebra_foundations.html" class="quarto-xref"><span>1&nbsp; Linear Algebra Foundations</span></a></h3>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 33%">
-<col style="width: 33%">
-<col style="width: 33%">
+<col style="width: 35%">
+<col style="width: 65%">
 </colgroup>
 <thead>
 <tr class="header">
 <th>Symbol</th>
-<th>Meaning</th>
-<th>Units or convention</th>
+<th>Meaning, units, and convention</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td><span class="math inline">\(a,\alpha\)</span></td>
-<td>Scalar quantity</td>
-<td>Depends on the quantity</td>
+<td>Scalar quantity.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(m,n,i,j\)</span></td>
-<td>Integer dimensions or indices</td>
-<td>Declared locally</td>
+<td>Integer dimensions or indices declared locally.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(\mathbb R\)</span></td>
-<td>Set of real numbers</td>
-<td>—</td>
+<td>Set of real numbers.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\mathbb R^n,\mathbb R^{m\times n}\)</span></td>
-<td>Real coordinate columns and real matrices</td>
-<td>Dimensions shown by the superscripts</td>
+<td>Real coordinate columns and real matrices with dimensions shown by the superscripts.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(\mathbb R_{\geq0},\mathbb R_{&gt;0}\)</span></td>
-<td>Nonnegative and strictly positive real numbers</td>
-<td>—</td>
+<td>Nonnegative and strictly positive real numbers.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\mathbf{v}\in\mathbb{R}^n\)</span></td>
-<td>Column vector with <span class="math inline">\(n\)</span> components</td>
-<td>Depends on the quantity</td>
+<td>Column vector with <span class="math inline">\(n\)</span> components.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(\mathbf{A}\in\mathbb{R}^{m\times n}\)</span></td>
-<td>Matrix with <span class="math inline">\(m\)</span> rows and <span class="math inline">\(n\)</span> columns</td>
-<td>Depends on the map</td>
+<td>Matrix with <span class="math inline">\(m\)</span> rows and <span class="math inline">\(n\)</span> columns.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\mathbf{I}_n\)</span></td>
-<td><span class="math inline">\(n\times n\)</span> identity matrix</td>
-<td>Dimensionless</td>
+<td><span class="math inline">\(n\times n\)</span> identity matrix.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(\mathbf{0}_n\)</span></td>
-<td>Zero vector with <span class="math inline">\(n\)</span> components</td>
-<td>Depends on the quantity</td>
+<td>Zero vector with <span class="math inline">\(n\)</span> components.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\((\cdot)^\mathsf{T}\)</span></td>
-<td>Transpose</td>
-<td>—</td>
+<td>Transpose.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\((\cdot)^{-1}\)</span></td>
-<td>Inverse, when it exists</td>
-<td>—</td>
+<td>Inverse, when it exists.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\((\cdot)^{-\mathsf T}\)</span></td>
-<td>Inverse transpose, <span class="math inline">\((\mathbf A^{-1})^\mathsf T=(\mathbf A^\mathsf T)^{-1}\)</span> for nonsingular <span class="math inline">\(\mathbf A\)</span></td>
-<td>—</td>
+<td>Inverse transpose, <span class="math inline">\((\mathbf A^{-1})^\mathsf T=(\mathbf A^\mathsf T)^{-1}\)</span> for nonsingular <span class="math inline">\(\mathbf A\)</span>.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(\lVert\mathbf{v}\rVert_2\)</span></td>
-<td>Euclidean norm of <span class="math inline">\(\mathbf{v}\)</span></td>
-<td>Same units as <span class="math inline">\(\mathbf{v}\)</span></td>
+<td>Euclidean norm of <span class="math inline">\(\mathbf{v}\)</span>, with the same units as <span class="math inline">\(\mathbf v\)</span>.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\det(\mathbf A)\)</span></td>
-<td>Determinant of a square matrix</td>
-<td>Depends on the matrix units</td>
+<td>Determinant of a square matrix.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(\operatorname{rank}(\mathbf A)\)</span></td>
-<td>Dimension of the column space of <span class="math inline">\(\mathbf A\)</span></td>
-<td>Nonnegative integer</td>
+<td>Dimension of the column space of <span class="math inline">\(\mathbf A\)</span>.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\operatorname{nullity}(\mathbf A)\)</span></td>
-<td>Dimension of the null space of <span class="math inline">\(\mathbf A\)</span></td>
-<td>Nonnegative integer</td>
+<td>Dimension of the null space of <span class="math inline">\(\mathbf A\)</span>.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(\operatorname{span}(\mathbf v_1,\ldots,\mathbf v_k)\)</span></td>
-<td>Set of all linear combinations of the listed vectors</td>
-<td>Same vector space as the vectors</td>
+<td>Set of all linear combinations of the listed vectors.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\operatorname{Col}(\mathbf A),\mathcal N(\mathbf A)\)</span></td>
-<td>Column space and null space of <span class="math inline">\(\mathbf A\)</span></td>
-<td>Subspaces of the output and input spaces</td>
+<td>Column space and null space of <span class="math inline">\(\mathbf A\)</span>, which are subspaces of the output and input spaces.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(\mathbf u\times\mathbf v\)</span></td>
-<td>Three-dimensional cross product of vectors expressed in the same right-handed orthonormal frame</td>
-<td>Product of the input units</td>
+<td>Three-dimensional cross product of vectors expressed in the same right-handed orthonormal frame; its units are the product of the input units.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(O(n),SO(n)\)</span></td>
-<td>Orthogonal group and special orthogonal group of real <span class="math inline">\(n\times n\)</span> matrices</td>
-<td><span class="math inline">\(\mathbf Q^\mathsf T\mathbf Q=\mathbf I_n\)</span>; <span class="math inline">\(SO(n)\)</span> additionally requires <span class="math inline">\(\det\mathbf Q=1\)</span></td>
+<td>Orthogonal group and special orthogonal group of real <span class="math inline">\(n\times n\)</span> matrices: <span class="math inline">\(\mathbf Q^\mathsf T\mathbf Q=\mathbf I_n\)</span>, and <span class="math inline">\(SO(n)\)</span> additionally requires <span class="math inline">\(\det\mathbf Q=1\)</span>.</td>
 </tr>
 </tbody>
 </table>
@@ -560,62 +538,51 @@ window.Quarto = {
 <h3 class="unnumbered unlisted anchored" data-anchor-id="notation-introduced-in-sec-geometry-coordinate-frames">Notation introduced in <a href="02_geometry_and_coordinate_frames.html" class="quarto-xref"><span>2&nbsp; Geometry and Coordinate Frames</span></a></h3>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 33%">
-<col style="width: 33%">
-<col style="width: 33%">
+<col style="width: 35%">
+<col style="width: 65%">
 </colgroup>
 <thead>
 <tr class="header">
 <th>Symbol</th>
-<th>Meaning</th>
-<th>Units or convention</th>
+<th>Meaning, units, and convention</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td><span class="math inline">\(\{a\}\)</span></td>
-<td>Coordinate frame named <span class="math inline">\(a\)</span></td>
-<td>Right-handed</td>
+<td>Right-handed coordinate frame named <span class="math inline">\(a\)</span>.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(O_a\)</span></td>
-<td>Origin of frame <span class="math inline">\(\{a\}\)</span></td>
-<td>—</td>
+<td>Origin of frame <span class="math inline">\(\{a\}\)</span>.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(\mathbf{e}_{x,a},\mathbf{e}_{y,a},\mathbf{e}_{z,a}\)</span></td>
-<td>Unit basis vectors of frame <span class="math inline">\(\{a\}\)</span></td>
-<td>Dimensionless</td>
+<td>Unit basis vectors of frame <span class="math inline">\(\{a\}\)</span>.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\({}^{a}\mathbf{v}\)</span></td>
-<td>Coordinates of geometric vector <span class="math inline">\(\mathbf{v}\)</span> expressed in frame <span class="math inline">\(\{a\}\)</span></td>
-<td>Depends on <span class="math inline">\(\mathbf{v}\)</span></td>
+<td>Coordinates of geometric vector <span class="math inline">\(\mathbf{v}\)</span> expressed in frame <span class="math inline">\(\{a\}\)</span>.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\({}^{a}\mathbf{p}_P\)</span></td>
-<td>Position of point <span class="math inline">\(P\)</span> relative to <span class="math inline">\(O_a\)</span>, expressed in frame <span class="math inline">\(\{a\}\)</span></td>
-<td><span class="math inline">\(\mathrm{m}\)</span></td>
+<td>Position of point <span class="math inline">\(P\)</span> relative to <span class="math inline">\(O_a\)</span>, expressed in frame <span class="math inline">\(\{a\}\)</span>, in <span class="math inline">\(\mathrm{m}\)</span>.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\({}^{a}\mathbf r_{OP}\)</span></td>
-<td>Relative-position vector from point <span class="math inline">\(O\)</span> to point <span class="math inline">\(P\)</span>, expressed in frame <span class="math inline">\(\{a\}\)</span></td>
-<td><span class="math inline">\(\mathrm{m}\)</span></td>
+<td>Relative-position vector from point <span class="math inline">\(O\)</span> to point <span class="math inline">\(P\)</span>, expressed in frame <span class="math inline">\(\{a\}\)</span>, in <span class="math inline">\(\mathrm{m}\)</span>.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(\mathbf{R}_{ab}\)</span></td>
-<td>Rotation mapping coordinates from frame <span class="math inline">\(\{b\}\)</span> to frame <span class="math inline">\(\{a\}\)</span></td>
-<td><span class="math inline">\(\mathbf{R}_{ab}\in SO(2)\)</span> or <span class="math inline">\(SO(3)\)</span></td>
+<td>Rotation in <span class="math inline">\(SO(2)\)</span> or <span class="math inline">\(SO(3)\)</span> mapping coordinates from frame <span class="math inline">\(\{b\}\)</span> to frame <span class="math inline">\(\{a\}\)</span>.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\({}^{a}\mathbf{p}_b\)</span></td>
-<td>Position of origin <span class="math inline">\(O_b\)</span> relative to <span class="math inline">\(O_a\)</span>, expressed in frame <span class="math inline">\(\{a\}\)</span></td>
-<td><span class="math inline">\(\mathrm{m}\)</span></td>
+<td>Position of origin <span class="math inline">\(O_b\)</span> relative to <span class="math inline">\(O_a\)</span>, expressed in frame <span class="math inline">\(\{a\}\)</span>, in <span class="math inline">\(\mathrm{m}\)</span>.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(\boldsymbol\omega\)</span></td>
-<td>Three-dimensional angular-velocity vector</td>
-<td><span class="math inline">\(\mathrm{rad\,s^{-1}}\)</span></td>
+<td>Three-dimensional angular-velocity vector in <span class="math inline">\(\mathrm{rad\,s^{-1}}\)</span>.</td>
 </tr>
 </tbody>
 </table>
@@ -624,137 +591,111 @@ window.Quarto = {
 <h3 class="unnumbered unlisted anchored" data-anchor-id="notation-introduced-in-sec-differential-drive-model">Notation introduced in <a href="03_kinematics_and_numerical_integration.html" class="quarto-xref"><span>3&nbsp; Differential-Drive Kinematics and Numerical Integration: Model and Derivation</span></a></h3>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 23%">
-<col style="width: 42%">
-<col style="width: 33%">
+<col style="width: 35%">
+<col style="width: 65%">
 </colgroup>
 <thead>
 <tr class="header">
 <th>Symbol</th>
-<th>Meaning</th>
-<th>Units or convention</th>
+<th>Meaning, units, and convention</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td><span class="math inline">\(t\)</span></td>
-<td>Continuous time</td>
-<td><span class="math inline">\(\mathrm{s}\)</span></td>
+<td>Continuous time in <span class="math inline">\(\mathrm{s}\)</span>.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(k\in\mathbb N_0\)</span></td>
-<td>Sample index, where <span class="math inline">\(\mathbb N_0=\{0,1,2,\ldots\}\)</span></td>
-<td>Dimensionless integer</td>
+<td>Sample index, where <span class="math inline">\(\mathbb N_0=\{0,1,2,\ldots\}\)</span>.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(t_k\)</span></td>
-<td>Time at sample <span class="math inline">\(k\)</span></td>
-<td><span class="math inline">\(\mathrm{s}\)</span></td>
+<td>Time at sample <span class="math inline">\(k\)</span>, in <span class="math inline">\(\mathrm{s}\)</span>.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\Delta t=t_{k+1}-t_k\)</span></td>
-<td>Sampling or numerical-integration interval</td>
-<td><span class="math inline">\(\mathrm{s}\)</span></td>
+<td>Sampling or numerical-integration interval in <span class="math inline">\(\mathrm{s}\)</span>.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(\dot{\mathbf{x}},\ddot{\mathbf{x}}\)</span></td>
-<td>First and second derivatives with respect to time</td>
-<td>Quantity per <span class="math inline">\(\mathrm{s}\)</span> and per <span class="math inline">\(\mathrm{s}^2\)</span></td>
+<td>First and second derivatives with respect to time, with units of the differentiated quantity per <span class="math inline">\(\mathrm{s}\)</span> and per <span class="math inline">\(\mathrm{s}^2\)</span>.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\{w\},\{b\}\)</span></td>
-<td>World and robot body frames</td>
-<td>—</td>
+<td>World and robot body frames.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(O_w,O_b\)</span></td>
-<td>Origins of the world and body frames</td>
-<td>—</td>
+<td>Origins of the world and body frames.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\mathbf{q}=[x\;y\;\theta]^\mathsf{T}\)</span></td>
-<td>Planar robot pose coordinates in the world frame</td>
-<td><span class="math inline">\(\mathrm{m},\mathrm{m},\mathrm{rad}\)</span></td>
+<td>Planar robot pose coordinates in the world frame, with component units <span class="math inline">\(\mathrm{m},\mathrm{m},\mathrm{rad}\)</span>.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(\theta\)</span></td>
-<td>Counter-clockwise heading of <span class="math inline">\(\{b\}\)</span> relative to <span class="math inline">\(\{w\}\)</span></td>
-<td><span class="math inline">\(\mathrm{rad}\)</span></td>
+<td>Counter-clockwise heading of <span class="math inline">\(\{b\}\)</span> relative to <span class="math inline">\(\{w\}\)</span>, in <span class="math inline">\(\mathrm{rad}\)</span>.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\mathbf u=[v\;\omega]^\mathsf T\)</span></td>
-<td>Planar body-velocity input</td>
-<td><span class="math inline">\(\mathrm{m\,s^{-1}},\mathrm{rad\,s^{-1}}\)</span></td>
+<td>Planar body-velocity input with component units <span class="math inline">\(\mathrm{m\,s^{-1}},\mathrm{rad\,s^{-1}}\)</span>.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(v,\omega\)</span></td>
-<td>Signed body-forward speed and counter-clockwise yaw rate</td>
-<td><span class="math inline">\(\mathrm{m\,s^{-1}},\mathrm{rad\,s^{-1}}\)</span></td>
+<td>Signed body-forward speed in <span class="math inline">\(\mathrm{m\,s^{-1}}\)</span> and counter-clockwise yaw rate in <span class="math inline">\(\mathrm{rad\,s^{-1}}\)</span>.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\phi_L,\phi_R\)</span></td>
-<td>Left and right wheel angles</td>
-<td><span class="math inline">\(\mathrm{rad}\)</span></td>
+<td>Left and right wheel angles in <span class="math inline">\(\mathrm{rad}\)</span>.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(\dot{\phi}_L,\dot{\phi}_R\)</span></td>
-<td>Left and right wheel angular speeds</td>
-<td><span class="math inline">\(\mathrm{rad\,s^{-1}}\)</span></td>
+<td>Left and right wheel angular speeds in <span class="math inline">\(\mathrm{rad\,s^{-1}}\)</span>.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(v_L,v_R\)</span></td>
-<td>Signed longitudinal ground speeds of the left and right wheels</td>
-<td><span class="math inline">\(\mathrm{m\,s^{-1}}\)</span></td>
+<td>Signed longitudinal ground speeds of the left and right wheels in <span class="math inline">\(\mathrm{m\,s^{-1}}\)</span>.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(r,L\)</span></td>
-<td>Effective wheel radius and track width between wheel contact lines</td>
-<td><span class="math inline">\(\mathrm{m}\)</span></td>
+<td>Effective wheel radius and track width between wheel contact lines, in <span class="math inline">\(\mathrm{m}\)</span>.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(C\)</span></td>
-<td>Instantaneous centre of curvature for planar motion</td>
-<td>Geometric point</td>
+<td>Instantaneous centre of curvature for planar motion.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(\rho\)</span></td>
-<td>Nonnegative radial distance declared in the local geometric context</td>
-<td><span class="math inline">\(\mathrm{m}\)</span></td>
+<td>Nonnegative radial distance in the declared local geometric context, in <span class="math inline">\(\mathrm{m}\)</span>.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(R\)</span></td>
-<td>Signed turning radius; positive for an ICC on the robot’s left</td>
-<td><span class="math inline">\(\mathrm{m}\)</span>; distinct from rotation matrix <span class="math inline">\(\mathbf R\)</span></td>
+<td>Signed turning radius in <span class="math inline">\(\mathrm{m}\)</span>, positive for an ICC on the robot’s left and distinct from rotation matrix <span class="math inline">\(\mathbf R\)</span>.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(\Delta\ell,\Delta\theta\)</span></td>
-<td>Signed arc-length and heading changes over an interval</td>
-<td><span class="math inline">\(\mathrm{m},\mathrm{rad}\)</span></td>
+<td>Signed arc-length change in <span class="math inline">\(\mathrm{m}\)</span> and heading change in <span class="math inline">\(\mathrm{rad}\)</span> over an interval.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\mathbf q_k^{\mathrm E}\)</span></td>
-<td>Forward Euler approximation of the pose at sample <span class="math inline">\(k\)</span></td>
-<td><span class="math inline">\(\mathrm{m},\mathrm{m},\mathrm{rad}\)</span></td>
+<td>Forward Euler approximation of the pose at sample <span class="math inline">\(k\)</span>, with the same component units as <span class="math inline">\(\mathbf q\)</span>.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(E(\Delta t)\)</span></td>
-<td>Declared numerical-integration error magnitude at step size <span class="math inline">\(\Delta t\)</span></td>
-<td>Depends on the error definition</td>
+<td>Declared numerical-integration error magnitude at step size <span class="math inline">\(\Delta t\)</span>.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(e_p\)</span></td>
-<td>One-step position-error magnitude in the declared integration comparison</td>
-<td><span class="math inline">\(\mathrm m\)</span></td>
+<td>One-step position-error magnitude in the declared integration comparison, in <span class="math inline">\(\mathrm m\)</span>.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(O(h^p)\)</span></td>
-<td>Quantity bounded in magnitude by a constant times <span class="math inline">\(h^p\)</span> as <span class="math inline">\(h\to0\)</span></td>
-<td>Units follow the bounded quantity</td>
+<td>Quantity bounded in magnitude by a constant times <span class="math inline">\(h^p\)</span> as <span class="math inline">\(h\to0\)</span>.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\operatorname{sinc}(z)\)</span></td>
-<td>Unnormalised sinc function, <span class="math inline">\(\sin z/z\)</span> for <span class="math inline">\(z\neq0\)</span> and <span class="math inline">\(1\)</span> for <span class="math inline">\(z=0\)</span></td>
-<td>Dimensionless argument and value</td>
+<td>Unnormalised sinc function, <span class="math inline">\(\sin z/z\)</span> for <span class="math inline">\(z\neq0\)</span> and <span class="math inline">\(1\)</span> for <span class="math inline">\(z=0\)</span>.</td>
 </tr>
 </tbody>
 </table>
@@ -763,97 +704,79 @@ window.Quarto = {
 <h3 class="unnumbered unlisted anchored" data-anchor-id="notation-introduced-in-sec-planar-rigid-body-motion">Notation introduced in <a href="06_planar_rigid_body_motion_se2_and_twists.html" class="quarto-xref"><span>6&nbsp; Planar Rigid-Body Motion: SE(2) and Twists</span></a></h3>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 23%">
-<col style="width: 44%">
-<col style="width: 31%">
+<col style="width: 35%">
+<col style="width: 65%">
 </colgroup>
 <thead>
 <tr class="header">
 <th>Symbol</th>
-<th>Meaning</th>
-<th>Units or convention</th>
+<th>Meaning, units, and convention</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td><span class="math inline">\({}^{a}\overline{\mathbf p}_P\)</span></td>
-<td>Homogeneous point coordinate obtained by appending <span class="math inline">\(1\)</span> to <span class="math inline">\({}^{a}\mathbf p_P\)</span></td>
-<td>Position entries in <span class="math inline">\(\mathrm m\)</span>; final entry dimensionless</td>
+<td>Homogeneous point coordinate obtained by appending <span class="math inline">\(1\)</span> to <span class="math inline">\({}^{a}\mathbf p_P\)</span>; position entries are in <span class="math inline">\(\mathrm m\)</span> and the final entry is dimensionless.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(SO(2)\)</span></td>
-<td>Special orthogonal group of planar rotation matrices</td>
-<td><span class="math inline">\(\mathbf R^\mathsf T\mathbf R=\mathbf I_2\)</span>, <span class="math inline">\(\det\mathbf R=1\)</span></td>
+<td>Special orthogonal group of planar rotation matrices satisfying <span class="math inline">\(\mathbf R^\mathsf T\mathbf R=\mathbf I_2\)</span> and <span class="math inline">\(\det\mathbf R=1\)</span>.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(SE(2)\)</span></td>
-<td>Special Euclidean group of planar rigid transformations</td>
-<td>Planar rotation and translation represented together</td>
+<td>Special Euclidean group representing planar rotation and translation together.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\mathbf{T}_{ab}\)</span></td>
-<td>Homogeneous transform mapping coordinates from frame <span class="math inline">\(\{b\}\)</span> to frame <span class="math inline">\(\{a\}\)</span></td>
-<td><span class="math inline">\(\mathbf{T}_{ab}\in SE(2)\)</span></td>
+<td>Homogeneous transform in <span class="math inline">\(SE(2)\)</span> mapping coordinates from frame <span class="math inline">\(\{b\}\)</span> to frame <span class="math inline">\(\{a\}\)</span>.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(T_{\mathbf I_2}SO(2)\)</span></td>
-<td>Tangent space of <span class="math inline">\(SO(2)\)</span> at the identity rotation <span class="math inline">\(\mathbf I_2\)</span></td>
-<td>Linear space of rotation-curve derivatives through <span class="math inline">\(\mathbf I_2\)</span></td>
+<td>Tangent space of <span class="math inline">\(SO(2)\)</span> at <span class="math inline">\(\mathbf I_2\)</span>: the linear space of rotation-curve derivatives through the identity.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(T_{\mathbf I_3}SE(2)\)</span></td>
-<td>Tangent space of <span class="math inline">\(SE(2)\)</span> at the identity transformation <span class="math inline">\(\mathbf I_3\)</span></td>
-<td>Linear space of transformation-curve derivatives through <span class="math inline">\(\mathbf I_3\)</span></td>
+<td>Tangent space of <span class="math inline">\(SE(2)\)</span> at <span class="math inline">\(\mathbf I_3\)</span>: the linear space of transformation-curve derivatives through the identity.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(\mathbf S_2\)</span></td>
-<td>Planar skew generator <span class="math inline">\(\begin{bmatrix}0&amp;-1\\1&amp;0\end{bmatrix}\)</span></td>
-<td>Dimensionless</td>
+<td>Planar skew generator <span class="math inline">\(\begin{bmatrix}0&amp;-1\\1&amp;0\end{bmatrix}\)</span>.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\mathfrak{so}(2)\)</span></td>
-<td>Lie algebra and identity tangent space of <span class="math inline">\(SO(2)\)</span></td>
-<td><span class="math inline">\(2\times2\)</span> real skew-symmetric matrices</td>
+<td>Lie algebra and identity tangent space of <span class="math inline">\(SO(2)\)</span>, comprising <span class="math inline">\(2\times2\)</span> real skew-symmetric matrices.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(\mathfrak{se}(2)\)</span></td>
-<td>Lie algebra and identity tangent space of <span class="math inline">\(SE(2)\)</span></td>
-<td>Structured <span class="math inline">\(3\times3\)</span> infinitesimal planar rigid-motion matrices</td>
+<td>Lie algebra and identity tangent space of <span class="math inline">\(SE(2)\)</span>, comprising structured <span class="math inline">\(3\times3\)</span> infinitesimal planar rigid-motion matrices.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\boldsymbol\xi=[\boldsymbol\nu^\mathsf T\;\omega]^\mathsf T\)</span></td>
-<td>Planar twist coordinate column with linear part <span class="math inline">\(\boldsymbol\nu\in\mathbb R^2\)</span> and angular part <span class="math inline">\(\omega\in\mathbb R\)</span></td>
-<td><span class="math inline">\(\mathrm{m\,s^{-1}}\)</span> and <span class="math inline">\(\mathrm{rad\,s^{-1}}\)</span></td>
+<td>Planar twist coordinate column with linear part <span class="math inline">\(\boldsymbol\nu\in\mathbb R^2\)</span> in <span class="math inline">\(\mathrm{m\,s^{-1}}\)</span> and angular part <span class="math inline">\(\omega\in\mathbb R\)</span> in <span class="math inline">\(\mathrm{rad\,s^{-1}}\)</span>.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(\widehat{\boldsymbol\xi}\)</span></td>
-<td>Hat-operator matrix representing <span class="math inline">\(\boldsymbol\xi\)</span> in <span class="math inline">\(\mathfrak{se}(2)\)</span></td>
-<td>Upper-left block in <span class="math inline">\(\mathrm{s^{-1}}\)</span>; translation column in <span class="math inline">\(\mathrm{m\,s^{-1}}\)</span></td>
+<td>Hat-operator matrix representing <span class="math inline">\(\boldsymbol\xi\)</span> in <span class="math inline">\(\mathfrak{se}(2)\)</span>; its upper-left block is in <span class="math inline">\(\mathrm{s^{-1}}\)</span> and its translation column is in <span class="math inline">\(\mathrm{m\,s^{-1}}\)</span>.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\((\cdot)^\vee\)</span></td>
-<td>Vee operator, inverse of the declared hat operator</td>
-<td>Returns the twist coordinate column</td>
+<td>Vee operator, inverse of the declared hat operator, returning the twist coordinate column.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(\boldsymbol\xi_b,\boldsymbol\xi_w\)</span></td>
-<td>Body and spatial twist coordinates for the same instantaneous motion</td>
-<td>Body axes/body origin and world axes/world origin conventions</td>
+<td>Body and spatial twist coordinates for the same instantaneous motion, using body axes/body origin and world axes/world origin respectively.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\boldsymbol\nu_b,\boldsymbol\nu_w\)</span></td>
-<td>Linear parts of the body and spatial twists</td>
-<td><span class="math inline">\(\mathrm{m\,s^{-1}}\)</span></td>
+<td>Linear parts of the body and spatial twists in <span class="math inline">\(\mathrm{m\,s^{-1}}\)</span>.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(\operatorname{Ad}_{\mathbf T}\)</span></td>
-<td>Adjoint mapping that changes twist coordinates according to rigid transform <span class="math inline">\(\mathbf T\)</span></td>
-<td>Matrix dimensions and mixed units follow the twist convention</td>
+<td>Adjoint mapping that changes twist coordinates according to rigid transform <span class="math inline">\(\mathbf T\)</span>; its dimensions and mixed units follow the declared twist convention.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\ell\)</span></td>
-<td>Declared characteristic length used to compare linear and angular twist components</td>
-<td><span class="math inline">\(\mathrm m\)</span></td>
+<td>Characteristic length in <span class="math inline">\(\mathrm m\)</span> used to compare linear and angular twist components.</td>
 </tr>
 </tbody>
 </table>
@@ -862,167 +785,135 @@ window.Quarto = {
 <h3 class="unnumbered unlisted anchored" data-anchor-id="notation-introduced-in-sec-spatial-rigid-body-motion">Notation introduced in <a href="07_degrees_of_freedom_and_spatial_motion_so3_se3.html" class="quarto-xref"><span>7&nbsp; Degrees of Freedom and Spatial Motion: SO(3) and SE(3)</span></a></h3>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 30%">
-<col style="width: 39%">
-<col style="width: 30%">
+<col style="width: 35%">
+<col style="width: 65%">
 </colgroup>
 <thead>
 <tr class="header">
 <th>Symbol</th>
-<th>Meaning</th>
-<th>Units or convention</th>
+<th>Meaning, units, and convention</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td><span class="math inline">\(\mathcal B\)</span></td>
-<td>Set of labelled material points belonging to the rigid body</td>
-<td>Abstract set</td>
+<td>Set of labelled material points belonging to the rigid body.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\chi:\mathcal B\to\mathbb R^d\)</span></td>
-<td>Placement map assigning a world position to every material point in a <span class="math inline">\(d\)</span>-dimensional model</td>
-<td>Output coordinates measured in <span class="math inline">\(\mathrm m\)</span></td>
+<td>Placement map assigning a world position in <span class="math inline">\(\mathrm m\)</span> to every material point in a <span class="math inline">\(d\)</span>-dimensional model.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(\mathcal C\)</span></td>
-<td>Configuration space: the set of all configurations allowed by the model</td>
-<td>May be curved and need not be a vector space</td>
+<td>Configuration space: the set of all configurations allowed by the model; it may be curved and need not be a vector space.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\chi\in\mathcal C\)</span></td>
-<td>One complete physical configuration represented as an admissible placement map</td>
-<td>Abstract element of <span class="math inline">\(\mathcal C\)</span></td>
+<td>One complete physical configuration represented as an admissible placement map.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(\mathbf q\)</span></td>
-<td>Chosen column of generalised coordinates describing a configuration</td>
-<td>Components and units depend on the system</td>
+<td>Chosen column of generalised coordinates describing a configuration; its component units depend on the system.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(n_{\mathrm{dof}}\)</span></td>
-<td>Number of configuration degrees of freedom</td>
-<td>Nonnegative integer</td>
+<td>Number of configuration degrees of freedom.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(n_v,n_c\)</span></td>
-<td>Numbers of scalar variables and independent regular equality constraints in a local count</td>
-<td>Nonnegative integers</td>
+<td>Numbers of scalar variables and independent regular equality constraints in a local count.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\mathbf z\in\mathbb R^{n_v}\)</span></td>
-<td>Ambient coordinate column used to express equality constraints</td>
-<td>Components and units depend on the system</td>
+<td>Ambient coordinate column used to express equality constraints; its component units depend on the system.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(\mathbf g:\mathbb R^{n_v}\to\mathbb R^{n_c}\)</span></td>
-<td>Equality-constraint mapping, with valid coordinates satisfying <span class="math inline">\(\mathbf g(\mathbf z)=\mathbf 0_{n_c}\)</span></td>
-<td>Output units depend on the constraints</td>
+<td>Equality-constraint mapping, with valid coordinates satisfying <span class="math inline">\(\mathbf g(\mathbf z)=\mathbf 0_{n_c}\)</span>.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\mathbf J_{\mathbf g}(\mathbf z)\)</span></td>
-<td>Constraint Jacobian with entries <span class="math inline">\(\partial g_i/\partial z_j\)</span></td>
-<td><span class="math inline">\(n_c\times n_v\)</span>; row units depend on <span class="math inline">\(g_i\)</span> and <span class="math inline">\(z_j\)</span></td>
+<td><span class="math inline">\(n_c\times n_v\)</span> constraint Jacobian with entries <span class="math inline">\(\partial g_i/\partial z_j\)</span>; row units depend on the corresponding constraint and coordinate.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(SO(3)\)</span></td>
-<td>Special orthogonal group of spatial rotation matrices</td>
-<td><span class="math inline">\(\mathbf R^\mathsf T\mathbf R=\mathbf I_3\)</span>, <span class="math inline">\(\det\mathbf R=1\)</span></td>
+<td>Special orthogonal group of spatial rotation matrices satisfying <span class="math inline">\(\mathbf R^\mathsf T\mathbf R=\mathbf I_3\)</span> and <span class="math inline">\(\det\mathbf R=1\)</span>.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\mathbf R_x(\theta),\mathbf R_y(\theta),\mathbf R_z(\theta)\)</span></td>
-<td>Active right-hand-rule rotations about the declared coordinate axes</td>
-<td>Elements of <span class="math inline">\(SO(3)\)</span></td>
+<td>Active right-hand-rule rotations in <span class="math inline">\(SO(3)\)</span> about the declared coordinate axes.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(\mathbf Q_w,\mathbf Q_b\)</span></td>
-<td>Finite orientation increments expressed along world or body axes</td>
-<td>Elements of <span class="math inline">\(SO(3)\)</span>; premultiply or postmultiply accordingly</td>
+<td>Finite orientation increments in <span class="math inline">\(SO(3)\)</span> expressed along world or body axes; premultiply or postmultiply accordingly.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\boldsymbol\omega_w,\boldsymbol\omega_b\)</span></td>
-<td>Same world-relative angular velocity resolved along world or body axes</td>
-<td><span class="math inline">\(\mathrm{rad\,s^{-1}}\)</span></td>
+<td>Same world-relative angular velocity resolved along world or body axes, in <span class="math inline">\(\mathrm{rad\,s^{-1}}\)</span>.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(SE(3)\)</span></td>
-<td>Special Euclidean group of spatial rigid transformations</td>
-<td>Spatial rotation and translation represented together</td>
+<td>Special Euclidean group representing spatial rotation and translation together.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\mathbf T_{wb}\in SE(3)\)</span></td>
-<td>Spatial pose of frame <span class="math inline">\(\{b\}\)</span> relative to frame <span class="math inline">\(\{w\}\)</span> and transform from body to world point coordinates</td>
-<td>Rotation block dimensionless; translation block in <span class="math inline">\(\mathrm m\)</span></td>
+<td>Spatial pose of frame <span class="math inline">\(\{b\}\)</span> relative to frame <span class="math inline">\(\{w\}\)</span> and transform from body to world point coordinates; its rotation block is dimensionless and translation block is in <span class="math inline">\(\mathrm m\)</span>.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\([\mathbf v]_\times\)</span></td>
-<td>Cross-product matrix satisfying <span class="math inline">\([\mathbf v]_\times\mathbf y=\mathbf v\times\mathbf y\)</span></td>
-<td>Same units as <span class="math inline">\(\mathbf v\)</span></td>
+<td>Cross-product matrix satisfying <span class="math inline">\([\mathbf v]_\times\mathbf y=\mathbf v\times\mathbf y\)</span>, with the same units as <span class="math inline">\(\mathbf v\)</span>.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\mathfrak{so}(3)\)</span></td>
-<td>Lie algebra and identity tangent space of <span class="math inline">\(SO(3)\)</span></td>
-<td><span class="math inline">\(3\times3\)</span> real skew-symmetric matrices</td>
+<td>Lie algebra and identity tangent space of <span class="math inline">\(SO(3)\)</span>, comprising <span class="math inline">\(3\times3\)</span> real skew-symmetric matrices.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(\mathbf a_w,\alpha,\boldsymbol\varphi_w=\alpha\mathbf a_w\)</span></td>
-<td>Unit rotation axis, signed angle, and rotation-vector coordinates expressed along world axes</td>
-<td>Dimensionless axis; angle and rotation vector labelled in <span class="math inline">\(\mathrm{rad}\)</span></td>
+<td>Unit rotation axis, signed angle, and rotation-vector coordinates expressed along world axes; the angle and rotation vector are labelled in <span class="math inline">\(\mathrm{rad}\)</span>.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\exp(\mathbf A)\)</span></td>
-<td>Matrix exponential <span class="math inline">\(\sum_{j=0}^{\infty}\mathbf A^j/j!\)</span></td>
-<td>Dimensionless output when <span class="math inline">\(\mathbf A\)</span> is dimensionless</td>
+<td>Matrix exponential <span class="math inline">\(\sum_{j=0}^{\infty}\mathbf A^j/j!\)</span>.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(\mathsf q=(q_w,\mathbf q_v)\)</span></td>
-<td>Quaternion written as an ordered scalar–vector pair</td>
-<td>Dimensionless components</td>
+<td>Quaternion written as an ordered scalar–vector pair.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\otimes\)</span></td>
-<td>Hamilton product of two quaternions</td>
-<td>Order follows rotation-composition order</td>
+<td>Hamilton product of two quaternions, with order following rotation-composition order.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(\mathsf q^*=(q_w,-\mathbf q_v)\)</span></td>
-<td>Quaternion conjugate; the inverse when <span class="math inline">\(\mathsf q\)</span> has unit norm</td>
-<td>Dimensionless</td>
+<td>Quaternion conjugate; the inverse when <span class="math inline">\(\mathsf q\)</span> has unit norm.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\mathfrak{se}(3)\)</span></td>
-<td>Lie algebra and identity tangent space of <span class="math inline">\(SE(3)\)</span></td>
-<td>Structured <span class="math inline">\(4\times4\)</span> infinitesimal spatial rigid-motion matrices</td>
+<td>Lie algebra and identity tangent space of <span class="math inline">\(SE(3)\)</span>, comprising structured <span class="math inline">\(4\times4\)</span> infinitesimal spatial rigid-motion matrices.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(\boldsymbol\xi=[\boldsymbol\nu^\mathsf T\;\boldsymbol\omega^\mathsf T]^\mathsf T\)</span></td>
-<td>Spatial twist coordinate column in the project’s linear-first order</td>
-<td>Three entries in <span class="math inline">\(\mathrm{m\,s^{-1}}\)</span> followed by three in <span class="math inline">\(\mathrm{rad\,s^{-1}}\)</span></td>
+<td>Spatial twist coordinate column in the project’s linear-first order: three entries in <span class="math inline">\(\mathrm{m\,s^{-1}}\)</span> followed by three in <span class="math inline">\(\mathrm{rad\,s^{-1}}\)</span>.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\|\mathbf M\|_{\mathrm F}\)</span></td>
-<td>Frobenius norm of a real matrix</td>
-<td>Units follow the matrix entries</td>
+<td>Frobenius norm of a real matrix, with units following its entries.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(e_{\mathrm{orth}},e_{\det},e_q\)</span></td>
-<td>Orthogonality, determinant, and unit-quaternion residuals</td>
-<td>Dimensionless</td>
+<td>Orthogonality, determinant, and unit-quaternion residuals.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\|\boldsymbol\xi\|_\ell\)</span></td>
-<td>Twist comparison magnitude after choosing characteristic length <span class="math inline">\(\ell\)</span></td>
-<td><span class="math inline">\(\mathrm{m\,s^{-1}}\)</span>; application-dependent</td>
+<td>Application-dependent twist comparison magnitude in <span class="math inline">\(\mathrm{m\,s^{-1}}\)</span> after choosing characteristic length <span class="math inline">\(\ell\)</span>.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(\boldsymbol\Omega_k=[\boldsymbol\omega_{b,k}]_\times\)</span></td>
-<td>Body-expressed angular-velocity matrix at sample <span class="math inline">\(k\)</span></td>
-<td><span class="math inline">\(\mathrm{s^{-1}}\)</span></td>
+<td>Body-expressed angular-velocity matrix at sample <span class="math inline">\(k\)</span>, in <span class="math inline">\(\mathrm{s^{-1}}\)</span>.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\widetilde{\mathbf R}_{k+1}\)</span></td>
-<td>Forward Euler candidate for the next orientation matrix</td>
-<td>Dimensionless; not necessarily in <span class="math inline">\(SO(3)\)</span></td>
+<td>Forward Euler candidate for the next orientation matrix; it is not necessarily in <span class="math inline">\(SO(3)\)</span>.</td>
 </tr>
 </tbody>
 </table>
@@ -1031,142 +922,115 @@ window.Quarto = {
 <h3 class="unnumbered unlisted anchored" data-anchor-id="notation-introduced-in-sec-screw-motion-se3-exponential-spatial-integration">Notation introduced in <a href="08_screw_motion_se3_exponential_and_spatial_integration.html" class="quarto-xref"><span>8&nbsp; Screw Motion, the SE(3) Exponential, and Spatial Pose Integration</span></a></h3>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 33%">
-<col style="width: 33%">
-<col style="width: 33%">
+<col style="width: 35%">
+<col style="width: 65%">
 </colgroup>
 <thead>
 <tr class="header">
 <th>Symbol</th>
-<th>Meaning</th>
-<th>Units or convention</th>
+<th>Meaning, units, and convention</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td><span class="math inline">\(I,L_i,\mathcal B_i,\bigsqcup_{i\in I}\mathcal B_i\)</span></td>
-<td>Finite link-index set, link <span class="math inline">\(i\)</span>, its material-point set, and the disjoint union of all link point sets</td>
-<td>Abstract sets and labels</td>
+<td>Finite link-index set, link <span class="math inline">\(i\)</span>, its material-point set, and the disjoint union of all link point sets.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(c_b:\mathcal B_b\to\mathbb R^3\)</span></td>
-<td>Fixed body-coordinate assignment mapping each material point of link <span class="math inline">\(b\)</span> to its coordinates in frame <span class="math inline">\(\{b\}\)</span></td>
-<td>Output in <span class="math inline">\(\mathrm m\)</span></td>
+<td>Fixed body-coordinate assignment mapping each material point of link <span class="math inline">\(b\)</span> to its coordinates in frame <span class="math inline">\(\{b\}\)</span>, in <span class="math inline">\(\mathrm m\)</span>.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(A_{\mathbf T_{wb}}:\mathbb R^3\to\mathbb R^3\)</span></td>
-<td>Affine point-coordinate map induced by pose matrix <span class="math inline">\(\mathbf T_{wb}\)</span></td>
-<td>Input and output in <span class="math inline">\(\mathrm m\)</span></td>
+<td>Affine point-coordinate map induced by pose matrix <span class="math inline">\(\mathbf T_{wb}\)</span>, with input and output in <span class="math inline">\(\mathrm m\)</span>.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\chi_{\mathbf T_{wb}}=A_{\mathbf T_{wb}}\circ c_b\)</span>, <span class="math inline">\(\Phi_b:SE(3)\to\mathcal C_b\)</span></td>
-<td>Rigid-link configuration induced by a pose and the one-to-one pose-to-configuration correspondence</td>
-<td>Mappings between the declared sets</td>
+<td>Rigid-link configuration induced by a pose and the one-to-one pose-to-configuration correspondence.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(\mathcal Q\)</span>, <span class="math inline">\(N\)</span>, <span class="math inline">\(n\)</span>, <span class="math inline">\(j\)</span></td>
-<td>Generalised-coordinate domain, number of joints, number of coordinates, and joint index</td>
-<td><span class="math inline">\(\mathcal Q\)</span> may contain mixed-unit coordinates; counts and index are integers</td>
+<td>Generalised-coordinate domain, number of joints, number of coordinates, and joint index; <span class="math inline">\(\mathcal Q\)</span> may contain mixed-unit coordinates.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\({}^{a}\mathcal L\)</span>, <span class="math inline">\({}^{a}\mathbf p_\ell\)</span>, <span class="math inline">\({}^{a}\mathbf s\)</span>, <span class="math inline">\(\lambda\)</span></td>
-<td>Oriented axis line, a point on it, its unit positive direction, and signed distance along it</td>
-<td>Point and <span class="math inline">\(\lambda\)</span> in <span class="math inline">\(\mathrm m\)</span>; direction dimensionless</td>
+<td>Oriented axis line, a point on it in <span class="math inline">\(\mathrm m\)</span>, its unit positive direction, and signed distance <span class="math inline">\(\lambda\)</span> in <span class="math inline">\(\mathrm m\)</span>.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(\theta_j,\dot\theta_j,d_j,\dot d_j\)</span></td>
-<td>Revolute angle and angular rate, and prismatic displacement and rate, for joint <span class="math inline">\(j\)</span></td>
-<td><span class="math inline">\(\mathrm{rad}\)</span>, <span class="math inline">\(\mathrm{rad\,s^{-1}}\)</span>, <span class="math inline">\(\mathrm m\)</span>, <span class="math inline">\(\mathrm{m\,s^{-1}}\)</span></td>
+<td>Revolute angle and rate in <span class="math inline">\(\mathrm{rad}\)</span> and <span class="math inline">\(\mathrm{rad\,s^{-1}}\)</span>, and prismatic displacement and rate in <span class="math inline">\(\mathrm m\)</span> and <span class="math inline">\(\mathrm{m\,s^{-1}}\)</span>, for joint <span class="math inline">\(j\)</span>.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\mathbf F_e:\mathcal Q\to SE(3)\)</span></td>
-<td>Forward-kinematics map returning the pose of selected frame <span class="math inline">\(\{e\}\)</span> relative to space frame <span class="math inline">\(\{s\}\)</span></td>
-<td>Rotation dimensionless; translation in <span class="math inline">\(\mathrm m\)</span></td>
+<td>Forward-kinematics map returning the pose of selected frame <span class="math inline">\(\{e\}\)</span> relative to space frame <span class="math inline">\(\{s\}\)</span>; rotation is dimensionless and translation is in <span class="math inline">\(\mathrm m\)</span>.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(h\)</span></td>
-<td>Signed screw pitch: axial travel per positive radian of rotation</td>
-<td><span class="math inline">\(\mathrm{m\,rad^{-1}}\)</span></td>
+<td>Signed screw pitch in <span class="math inline">\(\mathrm{m\,rad^{-1}}\)</span>: axial travel per positive radian of rotation.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\({}^{a}\mathbf S_R,{}^{a}\mathbf S_H,{}^{a}\mathbf S_P\)</span></td>
-<td>Normalised revolute, finite-pitch helical, and prismatic screw-axis coordinate columns expressed in frame <span class="math inline">\(\{a\}\)</span></td>
-<td>Linear-first six-entry columns with case-dependent mixed units</td>
+<td>Normalised revolute, finite-pitch helical, and prismatic screw-axis coordinate columns expressed in frame <span class="math inline">\(\{a\}\)</span>, using linear-first six-entry order and case-dependent mixed units.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\({}^{a}\mathbf S=[({}^{a}\mathbf s_v)^{\mathsf T}\;({}^{a}\mathbf s_\omega)^{\mathsf T}]^{\mathsf T}\)</span></td>
-<td>Normalised screw-axis coordinates with linear and angular coefficient blocks</td>
-<td><span class="math inline">\(\mathbf s_v\)</span> in <span class="math inline">\(\mathrm{m\,rad^{-1}}\)</span> for rotational screws and dimensionless for prismatic screws; <span class="math inline">\(\mathbf s_\omega\)</span> dimensionless</td>
+<td>Normalised screw-axis coordinates with linear and angular coefficient blocks; <span class="math inline">\(\mathbf s_v\)</span> is in <span class="math inline">\(\mathrm{m\,rad^{-1}}\)</span> for rotational screws and dimensionless for prismatic screws, while <span class="math inline">\(\mathbf s_\omega\)</span> is dimensionless.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\sigma,\dot\sigma\)</span></td>
-<td>Signed motion amount along a normalised screw and its rate</td>
-<td><span class="math inline">\(\mathrm{rad}\)</span> and <span class="math inline">\(\mathrm{rad\,s^{-1}}\)</span> for rotational screws; <span class="math inline">\(\mathrm m\)</span> and <span class="math inline">\(\mathrm{m\,s^{-1}}\)</span> for prismatic screws</td>
+<td>Signed motion amount along a normalised screw and its rate: <span class="math inline">\(\mathrm{rad}\)</span> and <span class="math inline">\(\mathrm{rad\,s^{-1}}\)</span> for rotational screws, or <span class="math inline">\(\mathrm m\)</span> and <span class="math inline">\(\mathrm{m\,s^{-1}}\)</span> for prismatic screws.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(\widehat{{}^{a}\mathbf S}\)</span></td>
-<td>Hat-operator matrix representation of a screw axis in <span class="math inline">\(\mathfrak{se}(3)\)</span></td>
-<td>Mixed units follow <span class="math inline">\({}^{a}\mathbf S\)</span></td>
+<td>Hat-operator matrix representation of a screw axis in <span class="math inline">\(\mathfrak{se}(3)\)</span>, with mixed units following <span class="math inline">\({}^{a}\mathbf S\)</span>.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\({}^{a}\boldsymbol\eta=[({}^{a}\boldsymbol\rho)^{\mathsf T}\;({}^{a}\boldsymbol\phi)^{\mathsf T}]^{\mathsf T}\)</span></td>
-<td>Finite exponential-coordinate column with linear block <span class="math inline">\(\boldsymbol\rho\)</span> and rotation-vector block <span class="math inline">\(\boldsymbol\phi\)</span></td>
-<td>First three entries in <span class="math inline">\(\mathrm m\)</span>; final three labelled in <span class="math inline">\(\mathrm{rad}\)</span></td>
+<td>Finite exponential-coordinate column with linear block <span class="math inline">\(\boldsymbol\rho\)</span> in <span class="math inline">\(\mathrm m\)</span> and rotation-vector block <span class="math inline">\(\boldsymbol\phi\)</span> labelled in <span class="math inline">\(\mathrm{rad}\)</span>.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(\mathbf T_\Delta\)</span></td>
-<td>Finite rigid-displacement transformation produced by a screw exponential or finite twist increment</td>
-<td>Element of <span class="math inline">\(SE(3)\)</span>; translation in <span class="math inline">\(\mathrm m\)</span></td>
+<td>Finite rigid-displacement transformation in <span class="math inline">\(SE(3)\)</span> produced by a screw exponential or finite twist increment; translation is in <span class="math inline">\(\mathrm m\)</span>.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\boldsymbol\Omega=[{}^{a}\mathbf s_\omega]_\times\)</span>, <span class="math inline">\(\mathbf G(\theta)\)</span></td>
-<td>Unit-axis cross-product matrix and normalised-screw translation map</td>
-<td><span class="math inline">\(\boldsymbol\Omega\)</span> dimensionless; <span class="math inline">\(\mathbf G\)</span> maps <span class="math inline">\(\mathrm{m\,rad^{-1}}\)</span> to <span class="math inline">\(\mathrm m\)</span></td>
+<td>Unit-axis cross-product matrix and normalised-screw translation map; <span class="math inline">\(\mathbf G\)</span> maps <span class="math inline">\(\mathrm{m\,rad^{-1}}\)</span> to <span class="math inline">\(\mathrm m\)</span>.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(\operatorname{Log}(\mathbf T)\)</span>, <span class="math inline">\(\log_{\mathrm{sel}}\)</span>, <span class="math inline">\(\mathcal D_{\mathrm{sel}}\)</span>, <span class="math inline">\(\log_{\mathrm p}\)</span></td>
-<td>Set of all real rigid-motion logarithms, a selected single-valued branch, its domain, and the chapter’s principal branch</td>
-<td>Logarithms are elements of <span class="math inline">\(\mathfrak{se}(3)\)</span> with finite mixed-unit blocks</td>
+<td>Set of all real rigid-motion logarithms, a selected single-valued branch, its domain, and the chapter’s principal branch; logarithms lie in <span class="math inline">\(\mathfrak{se}(3)\)</span> with finite mixed-unit blocks.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\boldsymbol\Phi=[{}^{a}\boldsymbol\phi]_\times\)</span></td>
-<td>Cross-product matrix of the finite rotation-vector block</td>
-<td>Entries labelled in <span class="math inline">\(\mathrm{rad}\)</span></td>
+<td>Cross-product matrix of the finite rotation-vector block, with entries labelled in <span class="math inline">\(\mathrm{rad}\)</span>.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(A(\theta),B(\theta),C(\theta),D(\theta)\)</span></td>
-<td>Continuously extended scalar coefficients used in the rotation, left-Jacobian, and inverse-left-Jacobian formulas</td>
-<td>Dimensionless</td>
+<td>Continuously extended scalar coefficients used in the rotation, left-Jacobian, and inverse-left-Jacobian formulas.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\mathbf J({}^{a}\boldsymbol\phi)\)</span></td>
-<td>Left Jacobian of <span class="math inline">\(SO(3)\)</span> mapping <span class="math inline">\(\boldsymbol\rho\)</span> to the finite translation column</td>
-<td>Dimensionless <span class="math inline">\(3\times3\)</span> matrix</td>
+<td>Dimensionless <span class="math inline">\(3\times3\)</span> left Jacobian of <span class="math inline">\(SO(3)\)</span> mapping <span class="math inline">\(\boldsymbol\rho\)</span> to the finite translation column.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(c_\theta,{}^{a}\mathbf u,s_\theta,\mathbf Q\)</span></td>
-<td>Trace-derived cosine, skew-difference column, sine magnitude, and symmetric axis outer-product matrix used by the principal rotation logarithm</td>
-<td>Dimensionless</td>
+<td>Trace-derived cosine, skew-difference column, sine magnitude, and symmetric axis outer-product matrix used by the principal rotation logarithm.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\theta_{\mathrm{series}},\varepsilon_\pi,\varepsilon_{\mathrm{zero}},\varepsilon_{p,0}\)</span></td>
-<td>Series-selection, near-<span class="math inline">\(\pi\)</span>, angular-zero, and translation-zero thresholds</td>
-<td>First three in <span class="math inline">\(\mathrm{rad}\)</span>; <span class="math inline">\(\varepsilon_{p,0}\)</span> in <span class="math inline">\(\mathrm m\)</span></td>
+<td>Series-selection, near-<span class="math inline">\(\pi\)</span>, angular-zero, and translation-zero thresholds; the first three are in <span class="math inline">\(\mathrm{rad}\)</span> and <span class="math inline">\(\varepsilon_{p,0}\)</span> is in <span class="math inline">\(\mathrm m\)</span>.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(\|\mathbf v\|_\infty\)</span></td>
-<td>Infinity norm: the largest absolute component of a finite column</td>
-<td>Same units as <span class="math inline">\(\mathbf v\)</span></td>
+<td>Infinity norm: the largest absolute component of a finite column, with the same units as <span class="math inline">\(\mathbf v\)</span>.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\widetilde{\mathbf T}\)</span>, <span class="math inline">\(e_{\mathrm{row}}\)</span></td>
-<td>Candidate homogeneous transformation and its bottom-row residual before validation</td>
-<td>Candidate translation in <span class="math inline">\(\mathrm m\)</span>; residual dimensionless</td>
+<td>Candidate homogeneous transformation and its bottom-row residual before validation; candidate translation is in <span class="math inline">\(\mathrm m\)</span> and the residual is dimensionless.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(e_{R,\mathrm{rt}},e_{p,\mathrm{rt}}\)</span></td>
-<td>Rotation and translation residuals for an exponential/logarithm round trip</td>
-<td>Dimensionless and <span class="math inline">\(\mathrm m\)</span>, respectively</td>
+<td>Rotation and translation residuals for an exponential/logarithm round trip, dimensionless and in <span class="math inline">\(\mathrm m\)</span> respectively.</td>
 </tr>
 </tbody>
 </table>

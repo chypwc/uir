@@ -481,7 +481,7 @@ window.Quarto = {
 </header>
 
 
-<p>The code explained in this companion is in <a href="https://github.com/chypwc/robotics-learning-lab/tree/main/ros_ws/src/rigid_body_kinematics"><code>ros_ws/src/rigid_body_kinematics</code></a>. Public headers are under <a href="https://github.com/chypwc/robotics-learning-lab/tree/main/ros_ws/src/rigid_body_kinematics/include/rigid_body_kinematics"><code>include/rigid_body_kinematics/</code></a>, compiled implementations are under <a href="https://github.com/chypwc/robotics-learning-lab/tree/main/ros_ws/src/rigid_body_kinematics/src"><code>src/</code></a>, and deterministic GTests are under <a href="https://github.com/chypwc/robotics-learning-lab/tree/main/ros_ws/src/rigid_body_kinematics/test"><code>test/</code></a>.</p>
+<p>The code explained in this companion is in <a href="https://github.com/chypwc/uir/tree/main/ros_ws/src/rigid_body_kinematics"><code>ros_ws/src/rigid_body_kinematics</code></a>. Public headers are under <a href="https://github.com/chypwc/uir/tree/main/ros_ws/src/rigid_body_kinematics/include/rigid_body_kinematics"><code>include/rigid_body_kinematics/</code></a>, compiled implementations are under <a href="https://github.com/chypwc/uir/tree/main/ros_ws/src/rigid_body_kinematics/src"><code>src/</code></a>, and deterministic GTests are under <a href="https://github.com/chypwc/uir/tree/main/ros_ws/src/rigid_body_kinematics/test"><code>test/</code></a>.</p>
 <section id="sec-spatial-kernel-cpp-cmake-ament" class="level2" data-number="9.1">
 <h2 data-number="9.1" class="anchored" data-anchor-id="sec-spatial-kernel-cpp-cmake-ament"><span class="header-section-number">9.1</span> From C++ source to a reusable ROS 2 library</h2>
 <p>The <code>Rotation3</code> code becomes useful to another program only after the compiler converts it to machine code, the build system packages that code as a library, and the installed package tells downstream software where to find the library and its headers. This section follows that complete path through the actual <code>rigid_body_kinematics</code> package.</p>
@@ -490,8 +490,8 @@ window.Quarto = {
 <p>These tools act at different layers:</p>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 9%">
-<col style="width: 90%">
+<col style="width: 25%">
+<col style="width: 75%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -535,19 +535,19 @@ window.Quarto = {
 <p>The header is included as source text wherever its declarations are needed. The compiler separately converts each <code>.cpp</code> file into an object file, conventionally ending in <code>.o</code>. An object file contains machine code and symbol information, but it is not yet the reusable package interface or a runnable program.</p>
 <p>For the present package, the concrete paths are</p>
 <pre class="text"><code>include/rigid_body_kinematics/rotation3.hpp
-                         │ included while compiling
-                         ↓
-src/rotation3.cpp ── compile ──&gt; rotation3.cpp.o
-                                      │
-                                      │ archive
-                                      ↓
+                         | included while compiling
+                         v
+src/rotation3.cpp -- compile --&gt; rotation3.cpp.o
+                                      |
+                                      | archive
+                                      v
                          librigid_body_kinematics.a
 
-test/test_rotation3.cpp ── compile ──&gt; test_rotation3.cpp.o
-                                      │
-                                      │ link with the static library
-                                      │ and GoogleTest
-                                      ↓
+test/test_rotation3.cpp -- compile --&gt; test_rotation3.cpp.o
+                                      |
+                                      | link with the static library
+                                      | and GoogleTest
+                                      v
                                 test_rotation3</code></pre>
 <p>The extension <code>.a</code> means a static library archive. When a later executable links this library, the linker incorporates the required compiled library code into that executable. A shared Linux library would normally end in <code>.so</code> and would remain a separate run-time file. The configured package produces <code>librigid_body_kinematics.a</code>; it does not presently produce a <code>.so</code>.</p>
 <p>This split also explains two common error families. A compiler error means that one source file could not be translated, for example because a type is unknown or a semicolon is missing. An <code>undefined reference</code> from the linker means the declaration was sufficient to compile a call, but no linked object or library supplied the required compiled definition.</p>
