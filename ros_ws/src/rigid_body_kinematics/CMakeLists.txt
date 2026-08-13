@@ -21,7 +21,9 @@ find_package(Eigen3 REQUIRED)
 # rigid_body_kinematics library, like librigid_body_kinematics.so
 add_library(${PROJECT_NAME}
   src/rotation3.cpp
+  src/transform3.cpp
 )
+
 
 # Create a namespaced alias for the same library target.
 # This allows it to be referred to as:
@@ -86,6 +88,14 @@ if(BUILD_TESTING)
   )
 
   target_link_libraries(test_rotation3
+    ${PROJECT_NAME}
+  )
+
+  ament_add_gtest(test_transform3
+    test/test_transform3.cpp
+  )
+
+  target_link_libraries(test_transform3
     ${PROJECT_NAME}
   )
 

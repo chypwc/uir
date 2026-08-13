@@ -23,6 +23,15 @@ public:
   [[nodiscard]] Eigen::Vector3d rotate_vector(
     const Eigen::Vector3d & vector_b) const;
 
+  // Return the validated rotation matrix
+  [[nodiscard]] Eigen::Matrix3d matrix() const;
+
+  // Compose R_ab with R_bc to produce R_ac
+  [[nodiscard]] Rotation3 compose(const Rotation3 & rotation_bc) const;
+
+  // Return the inverse rotation R_ba
+  [[nodiscard]] Rotation3 inverse() const;
+
 private:
   // Construct from underlying matrix
   explicit Rotation3(const Eigen::Matrix3d & matrix);

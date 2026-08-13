@@ -77,4 +77,24 @@ Eigen::Vector3d Rotation3::rotate_vector(const Eigen::Vector3d & vector_b) const
   return vector_a;
 }
 
+Eigen::Matrix3d Rotation3::matrix() const { return matrix_; }
+
+Rotation3 Rotation3::compose(const Rotation3 & rotation_bc) const
+{
+  const Eigen::Matrix3d matrix_ac = matrix_ * rotation_bc.matrix_;
+
+  if (!matrix_ac.allFinite()) {
+    throw GeometryException(
+      GeometryError::unsupported_magnitude,
+      "Rotation composition produced a non-finite result.");
+  }
+
+  return Rotation3(matrix_ac);
+}
+
+Rotation3 Rotation3::inverse() const
+{
+  const Eigen::Matrix3d matrix_ba = matrix_.transpose();
+  return Rotation3(matrix_ba);
+}
 }  // namespace rigid_body_kinematics

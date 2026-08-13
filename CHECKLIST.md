@@ -20,7 +20,7 @@ All phases belong to the learning programme. Phase 9 and Phase 12 are distinct r
 | Milestone | Phases | Outcome | Status | Evidence |
 |---|---:|---|---|---|
 | `M0` — Environment bootstrap | 0 | Reproducible development environment | Complete | [Setup](docs/environment/environment_setup.md), [verification](docs/environment/environment_verification.md) |
-| `M1` — Classical intelligence foundation | 1–5 | Bounded planar-manipulator laboratory, classical mobile-robot inspection mission, and reusable autonomy contracts | Active | — |
+| `M1` — Classical intelligence foundation | 1–5 | Bounded planar-manipulator laboratory, classical mobile-robot inspection mission, and reusable state-space, estimation, perception, world-state, optimisation, decision, planning, telemetry, and safety contracts | Active | — |
 | `M2` — Reusable learning foundation | 6 | Reproducible reinforcement-learning, data, safety-cost, and evaluation workflows | Queued | — |
 | `M3` — Classical manipulation platform | 7 | Frozen classical manipulation and safety baseline | Queued | — |
 | `M4` — Manipulation learning | 8 | Frozen manipulation data and selected model-free learned baseline | Queued | — |
@@ -34,19 +34,19 @@ All phases belong to the learning programme. Phase 9 and Phase 12 are distinct r
 - **Milestone:** `M1` — Classical intelligence foundation.
 - **Phase:** Phase 1 — Geometry, mechanics, and control.
 - **Capability:** `P1.2` — Spatial geometry kernel.
-- **Active task:** Implement, test, understand, and retrospectively document the validated $SO(3)$ rotation and free-vector-rotation mathematical cycle, completing only the package infrastructure required by that cycle.
+- **Active task:** Run the checklist-declared intermediate C++ quality gate across the stable spatial-representation, vector and point action, composition, inversion, public-interface, and package-structure work.
 - **Next capability:** `P1.3` — General robot kinematics and Jacobians.
 - **Blockers:** None.
 
 ## Phase 1 — Geometry, mechanics, and control
 
-Phase 1 closes when two bounded learning systems pass. First, a deterministic 2R/3R planar manipulator laboratory must solve declared inverse-kinematics cases and track joint trajectories with classical controllers under declared gravity, friction, saturation, disturbance, and model mismatch. Second, the headless simulated differential-drive robot must estimate its planar motion, follow bounded straight and curved trajectories under declared disturbances, and reach a stopped-safe state after every declared command failure. The two manipulator specifications own the laboratory scenarios and thresholds; the final acceptance specification owns the mobile-system scenarios and thresholds. The phase report must keep the educational manipulator evidence distinct from the mobile-robot integration and safety evidence while explaining both from the shared geometry, mechanics, and control foundations.
+Phase 1 closes when its shared mathematical references and two bounded learning systems pass. The shared references must verify continuous- and discrete-time state-space models, linearisation, stability, controllability, observability, introductory Lyapunov reasoning, and LQR before later phases reuse them. First, a deterministic 2R/3R planar manipulator laboratory must solve declared inverse-kinematics cases and track joint trajectories with classical controllers, including one admitted LQR application, under declared gravity, friction, saturation, disturbance, and model mismatch. Second, the headless simulated differential-drive robot must estimate its planar motion, follow bounded straight and curved trajectories under declared disturbances, and reach a stopped-safe state after every declared command failure. The two manipulator specifications own the laboratory scenarios and thresholds; the final acceptance specification owns the mobile-system scenarios and thresholds. The phase report must keep the educational state-space reference, manipulator evidence, and mobile-robot integration and safety evidence distinct while explaining their dependency chain from the shared geometry, mechanics, and control foundations.
 
 ### Evidence-based gap assessment
 
 | Area                                            | Current evidence                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Gap to the Phase 1 goal                                                                                                                                                                                                                   | Disposition                                                                                                                                              |
 | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Linear algebra and coordinate frames            | [Chapter 1](notes/01_linear_algebra_foundations.qmd) covers vectors, matrices, rank, null spaces, determinants, and orthogonal maps; [Chapter 2](notes/02_geometry_and_coordinate_frames.qmd) covers frames, coordinate changes, and a cumulative test; Chapter 7 introduces a constraint Jacobian, rank, and tangent null space; the opening [Chapter 10](notes/10_general_robot_kinematics_and_jacobians.qmd) block defines the total derivative and multivariable chain rule | Task, space, and body robot Jacobians, robot singularities, linearisation, and eigenvalue-based stability remain untaught                                                                                                                 | Complete the queued Chapter 10 Jacobian blocks and teach the remaining mathematics where control first requires it                                       |
+| Linear algebra and coordinate frames            | [Chapter 1](notes/01_linear_algebra_foundations.qmd) covers vectors, matrices, rank, null spaces, determinants, and orthogonal maps; [Chapter 2](notes/02_geometry_and_coordinate_frames.qmd) covers frames, coordinate changes, and a cumulative test; Chapter 7 introduces a constraint Jacobian, rank, and tangent null space; the opening [Chapter 10](notes/10_general_robot_kinematics_and_jacobians.qmd) block defines the total derivative and multivariable chain rule | Task, space, and body robot Jacobians and robot singularities remain untaught | Complete the queued Chapter 10 Jacobian blocks in `P1.3` |
 | Planar rigid-body and differential-drive motion | [Chapter 3](notes/03_kinematics_and_numerical_integration.qmd), [Chapter 6](notes/06_planar_rigid_body_motion_se2_and_twists.qmd), the [specification](docs/01_motion_models/differential_drive_motion_model.md), and the [package](ros_ws/src/differential_drive_motion_model) cover ideal planar kinematics, exact constant-input integration, and Forward Euler                                                                                                              | Encoder odometry, timestamps, drift, and broader ODE treatment remain outside the closed ideal-motion capability                                                                                                                          | Preserve the accepted `P1.1` evidence and add the deferred topics only in their owning later capabilities                                                |
 | Spatial rigid-body motion                       | The reviewed [Chapter 7](notes/07_degrees_of_freedom_and_spatial_motion_so3_se3.qmd) covers degrees of freedom, $SO(3)$, $SE(3)$, quaternions, body and spatial twists, and the adjoint; the approved and rendered [Chapter 8](notes/08_screw_motion_se3_exponential_and_spatial_integration.qmd) covers screw axes, the $SE(3)$ exponential and logarithm, constant-twist integration, numerical branches, worked cases, retrieval tests, and the Chasles--Mozzi appendix; the [minimum spatial geometry kernel specification](docs/02_spatial_kinematics/spatial_geometry_kernel.md) freezes the bounded interface and analytic acceptance cases | The substantive implementation companion, C++ package, and deterministic tests do not yet exist                                                                                                                        | Review the specification, then implement and verify `P1.2`                                                                                               |
 | General robot kinematics                        | The opening [Chapter 10](notes/10_general_robot_kinematics_and_jacobians.qmd) block defines configuration coordinates, task variables, forward maps, the total derivative, the multivariable chain rule, a planar 2R example, and a retrieval test                                                                                                                                                                                                                              | The transform-chain and product-of-exponentials models, task and body/space Jacobians, rank and singularity analysis, full review, specification, implementation, and tests remain absent                                                 | Review the existing opening block when `P1.3` becomes active, then complete the reusable general-kinematics chapter and workbench                        |
@@ -54,7 +54,7 @@ Phase 1 closes when two bounded learning systems pass. First, a deterministic 2R
 | Wheeled constraints and odometry                | Chapter 3 derives the ideal no-sideways differential-drive constraint and wheel/body mapping; Chapters 3 and 7 distinguish holonomic and nonholonomic constraints                                                                                                                                                                                                                                                                                                               | The general Pfaffian-to-parametric framework, rolling-constraint matrices, encoder odometry, Ackermann steering, and the bicycle comparison are absent                                                                                    | Add a wheeled-constraints and odometry chapter, then implement one differential-drive odometry pipeline                                                  |
 | Dynamic systems and mechanics                   | The preserved [dynamics draft](notes/16_dynamic_systems_mechanics_and_actuator_limits.qmd) covers one-dimensional Newtonian motion, wheel traction balance, and ideal gearing                                                                                                                                                                                                                                                                                                   | General state ODEs, planar yaw dynamics, manipulator mass, Coriolis/centrifugal and gravity terms, inertia, friction and traction bounds, resistance, actuator saturation, braking, and a reference numerical method are absent           | Preserve and complete the shared dynamic-systems foundation, then derive separate bounded differential-drive and 2R manipulator plants                   |
 | Trajectory generation                           | No current learning or implementation artifact                                                                                                                                                                                                                                                                                                                                                                                                                                  | Path versus trajectory, time scaling, curvature, velocity, acceleration, jerk, wheel feasibility, and safe rejection are absent                                                                                                           | Add one bounded straight-and-constant-curvature trajectory chapter and generator                                                                         |
-| Feedback and control                            | No current learning or implementation artifact                                                                                                                                                                                                                                                                                                                                                                                                                                  | Error dynamics, stability, open-loop and feedback distinctions, P/PI/PD/PID, sampling, delay, saturation, anti-windup, derivative filtering, disturbance rejection, gravity compensation, computed-torque control, and metrics are absent | Establish the shared feedback foundation on the mobile benchmark, then apply it to the bounded planar manipulator without duplicating the generic theory |
+| State-space, feedback, and control | No current approved learning or implementation artifact | Continuous- and discrete-time state-space models, linearisation about equilibria and trajectories, eigenvalue and Lyapunov stability, controllability, observability, stabilisability, detectability, Riccati equations, LQR, error dynamics, open-loop and feedback distinctions, P/PI/PD/PID, sampling, delay, saturation, anti-windup, derivative filtering, disturbance rejection, gravity compensation, computed-torque control, and metrics are absent | Build one bounded state-space and LQR reference laboratory in `P1.8`, establish the practical feedback benchmark in `P1.9`, and apply the admitted LQR and manipulator controllers in `P1.10` without duplicating the Riccati solver |
 | ROS 2 integration and safety                    | [Chapter 5](notes/05_ros2_packages_and_development_workflow.qmd) covers package and build workflow; existing functions validate numeric inputs                                                                                                                                                                                                                                                                                                                                  | ROS messages, `tf2`, simulation time, Gazebo acceptance, command supervision, watchdog, emergency stop, stopped-safe behaviour, telemetry, replay, and fault injection are absent                                                         | Learn these at their adapter boundary, verify simulation safety behaviour, and make no certified functional-safety claim                                 |
 
 ### Scope boundary
@@ -64,6 +64,7 @@ Phase 1 closes when two bounded learning systems pass. First, a deterministic 2R
 - Phase 7 owns the spatial six- or seven-degree-of-freedom product: Pinocchio validation, production URDF/SRDF, `ros2_control`, MoveIt 2, collision-aware planning, gripper and contact models, task-space force-aware control, mission execution, recovery, and safety evidence. It reuses rather than reteaches Phase 1 foundations.
 - Ackermann steering and the kinematic bicycle model remain a mathematical comparison. Do not create a second vehicle implementation.
 - Probabilistic odometry, covariance estimation, sensor fusion, and slip estimation belong to Phase 2. Obstacle-aware and kinodynamic planning belong to Phase 5.
+- Phase 1 owns continuous- and discrete-time state-space models, local linearisation, stability, controllability, observability, introductory Lyapunov reasoning, LQR, and one LQR tracking application. Finite-horizon optimal-control formulation, indirect methods, shooting, direct collocation, differential flatness, iLQR, DDP, nonlinear MPC, dynamic programming, and POMDP planning belong to Phase 5.
 - OpenCV and PCL enter with perception in Phase 3. Pinocchio, `ros2_control`, and MoveIt 2 enter with the Phase 7 manipulation product. Phase 1 uses modern C++, CMake, Eigen, GTest, ROS 2, `tf2`, Gazebo, and Python analysis only where an artifact requires them.
 - Safety evidence is limited to verified behaviour in the declared simulation and fault model; it is not a hardware or functional-safety certification.
 - Treat each concept checkbox in a note-writing block as a separate draft-and-review gate. Do not batch several unchecked learning blocks into one review.
@@ -77,6 +78,7 @@ Phase 1 closes when two bounded learning systems pass. First, a deterministic 2R
 | Operational command envelope, freshness, emergency-stop priority, reset, and stopped-safe state | `motion_safety_supervisor`; it does not reproduce controller or plant dynamics |
 | Realised wheel-effort, effort slew, traction, resistance, and disturbance constraints | `differential_drive_planar_plant` offline and the selected Gazebo actuator/physics boundary in integration |
 | Offline controller performance claims | `docs/reports/phase_01_controller_benchmark.md`, backed by tested metrics and a durable configuration/results manifest |
+| State-space analysis, Riccati solution, and LQR reference correctness | `docs/04_motion_control/linear_state_space_control_lab.md`, `linear_systems_control_lab`, and its deterministic reference tests; the selected 2R application reuses frozen gains in `planar_manipulator_lab` without duplicating the Riccati solver |
 | Educational manipulator kinematics interfaces and deterministic correctness | `docs/02_spatial_kinematics/planar_manipulator_kinematics_lab.md` and the focused `planar_manipulator_lab` tests |
 | Educational manipulator dynamics and controller-comparison claims | `docs/reports/phase_01_planar_manipulator_lab_verification.md`, backed by the dynamics/control specification, focused tests, and frozen scenario manifest |
 | Simulation safety claims | `docs/reports/phase_01_motion_safety_verification.md`, backed by fault-injection evidence |
@@ -87,17 +89,18 @@ Phase 1 closes when two bounded learning systems pass. First, a deterministic 2R
 | Capability | Learning artifact | Side project and principal tools | Status |
 |---|---|---|---|
 | `P1.1` — Ideal planar motion kernel | Close Chapters 2–3 and preserve Chapters 4 and 6 | Existing `differential_drive_motion_model`, Python and `pytest` | Complete |
-| `P1.2` — Spatial geometry kernel | Complete Chapter 8 and its Chapter 9 implementation companion | `rigid_body_kinematics`, modern C++, CMake, Eigen, and GTest | Active: first mathematical implementation cycle |
+| `P1.2` — Spatial geometry kernel | Complete Chapter 8 and its Chapter 9 implementation companion | `rigid_body_kinematics`, modern C++, CMake, Eigen, and GTest | Active: intermediate C++ quality checkpoint |
 | `P1.3` — General kinematics and Jacobians | Complete Chapter 10 and its Chapter 11 implementation companion | Extend `rigid_body_kinematics` with bounded forward and velocity kinematics | Queued: opening theory block drafted; review and remaining blocks pending |
 | `P1.4` — Planar manipulator kinematics laboratory | Chapter 12 and its Chapter 13 implementation companion | Begin `planar_manipulator_lab` with 2R/3R inverse kinematics, modern C++, Eigen, GTest, and offline visualisation | Queued |
 | `P1.5` — Wheel-odometry pipeline | Chapter 14 and its Chapter 15 implementation companion | `differential_drive_odometry`, pure Python core plus thin ROS 2 adapter, `nav_msgs`, and `tf2` | Queued |
 | `P1.6` — Differential-drive dynamics laboratory | Chapter 16 and its Chapter 17 implementation companion | `differential_drive_planar_plant`, modern C++ and deterministic numerical tests | Queued |
 | `P1.7` — Bounded trajectory generator | Chapter 18 and its Chapter 19 implementation companion | `differential_drive_trajectory`, modern C++ and independent constraint checks | Queued |
-| `P1.8` — Offline controller benchmark | Chapter 20 and its Chapter 21 implementation companion | `differential_drive_control`, modern C++ core and Python analysis | Queued |
-| `P1.9` — Planar manipulator dynamics and control laboratory | Chapter 22 and its Chapter 23 implementation companion | Extend `planar_manipulator_lab` with a 2R plant, joint trajectories, classical controllers, and frozen comparisons | Queued |
-| `P1.10` — Nominal Gazebo integration | Chapter 24 implementation companion | `differential_drive_gazebo`, thin ROS 2 adapters, and evaluator-only ground truth | Queued |
-| `P1.11` — Motion safety and fault acceptance | Extend Chapter 24 | `motion_safety_supervisor`, diagnostics, fault injection, and `rosbag2` MCAP | Queued |
-| `P1.12` — Phase 1 evaluation and learning closure | Chapter 25 cumulative review | Final acceptance campaign, phase verification report, and book render | Queued |
+| `P1.8` — State-space systems and LQR reference laboratory | Chapter 20 and its Chapter 21 implementation companion | `linear_systems_control_lab`, Python, NumPy/SciPy, and deterministic `pytest` references | Queued |
+| `P1.9` — Offline controller benchmark | Chapter 22 and its Chapter 23 implementation companion | `differential_drive_control`, modern C++ core and Python analysis | Queued |
+| `P1.10` — Planar manipulator dynamics and control laboratory | Chapter 24 and its Chapter 25 implementation companion | Extend `planar_manipulator_lab` with a 2R plant, joint trajectories, classical controllers including one frozen-gain LQR application, and matched comparisons | Queued |
+| `P1.11` — Nominal Gazebo integration | Chapter 26 implementation companion | `differential_drive_gazebo`, thin ROS 2 adapters, and evaluator-only ground truth | Queued |
+| `P1.12` — Motion safety and fault acceptance | Extend Chapter 26 | `motion_safety_supervisor`, diagnostics, fault injection, and `rosbag2` MCAP | Queued |
+| `P1.13` — Phase 1 evaluation and learning closure | Chapter 27 cumulative review | Final acceptance campaign, phase verification report, and book render | Queued |
 
 ### P1.1 — Close the preserved ideal planar motion kernel
 
@@ -150,10 +153,10 @@ The outcome is the geometry layer of the spatial and general kinematics workbenc
 
 #### Implement and document
 
-- [ ] **Active:** Implement, test, understand, and retrospectively document the validated $SO(3)$ rotation and free-vector-rotation mathematical cycle; complete the minimum `ament_cmake` library target, Eigen and GTest linkage, C++17 requirement, explicit compiler warnings, and public header/source/test layout needed by this cycle without adding a ROS runtime dependency to the mathematical core.
-- [ ] Implement, test, understand, and retrospectively document the validated $SE(3)$ representation and point-transformation mathematical cycle.
-- [ ] Implement, test, understand, and retrospectively document the $SO(3)$ and $SE(3)$ composition-and-inversion mathematical cycle.
-- [ ] Run the checklist-declared intermediate C++ quality gate after the representations, vector and point operations, composition, inversion, public API, and package structure are stable.
+- [x] Implement, test, understand, and retrospectively document the validated $SO(3)$ rotation and free-vector-rotation mathematical cycle; complete the minimum `ament_cmake` library target, Eigen and GTest linkage, C++17 requirement, explicit compiler warnings, and public header/source/test layout needed by this cycle without adding a ROS runtime dependency to the mathematical core.
+- [x] Implement, test, understand, and retrospectively document the validated $SE(3)$ representation and point-transformation mathematical cycle.
+- [x] Implement, test, understand, and retrospectively document the $SO(3)$ and $SE(3)$ composition-and-inversion mathematical cycle, including matrix reconstruction needed to inspect the results; preserve the durable explanation in the [composition-and-inversion companion section](notes/09_spatial_geometry_kernel_implementation.qmd#sec-spatial-kernel-composition-inversion) and the deterministic evidence in the [`rigid_body_kinematics` tests](ros_ws/src/rigid_body_kinematics/test).
+- [ ] **Active:** Run the checklist-declared intermediate C++ quality gate after the representations, vector and point operations, composition, inversion, public API, and package structure are stable.
 - [ ] Implement, test, understand, and retrospectively document the hat-and-vee mathematical cycle using the project's linear-first twist order.
 - [ ] Implement, test, understand, and retrospectively document the $SO(3)$ exponential-and-logarithm mathematical cycle, splitting identity, nominal-angle, and near-$\pi$ numerical branches into manageable subcycles where required.
 - [ ] Implement, test, understand, and retrospectively document the $SE(3)$ exponential, logarithm, and constant-twist-integration mathematical cycle, keeping linear and angular blocks and their units distinct.
@@ -238,7 +241,7 @@ The outcome is the first stage of one educational planar-manipulator side projec
 - [ ] Compare analytic and numerical solutions on frozen targets; verify residual and iteration thresholds, deterministic results for fixed seeds, and bounded damped-least-squares behaviour near singularities. When a numerical candidate violates limits or no valid candidate is found, require non-success without claiming that the globally constrained problem is infeasible.
 - [ ] Verify the 3R position-task Jacobian and exact null-space projection independently, show that the secondary joint-centering velocity preserves the primary task to tolerance, demonstrate the declared leakage from the damped approximate projector, and verify the declared manipulability behaviour at regular and singular configurations.
 - [ ] Link the approved theory, specification, companion, package, deterministic tests, scenario manifest, and plots and close the kinematics stage of `planar_manipulator_lab`.
-- [ ] Compare actual effort and elapsed time for `P1.1`–`P1.4` with the revised 12–16 week Phase 1 duration; ask the user to revise duration or deliberately narrow remaining scope if the estimate is no longer credible rather than silently skipping required learning or evidence.
+- [ ] Compare actual effort and elapsed time for `P1.1`–`P1.4` with the revised 14–18 week Phase 1 duration; ask the user to revise duration or deliberately narrow remaining scope if the estimate is no longer credible rather than silently skipping required learning or evidence.
 
 ### P1.5 — Wheeled constraints and wheel-odometry pipeline
 
@@ -279,7 +282,7 @@ The outcome is a deterministic plant that makes actuator limits and controller c
 
 - [ ] Before drafting, route dynamic-system concepts through *Feedback Systems*, Chapters 3, 5, and 6; route mechanics through *Modern Robotics*, Chapter 8, supported by Craig, Chapters 6 and 8, Corke, Chapter 9, and LaValle, Section 13.2.4, for the smooth differential-drive state model.
 - [ ] Continue `notes/16_dynamic_systems_mechanics_and_actuator_limits.qmd`, preserving all useful material from the renamed draft.
-- [ ] Define state, input, output, the vector ODE $\dot{\mathbf x}=f(\mathbf x,\mathbf u,t)$, conversion of higher-order mechanics to first-order state equations, equilibrium, local linearisation, and the eigenvalue intuition needed later for stability.
+- [ ] Define state, input, output, the vector ODE $\dot{\mathbf x}=f(\mathbf x,\mathbf u,t)$, conversion of higher-order mechanics to first-order state equations, equilibrium, and the local linearisation needed to construct later reference models; defer full continuous/discrete stability, controllability, observability, Lyapunov, Riccati, and LQR treatment to `P1.8`.
 - [ ] Generalise numerical integration from scalar Forward Euler to vector state, compare it with one declared higher-order reference method, and explain accuracy, convergence, step size, and numerical stability.
 - [ ] Derive planar Newton–Euler longitudinal and yaw dynamics, mass moment of inertia, unequal wheel-force yaw moment, wheel torque to traction, gearing, and simple resistance; for two declared identical driven wheels, reflect wheel inertia into effective longitudinal mass and yaw inertia through the ideal no-slip relation, and define bare chassis inertias so the wheel contribution is not counted twice.
 - [ ] Derive static traction bounds, demanded-versus-realised force, one bounded friction model, wheel-torque magnitude and slew-rate limits, braking, and stopping-distance reasoning; explain torque-speed, current, power, and detailed electrical models only as explicit deferrals.
@@ -337,13 +340,48 @@ The outcome is the smallest trajectory set needed for the Phase 1 controller com
 - [ ] Verify deterministic sampling, inclusion of the exact final sample, and explicit rejection of invalid limits, time steps, and requests that are infeasible under the declared geometry or wheel constraints.
 - [ ] Link the approved theory, specification, companion, package, and deterministic tests and close `P1.7`.
 
-### P1.8 — Feedback, PID, and offline controller benchmark
+### P1.8 — State-space systems and LQR reference laboratory
+
+The outcome is a bounded mathematical reference laboratory for the state-space and linear-control results that later estimation, optimal-control, manipulator, and UAV capabilities reuse. It is not a general control toolbox and does not move Phase 5 optimal-control methods into Phase 1.
+
+#### Learn and review
+
+- [ ] Draft `notes/20_state_space_stability_and_lqr.qmd` primarily from *Feedback Systems*, Chapters 3 and 5–7, supported by *Principles of Robot Autonomy*, Chapter 3, and *Modern Robotics*, Chapter 11.
+- [ ] Define continuous- and discrete-time nonlinear state-space models, state, input, output, equilibrium, nominal trajectory, and the units and physical meaning of every state-space component.
+- [ ] Derive local linearisation about an equilibrium and along a nominal trajectory using the dynamics and output Jacobians; distinguish continuous-time and discrete-time models and verify the approximation domain rather than treating a local model as globally exact.
+- [ ] Classify continuous- and discrete-time linear stability from eigenvalues; define controllability and observability, derive their finite-dimensional matrices and rank tests, and distinguish controllability from stabilisability and observability from detectability.
+- [ ] Introduce Lyapunov stability through positive-definite quadratic functions and the continuous- and discrete-time Lyapunov equations; state what the bounded analysis proves and what it does not prove for a nonlinear system.
+- [ ] Derive finite- and infinite-horizon continuous- and discrete-time LQR, the quadratic state and control cost, Riccati recursion or equation, feedback sign, gain dimensions and units, and closed-loop dynamics.
+- [ ] Explain that LQR assumes a declared linear model, full state or an independently supplied state estimate, quadratic cost, and no hard constraints; defer finite-horizon nonlinear optimal control, shooting, collocation, differential flatness, iLQR, DDP, nonlinear MPC, dynamic programming, and POMDPs to Phase 5.
+- [ ] Add worked stable, unstable, uncontrollable, unobservable, stabilisable, detectable, Lyapunov, continuous-LQR, and discrete-LQR cases; add retrieval tests, a cumulative test with answers, limitations, review, notation, glossary, `notes/_quarto.yml`, and render evidence.
+
+#### Specify
+
+- [ ] Create `docs/04_motion_control/linear_state_space_control_lab.md` with fixed continuous and discrete fixtures, state and input definitions and SI units, equilibrium and nominal-trajectory data, linearisation policy, rank and stability tolerances, cost matrices, result schemas, invalid-input behaviour, exclusions, and analytic acceptance cases.
+- [ ] Freeze independent evidence paths before implementation: analytic Jacobians and finite differences for linearisation, hand-checkable eigenvalue and rank cases, Riccati-equation residuals, and independently calculated closed-loop eigenvalues and costs.
+
+#### Implement and document
+
+- [ ] When implementation begins, create `notes/21_state_space_stability_and_lqr_implementation.qmd` with model shapes, continuous/discrete conventions, derivative evaluation, rank tolerance, eigenvalue classification, cost-matrix validation, Riccati-solver boundary, gain sign, result schema, and failure behaviour.
+- [ ] Create `ros_ws/src/linear_systems_control_lab` as a pure Python `ament_python` package using NumPy, SciPy, and deterministic `pytest` tests without a ROS runtime, simulator, or general nonlinear-optimisation dependency.
+- [ ] Implement the bounded model evaluation, equilibrium and dimension checks, analytic or finite-difference linearisation path, controllability and observability matrices, stability classification, Lyapunov residual checks, and continuous/discrete LQR adapter; use the established SciPy Riccati solvers rather than implementing a general Riccati solver.
+- [ ] Add one deterministic scenario runner for the frozen reference cases and a versioned model-and-gain export schema that `P1.10` can use after its 2R specification is frozen; do not precompute manipulator gains before the owning model and scenario exist.
+
+#### Verify and close
+
+- [ ] Verify analytic linearisation against finite differences and known scalar or low-dimensional models at equilibria and along a nominal trajectory; expose the approximation error outside the declared local region.
+- [ ] Verify stable and unstable continuous/discrete fixtures, controllable and uncontrollable fixtures, observable and unobservable fixtures, and the declared stabilisable and detectable cases without relying only on the implementation under test.
+- [ ] Verify continuous and discrete Riccati residuals, gain dimensions and sign, closed-loop eigenvalues, quadratic cost behaviour, and agreement with hand-checkable or independent reference cases.
+- [ ] Reject dimension mismatches, non-finite values, invalid sample periods, invalid rank tolerances, nonsymmetric or inadmissible cost matrices, and unsupported Riccati cases without returning a valid-looking result.
+- [ ] Link the approved theory, specification, companion, package, scenario fixtures, and deterministic tests and close `P1.8`; the selected robot application remains owned by `P1.10`.
+
+### P1.9 — Feedback, PID, and offline controller benchmark
 
 The outcome is a reproducible controller comparison on the same plant, trajectories, scenarios, metrics, and compute path.
 
 #### Learn and review
 
-- [ ] Draft `notes/20_feedback_stability_and_practical_pid_control.qmd` primarily from *Feedback Systems*, Chapters 3, 5–6, and 11, supported by *Modern Robotics*, Chapter 11 and Section 13.3.4, and Corke, Chapter 9.
+- [ ] Draft `notes/22_feedback_stability_and_practical_pid_control.qmd` primarily from *Feedback Systems*, Chapters 3, 5–6, and 11, supported by *Modern Robotics*, Chapter 11 and Section 13.3.4, Corke, Chapter 9, and the approved `P1.8` state-space chapter without repeating its linear-systems derivations.
 - [ ] Define plant, reference, output, error, sensor, controller, actuator, feedforward, open loop, closed loop, and disturbance paths before deriving a controller.
 - [ ] Derive first- and second-order error dynamics, equilibria, poles or eigenvalues, local stability, damping ratio, natural frequency, steady-state error, overshoot, settling time, and control effort.
 - [ ] Derive the roles and limitations of P, PI, PD, and PID; include constant-disturbance rejection, sampled implementation, derivative filtering, saturation, integrator windup, and one explicit anti-windup method.
@@ -360,7 +398,7 @@ The outcome is a reproducible controller comparison on the same plant, trajector
 
 #### Implement and document
 
-- [ ] When implementation begins, create `notes/21_feedback_stability_and_practical_pid_control_implementation.qmd` with error coordinates, discrete state, gain units, update order, saturation and anti-windup order, latency buffer, telemetry schema, and reproducibility controls.
+- [ ] When implementation begins, create `notes/23_feedback_stability_and_practical_pid_control_implementation.qmd` with error coordinates, discrete state, gain units, update order, saturation and anti-windup order, latency buffer, telemetry schema, and reproducibility controls.
 - [ ] Create `ros_ws/src/differential_drive_control` as a C++ `ament_cmake` package with pure controller and experiment-runner libraries independent of ROS and Gazebo.
 - [ ] Implement the frozen feedforward, proportional, and PID-based stacks without changing their contracts between scenarios.
 - [ ] Implement deterministic injection of bounded sensor noise and command latency, and configure the depended-on plant to realise wheel-effort saturation, traction limits, external force and yaw-moment disturbance, and declared parameter mismatch; do not reimplement plant constraints in the benchmark runner.
@@ -374,46 +412,49 @@ The outcome is a reproducible controller comparison on the same plant, trajector
 - [ ] Run every frozen straight and curved scenario for every controller stack; preserve negative results and do not retune per scenario unless the benchmark explicitly allows it.
 - [ ] Use Python only to generate reproducible tables and plots from the recorded series; keep acceptance calculations in the tested benchmark path.
 - [ ] Create `docs/reports/phase_01_controller_benchmark.md` with interpreted offline results, negative results, limitations, and links to the durable manifest and deterministic tests.
-- [ ] Link the approved theory, specification, companion, package, benchmark report, and deterministic tests and close `P1.8`; final Gazebo acceptance remains owned by `P1.12`.
+- [ ] Link the approved theory, specification, companion, package, benchmark report, and deterministic tests and close `P1.9`; final Gazebo acceptance remains owned by `P1.13`.
 
-### P1.9 — Planar manipulator dynamics and classical-control laboratory
+### P1.10 — Planar manipulator dynamics and classical-control laboratory
 
 The outcome is the second and final stage of `planar_manipulator_lab`: a deterministic vertical-plane 2R plant and a frozen comparison of classical joint controllers. It applies the shared mechanics, trajectory, and feedback learning without importing the Phase 7 manipulation stack.
 
 #### Learn and review
 
-- [ ] Draft `notes/22_planar_manipulator_dynamics_and_classical_control.qmd` primarily from *Modern Robotics*, Chapters 8 and 11, supported by Craig, Chapters 6 and 9–10, Corke, Chapter 9, and the already approved feedback chapter.
+- [ ] Draft `notes/24_planar_manipulator_dynamics_and_classical_control.qmd` primarily from *Modern Robotics*, Chapters 8 and 11, supported by Craig, Chapters 6 and 9–10, Corke, Chapter 9, and the already approved state-space, LQR, and feedback chapters.
 - [ ] Define the fixed-base vertical-plane 2R model with link length, mass, centre-of-mass distance, planar mass moment of inertia, joint position and velocity, gravity, viscous joint friction, joint limits, and torque limits, including the frames and SI units of every quantity.
 - [ ] Derive kinetic and potential energy and then the Euler–Lagrange equations in the form $M(\mathbf q)\ddot{\mathbf q}+\mathbf c(\mathbf q,\dot{\mathbf q})+\mathbf g(\mathbf q)+D\dot{\mathbf q}=\boldsymbol\tau$; distinguish the Coriolis/centrifugal bias vector from one possible matrix representation.
 - [ ] Derive forward dynamics, inverse dynamics, static gravity torque, and the symmetry and positive-definiteness properties of the mass matrix over the declared model domain.
 - [ ] Reuse the approved quintic time-scaling ideas to construct one fixed joint-space reference with position, velocity, and acceleration; distinguish joint-space tracking from end-effector task error.
 - [ ] Derive joint-space PD, gravity-compensated PD, inverse-dynamics feedforward, and computed-torque PD with gain units, nominal error dynamics, torque saturation, and explicit limitations under model mismatch and unmodelled contact.
+- [ ] Linearise the 2R state dynamics about one declared static equilibrium, define the state and input deviations, reuse `P1.8` to compute and freeze one LQR gain, and derive a local inverse-dynamics-feedforward plus LQR feedback trajectory-tracking application without implementing another Riccati solver.
 - [ ] Explain why integral control, task-space force control, impedance/admittance control, collision avoidance, payload contact, and adaptive or robust control are not required by this laboratory.
 - [ ] Add worked equilibrium, gravity, forward/inverse-dynamics, energy, setpoint, and trajectory-tracking cases; add retrieval tests, a cumulative test with answers, limitations, review, notation, glossary, `notes/_quarto.yml`, and render evidence.
 
 #### Specify
 
-- [ ] Create `docs/04_motion_control/planar_manipulator_dynamics_and_control.md` with the fixed 2R model, state, parameters, force and sign conventions, valid joint envelope, torque bounds, integration policy, controller interfaces, fixed references, disturbances, model-mismatch cases, metrics, deterministic seeds, status values, invalid-input behaviour, exclusions, and frozen acceptance thresholds. Treat a joint-limit crossing as a detected experiment violation and termination condition rather than inventing unmodelled hard-stop contact dynamics.
+- [ ] Create `docs/04_motion_control/planar_manipulator_dynamics_and_control.md` with the fixed 2R model, state, parameters, force and sign conventions, valid joint envelope, torque bounds, integration policy, controller interfaces, fixed references, declared LQR equilibrium, frozen gain provenance, local-validity region, disturbances, model-mismatch cases, metrics, deterministic seeds, status values, invalid-input behaviour, exclusions, and frozen acceptance thresholds. Treat a joint-limit crossing as a detected experiment violation and termination condition rather than inventing unmodelled hard-stop contact dynamics.
 - [ ] Define a durable scenario and results manifest shared by every admitted controller; freeze the same initial states, references, sample times, disturbance schedules, nominal parameters, mismatched controller parameters, metrics, and retuning policy before implementation comparisons begin.
 
 #### Implement and document
 
-- [ ] When implementation begins, create `notes/23_planar_manipulator_dynamics_and_classical_control_implementation.qmd` with state layout, model-term evaluation, forward/inverse-dynamics order, integrator, saturation, controller update order, gain units, telemetry, scenario configuration, and reproducibility controls.
+- [ ] When implementation begins, create `notes/25_planar_manipulator_dynamics_and_classical_control_implementation.qmd` with state layout, model-term evaluation, forward/inverse-dynamics order, integrator, saturation, controller update order, frozen LQR gain import and validation, gain units, telemetry, scenario configuration, and reproducibility controls.
 - [ ] Extend `ros_ws/src/planar_manipulator_lab` with separate pure model, controller, simulation, metric, and experiment-runner components; do not couple it to the differential-drive plant or controller packages and do not add a ROS runtime or simulator adapter.
 - [ ] Implement the fixed 2R mass matrix, Coriolis/centrifugal bias, gravity, viscous friction, forward and inverse dynamics, declared reference, deterministic integrator, torque saturation, joint-envelope monitoring, external joint-disturbance input, and model-mismatch injection.
-- [ ] Implement the frozen joint-space PD, gravity-compensated PD, and computed-torque PD stacks without per-scenario retuning; keep the controller's nominal model distinct from the evaluator-owned plant parameters.
+- [ ] After the 2R specification is frozen, use the accepted `linear_systems_control_lab` path to independently calculate and export the declared local linear model and LQR gain; version the model, equilibrium, cost matrices, solver configuration, residuals, and gain consumed by the C++ laboratory.
+- [ ] Implement the frozen joint-space PD, gravity-compensated PD, computed-torque PD, and admitted frozen-gain LQR tracking stacks without per-scenario retuning; keep the controller's nominal model distinct from the evaluator-owned plant parameters and do not duplicate the `P1.8` Riccati solver.
 - [ ] Extend the offline runner and plotting path to record and display joint and end-effector errors, torque, effort, energy where applicable, saturation, disturbances, and constraint violations from one versioned result schema.
 
 #### Verify and close
 
 - [ ] Verify independent closed-form mass, bias, and gravity cases; mass-matrix symmetry and positive definiteness; static gravity compensation; and forward/inverse-dynamics round trips over the frozen valid domain.
+- [ ] Verify the declared 2R equilibrium, analytic or independently checked local linearisation, exported Riccati residual, gain dimensions and units, and local closed-loop eigenvalues before applying the LQR controller.
 - [ ] Verify rest and equilibrium cases, bounded zero-gravity and zero-friction energy error, numerical refinement behaviour, torque bounds, joint-envelope violation detection, saturation status, invalid-input rejection, and deterministic repeatability.
-- [ ] Run every controller on the same setpoint and quintic-reference scenarios under nominal parameters, declared disturbances, torque saturation, and frozen mass, inertia, and friction mismatch without per-scenario retuning.
+- [ ] Run every applicable controller on the same setpoint and quintic-reference scenarios under nominal parameters, declared disturbances, torque saturation, and frozen mass, inertia, and friction mismatch without per-scenario retuning; identify any scenario outside the LQR model's declared local-validity region rather than presenting it as an equivalent global controller comparison.
 - [ ] Compare joint RMSE, end-effector position RMSE, maximum error, settling time where applicable, peak torque, integrated squared effort, saturation time, and constraint violations; preserve negative results and do not require computed torque to win every case.
 - [ ] Create `docs/reports/phase_01_planar_manipulator_lab_verification.md` with interpreted kinematics, dynamics, and control results, the scenario-manifest link, limitations, negative results, and the explicit boundary to the Phase 7 product.
-- [ ] Link both approved manipulator theory chapters, both specifications, both companions, the package, deterministic tests, scenario manifest, plots, and verification report and close `P1.9`.
+- [ ] Link both approved manipulator theory chapters, the state-space and feedback prerequisites, both manipulator specifications and companions, the package, deterministic tests, scenario manifest, plots, and verification report and close `P1.10`.
 
-### P1.10 — Nominal ROS 2 and Gazebo closed-loop integration
+### P1.11 — Nominal ROS 2 and Gazebo closed-loop integration
 
 The outcome is one headless nominal integration path that demonstrably exercises the accepted trajectory, odometry, controller, and wheel-effort interfaces. Simulator ground truth is evaluator-only.
 
@@ -425,11 +466,11 @@ The outcome is one headless nominal integration path that demonstrably exercises
 #### Specify
 
 - [ ] Create `docs/05_phase_01_integration/gazebo_closed_loop_integration.md` with the robot and world, launch graph, selected wheel-effort adapter, topics, frames, timestamps, parameters, nominal scenarios, evaluator-only ground truth, telemetry proving that the regulator output reaches the effort boundary, tolerances, exclusions, and acceptance commands.
-- [ ] Limit this capability to no-motion, straight, rotation-in-place, and constant-curvature nominal cases; leave injected failures and final mobile-system thresholds to `P1.11` and `P1.12`.
+- [ ] Limit this capability to no-motion, straight, rotation-in-place, and constant-curvature nominal cases; leave injected failures and final mobile-system thresholds to `P1.12` and `P1.13`.
 
 #### Implement and document
 
-- [ ] When implementation begins, create `notes/24_ros2_gazebo_integration_and_motion_safety_implementation.qmd` with the durable simulation-clock, launch, bridge, effort-adapter, frame, timestamp, and evaluator boundary.
+- [ ] When implementation begins, create `notes/26_ros2_gazebo_integration_and_motion_safety_implementation.qmd` with the durable simulation-clock, launch, bridge, effort-adapter, frame, timestamp, and evaluator boundary.
 - [ ] Create `ros_ws/src/differential_drive_gazebo` with the minimum robot, world, launch, nominal scenario runner, and evaluator required by the specification.
 - [ ] Add thin ROS 2 adapters to the trajectory and controller packages; do not duplicate their pure algorithms in the Gazebo package.
 - [ ] Integrate trajectory reference, odometry and joint-state feedback, controller wheel-effort request, the selected Gazebo effort adapter, `tf2`, and evaluator-only ground truth with explicit units, frames, and timestamps.
@@ -440,9 +481,9 @@ The outcome is one headless nominal integration path that demonstrably exercises
 - [ ] Run the nominal headless scenarios and verify that controller inputs contain only odometry and declared joint-state measurements while ground truth reaches only the evaluator.
 - [ ] Compare odometry with simulator ground truth on no-motion, straight, spin, and curved segments using the integration specification's tolerances.
 - [ ] Trace one complete sample from trajectory reference through regulator wheel effort to Gazebo joint response and recorded odometry.
-- [ ] Link the integration specification, implementation companion, packages, launch tests, and nominal results and close `P1.10`.
+- [ ] Link the integration specification, implementation companion, packages, launch tests, and nominal results and close `P1.11`.
 
-### P1.11 — Motion safety supervisor and fault acceptance
+### P1.12 — Motion safety supervisor and fault acceptance
 
 The outcome is separately owned, reusable command-safety logic verified through unit, integration, and declared simulation fault cases.
 
@@ -462,7 +503,7 @@ The outcome is separately owned, reusable command-safety logic verified through 
 
 #### Implement and document
 
-- [ ] Extend `notes/24_ros2_gazebo_integration_and_motion_safety_implementation.qmd` with command validation, watchdog clock, state transitions, emergency-stop priority, reset, diagnostics, recording, and shutdown behaviour only when implementation begins.
+- [ ] Extend `notes/26_ros2_gazebo_integration_and_motion_safety_implementation.qmd` with command validation, watchdog clock, state transitions, emergency-stop priority, reset, diagnostics, recording, and shutdown behaviour only when implementation begins.
 - [ ] Create `ros_ws/src/motion_safety_supervisor` with a pure deterministic state machine, focused unit tests, and a thin ROS 2 node; keep Gazebo assets and scenario orchestration in `differential_drive_gazebo`.
 - [ ] Implement safe-envelope validation, sequence and timestamp checks, command and feedback watchdogs, latched emergency stop, explicit reset policy, stopped-safe output, and structured diagnostic status.
 - [ ] Add fault scenarios and record reference, raw and validated efforts, odometry, joint states, ground truth, diagnostics, limit events, and safety interventions through `rosbag2` with MCAP storage.
@@ -473,21 +514,21 @@ The outcome is separately owned, reusable command-safety logic verified through 
 - [ ] Inject invalid command, command-publisher dropout, joint-state dropout, odometry dropout, duplicate and out-of-order timestamps, simulation-time reset, and emergency stop in headless integration tests.
 - [ ] Measure watchdog reaction time, stop time, stopping distance, intervention sequence, and diagnostic status for every applicable fault.
 - [ ] Create `docs/reports/phase_01_motion_safety_verification.md` with interpreted fault results, failures, limitations, evidence-manifest link, and the simulation-only safety claim.
-- [ ] Link the specification, companion, supervisor package, integration tests, safety report, and evidence manifest and close `P1.11`.
+- [ ] Link the specification, companion, supervisor package, integration tests, safety report, and evidence manifest and close `P1.12`.
 
-### P1.12 — Phase 1 system evaluation and learning closure
+### P1.13 — Phase 1 system evaluation and learning closure
 
 The outcome is the final Phase 1 conclusion. This capability evaluates accepted components; any defect returns to its owning package and specification rather than being patched only in the evaluator.
 
 #### Learn and review
 
-- [ ] Create `notes/25_geometry_mechanics_and_control_cumulative_review.qmd` with separate retrieval, derivation, application, and limitation blocks spanning frames, planar and spatial kinematics, Jacobians, inverse kinematics, redundancy, odometry, mobile and manipulator dynamics, trajectories, classical control, integration, and safety.
+- [ ] Create `notes/27_geometry_mechanics_and_control_cumulative_review.qmd` with separate retrieval, derivation, application, and limitation blocks spanning frames, planar and spatial kinematics, Jacobians, inverse kinematics, redundancy, odometry, mobile and manipulator dynamics, trajectories, continuous- and discrete-time state-space models, linearisation, stability, controllability, observability, Lyapunov reasoning, LQR, practical feedback, integration, and safety.
 - [ ] Complete and self-check every cumulative block, correct each blocking misconception, and obtain user approval.
 - [ ] Add the approved cumulative review to `notes/_quarto.yml`; because it introduces no new concepts or notation, verify rather than duplicate glossary and notation entries.
 
 #### Specify
 
-- [ ] Create `docs/05_phase_01_integration/phase_01_acceptance.md` as the sole owner of final mobile-system scenarios, parameterisations, metrics, thresholds, commands, environment, held-out seeds, log manifest, and pass/fail rules; reference the accepted component specifications instead of copying their requirements, and freeze the document before running the final campaign. The two planar-manipulator specifications and `P1.9` verification report remain authoritative for the separate educational laboratory.
+- [ ] Create `docs/05_phase_01_integration/phase_01_acceptance.md` as the sole owner of final mobile-system scenarios, parameterisations, metrics, thresholds, commands, environment, held-out seeds, log manifest, and pass/fail rules; reference the accepted component specifications instead of copying their requirements, and freeze the document before running the final campaign. The state-space reference specification, two planar-manipulator specifications, and `P1.10` verification report remain authoritative for their separate educational laboratories.
 - [ ] Freeze nominal straight and curved cases plus wheel-geometry mismatch, bounded external disturbance, encoder noise, command latency, physical effort and traction saturation, command dropout, feedback dropout, invalid command, timestamp fault, and emergency-stop cases.
 - [ ] Require identical system scenarios for each admitted controller stack where comparison is meaningful, and state when a safety-only scenario has no controller ranking.
 
@@ -496,7 +537,7 @@ The outcome is the final Phase 1 conclusion. This capability evaluates accepted 
 - [ ] Run the complete headless acceptance campaign from a clean documented environment and preserve its configuration, seeds, event manifest, machine-readable metrics, and retained-log hashes or locations.
 - [ ] Compare the frozen controller stacks without per-scenario retuning and report tracking error, overshoot, settling time, effort, smoothness, constraint violations, watchdog reaction time, stop time, and stopping distance.
 - [ ] Verify every final pass/fail rule against the tested metric path; preserve failed cases and negative results.
-- [ ] Confirm that the frozen `P1.9` planar-manipulator report passes its own kinematics, dynamics, and control gates; reference it without rerunning or copying its cases into the mobile-system campaign.
+- [ ] Confirm that the frozen `P1.8` state-space reference and `P1.10` planar-manipulator report pass their own mathematical, kinematics, dynamics, and control gates; reference them without rerunning or copying their cases into the mobile-system campaign.
 - [ ] Create `docs/reports/phase_01_geometry_mechanics_control_verification.md` with the final interpretation, distinct links to the planar-manipulator, mobile-controller, and safety reports, limitations, safety-claim boundary, and deferred work.
 - [ ] Render and inspect the complete Phase 1 book, link the final report in the programme table, mark Phase 1 complete, reduce this detailed section to its milestone row, and expand Phase 2.
 

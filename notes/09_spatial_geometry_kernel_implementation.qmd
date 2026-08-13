@@ -476,3 +476,443 @@ The focused GTest executable protects the governing behaviour with nine determin
 ### Deliberate limits
 
 `Eigen::Matrix3d` fixes the matrix shape at compile time, so this entry point cannot receive a wrong-shaped dynamic array; a future external-array adapter must own shape validation. `Rotation3` does not store frame names or physical units, so call sites must preserve the $\mathbf R_{ab}$, ${}^{b}\mathbf v$, and ${}^{a}\mathbf v$ relationship through their variable and interface contracts. The tolerance test admits a bounded residual but never repairs the matrix. Point transformation remains a separate operation because adding translation to a free vector would change the represented physical object.
+
+## Validated rigid transformations and point action {#sec-spatial-kernel-transform3}
+
+This implementation block answers two related questions: how does the library accept only a valid homogeneous rigid transformation, and how does that transformation change the coordinates of a point? For $\mathbf T_{ab}$, the pose of frame $\{b\}$ relative to frame $\{a\}$, the reviewed homogeneous equation is
+
+$$
+\begin{bmatrix}
+{}^{a}\mathbf p_P\\
+1
+\end{bmatrix}
+=
+\underbrace{
+\begin{bmatrix}
+\mathbf R_{ab}&{}^{a}\mathbf p_b\\
+\mathbf 0_3^{\mathsf T}&1
+\end{bmatrix}
+}_{\mathbf T_{ab}}
+\begin{bmatrix}
+{}^{b}\mathbf p_P\\
+1
+\end{bmatrix}.
+$$
+
+Expanding the upper three rows gives the operation used by the C++ implementation:
+
+$$
+{}^{a}\mathbf p_P
+=
+\mathbf R_{ab}{}^{b}\mathbf p_P
++{}^{a}\mathbf p_b.
+$$
+
+Here $\mathbf R_{ab}$ is dimensionless, while ${}^{a}\mathbf p_b$, ${}^{b}\mathbf p_P$, and ${}^{a}\mathbf p_P$ are measured in metres. The homogeneous matrix form remains convenient for derivation and later group composition. The implementation stores the equivalent rotation--translation pair because the bottom row is fixed structural information rather than independent geometric state.
+
+### The `Transform3` class
+
+The complete declaration is
+
+```cpp
+class Transform3
+{
+public:
+  // Create the identity transform
+  static Transform3 identity();
+
+  // Validate a raw homogeneous matrix and create a rigid transform
+  static Transform3 from_matrix(
+    const Eigen::Matrix4d & matrix,
+    const NumericalPolicy & policy = NumericalPolicy{});
+
+  // Transform point coordinates from frame {b} into frame {a}
+  [[nodiscard]] Eigen::Vector3d transform_point(
+    const Eigen::Vector3d & point_b) const;
+
+private:
+  Transform3(
+    const Rotation3 & rotation,
+    const Eigen::Vector3d & translation);
+
+  Rotation3 rotation_;
+  Eigen::Vector3d translation_;
+};
+```
+
+`rotation_` can contain only a `Rotation3` that has passed the $SO(3)$ checks from @sec-spatial-kernel-rotation3. `translation_` stores ${}^{a}\mathbf p_b$ in metres. The private constructor prevents a caller from combining an unchecked rotation with a translation. `identity()` constructs the pair $(\mathbf I_3,\mathbf 0_3)$.
+
+The class does not store the raw $4\times4$ input. After validation, its bottom row contains no additional information, so storing only $(\mathbf R_{ab},{}^{a}\mathbf p_b)$ prevents an internally malformed homogeneous row. A later matrix accessor can reconstruct the convenient homogeneous representation with the exact bottom row $[0\;0\;0\;1]$.
+
+### Complete `from_matrix` implementation
+
+The raw matrix entry point validates the complete representation before constructing the pair:
+
+```cpp
+Transform3 Transform3::from_matrix(
+  const Eigen::Matrix4d & matrix, const NumericalPolicy & policy)
+{
+  const bool policy_is_valid =
+    std::isfinite(policy.orthogonality_tolerance) &&
+    std::isfinite(policy.determinant_tolerance) &&
+    std::isfinite(policy.homogeneous_row_tolerance) &&
+    policy.orthogonality_tolerance >= 0.0 &&
+    policy.determinant_tolerance >= 0.0 &&
+    policy.homogeneous_row_tolerance >= 0.0;
+
+  if (!policy_is_valid) {
+    throw GeometryException(
+      GeometryError::invalid_policy,
+      "Transform tolerances must be finite and non-negative.");
+  }
+
+  if (!matrix.allFinite()) {
+    throw GeometryException(
+      GeometryError::non_finite,
+      "Transform matrix entries must be finite.");
+  }
+
+  const Eigen::Vector4d expected_bottom_row(0.0, 0.0, 0.0, 1.0);
+
+  const Eigen::Vector4d bottom_row_error =
+    matrix.row(3).transpose() - expected_bottom_row;
+
+  const double bottom_row_residual =
+    bottom_row_error.cwiseAbs().maxCoeff();
+
+  if (bottom_row_residual > policy.homogeneous_row_tolerance) {
+    throw GeometryException(
+      GeometryError::invalid_transform,
+      "Transform must have homogeneous bottom row [0, 0, 0, 1].");
+  }
+
+  const Eigen::Matrix3d rotation_matrix =
+    matrix.block<3, 3>(0, 0);
+
+  const Eigen::Vector3d translation =
+    matrix.block<3, 1>(0, 3);
+
+  const Rotation3 rotation =
+    Rotation3::from_matrix(rotation_matrix, policy);
+
+  return Transform3(rotation, translation);
+}
+```
+
+The validation order is policy, all sixteen entries, homogeneous bottom row, and then rotation block. `matrix.row(3).transpose()` converts the bottom row to a four-component column. `cwiseAbs()` takes the absolute value of each component, and `maxCoeff()` returns their infinity norm,
+
+$$
+e_{\mathrm{row}}
+=
+\max\left(
+|T_{41}|,
+|T_{42}|,
+|T_{43}|,
+|T_{44}-1|
+\right).
+$$
+
+The row is accepted when $e_{\mathrm{row}}\leq\varepsilon_{\mathrm{row}}$. A zero tolerance requires an exact structural row. The fixed-size calls `block<3, 3>(0, 0)` and `block<3, 1>(0, 3)` then extract $\mathbf R_{ab}$ and ${}^{a}\mathbf p_b$. Delegating the rotation check to `Rotation3::from_matrix` avoids maintaining a second implementation of the $SO(3)$ invariant.
+
+### Complete `transform_point` implementation
+
+The point operation expands the upper three rows of the homogeneous multiplication:
+
+```cpp
+Eigen::Vector3d Transform3::transform_point(
+  const Eigen::Vector3d & point_b) const
+{
+  if (!point_b.allFinite()) {
+    throw GeometryException(
+      GeometryError::non_finite,
+      "Point coordinates must be finite.");
+  }
+
+  const Eigen::Vector3d rotated_point =
+    rotation_.rotate_vector(point_b);
+
+  const Eigen::Vector3d point_a =
+    rotated_point + translation_;
+
+  if (!point_a.allFinite()) {
+    throw GeometryException(
+      GeometryError::unsupported_magnitude,
+      "Transformed point is outside the finite numerical range.");
+  }
+
+  return point_a;
+}
+```
+
+`rotation_.rotate_vector(point_b)` calculates $\mathbf R_{ab}{}^{b}\mathbf p_P$. Although the input describes point coordinates, this first subcalculation is the same linear action used for a free vector. Adding `translation_` completes the point transformation and is precisely what distinguishes `transform_point()` from `Rotation3::rotate_vector()`. The final finiteness check detects a finite rotated point and finite translation whose sum overflows binary64.
+
+### Analytic example and focused tests
+
+The normal non-identity fixture uses
+
+$$
+\mathbf T_{ab}
+=
+\begin{bmatrix}
+0&-1&0&1\\
+1&0&0&2\\
+0&0&1&3\\
+0&0&0&1
+\end{bmatrix},
+\qquad
+{}^{b}\mathbf p_P
+=
+\begin{bmatrix}
+1\\0\\0
+\end{bmatrix}\mathrm m.
+$$
+
+The expected result is
+
+$$
+{}^{a}\mathbf p_P
+=
+\begin{bmatrix}
+0\\1\\0
+\end{bmatrix}
++
+\begin{bmatrix}
+1\\2\\3
+\end{bmatrix}
+=
+\begin{bmatrix}
+1\\3\\3
+\end{bmatrix}\mathrm m.
+$$
+
+Seven focused tests protect this cycle: identity leaves point coordinates unchanged; the analytic rotation-plus-translation fixture returns $[1\;3\;3]^{\mathsf T}\,\mathrm m$; a malformed bottom row returns `invalid_transform`; a reflection in the rotation block returns `invalid_rotation`; a `NaN` transform entry and an infinite point return `non_finite`; and finite point and translation components whose sum overflows return `unsupported_magnitude`.
+
+## Rotation and transformation composition and inversion {#sec-spatial-kernel-composition-inversion}
+
+This implementation block answers how the library combines consecutive frame changes, reverses a frame change, and reconstructs a matrix for inspection or interchange. The inputs must already be valid `Rotation3` or `Transform3` values. The output is another group value, and compatible frame labels remain the caller's responsibility.
+
+### Governing group operations
+
+Let $\mathbf T_{ab}$ describe frame $\{b\}$ relative to frame $\{a\}$ and let $\mathbf T_{bc}$ describe frame $\{c\}$ relative to frame $\{b\}$. Products act rightmost first, so changing coordinates from $\{c\}$ through $\{b\}$ to $\{a\}$ requires
+
+$$
+\mathbf T_{ac}
+=
+\mathbf T_{ab}\mathbf T_{bc}.
+$$
+
+Writing both transformations as rotation--translation pairs and multiplying their blocks gives
+
+$$
+\begin{aligned}
+\mathbf T_{ab}\mathbf T_{bc}
+&=
+\begin{bmatrix}
+\mathbf R_{ab}&{}^{a}\mathbf p_b\\
+\mathbf 0_3^{\mathsf T}&1
+\end{bmatrix}
+\begin{bmatrix}
+\mathbf R_{bc}&{}^{b}\mathbf p_c\\
+\mathbf 0_3^{\mathsf T}&1
+\end{bmatrix}\\
+&=
+\begin{bmatrix}
+\mathbf R_{ab}\mathbf R_{bc}&
+\mathbf R_{ab}{}^{b}\mathbf p_c+{}^{a}\mathbf p_b\\
+\mathbf 0_3^{\mathsf T}&1
+\end{bmatrix}.
+\end{aligned}
+$$
+
+Therefore the implementation must calculate
+
+$$
+\mathbf R_{ac}=\mathbf R_{ab}\mathbf R_{bc},
+\qquad
+{}^{a}\mathbf p_c
+=
+\mathbf R_{ab}{}^{b}\mathbf p_c+{}^{a}\mathbf p_b.
+$$
+
+The rotations are dimensionless. The three translation columns are measured in metres, but their components initially use different frames. Multiplication by $\mathbf R_{ab}$ first re-expresses ${}^{b}\mathbf p_c$ in frame $\{a\}$; only then can the two metre-valued columns be added.
+
+To reverse $\mathbf T_{ab}$, require its product with $\mathbf T_{ba}$ to equal the identity:
+
+$$
+\begin{bmatrix}
+\mathbf R_{ab}&{}^{a}\mathbf p_b\\
+\mathbf 0_3^{\mathsf T}&1
+\end{bmatrix}
+\begin{bmatrix}
+\mathbf R_{ba}&{}^{b}\mathbf p_a\\
+\mathbf 0_3^{\mathsf T}&1
+\end{bmatrix}
+=
+\begin{bmatrix}
+\mathbf I_3&\mathbf 0_3\\
+\mathbf 0_3^{\mathsf T}&1
+\end{bmatrix}.
+$$
+
+Equating the upper-left blocks gives $\mathbf R_{ab}\mathbf R_{ba}=\mathbf I_3$. Because a rotation matrix is orthogonal, $\mathbf R_{ba}=\mathbf R_{ab}^{\mathsf T}$. Equating the upper-right blocks then gives
+
+$$
+\mathbf R_{ab}{}^{b}\mathbf p_a+{}^{a}\mathbf p_b
+=
+\mathbf 0_3,
+$$
+
+and multiplying by $\mathbf R_{ab}^{\mathsf T}$ yields
+
+$$
+{}^{b}\mathbf p_a
+=
+-\mathbf R_{ab}^{\mathsf T}{}^{a}\mathbf p_b.
+$$
+
+Hence
+
+$$
+\mathbf T_{ab}^{-1}
+=
+\mathbf T_{ba}
+=
+\begin{bmatrix}
+\mathbf R_{ab}^{\mathsf T}&
+-\mathbf R_{ab}^{\mathsf T}{}^{a}\mathbf p_b\\
+\mathbf 0_3^{\mathsf T}&1
+\end{bmatrix}.
+$$
+
+### Public operations and matrix reconstruction
+
+The cycle adds the same three kinds of operation to the two value types:
+
+```cpp
+// Rotation3
+[[nodiscard]] Eigen::Matrix3d matrix() const;
+[[nodiscard]] Rotation3 compose(const Rotation3 & rotation_bc) const;
+[[nodiscard]] Rotation3 inverse() const;
+
+// Transform3
+[[nodiscard]] Eigen::Matrix4d matrix() const;
+[[nodiscard]] Transform3 compose(const Transform3 & transform_bc) const;
+[[nodiscard]] Transform3 inverse() const;
+```
+
+Each member function is `const` because observing, composing, or inverting a value does not modify that value. `[[nodiscard]]` asks the compiler to warn when a caller discards the returned matrix or group value. The argument names state the required right operand: calling `rotation_ab.compose(rotation_bc)` or `transform_ab.compose(transform_bc)` produces the corresponding `ac` value.
+
+`Rotation3::matrix()` returns a copy of its stored $3\times3$ matrix. `Transform3::matrix()` constructs a new identity matrix and replaces only its rotation and translation blocks:
+
+```cpp
+Eigen::Matrix4d Transform3::matrix() const
+{
+  Eigen::Matrix4d result = Eigen::Matrix4d::Identity();
+
+  result.block<3, 3>(0, 0) = rotation_.matrix();
+  result.block<3, 1>(0, 3) = translation_;
+
+  return result;
+}
+```
+
+Starting from `Identity()` makes the reconstructed bottom row exactly $[0\;0\;0\;1]$. A small bottom-row error admitted at the raw input boundary is therefore not preserved inside the core type.
+
+### Complete `Rotation3` operations
+
+The rotation implementation directly follows $\mathbf R_{ac}=\mathbf R_{ab}\mathbf R_{bc}$ and $\mathbf R_{ba}=\mathbf R_{ab}^{\mathsf T}$:
+
+```cpp
+Eigen::Matrix3d Rotation3::matrix() const { return matrix_; }
+
+Rotation3 Rotation3::compose(const Rotation3 & rotation_bc) const
+{
+  const Eigen::Matrix3d matrix_ac = matrix_ * rotation_bc.matrix_;
+
+  if (!matrix_ac.allFinite()) {
+    throw GeometryException(
+      GeometryError::unsupported_magnitude,
+      "Rotation composition produced a non-finite result.");
+  }
+
+  return Rotation3(matrix_ac);
+}
+
+Rotation3 Rotation3::inverse() const
+{
+  const Eigen::Matrix3d matrix_ba = matrix_.transpose();
+  return Rotation3(matrix_ba);
+}
+```
+
+The class can read `rotation_bc.matrix_` even though that member is private because both objects have the same class type. Composition checks the calculated matrix before constructing the result. Inversion uses the transpose instead of a general matrix-inverse algorithm because membership in $SO(3)$ has already established orthogonality.
+
+### Complete `Transform3` operations
+
+The transformation implementation calculates rotation composition and translation composition as separate, unit-consistent steps:
+
+```cpp
+Transform3 Transform3::compose(const Transform3 & transform_bc) const
+{
+  const Rotation3 rotation_ac = rotation_.compose(transform_bc.rotation_);
+  const Eigen::Vector3d translated_position =
+    rotation_.rotate_vector(transform_bc.translation_);
+  const Eigen::Vector3d translation_ac = translated_position + translation_;
+
+  if (!translation_ac.allFinite()) {
+    throw GeometryException(
+      GeometryError::unsupported_magnitude,
+      "Transform composition produced a non-finite translation.");
+  }
+
+  return Transform3(rotation_ac, translation_ac);
+}
+
+Transform3 Transform3::inverse() const
+{
+  const Rotation3 rotation_ba = rotation_.inverse();
+  const Eigen::Vector3d translation_ba =
+    rotation_ba.rotate_vector(-translation_);
+
+  return Transform3(rotation_ba, translation_ba);
+}
+```
+
+In `compose()`, `rotation_.rotate_vector(transform_bc.translation_)` implements $\mathbf R_{ab}{}^{b}\mathbf p_c$. The variable `translated_position` is therefore expressed in frame $\{a\}$ despite the general name; adding `translation_` produces ${}^{a}\mathbf p_c$. The final finiteness check rejects overflow in that addition.
+
+In `inverse()`, `rotation_ba` stores $\mathbf R_{ab}^{\mathsf T}$. Passing `-translation_` to its vector action calculates $-\mathbf R_{ab}^{\mathsf T}{}^{a}\mathbf p_b$, which is ${}^{b}\mathbf p_a$ in metres. Reusing the validated rotation operations keeps the code aligned with the two derived component equations.
+
+### Analytic fixtures and focused tests
+
+The rotation test composes quarter turns about the positive $z$- and $x$-axes in both orders. The independently calculated products satisfy $\mathbf R_z\mathbf R_x\ne\mathbf R_x\mathbf R_z$, so the test detects an accidentally reversed multiplication order. A second test uses a $45$-degree rotation and verifies both $\mathbf R\mathbf R^{-1}=\mathbf I_3$ and $\mathbf R^{-1}\mathbf R=\mathbf I_3$.
+
+The transformation composition fixture uses
+
+$$
+{}^{a}\mathbf p_b
+=
+\begin{bmatrix}1\\2\\3\end{bmatrix}\mathrm m,
+\qquad
+{}^{b}\mathbf p_c
+=
+\begin{bmatrix}1\\0\\0\end{bmatrix}\mathrm m,
+$$
+
+with $\mathbf R_{ab}$ a positive quarter turn about the shared $z$-axis and $\mathbf R_{bc}=\mathbf I_3$. The rotated second translation is $[0\;1\;0]^{\mathsf T}\,\mathrm m$, so the expected composed translation is $[1\;3\;3]^{\mathsf T}\,\mathrm m$. This fixture would fail if the implementation merely added columns expressed in different frames.
+
+For the same $\mathbf T_{ab}$, the independently calculated inverse translation is
+
+$$
+{}^{b}\mathbf p_a
+=
+-\mathbf R_{ab}^{\mathsf T}
+\begin{bmatrix}1\\2\\3\end{bmatrix}
+=
+\begin{bmatrix}-2\\1\\-3\end{bmatrix}\mathrm m.
+$$
+
+The inverse test checks that analytic matrix and both identity products. It compares rotation blocks with a dimensionless tolerance and translation columns with a metre-valued tolerance. The boundary test composes two identity rotations whose finite $x$-translations are both `std::numeric_limits<double>::max()`. Their sum overflows to infinity, so `compose()` throws `unsupported_magnitude` instead of returning a geometric value.
+
+### Deliberate limits
+
+The core types do not store runtime frame labels, so `compose()` cannot detect a call whose conceptual middle frames are incompatible. Composition uses the private constructor because valid group elements are closed under exact mathematical composition; it checks finiteness but does not repeat the raw-input residual tests. Repeated floating-point products can therefore accumulate a small orthogonality or determinant drift. The library does not yet define a drift-monitoring or re-orthogonalisation policy, and it does not silently project a result back onto $SO(3)$. `Transform3` exposes the complete matrix but does not yet expose its rotation and translation as separate public values.

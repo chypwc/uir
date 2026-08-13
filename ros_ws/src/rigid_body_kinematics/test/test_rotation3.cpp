@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <Eigen/Core>
+#include <cmath>
 #include <limits>
 
 #include "rigid_body_kinematics/geometry_error.hpp"
@@ -159,4 +160,78 @@ TEST(Rotation3Test, ReportsUnsupportedMagnitudeWhenVectorRotationOverflows)
       error.code(),
       rigid_body_kinematics::GeometryError::unsupported_magnitude);
   }
+}
+
+TEST(Rotation3Test, CompositionIsRightmostFirstAndNoncommuting)
+{
+  // clang-format off
+  Eigen::Matrix3d matrix_z;
+  matrix_z <<
+    0.0, -1.0, 0.0,
+    1.0,  0.0, 0.0,
+    0.0,  0.0, 1.0;
+
+  Eigen::Matrix3d matrix_x;
+  matrix_x <<
+    1.0, 0.0,  0.0,
+    0.0, 0.0, -1.0,
+    0.0, 1.0,  0.0;
+  // clang-format on
+
+  const rigid_body_kinematics::Rotation3 rotation_z =
+    rigid_body_kinematics::Rotation3::from_matrix(matrix_z);
+
+  const rigid_body_kinematics::Rotation3 rotation_x =
+    rigid_body_kinematics::Rotation3::from_matrix(matrix_x);
+
+  // clang-format off
+  Eigen::Matrix3d expected_zx;
+  expected_zx <<
+    0.0, 0.0, 1.0,
+    1.0, 0.0, 0.0,
+    0.0, 1.0, 0.0;
+
+  Eigen::Matrix3d expected_xz;
+  expected_xz <<
+    0.0, -1.0,  0.0,
+    0.0,  0.0, -1.0,
+    1.0,  0.0,  0.0;
+  // clang-format on
+
+  const Eigen::Matrix3d actual_zx = rotation_z.compose(rotation_x).matrix();
+  const Eigen::Matrix3d actual_xz = rotation_x.compose(rotation_z).matrix();
+
+  constexpr double tolerance = 1e-12;
+  EXPECT_TRUE(actual_zx.isApprox(expected_zx, tolerance));
+  EXPECT_TRUE(actual_xz.isApprox(expected_xz, tolerance));
+  EXPECT_FALSE(actual_zx.isApprox(actual_xz, tolerance));
+}
+
+TEST(Rotation3Test, InverseComposesToIdentityOnBothSides)
+{
+  const double coefficient = std::sqrt(0.5);
+
+  // A 45-degree rotation about the positive z-axis
+  // clang-format off
+  Eigen::Matrix3d matrix_ab;
+  matrix_ab <<
+    coefficient, -coefficient, 0.0,
+    coefficient,  coefficient, 0.0,
+    0.0,          0.0,         1.0;
+  // clang-format on
+  const rigid_body_kinematics::Rotation3 rotation_ab =
+    rigid_body_kinematics::Rotation3::from_matrix(matrix_ab);
+
+  const rigid_body_kinematics::Rotation3 rotation_ba = rotation_ab.inverse();
+
+  const Eigen::Matrix3d right_identity =
+    rotation_ab.compose(rotation_ba).matrix();
+  const Eigen::Matrix3d left_identity =
+    rotation_ba.compose(rotation_ab).matrix();
+
+  constexpr double tolerance = 1e-12;
+  const Eigen::Matrix3d expected_identiry = Eigen::Matrix3d::Identity();
+
+  EXPECT_TRUE(right_identity.isApprox(expected_identiry, tolerance));
+  EXPECT_TRUE(left_identity.isApprox(expected_identiry, tolerance));
 }
