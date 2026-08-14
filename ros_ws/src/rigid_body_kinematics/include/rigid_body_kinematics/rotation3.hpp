@@ -7,6 +7,19 @@
 
 namespace rigid_body_kinematics
 {
+enum class RotationLogBranch
+{
+  identity,
+  small_angle,
+  nominal,
+  near_pi
+};
+
+struct RotationLogResult
+{
+  Eigen::Vector3d rotation_vector;
+  RotationLogBranch branch;
+};
 
 class Rotation3
 {
@@ -18,6 +31,15 @@ public:
   static Rotation3 from_matrix(
     const Eigen::Matrix3d & matrix,
     const NumericalPolicy & policy = NumericalPolicy{});
+
+  // Create a rotation from a finite rotation vector in radians.
+  static Rotation3 from_rotation_vector(
+    const Eigen::Vector3d & rotation_vector,
+    const NumericalPolicy & policy = NumericalPolicy{});
+
+  // Recover the deterministic principal rotation vector in radians
+  [[nodiscard]] RotationLogResult to_principal_rotation_vector(
+    const NumericalPolicy & policy = NumericalPolicy{}) const;
 
   // Apply this rotation to a vector
   [[nodiscard]] Eigen::Vector3d rotate_vector(

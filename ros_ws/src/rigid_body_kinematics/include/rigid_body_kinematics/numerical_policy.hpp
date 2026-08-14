@@ -8,6 +8,16 @@ struct NumericalPolicy
   double orthogonality_tolerance{1.0e-12};
   double determinant_tolerance{1.0e-12};
   double homogeneous_row_tolerance{1.0e-12};
+  double tangent_tolerance{1.0e-12};
+
+  // Inclusive upper bound for the small-angle series
+  double series_angle_threshold{1.0e-4};
+
+  // Maximum supported rotation-vector norm in radians.
+  double maximum_exponential_angle{1.0e6};
+
+  // Inclusive distance from pi for near-pi axis recovery.
+  double near_pi_tolerance{1.0e-6};
 };
 
 }  // namespace rigid_body_kinematics

@@ -10,6 +10,7 @@ enum class GeometryError
   non_finite,
   invalid_rotation,
   invalid_transform,
+  invalid_tangent,
   invalid_policy,        // a tolerance is invalid.
   unsupported_magnitude  // exceeds the finite numerical domain
 };

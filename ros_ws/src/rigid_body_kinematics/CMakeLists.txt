@@ -22,6 +22,7 @@ find_package(Eigen3 REQUIRED)
 add_library(${PROJECT_NAME}
   src/rotation3.cpp
   src/transform3.cpp
+  src/lie_algebra.cpp
 )
 
 
@@ -96,6 +97,30 @@ if(BUILD_TESTING)
   )
 
   target_link_libraries(test_transform3
+    ${PROJECT_NAME}
+  )
+
+  ament_add_gtest(test_lie_algebra
+    test/test_lie_algebra.cpp
+  )
+
+  target_link_libraries(test_lie_algebra
+    ${PROJECT_NAME}
+  )
+
+  ament_add_gtest(test_so3_exponential
+    test/test_so3_exponential.cpp
+  )
+
+  target_link_libraries(test_so3_exponential
+    ${PROJECT_NAME}
+  )
+
+  ament_add_gtest(test_so3_logarithm
+    test/test_so3_logarithm.cpp
+  )
+
+  target_link_libraries(test_so3_logarithm
     ${PROJECT_NAME}
   )
 

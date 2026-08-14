@@ -28,11 +28,11 @@ TEST(Transform3Test, RotationAndTranslationTransformPoint)
   // The translation p_ab_a is [1, 2, 3]^T metres.
   Eigen::Matrix4d matrix_ab;
   // clang-format off
-  matrix_ab << 
-    0.0, -1.0, 0.0, 1.0, 
-    1.0, 0.0, 0.0, 2.0, 
-    0.0, 0.0, 1.0, 3.0, 
-    0.0, 0.0, 0.0, 1.0;
+  matrix_ab <<
+    0.0, -1.0, 0.0, 1.0,
+    1.0,  0.0, 0.0, 2.0,
+    0.0,  0.0, 1.0, 3.0,
+    0.0,  0.0, 0.0, 1.0;
   // clang-format on
 
   const rigid_body_kinematics::Transform3 transform_ab =
@@ -171,8 +171,27 @@ TEST(Transform3Test, CompositionRotatesSecondTranslationBeforeAddition)
 
   const Eigen::Matrix4d actual_ac = transform_ab.compose(transform_bc).matrix();
 
-  constexpr double tolerance = 1e-12;
-  EXPECT_TRUE(actual_ac.isApprox(expected_ac, tolerance));
+  const Eigen::Matrix3d actual_rotation_ac = actual_ac.block<3, 3>(0, 0);
+  const Eigen::Vector3d actual_translation_ac = actual_ac.block<3, 1>(0, 3);
+
+  const Eigen::Matrix3d expected_rotation_ac = expected_ac.block<3, 3>(0, 0);
+  const Eigen::Vector3d expected_translation_ac = expected_ac.block<3, 1>(0, 3);
+
+  constexpr double rotation_tolerance = 1e-12;
+  constexpr double translation_tolerance = 1e-12;
+
+  EXPECT_LE(
+    (actual_rotation_ac - expected_rotation_ac).cwiseAbs().maxCoeff(),
+    rotation_tolerance);
+
+  EXPECT_LE(
+    (actual_translation_ac - expected_translation_ac).cwiseAbs().maxCoeff(),
+    translation_tolerance);
+
+  EXPECT_DOUBLE_EQ(actual_ac(3, 0), 0.0);
+  EXPECT_DOUBLE_EQ(actual_ac(3, 1), 0.0);
+  EXPECT_DOUBLE_EQ(actual_ac(3, 2), 0.0);
+  EXPECT_DOUBLE_EQ(actual_ac(3, 3), 1.0);
 }
 
 TEST(Transform3Test, InverseMatchesAnalyticResultAndComposesToIdentity)
@@ -202,6 +221,12 @@ TEST(Transform3Test, InverseMatchesAnalyticResultAndComposesToIdentity)
 
   const Eigen::Matrix4d matrix_ba = transform_ba.matrix();
 
+  const Eigen::Matrix3d actual_rotation_ba = matrix_ba.block<3, 3>(0, 0);
+  const Eigen::Vector3d actual_translation_ba = matrix_ba.block<3, 1>(0, 3);
+
+  const Eigen::Matrix3d expected_rotation_ba = expected_ba.block<3, 3>(0, 0);
+  const Eigen::Vector3d expected_translation_ba = expected_ba.block<3, 1>(0, 3);
+
   const Eigen::Matrix4d right_identity =
     transform_ab.compose(transform_ba).matrix();
   const Eigen::Matrix4d left_identity =
@@ -215,15 +240,23 @@ TEST(Transform3Test, InverseMatchesAnalyticResultAndComposesToIdentity)
   constexpr double rotation_tolerance = 1e-12;
   constexpr double translation_tolerance = 1e-12;
 
-  EXPECT_TRUE(matrix_ba.isApprox(expected_ba, rotation_tolerance));
+  EXPECT_LE(
+    (actual_rotation_ba - expected_rotation_ba).cwiseAbs().maxCoeff(),
+    rotation_tolerance);
 
-  EXPECT_TRUE(
-    right_rotation.isApprox(Eigen::Matrix3d::Identity(), rotation_tolerance));
+  EXPECT_LE(
+    (actual_translation_ba - expected_translation_ba).cwiseAbs().maxCoeff(),
+    translation_tolerance);
+
+  EXPECT_LE(
+    (right_rotation - Eigen::Matrix3d::Identity()).cwiseAbs().maxCoeff(),
+    rotation_tolerance);
 
   EXPECT_LE(right_translation.cwiseAbs().maxCoeff(), translation_tolerance);
 
-  EXPECT_TRUE(
-    left_rotation.isApprox(Eigen::Matrix3d::Identity(), rotation_tolerance));
+  EXPECT_LE(
+    (left_rotation - Eigen::Matrix3d::Identity()).cwiseAbs().maxCoeff(),
+    rotation_tolerance);
 
   EXPECT_LE(left_translation.cwiseAbs().maxCoeff(), translation_tolerance);
 }

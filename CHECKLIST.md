@@ -34,7 +34,7 @@ All phases belong to the learning programme. Phase 9 and Phase 12 are distinct r
 - **Milestone:** `M1` — Classical intelligence foundation.
 - **Phase:** Phase 1 — Geometry, mechanics, and control.
 - **Capability:** `P1.2` — Spatial geometry kernel.
-- **Active task:** Run the checklist-declared intermediate C++ quality gate across the stable spatial-representation, vector and point action, composition, inversion, public-interface, and package-structure work.
+- **Active task:** Implement, test, understand, and retrospectively document the linear-first $SE(3)$ exponential mathematical cycle, keeping translational coordinates in metres and rotational coordinates in radians distinct.
 - **Next capability:** `P1.3` — General robot kinematics and Jacobians.
 - **Blockers:** None.
 
@@ -89,7 +89,7 @@ Phase 1 closes when its shared mathematical references and two bounded learning 
 | Capability | Learning artifact | Side project and principal tools | Status |
 |---|---|---|---|
 | `P1.1` — Ideal planar motion kernel | Close Chapters 2–3 and preserve Chapters 4 and 6 | Existing `differential_drive_motion_model`, Python and `pytest` | Complete |
-| `P1.2` — Spatial geometry kernel | Complete Chapter 8 and its Chapter 9 implementation companion | `rigid_body_kinematics`, modern C++, CMake, Eigen, and GTest | Active: intermediate C++ quality checkpoint |
+| `P1.2` — Spatial geometry kernel | Complete Chapter 8 and its Chapter 9 implementation companion | `rigid_body_kinematics`, modern C++, CMake, Eigen, and GTest | Active: linear-first $SE(3)$ exponential cycle |
 | `P1.3` — General kinematics and Jacobians | Complete Chapter 10 and its Chapter 11 implementation companion | Extend `rigid_body_kinematics` with bounded forward and velocity kinematics | Queued: opening theory block drafted; review and remaining blocks pending |
 | `P1.4` — Planar manipulator kinematics laboratory | Chapter 12 and its Chapter 13 implementation companion | Begin `planar_manipulator_lab` with 2R/3R inverse kinematics, modern C++, Eigen, GTest, and offline visualisation | Queued |
 | `P1.5` — Wheel-odometry pipeline | Chapter 14 and its Chapter 15 implementation companion | `differential_drive_odometry`, pure Python core plus thin ROS 2 adapter, `nav_msgs`, and `tf2` | Queued |
@@ -156,10 +156,13 @@ The outcome is the geometry layer of the spatial and general kinematics workbenc
 - [x] Implement, test, understand, and retrospectively document the validated $SO(3)$ rotation and free-vector-rotation mathematical cycle; complete the minimum `ament_cmake` library target, Eigen and GTest linkage, C++17 requirement, explicit compiler warnings, and public header/source/test layout needed by this cycle without adding a ROS runtime dependency to the mathematical core.
 - [x] Implement, test, understand, and retrospectively document the validated $SE(3)$ representation and point-transformation mathematical cycle.
 - [x] Implement, test, understand, and retrospectively document the $SO(3)$ and $SE(3)$ composition-and-inversion mathematical cycle, including matrix reconstruction needed to inspect the results; preserve the durable explanation in the [composition-and-inversion companion section](notes/09_spatial_geometry_kernel_implementation.qmd#sec-spatial-kernel-composition-inversion) and the deterministic evidence in the [`rigid_body_kinematics` tests](ros_ws/src/rigid_body_kinematics/test).
-- [ ] **Active:** Run the checklist-declared intermediate C++ quality gate after the representations, vector and point operations, composition, inversion, public API, and package structure are stable.
-- [ ] Implement, test, understand, and retrospectively document the hat-and-vee mathematical cycle using the project's linear-first twist order.
-- [ ] Implement, test, understand, and retrospectively document the $SO(3)$ exponential-and-logarithm mathematical cycle, splitting identity, nominal-angle, and near-$\pi$ numerical branches into manageable subcycles where required.
-- [ ] Implement, test, understand, and retrospectively document the $SE(3)$ exponential, logarithm, and constant-twist-integration mathematical cycle, keeping linear and angular blocks and their units distinct.
+- [x] Run the checklist-declared intermediate C++ quality gate after the representations, vector and point operations, composition, inversion, public API, and package structure are stable; verify the clean package build, all registered functional and lint tests, installed downstream CMake target, public interface, mathematical equations, frames, units, validation, and numerical failure behaviour.
+- [x] Implement, test, understand, and retrospectively document the $SO(3)$ and linear-first $SE(3)$ hat-and-vee mathematical cycle; preserve the reviewed explanation in the [hat-and-vee companion section](notes/09_spatial_geometry_kernel_implementation.qmd#sec-spatial-kernel-hat-vee) and its 16 deterministic cases in [`test_lie_algebra.cpp`](ros_ws/src/rigid_body_kinematics/test/test_lie_algebra.cpp).
+- [x] Implement, test, understand, and retrospectively document the $SO(3)$ exponential mathematical cycle, including its exact-zero, stable small-angle, and nominal Rodrigues branches; preserve the reviewed explanation in the [$SO(3)$ exponential companion section](notes/09_spatial_geometry_kernel_implementation.qmd#sec-spatial-kernel-so3-exponential) and its nine deterministic cases in [`test_so3_exponential.cpp`](ros_ws/src/rigid_body_kinematics/test/test_so3_exponential.cpp).
+- [x] Implement, test, understand, and retrospectively document the principal $SO(3)$ logarithm mathematical cycle, including its identity, small-angle, nominal-angle, and deterministic near-$\pi$ branches; preserve the reviewed explanation in the [principal $SO(3)$ logarithm companion section](notes/09_spatial_geometry_kernel_implementation.qmd#sec-spatial-kernel-so3-logarithm) and its deterministic evidence in [`test_so3_logarithm.cpp`](ros_ws/src/rigid_body_kinematics/test/test_so3_logarithm.cpp).
+- [ ] **Active:** Implement, test, understand, and retrospectively document the linear-first $SE(3)$ exponential mathematical cycle, keeping the translational coordinates in metres and rotational coordinates in radians distinct.
+- [ ] Implement, test, understand, and retrospectively document the principal $SE(3)$ logarithm mathematical cycle using the completed principal $SO(3)$ logarithm.
+- [ ] Implement, test, understand, and retrospectively document the constant-twist-integration mathematical cycle using the completed $SE(3)$ exponential and explicit body-versus-space multiplication order.
 - [ ] Implement, test, understand, and retrospectively document the $SE(3)$ adjoint mathematical cycle using the project's linear-first twist order.
 - [ ] Implement, test, understand, and retrospectively document planar-pose embedding and extraction plus normalised planar-yaw quaternion conversion without attempting to replace `tf2`.
 

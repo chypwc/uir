@@ -916,3 +916,1189 @@ The inverse test checks that analytic matrix and both identity products. It comp
 ### Deliberate limits
 
 The core types do not store runtime frame labels, so `compose()` cannot detect a call whose conceptual middle frames are incompatible. Composition uses the private constructor because valid group elements are closed under exact mathematical composition; it checks finiteness but does not repeat the raw-input residual tests. Repeated floating-point products can therefore accumulate a small orthogonality or determinant drift. The library does not yet define a drift-monitoring or re-orthogonalisation policy, and it does not silently project a result back onto $SO(3)$. `Transform3` exposes the complete matrix but does not yet expose its rotation and translation as separate public values.
+
+## Linear-first $SO(3)$ and $SE(3)$ hat and vee maps {#sec-spatial-kernel-hat-vee}
+
+The next operation converts a three- or six-component coordinate column into the structured matrix used by the Lie-group equations. The inverse operation must recover the column only when the supplied matrix has the required structure. The mathematical definitions come from the cross-product matrix in @sec-so3-cross-product-matrix and the spatial-motion hat matrices in @sec-se3-body-twist and @sec-se3-spatial-twist.
+
+### Governing equations and component order
+
+The $SO(3)$ hat operation does not map one rotation matrix to another rotation matrix. It maps a three-component coordinate column to a matrix in the Lie algebra $\mathfrak{so}(3)$. This target space is the set of all real $3\times3$ skew-symmetric matrices:
+
+$$
+\mathfrak{so}(3)
+\mathrel{:=}
+\left\{
+\mathbf A\in\mathbb R^{3\times3}
+\;\middle|\;
+\mathbf A^{\mathsf T}=-\mathbf A
+\right\}.
+$$
+
+The hat map and its inverse, the vee map, therefore have the domains and codomains
+
+$$
+\begin{aligned}
+\operatorname{hat}_{SO(3)}&:\mathbb R^3\longrightarrow\mathfrak{so}(3),\\
+\operatorname{vee}_{SO(3)}&:\mathfrak{so}(3)\longrightarrow\mathbb R^3.
+\end{aligned}
+$$
+
+For a three-component input column $\mathbf x=[x_1\;x_2\;x_3]^{\mathsf T}\in\mathbb R^3$, the forward map is
+
+$$
+\operatorname{hat}_{SO(3)}(\mathbf x)
+=
+\widehat{\mathbf x}
+=
+[\mathbf x]_\times
+=
+\begin{bmatrix}
+0&-x_3&x_2\\
+x_3&0&-x_1\\
+-x_2&x_1&0
+\end{bmatrix},
+\qquad
+[\mathbf x]_\times\mathbf y
+=
+\mathbf x\times\mathbf y.
+$$
+
+The output $[\mathbf x]_\times$ belongs to $\mathfrak{so}(3)$ because $[\mathbf x]_\times^{\mathsf T}=-[\mathbf x]_\times$. For an input $\mathbf A\in\mathfrak{so}(3)$, the inverse map selects the three independent entries:
+
+$$
+\operatorname{vee}_{SO(3)}(\mathbf A)
+=
+\begin{bmatrix}
+A_{32}\\
+A_{13}\\
+A_{21}
+\end{bmatrix}.
+$$
+
+On these exact mathematical domains, the maps undo each other:
+
+$$
+\operatorname{vee}_{SO(3)}
+\left(
+\operatorname{hat}_{SO(3)}(\mathbf x)
+\right)
+=
+\mathbf x,
+\qquad
+\operatorname{hat}_{SO(3)}
+\left(
+\operatorname{vee}_{SO(3)}(\mathbf A)
+\right)
+=
+\mathbf A.
+$$
+
+The corresponding $SE(3)$ operations use the matrix space
+
+$$
+\mathfrak{se}(3)
+\mathrel{:=}
+\left\{
+\begin{bmatrix}
+\boldsymbol\Phi&\boldsymbol\rho\\
+\mathbf 0_3^{\mathsf T}&0
+\end{bmatrix}
+\;\middle|\;
+\boldsymbol\Phi\in\mathfrak{so}(3),
+\ \boldsymbol\rho\in\mathbb R^3
+\right\}.
+$$
+
+The project writes each six-component input in linear-first order. The label on $\mathbb R^6_{\mathrm{linear\text{-}first}}$ records this representation convention; it does not create a different six-dimensional vector space. The two maps are
+
+$$
+\begin{aligned}
+\operatorname{hat}_{SE(3)}
+&:
+\mathbb R^6_{\mathrm{linear\text{-}first}}
+\longrightarrow
+\mathfrak{se}(3),\\
+\operatorname{vee}_{SE(3)}
+&:
+\mathfrak{se}(3)
+\longrightarrow
+\mathbb R^6_{\mathrm{linear\text{-}first}}.
+\end{aligned}
+$$
+
+For a finite exponential-coordinate column expressed in frame $\{a\}$, the input is
+
+$$
+{}^{a}\boldsymbol\eta
+=
+\begin{bmatrix}
+{}^{a}\boldsymbol\rho\\
+{}^{a}\boldsymbol\phi
+\end{bmatrix},
+\qquad
+{}^{a}\boldsymbol\rho\in\mathbb R^3\ \mathrm m,
+\qquad
+{}^{a}\boldsymbol\phi\in\mathbb R^3\ \mathrm{rad}.
+$$
+
+The forward map places the angular block in the upper-left matrix block and the linear block in the upper-right matrix block:
+
+$$
+\operatorname{hat}_{SE(3)}
+\left({}^{a}\boldsymbol\eta\right)
+=
+\widehat{{}^{a}\boldsymbol\eta}
+=
+\begin{bmatrix}
+[{}^{a}\boldsymbol\phi]_\times&{}^{a}\boldsymbol\rho\\
+\mathbf 0_3^{\mathsf T}&0
+\end{bmatrix}.
+$$
+
+Conversely, if $\boldsymbol\Phi\in\mathfrak{so}(3)$ and $\boldsymbol\rho\in\mathbb R^3$, then
+
+$$
+\operatorname{vee}_{SE(3)}
+\left(
+\begin{bmatrix}
+\boldsymbol\Phi&\boldsymbol\rho\\
+\mathbf 0_3^{\mathsf T}&0
+\end{bmatrix}
+\right)
+=
+\begin{bmatrix}
+\boldsymbol\rho\\
+\operatorname{vee}_{SO(3)}(\boldsymbol\Phi)
+\end{bmatrix}.
+$$
+
+Thus, on the exact declared domains,
+
+$$
+\operatorname{vee}_{SE(3)}
+\left(
+\operatorname{hat}_{SE(3)}({}^{a}\boldsymbol\eta)
+\right)
+=
+{}^{a}\boldsymbol\eta.
+$$
+
+The same $SE(3)$ map accepts a linear-first twist $[({}^{a}\boldsymbol\nu)^{\mathsf T}\;({}^{a}\boldsymbol\omega)^{\mathsf T}]^{\mathsf T}$ when the blocks instead have units $\mathrm{m\,s^{-1}}$ and $\mathrm{rad\,s^{-1}}$. The hat map rearranges components; it does not add or otherwise mix the linear and angular blocks. Its output belongs to $\mathfrak{se}(3)$ and is not a homogeneous transformation in $SE(3)$: its bottom-right entry is zero rather than one. The mathematical vee maps above require exact membership in $\mathfrak{so}(3)$ or $\mathfrak{se}(3)$; the software implementation below extends their accepted numerical inputs only by the explicitly checked tangent tolerance.
+
+### Public functions and the fixed component-order alias
+
+The header gives the six-component Eigen type a project-specific name and declares four free functions:
+
+```cpp
+[[nodiscard]] Eigen::Matrix3d hat_so3(
+  const Eigen::Vector3d & vector);
+
+[[nodiscard]] Eigen::Vector3d vee_so3(
+  const Eigen::Matrix3d & matrix,
+  const NumericalPolicy & policy = NumericalPolicy{});
+
+using Vector6LinearFirst = Eigen::Matrix<double, 6, 1>;
+
+[[nodiscard]] Eigen::Matrix4d hat_se3(
+  const Vector6LinearFirst & coordinates);
+
+[[nodiscard]] Vector6LinearFirst vee_se3(
+  const Eigen::Matrix4d & matrix,
+  const NumericalPolicy & policy = NumericalPolicy{});
+```
+
+These are **free functions** because they perform conversions and do not own persistent state. The `using` declaration creates the readable name `Vector6LinearFirst` for Eigen's fixed-size $6\times1$ matrix type. The name records the convention for human readers, although C++ still cannot distinguish two six-columns that use different frames or units. The `[[nodiscard]]` attribute asks the compiler to warn when a caller discards a calculated matrix or coordinate column.
+
+### Implementing the $SO(3)$ maps
+
+After rejecting a non-finite input column, `hat_so3()` fills the matrix in exactly the sign pattern of $[\mathbf x]_\times$:
+
+```cpp
+Eigen::Matrix3d skew_matrix;
+
+// clang-format off
+skew_matrix <<
+  0.0,        -vector.z(), vector.y(),
+  vector.z(),  0.0,       -vector.x(),
+  -vector.y(), vector.x(), 0.0;
+// clang-format on
+
+return skew_matrix;
+```
+
+Eigen's comma initialiser `<<` supplies entries one row at a time. The local `clang-format` comments preserve the visually meaningful matrix layout; they affect formatting only and do not affect compilation.
+
+An inverse map must not treat every $3\times3$ array as a valid tangent matrix. For a candidate $\mathbf A$, the implementation calculates
+
+$$
+\operatorname{sym}(\mathbf A)
+=
+\frac{1}{2}(\mathbf A+\mathbf A^{\mathsf T}),
+\qquad
+e_{\mathrm{skew}}
+=
+\max_{i,j}
+\left|
+\operatorname{sym}(\mathbf A)_{ij}
+\right|.
+$$
+
+The matrix is admitted only when $e_{\mathrm{skew}}\leq\varepsilon_{\mathrm{tangent}}$. The implementation then takes the skew part and selects the three independent entries required by the vee definition:
+
+```cpp
+const Eigen::Matrix3d half_matrix = 0.5 * matrix;
+const Eigen::Matrix3d symmetric_part =
+  half_matrix + half_matrix.transpose();
+
+const double skew_residual =
+  symmetric_part.cwiseAbs().maxCoeff();
+
+if (skew_residual > policy.tangent_tolerance) {
+  throw GeometryException(
+    GeometryError::invalid_tangent,
+    "Matrix is not skew-symmetric within tolerance.");
+}
+
+const Eigen::Matrix3d skew_part =
+  half_matrix - half_matrix.transpose();
+
+const Eigen::Vector3d vector(
+  skew_part(2, 1), skew_part(0, 2), skew_part(1, 0));
+```
+
+Multiplying by $1/2$ before adding or subtracting reduces the chance that two large, finite entries overflow during the structural check. `cwiseAbs()` takes the absolute value of each entry, and `maxCoeff()` selects the largest one. A candidate inside the declared tolerance is converted to its skew part only after that residual has been checked; a materially symmetric component is therefore reported rather than silently discarded.
+
+### Implementing the linear-first $SE(3)$ maps
+
+The six-column is separated and inserted into the matrix according to the governing block equation:
+
+```cpp
+const Eigen::Vector3d linear_part = coordinates.head<3>();
+const Eigen::Vector3d angular_part = coordinates.tail<3>();
+
+Eigen::Matrix4d tangent_matrix = Eigen::Matrix4d::Zero();
+
+tangent_matrix.block<3, 3>(0, 0) = hat_so3(angular_part);
+tangent_matrix.block<3, 1>(0, 3) = linear_part;
+
+return tangent_matrix;
+```
+
+`head<3>()` selects the first three entries and `tail<3>()` selects the last three. `block<3, 3>(0, 0)` means “the $3\times3$ block whose first entry is at row zero, column zero.” `block<3, 1>(0, 3)` selects the top-right column. Initialising the complete matrix with `Zero()` establishes the structural bottom row before the two meaningful blocks are assigned.
+
+The inverse first requires the complete bottom row to be zero within the tangent tolerance. It then delegates the upper-left block to the already validated $SO(3)$ vee map and restores the project order explicitly:
+
+```cpp
+const double bottom_row_residual =
+  matrix.row(3).cwiseAbs().maxCoeff();
+
+if (bottom_row_residual > policy.tangent_tolerance) {
+  throw GeometryException(
+    GeometryError::invalid_tangent,
+    "SE(3) tangent matrix must have a zero bottom row.");
+}
+
+const Eigen::Matrix3d angular_matrix =
+  matrix.block<3, 3>(0, 0);
+const Eigen::Vector3d angular_part =
+  vee_so3(angular_matrix, policy);
+const Eigen::Vector3d linear_part =
+  matrix.block<3, 1>(0, 3);
+
+Vector6LinearFirst coordinates;
+coordinates.head<3>() = linear_part;
+coordinates.tail<3>() = angular_part;
+
+return coordinates;
+```
+
+The explicit `head` and `tail` assignments protect the linear-first convention. Reversing them would compile successfully but would give the six entries the wrong physical meaning.
+
+### Concrete round trip
+
+For the finite coordinate column
+
+$$
+{}^{a}\boldsymbol\eta
+=
+\begin{bmatrix}
+1&-2&3&0.1&-0.2&0.3
+\end{bmatrix}^{\mathsf T},
+$$
+
+the first three entries are in metres and the last three are in radians. The implementation produces
+
+$$
+\widehat{{}^{a}\boldsymbol\eta}
+=
+\begin{bmatrix}
+0&-0.3&-0.2&1\\
+0.3&0&-0.1&-2\\
+0.2&0.1&0&3\\
+0&0&0&0
+\end{bmatrix}.
+$$
+
+A caller can perform the round trip directly:
+
+```cpp
+Vector6LinearFirst coordinates;
+coordinates << 1.0, -2.0, 3.0, 0.1, -0.2, 0.3;
+
+const Eigen::Matrix4d tangent_matrix = hat_se3(coordinates);
+const Vector6LinearFirst recovered = vee_se3(tangent_matrix);
+```
+
+The recovered column equals `coordinates`. This equality tests both the sign pattern and the linear-first block order; checking only that the output has six entries would test neither mathematical property.
+
+### Validation and focused evidence
+
+Every hat input and every vee matrix is checked for finite entries. Each vee operation also requires a finite, non-negative `tangent_tolerance`; a structurally invalid input throws `invalid_tangent`, while a non-finite input throws `non_finite`. Intermediate symmetric- and skew-part calculations are checked so that arithmetic outside the finite numerical range throws `unsupported_magnitude` rather than returning a plausible column.
+
+The focused tests cover the cross-product identity, exact skew symmetry, the zero map, non-finite rejection, $SO(3)$ hat--vee recovery, tolerated and rejected symmetric contamination, invalid tangent tolerance, the analytic linear-first $SE(3)$ block layout, the zero map, $SE(3)$ hat--vee recovery, malformed bottom rows, invalid angular blocks, and non-finite translation entries.
+
+### Deliberate limits
+
+These functions validate matrix structure but do not evaluate an exponential, logarithm, or adjoint. `Vector6LinearFirst` documents component order but does not enforce a frame or a unit at compile time, so callers must keep coordinate columns in metres and radians separate from twists in metres per second and radians per second. The tangent tolerance is an absolute entrywise threshold, not a relative error model. A matrix admitted within tolerance is returned as the corresponding skew coordinates, but the input matrix itself is never modified or presented as an exact tangent matrix.
+
+## Stable $SO(3)$ exponential from a rotation vector {#sec-spatial-kernel-so3-exponential}
+
+The $SO(3)$ exponential answers a finite-motion question: given an oriented rotation axis multiplied by a signed rotation angle, what proper rotation matrix represents that motion? The derivation and numerical branches belong to @sec-se3-numerical-branches. This section records how the reviewed equation is represented by `Rotation3::from_rotation_vector()`.
+
+### Input, output, frame, and units
+
+Let ${}^{a}\boldsymbol\phi\in\mathbb R^3$ be a finite rotation-vector column expressed in frame $\{a\}$ and measured in radians. Its direction gives the oriented rotation axis and its Euclidean norm gives the unsigned rotation angle
+
+$$
+\theta
+\mathrel{:=}
+\left\|{}^{a}\boldsymbol\phi\right\|_2
+\in\mathbb R_{\geq0}\ \mathrm{rad}.
+$$
+
+The implemented mapping is
+
+$$
+\begin{aligned}
+\operatorname{from\_rotation\_vector}
+&:
+\mathbb R^3
+\longrightarrow
+SO(3),\\
+{}^{a}\boldsymbol\phi
+&\longmapsto
+\mathbf R({}^{a}\boldsymbol\phi)
+=
+\exp\!\left([{}^{a}\boldsymbol\phi]_\times\right).
+\end{aligned}
+$$
+
+The C++ parameter `rotation_vector` stores the three components of ${}^{a}\boldsymbol\phi$. The local variable `theta` stores $\theta=\|{}^{a}\boldsymbol\phi\|_2$, and the local matrix `rotation_matrix` stores the resulting $\mathbf R({}^{a}\boldsymbol\phi)$. The mathematical domain is $\mathbb R^3$, while the software domain is the bounded subset whose entries are finite and whose norm does not exceed `maximum_exponential_angle`. The returned `Rotation3` stores the dimensionless matrix $\mathbf R({}^{a}\boldsymbol\phi)\in SO(3)$. The class does not store the label $\{a\}$, so the caller remains responsible for applying the result with a consistent frame interpretation.
+
+### Rodrigues' formula and the two coefficients
+
+Define the skew-symmetric rotation generator
+
+$$
+\boldsymbol\Phi
+\mathrel{:=}
+[{}^{a}\boldsymbol\phi]_\times
+\in\mathfrak{so}(3).
+$$
+
+For $\theta>0$, the implementation evaluates Rodrigues' formula in finite rotation-vector form:
+
+$$
+\begin{aligned}
+&\boxed{
+\mathbf R({}^{a}\boldsymbol\phi)
+=
+\exp(\boldsymbol\Phi)
+=
+\exp\!\left([{}^{a}\boldsymbol\phi]_\times\right)
+=
+\mathbf I_3
++A(\theta)\boldsymbol\Phi
++B(\theta)\boldsymbol\Phi^2
+} \\
+& \qquad
+A(\theta)=\frac{\sin\theta}{\theta},
+\qquad
+B(\theta)=\frac{1-\cos\theta}{\theta^2}.
+\end{aligned}
+$$
+
+Here $\exp(\boldsymbol\Phi)$ is the matrix exponential of the hatted rotation vector, and Rodrigues' formula is its closed-form evaluation for a $3\times3$ skew-symmetric matrix. The coefficient $A$ scales the skew-symmetric first-order term. The coefficient $B$ scales the symmetric second-order term. At $\theta=0$, both displayed ratios have removable divisions by zero even though their limits are finite, so the implementation must select a separate evaluation instead of calculating the ratios directly.
+
+### Public factory and numerical policy
+
+The public factory returns the existing validated rotation value type:
+
+```cpp
+static Rotation3 from_rotation_vector(
+  const Eigen::Vector3d & rotation_vector,
+  const NumericalPolicy & policy = NumericalPolicy{});
+```
+
+The two policy values introduced by this operation are
+
+```cpp
+// Inclusive upper bound for the small-angle series
+double series_angle_threshold{1.0e-4};
+
+// Maximum supported rotation-vector norm in radians.
+double maximum_exponential_angle{1.0e6};
+```
+
+The first value selects a numerically stable formula; it does not classify a small nonzero motion as zero. The second value declares the largest angular input for which the interface promises to evaluate trigonometric functions and the subsequent matrix arithmetic.
+
+### Validation and overflow-safe angle calculation
+
+The factory validates the policy before inspecting the geometric input. The series threshold must be finite, strictly positive, and less than $\pi$; the maximum supported angle must be finite and at least $\pi$. The local `constexpr` value records the bound without creating a project-wide constants dependency:
+
+```cpp
+constexpr double kPi =
+  3.141592653589793238462643383279502884;
+
+const bool policy_is_valid =
+  std::isfinite(policy.series_angle_threshold) &&
+  std::isfinite(policy.maximum_exponential_angle) &&
+  policy.series_angle_threshold > 0.0 &&
+  policy.series_angle_threshold < kPi &&
+  policy.maximum_exponential_angle >= kPi;
+```
+
+After checking that every component is finite, the implementation calculates the angle with Eigen's scaled vector norm:
+
+```cpp
+const double theta = rotation_vector.stableNorm();
+
+if (!std::isfinite(theta)) {
+  throw GeometryException(
+    GeometryError::unsupported_magnitude,
+    "Rotation-vector norm is outside the finite numerical range.");
+}
+
+if (theta > policy.maximum_exponential_angle) {
+  throw GeometryException(
+    GeometryError::unsupported_magnitude,
+    "Rotation-vector angle exceeds the supported maximum.");
+}
+```
+
+In this code, `rotation_vector` is ${}^{a}\boldsymbol\phi$ and `theta` is $\theta=\|{}^{a}\boldsymbol\phi\|_2$. `stableNorm()` rescales the $3\times1$ vector internally before forming its Euclidean norm, reducing avoidable overflow and underflow. The maximum-angle check occurs before calculating $\theta^2$ and later powers, so the declared domain bounds those intermediate values.
+
+### Exact-zero, small-angle, and nominal branches
+
+The exact-zero branch returns the identity without evaluating a trigonometric ratio:
+
+```cpp
+if (theta == 0.0) {
+  return identity();
+}
+```
+
+The comparison is exact by design. A representable nonzero angle, however small, proceeds to Rodrigues' formula and therefore is not erased by a tolerance.
+
+For $0<\theta\leq\theta_{\mathrm{series}}$, direct subtraction in $1-\cos\theta$ loses relative precision because both terms approach one. The implementation instead evaluates the reviewed even-power series through the sixth-order terms:
+
+```cpp
+const double theta_squared = theta * theta;
+
+double coefficient_a;
+double coefficient_b;
+
+if (theta <= policy.series_angle_threshold) {
+  const double theta_fourth = theta_squared * theta_squared;
+  const double theta_sixth = theta_fourth * theta_squared;
+
+  coefficient_a =
+    1.0 - theta_squared / 6.0 + theta_fourth / 120.0 -
+    theta_sixth / 5040.0;
+
+  coefficient_b =
+    0.5 - theta_squared / 24.0 + theta_fourth / 720.0 -
+    theta_sixth / 40320.0;
+} else {
+  coefficient_a = std::sin(theta) / theta;
+  coefficient_b =
+    (1.0 - std::cos(theta)) / theta_squared;
+}
+```
+
+The code names follow Rodrigues' equation directly: `theta_squared`, `theta_fourth`, and `theta_sixth` are $\theta^2$, $\theta^4$, and $\theta^6$; `coefficient_a` is $A(\theta)$; and `coefficient_b` is $B(\theta)$. The coefficient variables are declared before the `if` statement because either branch must assign them and the matrix calculation after the statement must use them. The comparison `<=` makes the series threshold inclusive. The `else` branch uses the direct formulas only after the angle is large enough for their subtraction and division to be resolved reliably at the declared accuracy.
+
+### Constructing the proper rotation
+
+The final lines map each part of Rodrigues' equation directly to an Eigen expression:
+
+```cpp
+const Eigen::Matrix3d rotation_generator =
+  hat_so3(rotation_vector);
+
+const Eigen::Matrix3d rotation_matrix =
+  Eigen::Matrix3d::Identity() +
+  coefficient_a * rotation_generator +
+  coefficient_b * rotation_generator * rotation_generator;
+
+if (!rotation_matrix.allFinite()) {
+  throw GeometryException(
+    GeometryError::unsupported_magnitude,
+    "Rotation exponential produced a non-finite matrix.");
+}
+
+return Rotation3(rotation_matrix);
+```
+
+Here `rotation_vector` is ${}^{a}\boldsymbol\phi$, `rotation_generator` is $\boldsymbol\Phi=[{}^{a}\boldsymbol\phi]_\times$, and `rotation_generator * rotation_generator` is $\boldsymbol\Phi^2$. Therefore `coefficient_a * rotation_generator` is $A(\theta)\boldsymbol\Phi$, `coefficient_b * rotation_generator * rotation_generator` is $B(\theta)\boldsymbol\Phi^2$, and `rotation_matrix` is the completed $\mathbf R({}^{a}\boldsymbol\phi)$. The private constructor is available here because the factory is a member of `Rotation3`. The exponential equation establishes the proper-rotation structure mathematically, and the implementation separately rejects a non-finite numerical result.
+
+### Concrete usage
+
+A positive quarter turn about the $x_a$-axis is represented by
+
+$$
+{}^{a}\boldsymbol\phi_x
+=
+\begin{bmatrix}
+\pi/2\\0\\0
+\end{bmatrix}
+\mathrm{rad}.
+$$
+
+The corresponding call is
+
+```cpp
+const double half_pi = 0.5 * std::acos(-1.0);
+const Eigen::Vector3d rotation_vector(half_pi, 0.0, 0.0);
+
+const Rotation3 rotation =
+  Rotation3::from_rotation_vector(rotation_vector);
+```
+
+It returns
+
+$$
+\mathbf R_x\!\left(\frac{\pi}{2}\right)
+=
+\begin{bmatrix}
+1&0&0\\
+0&0&-1\\
+0&1&0
+\end{bmatrix}.
+$$
+
+### Verification properties
+
+The tests are organised around the mathematical and numerical contracts of the exponential rather than around implementation line coverage. Exact identity and an analytic quarter turn provide known outputs. A $10^{-8}\,\mathrm{rad}$ case checks that the small-angle branch preserves a nonzero rotation. Values on both sides of the series threshold check that changing formulas does not change the represented motion. The maximum-angle boundary, a non-finite input, and an invalid series threshold check the declared software domain. An arbitrary-axis case checks the group properties
+
+$$
+\mathbf R^{\mathsf T}\mathbf R=\mathbf I_3,
+\qquad
+\det(\mathbf R)=1,
+\qquad
+\mathbf R(-\boldsymbol\phi)=\mathbf R(\boldsymbol\phi)^{\mathsf T}.
+$$
+
+These cases separate independent analytic examples, numerical branch boundaries, invalid inputs, and algebraic invariants. Mutable pass counts and package-linter results are operational evidence, so they are omitted from this lesson.
+
+### Deliberate limits
+
+The exponential map is many-to-one: rotation vectors that differ by a complete turn about the same axis can produce the same matrix. `from_rotation_vector()` evaluates the supplied vector without reducing its angle modulo $2\pi$ or selecting a principal representative. @sec-spatial-kernel-so3-logarithm records the inverse operation and its principal selection convention.
+
+This is a binary64 $SO(3)$ implementation, not a general matrix-exponential routine. It evaluates Rodrigues' coefficients with the small-angle series or the direct trigonometric formulas according to `NumericalPolicy`. `Rotation3` does not encode frames or angle units, so callers must supply radians and preserve the frame meaning.
+
+## Principal $SO(3)$ logarithm to a rotation vector {#sec-spatial-kernel-so3-logarithm}
+
+The principal $SO(3)$ logarithm answers the inverse finite-motion question: given a validated rotation matrix, which rotation-vector column with angle in $[0,\pi]$ represents the same orientation change? The mathematical derivation belongs to @sec-se3-numerical-branches, especially @eq-so3-logarithm-cosine-skew-data, @eq-so3-principal-angle-atan2, and @eq-so3-near-pi-axis-components. This section records how `Rotation3::to_principal_rotation_vector()` implements that reviewed result.
+
+### Input, output, frame, and units
+
+Let $\mathbf R\in SO(3)$ be the dimensionless matrix already stored by a `Rotation3`. The C++ member `matrix_` stores this $\mathbf R$. If $\mathbf R$ is interpreted in frame $\{a\}$, `Rotation3::to_principal_rotation_vector()` returns a `RotationLogResult` whose member `rotation_vector` stores a finite rotation-vector column ${}^{a}\boldsymbol\phi\in\mathbb R^3$ expressed in the same frame and measured in radians. The selected angle is
+
+$$
+\theta
+\mathrel{:=}
+\left\|{}^{a}\boldsymbol\phi\right\|_2
+\in[0,\pi]\ \mathrm{rad}.
+$$
+
+The implemented mapping is
+
+$$
+\begin{aligned}
+\operatorname{to\_principal\_rotation\_vector}
+&:
+SO(3)
+\longrightarrow
+\left\{
+\boldsymbol\phi\in\mathbb R^3:
+\|\boldsymbol\phi\|_2\leq\pi
+\right\},\\
+\mathbf R
+&\longmapsto
+{}^{a}\boldsymbol\phi,
+\qquad
+\exp\!\left([{}^{a}\boldsymbol\phi]_{\times}\right)=\mathbf R.
+\end{aligned}
+$$
+
+The closed ball on the right still contains two opposite vectors at its $\pi$ boundary that represent the same rotation. The implementation makes the mapping single-valued there by a deterministic axis-sign convention described below.
+
+The operation is a non-static `const` member function:
+
+```cpp
+[[nodiscard]] RotationLogResult to_principal_rotation_vector(
+  const NumericalPolicy & policy = NumericalPolicy{}) const;
+```
+
+There is no matrix parameter because the method reads the validated `matrix_` already held by the `Rotation3` object. The trailing `const` promises that the operation does not modify that object. `[[nodiscard]]` asks the compiler to warn when a caller discards the recovered coordinates and branch information.
+
+### Returning the coordinates and the formula branch
+
+The result contains both the rotation vector and the numerical formula used to recover it:
+
+```cpp
+enum class RotationLogBranch
+{
+  identity,
+  small_angle,
+  nominal,
+  near_pi
+};
+
+struct RotationLogResult
+{
+  Eigen::Vector3d rotation_vector;
+  RotationLogBranch branch;
+};
+```
+
+The branch value makes a numerically important decision observable in tests and diagnostics. Here `nominal` means the ordinary middle-angle case in which the direct logarithm formula is suitable; it does not mean a desired or commanded angle. The four regions are
+
+```text
+theta = 0                                             identity
+0 < theta <= series_angle_threshold                   small_angle
+series_angle_threshold < theta <
+  pi - near_pi_tolerance                              nominal
+pi - near_pi_tolerance <= theta <= pi                 near_pi
+```
+
+The policy must leave these regions ordered and non-overlapping. In particular,
+
+$$
+0
+<
+\theta_{\mathrm{series}}
+<
+\pi-\theta_{\mathrm{near}\text{-}\pi}.
+$$
+
+### Recovering the principal angle
+
+The implementation first extracts the cosine and skew data derived in @eq-so3-logarithm-cosine-skew-data:
+
+$$
+\cos (\theta)
+=
+\frac{\operatorname{tr}(\mathbf R)-1}{2},
+\qquad
+{}^{a}\mathbf u
+=
+\begin{bmatrix}
+R_{32}-R_{23}\\
+R_{13}-R_{31}\\
+R_{21}-R_{12}
+\end{bmatrix}
+=
+2\sin\theta\,{}^{a}\mathbf s_\omega.
+$$
+
+The corresponding C++ is
+
+```cpp
+double cosine_theta = 0.5 * (matrix_.trace() - 1.0);
+
+// clang-format off
+const Eigen::Vector3d skew_difference(
+  matrix_(2, 1) - matrix_(1, 2),
+  matrix_(0, 2) - matrix_(2, 0),
+  matrix_(1, 0) - matrix_(0, 1));
+// clang-format on
+
+const double sine_theta =
+  0.5 * skew_difference.stableNorm();
+
+const double theta =
+  std::atan2(sine_theta, cosine_theta);
+```
+
+The identifier-to-equation mapping in this block is direct: `matrix_` is $\mathbf R$, `cosine_theta` is $\cos\theta$, `skew_difference` is ${}^{a}\mathbf u$, `sine_theta` is $\sin\theta=\|{}^{a}\mathbf u\|_2/2$, and `theta` is the principal angle $\theta$. In particular, the name `skew_difference` refers to the three-component column extracted from the skew matrix difference $\mathbf R-\mathbf R^{\mathsf T}$; it is not itself a matrix. `stableNorm()` calculates $\|{}^{a}\mathbf u\|_2$ with internal scaling. Because the principal interval makes $\sin\theta\geq0$, `sine_theta` is the nonnegative principal sine. `atan2(sine_theta, cosine_theta)` then recovers the angle in $[0,\pi]$ without relying on `acos()` alone near the identity.
+
+For an exact rotation, $\cos(\theta)\in[-1,1]$. Floating-point trace arithmetic can place it just outside that interval. The implementation clamps only an overshoot no larger than the dimensionless `orthogonality_tolerance`; a larger overshoot reports `invalid_rotation`. The tolerance is reused here because both checks measure dimensionless departure from a valid rotation, not because the two residuals are algebraically identical.
+
+### Identity, small-angle, and nominal formulas
+
+The identity has no unique axis, but its principal rotation vector is uniquely zero. The function therefore returns before attempting to normalise an axis:
+
+```cpp
+if (theta == 0.0) {
+  return RotationLogResult{
+    Eigen::Vector3d::Zero(),
+    RotationLogBranch::identity};
+}
+```
+
+Away from the near-$\pi$ region, both nonzero branches use
+
+$$
+{}^{a}\boldsymbol\phi
+=
+\frac{\theta}{2\sin\theta}
+{}^{a}\mathbf u.
+$$
+
+For a resolvable small angle, the direct ratio contains two small quantities. The implementation evaluates the reviewed series
+
+$$
+\frac{\theta}{2\sin\theta}
+=
+\frac12
++\frac{\theta^2}{12}
++\frac{7\theta^4}{720}
++O(\theta^6),
+$$
+
+while the nominal branch evaluates the direct ratio:
+
+```cpp
+if (theta <= policy.series_angle_threshold) {
+  const double theta_squared = theta * theta;
+  const double theta_fourth = theta_squared * theta_squared;
+
+  recovery_factor =
+    0.5 + theta_squared / 12.0 + 7.0 * theta_fourth / 720.0;
+
+  branch = RotationLogBranch::small_angle;
+} else {
+  recovery_factor = theta / (2.0 * sine_theta);
+  branch = RotationLogBranch::nominal;
+}
+
+const Eigen::Vector3d rotation_vector =
+  recovery_factor * skew_difference;
+```
+
+In this block, `theta_squared` and `theta_fourth` are $\theta^2$ and $\theta^4$. The scalar `recovery_factor` is the factor $\theta/(2\sin\theta)$, evaluated either by its series or by the direct formula. Multiplying it by `skew_difference`, which is ${}^{a}\mathbf u$, produces `rotation_vector`, which is ${}^{a}\boldsymbol\phi$. The small-angle branch preserves a representable nonzero rotation; only the exact identity returns zero. The nominal branch is used only when the direct denominator is separated from both zero-angle and near-$\pi$ numerical difficulties.
+
+### Recovering the axis near $\pi$
+
+As $\theta\to\pi$, `skew_difference` approaches zero and no longer supplies a reliable axis magnitude. The implementation instead constructs the symmetric outer product derived in @eq-so3-near-pi-axis-outer-product:
+
+$$
+\mathbf Q
+=
+\frac{
+\dfrac12(\mathbf R+\mathbf R^{\mathsf T})
+-\cos\theta\,\mathbf I_3
+}{1-\cos\theta}
+=
+{}^{a}\mathbf s_\omega
+({}^{a}\mathbf s_\omega)^{\mathsf T}.
+$$
+
+The code first constructs that matrix:
+
+```cpp
+const double denominator = 1.0 - cosine_theta;
+
+const Eigen::Matrix3d symmetric_part =
+  0.5 * (matrix_ + matrix_.transpose());
+
+const Eigen::Matrix3d axis_outer_product =
+  (symmetric_part - cosine_theta * Eigen::Matrix3d::Identity()) /
+  denominator;
+```
+
+Here `denominator` is $1-\cos\theta$, `symmetric_part` is $(\mathbf R+\mathbf R^{\mathsf T})/2$, and `axis_outer_product` is $\mathbf Q={}^{a}\mathbf s_\omega({}^{a}\mathbf s_\omega)^{\mathsf T}$. The largest diagonal entry $Q_{kk}=({}^{a}s_{\omega,k})^2$ identifies the safest component from which to recover the axis. A strict comparison retains the lowest index when two diagonal entries are equal:
+
+```cpp
+Eigen::Index dominant_index = 0;
+
+for (Eigen::Index index = 1; index < 3; ++index) {
+  if (axis_outer_product(index, index) >
+      axis_outer_product(dominant_index, dominant_index)) {
+    dominant_index = index;
+  }
+}
+
+const double dominant_component = std::sqrt(
+  axis_outer_product(dominant_index, dominant_index));
+
+Eigen::Vector3d axis =
+  axis_outer_product.col(dominant_index) / dominant_component;
+
+axis(dominant_index) = dominant_component;
+axis /= axis.stableNorm();
+```
+
+In this block, `dominant_index` is the mathematical index $k$, `dominant_component` is the selected positive value $\sqrt{Q_{kk}}$, and `axis` is the recovered unit-axis candidate ${}^{a}\widetilde{\mathbf s}_\omega$. The positive square root makes the selected dominant component positive, but that convention does not necessarily recover the orientation represented by the original rotation. The matrix $\mathbf Q$ determines only an unoriented axis line because
+
+$$
+\mathbf Q
+=
+{}^{a}\mathbf s_\omega
+({}^{a}\mathbf s_\omega)^{\mathsf T}
+=
+(-{}^{a}\mathbf s_\omega)
+(-{}^{a}\mathbf s_\omega)^{\mathsf T}.
+$$
+
+Consequently, the candidate ${}^{a}\widetilde{\mathbf s}_\omega$ can equal either the desired oriented axis ${}^{a}\mathbf s_\omega$ or its negative. For $0<\theta<\pi$, the skew column retains the missing orientation because ${}^{a}\mathbf u=2\sin\theta\,{}^{a}\mathbf s_\omega$ and $\sin\theta>0$. Because ${}^{a}\mathbf s_\omega$ is a unit column, the correctly oriented axis gives
+
+$$
+({}^{a}\mathbf s_\omega)^{\mathsf T}
+{}^{a}\mathbf u
+=
+({}^{a}\mathbf s_\omega)^{\mathsf T}
+\left(2\sin\theta\,{}^{a}\mathbf s_\omega\right)
+=
+2\sin\theta
+>0.
+$$
+
+The candidate has only two possible orientations. Therefore, if its computed dot product with ${}^{a}\mathbf u$ is negative, the candidate must be the oppositely oriented axis, because
+
+$$
+(-{}^{a}\mathbf s_\omega)^{\mathsf T}
+\left(2\sin\theta\,{}^{a}\mathbf s_\omega\right)
+=
+-2\sin\theta
+<0.
+$$
+
+The code detects this case and corrects the orientation directly:
+
+```cpp
+const double skew_alignment = axis.dot(skew_difference);
+
+if (skew_alignment < 0.0) {
+  axis = -axis;
+}
+
+const Eigen::Vector3d rotation_vector = theta * axis;
+```
+
+Here `axis` is the candidate ${}^{a}\widetilde{\mathbf s}_\omega$, `skew_difference` is ${}^{a}\mathbf u$, and `skew_alignment` is their dot product. If `skew_alignment` is negative, `axis = -axis` changes the candidate to the correct orientation; otherwise the candidate is retained. At exactly $\theta=\pi$, ${}^{a}\mathbf u=\mathbf 0_3$, so the rotation matrix contains no information that distinguishes the two axis orientations; the strict test `< 0.0` leaves the deterministic positive-dominant-component convention unchanged. After this decision, `rotation_vector` implements ${}^{a}\boldsymbol\phi=\theta{}^{a}\mathbf s_\omega$.
+
+### Concrete half-turn and principal-branch examples
+
+Consider the half-turn vector
+
+$$
+{}^{a}\boldsymbol\phi
+=
+\frac{\pi}{\sqrt2}
+\begin{bmatrix}
+1\\1\\0
+\end{bmatrix}.
+$$
+
+Because ${}^{a}\boldsymbol\phi=\theta{}^{a}\mathbf s_\omega$ and $\theta=\pi$, its unit axis is ${}^{a}\mathbf s_\omega=[1\;1\;0]^{\mathsf T}/\sqrt2$. Consequently,
+
+$$
+\mathbf Q
+=
+{}^{a}\mathbf s_\omega
+({}^{a}\mathbf s_\omega)^{\mathsf T}
+=
+\begin{bmatrix}
+1/2&1/2&0\\
+1/2&1/2&0\\
+0&0&0
+\end{bmatrix}.
+$$
+
+At $\theta=\pi$, Rodrigues' formula reduces to $\mathbf R=2\mathbf Q-\mathbf I_3$, so
+
+$$
+\mathbf R
+=
+\begin{bmatrix}
+0&1&0\\
+1&0&0\\
+0&0&-1
+\end{bmatrix}.
+$$
+
+The first two diagonal entries of $\mathbf Q$ are tied. The lowest-index rule selects the $x_a$ component, and the positive-root rule returns the displayed rotation vector deterministically.
+
+The principal convention also changes a non-principal input when the same rotation is reconstructed through the exponential. A rotation of $3\pi/2$ about $+\mathbf e_z$ has the same matrix as a principal rotation whose nonnegative angle is $\pi/2$ and whose oriented axis is $-\mathbf e_z$:
+
+$$
+\exp\!\left(\left[\frac{3\pi}{2}\mathbf e_z\right]_\times\right)
+=
+\exp\!\left(\left[\frac{\pi}{2}(-\mathbf e_z)\right]_\times\right).
+$$
+
+The logarithm therefore returns ${}^{a}\boldsymbol\phi=(\pi/2)(-\mathbf e_z)$, with $\theta=\pi/2$ and ${}^{a}\mathbf s_\omega=-\mathbf e_z$, rather than the original $(3\pi/2)\mathbf e_z$ input.
+
+### Validation and failure behaviour
+
+The function validates `orthogonality_tolerance`, `series_angle_threshold`, and `near_pi_tolerance` before using the matrix. Each must be finite, their lower bounds must hold, `near_pi_tolerance` must be less than $\pi$, and the small-angle threshold must lie below the start of the near-$\pi$ region. An invalid combination reports `GeometryError::invalid_policy`.
+
+Every derived scalar, matrix, axis, norm, and output vector is checked for finiteness. A non-finite intermediate reports `unsupported_magnitude`. A materially invalid cosine, negative recovered axis square, zero dominant component, or zero recovered axis norm reports `invalid_rotation`. The stored matrix has already passed `Rotation3::from_matrix()` or was constructed by a trusted `Rotation3` operation, so the logarithm does not repeat the complete $SO(3)$ validation.
+
+### Verification properties
+
+The logarithm tests are organised by the geometric or numerical behaviour that could fail. The identity checks the exact-zero convention. An analytic quarter turn checks the ordinary formula independently of the exponential implementation. A small nonzero rotation checks the series branch. Coordinate-axis, tied-axis, and just-below-$\pi$ cases check symmetric axis recovery, deterministic tie-breaking, and sign recovery. A $3\pi/2$ input about $+\mathbf e_z$ checks selection of the principal angle $\pi/2$ about $-\mathbf e_z$. An arbitrary-axis case checks the exponential--logarithm inverse relationship, while an overlapping-threshold case checks rejection of an invalid numerical policy.
+
+For every validated rotation, re-exponentiating the selected principal logarithm must recover the original matrix:
+
+$$
+\operatorname{Exp}_{SO(3)}
+\!\left(
+\operatorname{Log}_{SO(3)}^{\mathrm{principal}}(\mathbf R)
+\right)
+=
+\mathbf R
+$$
+
+For a rotation vector already inside the selected principal domain, including the canonical sign convention at $\theta=\pi$, the reverse composition must recover that vector:
+
+$$
+\operatorname{Log}_{SO(3)}^{\mathrm{principal}}
+\!\left(
+\operatorname{Exp}_{SO(3)}({}^{a}\boldsymbol\phi)
+\right)
+=
+{}^{a}\boldsymbol\phi.
+$$
+
+The first identity is the general endpoint contract. The second is deliberately narrower because exponential coordinates outside the principal domain, and the unselected sign at exactly $\pi$, cannot be recovered unchanged by a principal logarithm. Mutable pass counts and package-linter results are omitted from this lesson.
+
+### Deliberate limits
+
+This operation recovers only the rotational block of a logarithm. A complete $SE(3)$ logarithm must also recover the finite linear exponential-coordinate block from the transformation's translation. The selected principal rotation vector is discontinuous across the exact-$\pi$ branch boundary even though the represented orientation changes continuously. `Rotation3` does not encode frame labels or angle units, so callers must preserve the frame interpretation and treat the returned components as radians.
+
+## Algorithm summaries for the $SO(3)$ exponential and principal logarithm {#sec-spatial-kernel-so3-exp-log-algorithms}
+
+This section condenses the two preceding implementations into mathematical pseudocode. Each line performs one algorithmic assignment or decision using the mathematical quantity itself. A monospaced name in square brackets gives the corresponding C++ identifier; for example, $\theta\,[\mathtt{theta}]$ means that the mathematical angle $\theta$ is stored in the C++ variable `theta`.
+
+### Exponential: rotation vector to rotation matrix
+
+The exponential receives ${}^{a}\boldsymbol\phi\in\mathbb R^3$ in radians and returns a `Rotation3` storing $\mathbf R\in SO(3)$. The complete algorithm is
+
+$$
+\begin{aligned}
+&\textbf{input:}
+&&{}^{a}\boldsymbol\phi
+\in\mathbb R^3\ \mathrm{rad}
+\ [\mathtt{rotation\_vector}],
+\quad \mathtt{policy},\\
+&\textbf{output:}
+&&\mathbf R\in SO(3)
+\ [\mathtt{rotation\_matrix}],\\[2pt]
+&\theta\ [\mathtt{theta}]
+&&\gets
+\left\|{}^{a}\boldsymbol\phi\right\|_2,\\
+&\textbf{if }\theta=0,
+&&\textbf{return }\mathbf I_3.
+\end{aligned}
+$$
+
+For $\theta>0$, the algorithm continues with the coefficient selection and Rodrigues' formula:
+
+$$
+\begin{aligned}
+&A_{\mathrm{eval}}(\theta)
+\ [\mathtt{coefficient\_a}]
+&&\gets
+\begin{cases}
+1-\dfrac{\theta^2}{6}
++\dfrac{\theta^4}{120}
+-\dfrac{\theta^6}{5040},
+&0<\theta\leq\theta_{\mathrm{series}},\\[6pt]
+\dfrac{\sin\theta}{\theta},
+&\theta>\theta_{\mathrm{series}},
+\end{cases}\\[8pt]
+&B_{\mathrm{eval}}(\theta)
+\ [\mathtt{coefficient\_b}]
+&&\gets
+\begin{cases}
+\dfrac12
+-\dfrac{\theta^2}{24}
++\dfrac{\theta^4}{720}
+-\dfrac{\theta^6}{40320},
+&0<\theta\leq\theta_{\mathrm{series}},\\[6pt]
+\dfrac{1-\cos\theta}{\theta^2},
+&\theta>\theta_{\mathrm{series}},
+\end{cases}\\[8pt]
+&\boldsymbol\Phi
+\ [\mathtt{rotation\_generator}]
+&&\gets
+[{}^{a}\boldsymbol\phi]_\times,\\
+&\mathbf R
+\ [\mathtt{rotation\_matrix}]
+&&\gets
+\mathbf I_3
++A_{\mathrm{eval}}(\theta)\boldsymbol\Phi
++B_{\mathrm{eval}}(\theta)\boldsymbol\Phi^2,\\
+&\textbf{return}
+&&\mathtt{Rotation3}(\mathbf R).
+\end{aligned}
+$$
+
+The two polynomial branches are the evaluated sixth-order approximations used by the code. The direct branches evaluate the exact trigonometric coefficients.
+
+### Principal logarithm: rotation matrix to rotation vector
+
+The logarithm receives the validated $\mathbf R\in SO(3)$ stored in `matrix_` and returns the selected ${}^{a}\boldsymbol\phi$ in radians together with the numerical branch. Its complete algorithm is
+
+$$
+\begin{aligned}
+&\textbf{input:}
+&&\mathbf R\in SO(3)\ [\mathtt{matrix\_}],
+\quad \mathtt{policy},\\
+&\textbf{output:}
+&&{}^{a}\boldsymbol\phi\in\mathbb R^3\ \mathrm{rad}
+\ [\mathtt{rotation\_vector}],
+\quad b\ [\mathtt{branch}],\\[2pt]
+&c_\theta\ [\mathtt{cosine\_theta}]
+&&\gets
+\frac{\operatorname{tr}(\mathbf R)-1}{2},\\
+&{}^{a}\mathbf u\ [\mathtt{skew\_difference}]
+&&\gets
+\begin{bmatrix}
+R_{32}-R_{23}\\
+R_{13}-R_{31}\\
+R_{21}-R_{12}
+\end{bmatrix},\\[8pt]
+&s_\theta\ [\mathtt{sine\_theta}]
+&&\gets
+\frac12\left\|{}^{a}\mathbf u\right\|_2,\\
+&\theta\ [\mathtt{theta}]
+&&\gets
+\operatorname{atan2}(s_\theta,c_\theta)
+\in[0,\pi],\\
+&\textbf{if }\theta=0,
+&&\textbf{return }
+(\mathbf 0_3,\mathtt{identity}).
+\end{aligned}
+$$
+
+For a non-identity rotation, test the near-$\pi$ condition first. If it holds, begin the symmetric axis recovery:
+
+$$
+\begin{aligned}
+&\textbf{if }
+\pi-\theta\leq\theta_{\mathrm{near}\text{-}\pi},
+&&\textbf{enter the near-}\pi\textbf{ branch:}\\[2pt]
+&\quad\mathbf R_{\mathrm{sym}}
+\ [\mathtt{symmetric\_part}]
+&&\quad\gets
+\frac12(\mathbf R+\mathbf R^{\mathsf T}),\\
+&\quad d_\pi\ [\mathtt{denominator}]
+&&\quad\gets 1-c_\theta,\\
+&\quad\mathbf Q
+\ [\mathtt{axis\_outer\_product}]
+&&\quad\gets
+\frac{
+\mathbf R_{\mathrm{sym}}-c_\theta\mathbf I_3
+}{d_\pi}
+=
+{}^{a}\mathbf s_\omega
+({}^{a}\mathbf s_\omega)^{\mathsf T},\\[6pt]
+&\quad k
+&&\quad\gets
+\min\!\left(
+\underset{i\in\{1,2,3\}}{\operatorname{arg\,max}}
+Q_{ii}
+\right),\\
+&\quad k_{\mathrm{Eigen}}\ [\mathtt{dominant\_index}]
+&&\quad\gets k-1
+\quad\text{for Eigen's zero-based index},\\
+&\quad q_k\ [\mathtt{dominant\_component\_squared}]
+&&\quad\gets Q_{kk},\\
+&\quad d_k\ [\mathtt{dominant\_component}]
+&&\quad\gets\sqrt{q_k}.
+\end{aligned}
+$$
+
+With the dominant component available, complete the near-$\pi$ axis, sign, and output calculation:
+
+$$
+\begin{aligned}
+&\quad{}^{a}\widetilde{\mathbf s}_\omega
+\ [\mathtt{axis}]
+&&\quad\gets
+\frac{\mathbf Q_{:k}}{d_k},
+\qquad
+{}^{a}\widetilde s_{\omega,k}\gets d_k,\\
+&\quad n_s\ [\mathtt{axis\_norm}]
+&&\quad\gets
+\|{}^{a}\widetilde{\mathbf s}_\omega\|_2,\\
+&\quad{}^{a}\widetilde{\mathbf s}_\omega
+&&\quad\gets
+{}^{a}\widetilde{\mathbf s}_\omega/n_s,\\
+&\quad\alpha\ [\mathtt{skew\_alignment}]
+&&\quad\gets
+({}^{a}\widetilde{\mathbf s}_\omega)^{\mathsf T}
+{}^{a}\mathbf u,\\
+&\quad\textbf{if }\alpha<0,
+&&\quad{}^{a}\widetilde{\mathbf s}_\omega
+\gets-{}^{a}\widetilde{\mathbf s}_\omega,\\
+&\quad{}^{a}\boldsymbol\phi
+\ [\mathtt{rotation\_vector}]
+&&\quad\gets
+\theta{}^{a}\widetilde{\mathbf s}_\omega,\\
+&\quad\textbf{return}
+&&\quad({}^{a}\boldsymbol\phi,\mathtt{near\_pi}).
+\end{aligned}
+$$
+
+If the near-$\pi$ condition is false, select the small-angle or nominal recovery factor and finish through ${}^{a}\boldsymbol\phi=f(\theta){}^{a}\mathbf u$:
+
+$$
+\begin{aligned}
+&\textbf{if }0<\theta\leq\theta_{\mathrm{series}}:
+&&\\[-2pt]
+&\quad f(\theta)\ [\mathtt{recovery\_factor}]
+&&\quad\gets
+\frac12+\frac{\theta^2}{12}
++\frac{7\theta^4}{720},\\
+&\quad b\ [\mathtt{branch}]
+&&\quad\gets\mathtt{small\_angle},\\[6pt]
+&\textbf{else}:
+&&\theta_{\mathrm{series}}<\theta
+<\pi-\theta_{\mathrm{near}\text{-}\pi},\\
+&\quad f(\theta)\ [\mathtt{recovery\_factor}]
+&&\quad\gets
+\frac{\theta}{2s_\theta},\\
+&\quad b\ [\mathtt{branch}]
+&&\quad\gets\mathtt{nominal},\\[6pt]
+&{}^{a}\boldsymbol\phi
+\ [\mathtt{rotation\_vector}]
+&&\gets
+f(\theta){}^{a}\mathbf u,\\
+&\textbf{return}
+&&({}^{a}\boldsymbol\phi,b).
+\end{aligned}
+$$
+
+### Production checks omitted from the mathematical pseudocode
+
+The displayed algorithms assume finite inputs, valid policy values, and a validated $\mathbf R\in SO(3)$. The C++ boundary adds the required guards without changing the mathematical branch equations: it validates the policy and input components, enforces the supported angle, rejects non-finite intermediate or output values, clamps only tolerated round-off in $c_\theta$ and $Q_{kk}$, and rejects an unrecoverable zero axis or nominal sine factor. The detailed exponential and logarithm sections above record the corresponding `GeometryError` results.
+
+The two algorithms form inverse operations only after the logarithm's principal-domain convention is applied. For every validated $\mathbf R$,
+
+$$
+\operatorname{Exp}_{SO(3)}
+\!\left(
+\operatorname{Log}_{SO(3)}^{\mathrm{principal}}(\mathbf R)
+\right)
+=
+\mathbf R,
+$$
+
+whereas $\operatorname{Log}_{SO(3)}^{\mathrm{principal}}(\operatorname{Exp}_{SO(3)}({}^{a}\boldsymbol\phi))={}^{a}\boldsymbol\phi$ requires ${}^{a}\boldsymbol\phi$ to lie inside the selected principal domain, including the canonical sign at $\theta=\pi$.

@@ -230,8 +230,8 @@ TEST(Rotation3Test, InverseComposesToIdentityOnBothSides)
     rotation_ba.compose(rotation_ab).matrix();
 
   constexpr double tolerance = 1e-12;
-  const Eigen::Matrix3d expected_identiry = Eigen::Matrix3d::Identity();
+  const Eigen::Matrix3d expected_identity = Eigen::Matrix3d::Identity();
 
-  EXPECT_TRUE(right_identity.isApprox(expected_identiry, tolerance));
-  EXPECT_TRUE(left_identity.isApprox(expected_identiry, tolerance));
+  EXPECT_TRUE(right_identity.isApprox(expected_identity, tolerance));
+  EXPECT_TRUE(left_identity.isApprox(expected_identity, tolerance));
 }
