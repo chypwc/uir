@@ -511,7 +511,21 @@ window.Quarto = {
   <li><a href="#principal-logarithm-rotation-matrix-to-rotation-vector" id="toc-principal-logarithm-rotation-matrix-to-rotation-vector" class="nav-link" data-scroll-target="#principal-logarithm-rotation-matrix-to-rotation-vector"><span class="header-section-number">9.8.2</span> Principal logarithm: rotation matrix to rotation vector</a></li>
   <li><a href="#production-checks-omitted-from-the-mathematical-pseudocode" id="toc-production-checks-omitted-from-the-mathematical-pseudocode" class="nav-link" data-scroll-target="#production-checks-omitted-from-the-mathematical-pseudocode"><span class="header-section-number">9.8.3</span> Production checks omitted from the mathematical pseudocode</a></li>
   </ul></li>
-  <li><a href="#sec-spatial-kernel-se3-exponential" id="toc-sec-spatial-kernel-se3-exponential" class="nav-link" data-scroll-target="#sec-spatial-kernel-se3-exponential"><span class="header-section-number">9.9</span> Linear-first <span class="math inline">\(SE(3)\)</span> exponential from finite coordinates</a></li>
+  <li><a href="#sec-spatial-kernel-modelled-motion-coordinates" id="toc-sec-spatial-kernel-modelled-motion-coordinates" class="nav-link" data-scroll-target="#sec-spatial-kernel-modelled-motion-coordinates"><span class="header-section-number">9.9</span> Why the kernel uses modelled motion coordinates</a>
+  <ul class="collapse">
+  <li><a href="#a-normalised-screw-describes-one-motion-direction" id="toc-a-normalised-screw-describes-one-motion-direction" class="nav-link" data-scroll-target="#a-normalised-screw-describes-one-motion-direction"><span class="header-section-number">9.9.1</span> A normalised screw describes one motion direction</a></li>
+  <li><a href="#a-twist-describes-the-instantaneous-motion" id="toc-a-twist-describes-the-instantaneous-motion" class="nav-link" data-scroll-target="#a-twist-describes-the-instantaneous-motion"><span class="header-section-number">9.9.2</span> A twist describes the instantaneous motion</a></li>
+  <li><a href="#exponential-coordinates-describe-one-finite-motion-increment" id="toc-exponential-coordinates-describe-one-finite-motion-increment" class="nav-link" data-scroll-target="#exponential-coordinates-describe-one-finite-motion-increment"><span class="header-section-number">9.9.3</span> Exponential coordinates describe one finite motion increment</a></li>
+  </ul></li>
+  <li><a href="#sec-spatial-kernel-se3-exponential" id="toc-sec-spatial-kernel-se3-exponential" class="nav-link" data-scroll-target="#sec-spatial-kernel-se3-exponential"><span class="header-section-number">9.10</span> Linear-first <span class="math inline">\(SE(3)\)</span> exponential from finite coordinates</a>
+  <ul class="collapse">
+  <li><a href="#why-the-left-jacobian-produces-the-translation" id="toc-why-the-left-jacobian-produces-the-translation" class="nav-link" data-scroll-target="#why-the-left-jacobian-produces-the-translation"><span class="header-section-number">9.10.1</span> Why the left Jacobian produces the translation</a></li>
+  <li><a href="#public-factory-and-complete-implementation" id="toc-public-factory-and-complete-implementation" class="nav-link" data-scroll-target="#public-factory-and-complete-implementation"><span class="header-section-number">9.10.2</span> Public factory and complete implementation</a></li>
+  <li><a href="#equation-to-code-map" id="toc-equation-to-code-map" class="nav-link" data-scroll-target="#equation-to-code-map"><span class="header-section-number">9.10.3</span> Equation-to-code map</a></li>
+  <li><a href="#finite-pitch-screw-example" id="toc-finite-pitch-screw-example" class="nav-link" data-scroll-target="#finite-pitch-screw-example"><span class="header-section-number">9.10.4</span> Finite-pitch screw example</a></li>
+  <li><a href="#validation-and-focused-evidence-1" id="toc-validation-and-focused-evidence-1" class="nav-link" data-scroll-target="#validation-and-focused-evidence-1"><span class="header-section-number">9.10.5</span> Validation and focused evidence</a></li>
+  <li><a href="#deliberate-limits-5" id="toc-deliberate-limits-5" class="nav-link" data-scroll-target="#deliberate-limits-5"><span class="header-section-number">9.10.6</span> Deliberate limits</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -2324,12 +2338,175 @@ f(\theta){}^{a}\mathbf u,\\
 <p>whereas <span class="math inline">\(\operatorname{Log}_{SO(3)}^{\mathrm{principal}}(\operatorname{Exp}_{SO(3)}({}^{a}\boldsymbol\phi))={}^{a}\boldsymbol\phi\)</span> requires <span class="math inline">\({}^{a}\boldsymbol\phi\)</span> to lie inside the selected principal domain, including the canonical sign at <span class="math inline">\(\theta=\pi\)</span>.</p>
 </section>
 </section>
-<section id="sec-spatial-kernel-se3-exponential" class="level2" data-number="9.9">
-<h2 data-number="9.9" class="anchored" data-anchor-id="sec-spatial-kernel-se3-exponential"><span class="header-section-number">9.9</span> Linear-first <span class="math inline">\(SE(3)\)</span> exponential from finite coordinates</h2>
-<p>The <span class="math inline">\(SE(3)\)</span> exponential answers the next finite-motion question: given the linear-first coordinate column <span class="math inline">\({}^{a}\boldsymbol\eta=[({}^{a}\boldsymbol\rho)^{\mathsf T}\;({}^{a}\boldsymbol\phi)^{\mathsf T}]^{\mathsf T}\)</span>, what rotation and translation form the resulting rigid displacement?</p>
-<p>For a normalised screw displacement, <span class="math inline">\({}^{a}\boldsymbol\rho={}^a\mathbf s_v\sigma\)</span> and <span class="math inline">\({}^{a}\boldsymbol\phi={}^a\mathbf s_\omega\sigma\)</span>. The coefficient <span class="math inline">\({}^{a}\mathbf s_v\)</span> generates the velocity-field value at the reference origin <span class="math inline">\(O_a\)</span> after multiplication by the screw rate; it is not generally the velocity of a moving link-frame origin. Consequently, <span class="math inline">\({}^{a}\boldsymbol\rho\)</span> is a finite linear exponential coordinate, not generally the final translation of that origin.</p>
-<p>The two input blocks describe how to generate a finite screw displacement; they are not themselves the rotation and translation blocks of the resulting transformation.</p>
-<p>Exponentiation converts these input coordinates into the finite displacement derived in <a href="08_screw_motion_se3_exponential_and_spatial_integration.html#sec-se3-numerical-branches" class="quarto-xref"><span>Section 8.5</span></a>:</p>
+<section id="sec-spatial-kernel-modelled-motion-coordinates" class="level2" data-number="9.9">
+<h2 data-number="9.9" class="anchored" data-anchor-id="sec-spatial-kernel-modelled-motion-coordinates"><span class="header-section-number">9.9</span> Why the kernel uses modelled motion coordinates</h2>
+<p>Why does the kernel use screw, twist, and exponential coordinates when a robot ultimately reports point coordinates <span class="math inline">\({}^{a}\mathbf x\)</span>, translation <span class="math inline">\({}^{a}\mathbf p\)</span>, and rotation <span class="math inline">\(\mathbf R\)</span>? These quantities answer different questions. Point and pose coordinates describe a configuration: where a point or rigid body is. A screw describes the geometry of an allowed one-parameter motion, a twist describes the instantaneous rate of rigid motion, and exponential coordinates describe one finite motion increment. Sensor observations may be used to estimate <span class="math inline">\({}^{a}\mathbf x\)</span>, <span class="math inline">\({}^{a}\mathbf p\)</span>, or <span class="math inline">\(\mathbf R\)</span>, while the screw, twist, and exponential coordinates remain internal to a kinematic model, estimator, controller, or optimiser.</p>
+<p>The full theory is derived in <a href="08_screw_motion_se3_exponential_and_spatial_integration.html#sec-screw-axis-joint-motion" class="quarto-xref"><span>Section 8.2</span></a>, <a href="08_screw_motion_se3_exponential_and_spatial_integration.html#sec-se3-screw-exponential" class="quarto-xref"><span>Section 8.3</span></a>, and <a href="08_screw_motion_se3_exponential_and_spatial_integration.html#sec-se3-constant-twist-integration" class="quarto-xref"><span>Section 8.4</span></a>. This section recalls the exact definitions needed to understand what the implementation receives and why those inputs are not normally independent sensor measurements.</p>
+<section id="a-normalised-screw-describes-one-motion-direction" class="level3" data-number="9.9.1">
+<h3 data-number="9.9.1" class="anchored" data-anchor-id="a-normalised-screw-describes-one-motion-direction"><span class="header-section-number">9.9.1</span> A normalised screw describes one motion direction</h3>
+<p>Consider a rotational or helical motion whose geometry is known from design data or calibration. Let <span class="math inline">\({}^{a}\mathbf s_\omega\in\mathbb R^3\)</span> be the unit direction of its oriented screw axis, let <span class="math inline">\({}^{a}\mathbf p_\ell\in\mathbb R^3\)</span> be the position of the closest point on that axis relative to the reference origin <span class="math inline">\(O_a\)</span>, and let <span class="math inline">\(h\in\mathbb R\)</span> be the signed distance translated along the axis per radian of rotation. Both vectors are expressed in frame <span class="math inline">\(\{a\}\)</span>, <span class="math inline">\({}^{a}\mathbf p_\ell\)</span> is measured in metres, and <span class="math inline">\(h\)</span> is measured in metres per radian.</p>
+<p>These geometric quantities define the linear component of the normalised screw generator:</p>
+<p><span class="math display">\[
+{}^{a}\mathbf s_v
+=
+-{}^{a}\mathbf s_\omega\times{}^{a}\mathbf p_\ell
++h{}^{a}\mathbf s_\omega.
+\]</span></p>
+<p>The component <span class="math inline">\({}^{a}\mathbf s_v\in\mathbb R^3\)</span> is measured in metres per radian. It is not a translation axis or a finite translation. Its perpendicular term <span class="math inline">\(-{}^{a}\mathbf s_\omega\times{}^{a}\mathbf p_\ell\)</span> records the axis offset from <span class="math inline">\(O_a\)</span>, while its parallel term <span class="math inline">\(h{}^{a}\mathbf s_\omega\)</span> records the pitch. Placing the linear and angular components in the project’s linear-first order gives the normalised screw</p>
+<p><span class="math display">\[
+{}^{a}\mathbf S
+=
+\begin{bmatrix}
+{}^{a}\mathbf s_v\\
+{}^{a}\mathbf s_\omega
+\end{bmatrix}.
+\]</span></p>
+<p>For example, a revolute or helical joint stores <span class="math inline">\({}^{a}\mathbf S\)</span> as part of its kinematic model, while an encoder supplies the amount of motion along that fixed direction. A robot with no such one-degree-of-freedom constraint does not need to invent a normalised screw for every operation.</p>
+</section>
+<section id="a-twist-describes-the-instantaneous-motion" class="level3" data-number="9.9.2">
+<h3 data-number="9.9.2" class="anchored" data-anchor-id="a-twist-describes-the-instantaneous-motion"><span class="header-section-number">9.9.2</span> A twist describes the instantaneous motion</h3>
+<p>Let the signed rotation about the screw axis vary with time as <span class="math inline">\(\theta(t)\)</span>, measured in radians. Its derivative <span class="math inline">\(\dot\theta\)</span> is the angular rate in radians per second. Multiplying the normalised screw by this rate gives the linear-first spatial twist</p>
+<p><span class="math display">\[
+\begin{bmatrix}
+{}^{a}\boldsymbol\nu\\
+{}^{a}\boldsymbol\omega
+\end{bmatrix}
+=
+{}^{a}\mathbf S\dot\theta
+=
+\begin{bmatrix}
+{}^{a}\mathbf s_v\dot\theta\\
+{}^{a}\mathbf s_\omega\dot\theta
+\end{bmatrix}.
+\]</span></p>
+<p>The angular component <span class="math inline">\({}^{a}\boldsymbol\omega\in\mathbb R^3\)</span> is the angular velocity in radians per second. The linear component <span class="math inline">\({}^{a}\boldsymbol\nu\in\mathbb R^3\)</span> is measured in metres per second. It is the value of the screw’s instantaneous velocity field at <span class="math inline">\(O_a\)</span>, not generally the velocity of a moving link-frame origin. Together, the two components determine the velocity assigned to a point at <span class="math inline">\({}^{a}\mathbf x\)</span>:</p>
+<p><span class="math display">\[
+{}^{a}\dot{\mathbf x}
+=
+{}^{a}\boldsymbol\nu
++{}^{a}\boldsymbol\omega\times{}^{a}\mathbf x.
+\]</span></p>
+<p>The linear component <span class="math inline">\({}^{a}\boldsymbol\nu\)</span> therefore need not be measured at the possibly non-material reference origin <span class="math inline">\(O_a\)</span>. The twist can instead be calculated from a known screw and joint rate or inferred from inertial, visual, and material-point observations. The velocity-field equation then predicts the velocity at every other point on the rigid body. The current pose <span class="math inline">\(({}^{a}\mathbf p,\mathbf R)\)</span> alone does not contain this rate information.</p>
+</section>
+<section id="exponential-coordinates-describe-one-finite-motion-increment" class="level3" data-number="9.9.3">
+<h3 data-number="9.9.3" class="anchored" data-anchor-id="exponential-coordinates-describe-one-finite-motion-increment"><span class="header-section-number">9.9.3</span> Exponential coordinates describe one finite motion increment</h3>
+<p>Following the same rotational or helical screw through the signed finite angle <span class="math inline">\(\theta\)</span> gives the linear-first exponential-coordinate column</p>
+<p><span class="math display">\[
+{}^{a}\boldsymbol\eta
+=
+{}^{a}\mathbf S\theta
+=
+\begin{bmatrix}
+{}^{a}\boldsymbol\rho\\
+{}^{a}\boldsymbol\phi
+\end{bmatrix}
+=
+\begin{bmatrix}
+{}^{a}\mathbf s_v\theta\\
+{}^{a}\mathbf s_\omega\theta
+\end{bmatrix}.
+\]</span></p>
+<p>The angular coordinate <span class="math inline">\({}^{a}\boldsymbol\phi={}^{a}\mathbf s_\omega\theta\)</span> is measured in radians. Its direction gives the oriented screw-axis direction, and its magnitude gives the rotation amount when the equivalent orientation with <span class="math inline">\(\theta=\|{}^{a}\boldsymbol\phi\|_2&gt;0\)</span> is selected. The linear coordinate <span class="math inline">\({}^{a}\boldsymbol\rho={}^{a}\mathbf s_v\theta\)</span> is measured in metres. Substitution of the screw geometry shows the information it carries:</p>
+<p><span class="math display">\[
+{}^{a}\boldsymbol\rho
+=
+-\left({}^{a}\mathbf s_\omega\times{}^{a}\mathbf p_\ell\right)\theta
++h\theta{}^{a}\mathbf s_\omega.
+\]</span></p>
+<p>The first term records the scaled axis offset, and the second records the axial advance. Thus <span class="math inline">\({}^{a}\boldsymbol\rho\)</span> is a finite linear generator coordinate, not the final translation of the rigid transformation.</p>
+<p>When <span class="math inline">\({}^{a}\boldsymbol\phi\neq\mathbf0_3\)</span>, the selected finite coordinates retain the screw geometry. Choose the equivalent screw orientation for which <span class="math inline">\(\theta=\|{}^{a}\boldsymbol\phi\|_2&gt;0\)</span>, then recover</p>
+<p><span class="math display">\[
+\theta=\|{}^{a}\boldsymbol\phi\|_2,
+\qquad
+{}^{a}\mathbf s_\omega
+=
+\frac{{}^{a}\boldsymbol\phi}{\theta},
+\qquad
+{}^{a}\mathbf s_v
+=
+\frac{{}^{a}\boldsymbol\rho}{\theta},
+\]</span></p>
+<p>followed by</p>
+<p><span class="math display">\[
+h
+=
+({}^{a}\mathbf s_\omega)^{\mathsf T}{}^{a}\mathbf s_v,
+\qquad
+{}^{a}\mathbf p_\ell
+=
+{}^{a}\mathbf s_\omega\times{}^{a}\mathbf s_v.
+\]</span></p>
+<p>The dot product extracts the component of <span class="math inline">\({}^{a}\mathbf s_v\)</span> parallel to the axis, which is the pitch <span class="math inline">\(h\)</span>. The cross product removes that parallel component and recovers <span class="math inline">\({}^{a}\mathbf p_\ell\)</span>, the closest point on the axis. This recovery confirms that <span class="math inline">\({}^{a}\boldsymbol\phi\)</span> carries the axis direction and rotation amount, while <span class="math inline">\({}^{a}\boldsymbol\rho\)</span> carries the information needed to locate the axis and determine its pitch.</p>
+<p>Pure translation uses a separate normalisation because there is no rotation angle. Let <span class="math inline">\({}^{a}\mathbf s_v\)</span> now be a unit translation direction, let <span class="math inline">\(d\)</span> be the signed translation distance in metres, and set <span class="math inline">\({}^{a}\mathbf s_\omega=\mathbf0_3\)</span>. The finite coordinates are then</p>
+<p><span class="math display">\[
+{}^{a}\boldsymbol\eta
+=
+\begin{bmatrix}
+{}^{a}\mathbf s_vd\\
+\mathbf0_3
+\end{bmatrix},
+\qquad
+{}^{a}\boldsymbol\rho
+=
+{}^{a}\mathbf s_vd,
+\qquad
+{}^{a}\boldsymbol\phi
+=
+\mathbf0_3.
+\]</span></p>
+<p>For a rotational or helical motion, the three model representations can now be compared without confusing their units or purposes:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Representation</th>
+<th>Linear block</th>
+<th>Angular block</th>
+<th>Question answered</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Normalised screw</td>
+<td><span class="math inline">\({}^{a}\mathbf s_v\)</span> in metres per radian</td>
+<td><span class="math inline">\({}^{a}\mathbf s_\omega\)</span> as a unit direction</td>
+<td>What fixed screw geometry defines the motion?</td>
+</tr>
+<tr class="even">
+<td>Spatial twist</td>
+<td><span class="math inline">\({}^{a}\boldsymbol\nu={}^{a}\mathbf s_v\dot\theta\)</span> in metres per second</td>
+<td><span class="math inline">\({}^{a}\boldsymbol\omega={}^{a}\mathbf s_\omega\dot\theta\)</span> in radians per second</td>
+<td>How is the rigid body moving now?</td>
+</tr>
+<tr class="odd">
+<td>Finite exponential coordinates</td>
+<td><span class="math inline">\({}^{a}\boldsymbol\rho={}^{a}\mathbf s_v\theta\)</span> in metres</td>
+<td><span class="math inline">\({}^{a}\boldsymbol\phi={}^{a}\mathbf s_\omega\theta\)</span> in radians</td>
+<td>What finite motion increment will be exponentiated?</td>
+</tr>
+</tbody>
+</table>
+<p>These finite coordinates are normally modelled or derived rather than measured independently. A kinematic model supplies <span class="math inline">\({}^{a}\mathbf S\)</span> and a joint measurement supplies <span class="math inline">\(\theta\)</span> or <span class="math inline">\(d\)</span>. If a spatial twist expressed in frame <span class="math inline">\(\{a\}\)</span> remains constant over a time step <span class="math inline">\(\Delta t\)</span>, its blocks give <span class="math inline">\({}^{a}\boldsymbol\rho={}^{a}\boldsymbol\nu\Delta t\)</span> and <span class="math inline">\({}^{a}\boldsymbol\phi={}^{a}\boldsymbol\omega\Delta t\)</span>. An optimiser may instead choose the six coordinates directly as a local pose increment.</p>
+<p>Finite exponential coordinates are useful because directly adding entries to <span class="math inline">\(\mathbf R\)</span> does not preserve <span class="math inline">\(\mathbf R^{\mathsf T}\mathbf R=\mathbf I_3\)</span> and <span class="math inline">\(\det(\mathbf R)=1\)</span>. Exponentiation maps the six-component increment to a valid rigid transformation that can be composed with the current pose. The external state may still be stored and reported as <span class="math inline">\(({}^{a}\mathbf p,\mathbf R)\)</span>; the exponential coordinates are needed only while representing the increment. The inverse problem—recovering a selected increment from a finite pose—belongs to the principal <span class="math inline">\(SE(3)\)</span> logarithm cycle.</p>
+</section>
+</section>
+<section id="sec-spatial-kernel-se3-exponential" class="level2" data-number="9.10">
+<h2 data-number="9.10" class="anchored" data-anchor-id="sec-spatial-kernel-se3-exponential"><span class="header-section-number">9.10</span> Linear-first <span class="math inline">\(SE(3)\)</span> exponential from finite coordinates</h2>
+<p>Using the finite coordinates defined in <a href="#sec-spatial-kernel-modelled-motion-coordinates" class="quarto-xref"><span>Section 9.9</span></a>, the <span class="math inline">\(SE(3)\)</span> exponential answers the forward finite-motion question: what rigid displacement does the supplied six-component column generate? The implementation uses the linear-first input</p>
+<p><span class="math display">\[
+{}^{a}\boldsymbol\eta
+=
+\begin{bmatrix}
+{}^{a}\boldsymbol\rho\\
+{}^{a}\boldsymbol\phi
+\end{bmatrix}.
+\]</span></p>
+<p>Both blocks are expressed in frame <span class="math inline">\(\{a\}\)</span>. The linear block <span class="math inline">\({}^{a}\boldsymbol\rho\in\mathbb R^3\)</span> is measured in metres, and the angular block <span class="math inline">\({}^{a}\boldsymbol\phi\in\mathbb R^3\)</span> is measured in radians. They are generator coordinates: they describe the motion before exponentiation. The output is the rigid displacement</p>
 <p><span class="math display">\[
 \mathbf T_\Delta
 =
@@ -2340,49 +2517,447 @@ f(\theta){}^{a}\mathbf u,\\
 \mathbf 0_3^{\mathsf T}&amp;1
 \end{bmatrix},
 \qquad
+\mathbf R({}^{a}\boldsymbol\phi)
+=
+\exp\!\left([{}^{a}\boldsymbol\phi]_\times\right),
+\qquad
+\boxed{
 {}^{a}\mathbf p
 =
-\mathbf J({}^{a}\boldsymbol\phi){}^{a}\boldsymbol\rho.
+\mathbf J({}^{a}\boldsymbol\phi){}^{a}\boldsymbol\rho
+}.
 \]</span></p>
+<p>This mapping separates two pairs of quantities that are easy to confuse. The input block <span class="math inline">\({}^{a}\boldsymbol\phi\)</span> generates the final rotation <span class="math inline">\(\mathbf R\)</span>, while the input block <span class="math inline">\({}^{a}\boldsymbol\rho\)</span> contributes to the final translation <span class="math inline">\({}^{a}\mathbf p\)</span>. In general, <span class="math inline">\({}^{a}\boldsymbol\rho\neq{}^{a}\mathbf p\)</span>: rotation couples the linear and angular generators through the <span class="math inline">\(SO(3)\)</span> left Jacobian <span class="math inline">\(\mathbf J({}^{a}\boldsymbol\phi)\)</span>. The remaining question is why exponentiation applies this Jacobian instead of copying <span class="math inline">\({}^{a}\boldsymbol\rho\)</span> directly into the transform.</p>
+<section id="why-the-left-jacobian-produces-the-translation" class="level3" data-number="9.10.1">
+<h3 data-number="9.10.1" class="anchored" data-anchor-id="why-the-left-jacobian-produces-the-translation"><span class="header-section-number">9.10.1</span> Why the left Jacobian produces the translation</h3>
+<p>Let <span class="math inline">\(\boldsymbol\Phi=[{}^{a}\boldsymbol\phi]_\times\in\mathfrak{so}(3)\)</span>. The linear-first hat map places <span class="math inline">\(\boldsymbol\Phi\)</span> and <span class="math inline">\({}^{a}\boldsymbol\rho\)</span> in one <span class="math inline">\(\mathfrak{se}(3)\)</span> matrix:</p>
+<p><span class="math display">\[
+\widehat{{}^{a}\boldsymbol\eta}
+=
+\begin{bmatrix}
+\boldsymbol\Phi&amp;{}^{a}\boldsymbol\rho\\
+\mathbf 0_3^{\mathsf T}&amp;0
+\end{bmatrix}.
+\]</span></p>
+<p>For every integer <span class="math inline">\(k\geq1\)</span>, block multiplication gives</p>
+<p><span class="math display">\[
+\left(\widehat{{}^{a}\boldsymbol\eta}\right)^k
+=
+\begin{bmatrix}
+\boldsymbol\Phi^k&amp;\boldsymbol\Phi^{k-1}{}^{a}\boldsymbol\rho\\
+\mathbf 0_3^{\mathsf T}&amp;0
+\end{bmatrix}.
+\]</span></p>
+<p>Substitution into the matrix-exponential series separates the rotation block from the translation column:</p>
+<p><span class="math display">\[
+\begin{aligned}
+\exp\!\left(\widehat{{}^{a}\boldsymbol\eta}\right)
+&amp;=
+\begin{bmatrix}
+\displaystyle\sum_{k=0}^{\infty}\frac{\boldsymbol\Phi^k}{k!}
+&amp;
+\displaystyle\sum_{k=1}^{\infty}
+\frac{\boldsymbol\Phi^{k-1}}{k!}{}^{a}\boldsymbol\rho\\
+\mathbf 0_3^{\mathsf T}&amp;1
+\end{bmatrix}\\
+&amp;=
+\begin{bmatrix}
+\exp(\boldsymbol\Phi)&amp;
+\mathbf J({}^{a}\boldsymbol\phi){}^{a}\boldsymbol\rho\\
+\mathbf 0_3^{\mathsf T}&amp;1
+\end{bmatrix},
+\end{aligned}
+\]</span></p>
+<p>where the <span class="math inline">\(SO(3)\)</span> left Jacobian is the dimensionless mapping</p>
+<p><span class="math display">\[
+\mathbf J:\mathbb R^3\rightarrow\mathbb R^{3\times3},
+\qquad
+\mathbf J({}^{a}\boldsymbol\phi)
+=
+\sum_{j=0}^{\infty}
+\frac{\boldsymbol\Phi^j}{(j+1)!}.
+\]</span></p>
+<p>With <span class="math inline">\(\theta=\|{}^{a}\boldsymbol\phi\|_2\)</span> and <span class="math inline">\(\boldsymbol\Phi^3=-\theta^2\boldsymbol\Phi\)</span>, the powers in this series reduce to <span class="math inline">\(\mathbf I_3\)</span>, <span class="math inline">\(\boldsymbol\Phi\)</span>, and <span class="math inline">\(\boldsymbol\Phi^2\)</span>. Grouping their coefficients gives the closed form derived in <a href="08_screw_motion_se3_exponential_and_spatial_integration.html#sec-se3-numerical-branches" class="quarto-xref"><span>Section 8.5</span></a>:</p>
+<p><span class="math display">\[
+\boxed{
+\mathbf J({}^{a}\boldsymbol\phi)
+=
+\mathbf I_3
++B(\theta)\boldsymbol\Phi
++C(\theta)\boldsymbol\Phi^2
+},
+\qquad
+B(\theta)=\frac{1-\cos\theta}{\theta^2},
+\qquad
+C(\theta)=\frac{\theta-\sin\theta}{\theta^3}.
+\]</span></p>
+<p>The direct quotients are unsuitable near <span class="math inline">\(\theta=0\)</span> because their numerators subtract nearly equal floating-point values. Their sixth-order series are</p>
+<p><span class="math display">\[
+\begin{aligned}
+B(\theta)
+&amp;=
+\frac12-\frac{\theta^2}{24}
++\frac{\theta^4}{720}
+-\frac{\theta^6}{40320}
++O(\theta^8),\\
+C(\theta)
+&amp;=
+\frac16-\frac{\theta^2}{120}
++\frac{\theta^4}{5040}
+-\frac{\theta^6}{362880}
++O(\theta^8).
+\end{aligned}
+\]</span></p>
+<p>At <span class="math inline">\({}^{a}\boldsymbol\phi=\mathbf0_3\)</span>, the angle is <span class="math inline">\(\theta=0\)</span> and the cross-product matrix is <span class="math inline">\(\boldsymbol\Phi=[\mathbf0_3]_\times=\mathbf0_{3\times3}\)</span>. The coefficient limits <span class="math inline">\(B(0)=1/2\)</span> and <span class="math inline">\(C(0)=1/6\)</span> are finite, so substitution into the closed form gives</p>
+<p><span class="math display">\[
+\begin{aligned}
+\mathbf J(\mathbf0_3)
+&amp;=
+\mathbf I_3
++B(0)\mathbf0_{3\times3}
++C(0)\mathbf0_{3\times3}^{2}\\
+&amp;=
+\mathbf I_3.
+\end{aligned}
+\]</span></p>
+<p>The implementation returns this exact zero-angle result directly, so pure translation satisfies <span class="math inline">\({}^{a}\mathbf p={}^a\boldsymbol\rho\)</span> without a trigonometric calculation.</p>
+</section>
+<section id="public-factory-and-complete-implementation" class="level3" data-number="9.10.2">
+<h3 data-number="9.10.2" class="anchored" data-anchor-id="public-factory-and-complete-implementation"><span class="header-section-number">9.10.2</span> Public factory and complete implementation</h3>
+<p>The public factory accepts one linear-first coordinate column and returns a validated <code>Transform3</code> value:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb47"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Exponentiate finite linear-first coordinates [rho; phi].</span></span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a><span class="co">// rho is measured in metres and phi in radians.</span></span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a><span class="at">static</span> Transform3 from_exponential_coordinates<span class="op">(</span></span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> Vector6LinearFirst <span class="op">&amp;</span> coordinates<span class="op">,</span></span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> NumericalPolicy <span class="op">&amp;</span> policy <span class="op">=</span> NumericalPolicy<span class="op">{});</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The mathematical path through the function is:</p>
+<ol type="1">
+<li><p>Split the linear-first input <span class="math inline">\({}^{a}\boldsymbol\eta=[({}^{a}\boldsymbol\rho)^{\mathsf T}\;({}^{a}\boldsymbol\phi)^{\mathsf T}]^{\mathsf T}\)</span>. In the code, <code>coordinates.head&lt;3&gt;()</code> becomes <code>linear_coordinates</code> <span class="math inline">\({}^{a}\boldsymbol\rho\)</span> in metres, and <code>coordinates.tail&lt;3&gt;()</code> becomes <code>rotation_vector</code> <span class="math inline">\({}^{a}\boldsymbol\phi\)</span> in radians.</p></li>
+<li><p>Reuse the <span class="math inline">\(SO(3)\)</span> exponential to construct <code>rotation</code> <span class="math inline">\(\mathbf R=\exp([{}^{a}\boldsymbol\phi]_\times)\)</span>, then calculate <code>theta</code> <span class="math inline">\(\theta=\|{}^{a}\boldsymbol\phi\|_2\)</span> for the translation calculation.</p></li>
+<li><p>If <span class="math inline">\(\theta=0\)</span>, use <span class="math inline">\(\mathbf J(\mathbf0_3)=\mathbf I_3\)</span> and return <span class="math inline">\((\mathbf R,{}^{a}\boldsymbol\rho)=(\mathbf I_3,{}^{a}\boldsymbol\rho)\)</span> exactly. This is the pure-translation branch.</p></li>
+<li><p>If <span class="math inline">\(\theta&gt;0\)</span>, calculate <code>coefficient_b</code> <span class="math inline">\(B(\theta)\)</span> and <code>coefficient_c</code> <span class="math inline">\(C(\theta)\)</span>. The small-angle branch uses their series, while the remaining supported angles use their direct trigonometric formulas.</p></li>
+<li><p>Construct <code>rotation_generator</code> <span class="math inline">\(\boldsymbol\Phi=[{}^{a}\boldsymbol\phi]_\times\)</span> and then construct <code>left_jacobian</code> from <span class="math inline">\(\mathbf J=\mathbf I_3+B(\theta)\boldsymbol\Phi+C(\theta)\boldsymbol\Phi^2\)</span>.</p></li>
+<li><p>Calculate <code>translation</code> from <span class="math inline">\({}^{a}\mathbf p=\mathbf J({}^{a}\boldsymbol\phi){}^{a}\boldsymbol\rho\)</span>. This is the step that converts the finite linear generator coordinate <span class="math inline">\({}^{a}\boldsymbol\rho\)</span> into the final translation column <span class="math inline">\({}^{a}\mathbf p\)</span>.</p></li>
+<li><p>Return <code>Transform3(rotation, translation)</code>, which stores the pair <span class="math inline">\((\mathbf R,{}^{a}\mathbf p)\)</span> representing <span class="math inline">\(\mathbf T_\Delta\)</span>.</p></li>
+</ol>
+<p>The complete implementation keeps these stages in the same order:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb48"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>Transform3 Transform3<span class="op">::</span>from_exponential_coordinates<span class="op">(</span></span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> Vector6LinearFirst <span class="op">&amp;</span> coordinates<span class="op">,</span> <span class="at">const</span> NumericalPolicy <span class="op">&amp;</span> policy<span class="op">)</span></span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(!</span>coordinates<span class="op">.</span>allFinite<span class="op">())</span> <span class="op">{</span></span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">throw</span> GeometryException<span class="op">(</span></span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>      GeometryError<span class="op">::</span>non_finite<span class="op">,</span></span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a>      <span class="st">"SE(3) exponential coordinates must be finite."</span><span class="op">);</span></span>
+<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb48-9"><a href="#cb48-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-10"><a href="#cb48-10" aria-hidden="true" tabindex="-1"></a>  <span class="co">// eta = [rho; phi], with rho in metres and phi in radians.</span></span>
+<span id="cb48-11"><a href="#cb48-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> Eigen<span class="op">::</span>Vector3d linear_coordinates <span class="op">=</span> coordinates<span class="op">.</span>head<span class="op">&lt;</span><span class="dv">3</span><span class="op">&gt;();</span></span>
+<span id="cb48-12"><a href="#cb48-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> Eigen<span class="op">::</span>Vector3d rotation_vector <span class="op">=</span> coordinates<span class="op">.</span>tail<span class="op">&lt;</span><span class="dv">3</span><span class="op">&gt;();</span></span>
+<span id="cb48-13"><a href="#cb48-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-14"><a href="#cb48-14" aria-hidden="true" tabindex="-1"></a>  <span class="co">// R = exp([phi]_x). This also validates the angular policy and magnitude.</span></span>
+<span id="cb48-15"><a href="#cb48-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> Rotation3 rotation <span class="op">=</span></span>
+<span id="cb48-16"><a href="#cb48-16" aria-hidden="true" tabindex="-1"></a>    Rotation3<span class="op">::</span>from_rotation_vector<span class="op">(</span>rotation_vector<span class="op">,</span> policy<span class="op">);</span></span>
+<span id="cb48-17"><a href="#cb48-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-18"><a href="#cb48-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> <span class="dt">double</span> theta <span class="op">=</span> rotation_vector<span class="op">.</span>stableNorm<span class="op">();</span></span>
+<span id="cb48-19"><a href="#cb48-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-20"><a href="#cb48-20" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(!</span><span class="bu">std::</span>isfinite<span class="op">(</span>theta<span class="op">))</span> <span class="op">{</span></span>
+<span id="cb48-21"><a href="#cb48-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">throw</span> GeometryException<span class="op">(</span></span>
+<span id="cb48-22"><a href="#cb48-22" aria-hidden="true" tabindex="-1"></a>      GeometryError<span class="op">::</span>unsupported_magnitude<span class="op">,</span></span>
+<span id="cb48-23"><a href="#cb48-23" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Rotation-vector norm is outside the finite numerical range."</span><span class="op">);</span></span>
+<span id="cb48-24"><a href="#cb48-24" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb48-25"><a href="#cb48-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-26"><a href="#cb48-26" aria-hidden="true" tabindex="-1"></a>  <span class="co">// When phi = 0, J(phi) = I and p = rho exactly.</span></span>
+<span id="cb48-27"><a href="#cb48-27" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(</span>theta <span class="op">==</span> <span class="fl">0.0</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb48-28"><a href="#cb48-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Transform3<span class="op">(</span>rotation<span class="op">,</span> linear_coordinates<span class="op">);</span></span>
+<span id="cb48-29"><a href="#cb48-29" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb48-30"><a href="#cb48-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-31"><a href="#cb48-31" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> <span class="dt">double</span> theta_squared <span class="op">=</span> theta <span class="op">*</span> theta<span class="op">;</span></span>
+<span id="cb48-32"><a href="#cb48-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-33"><a href="#cb48-33" aria-hidden="true" tabindex="-1"></a>  <span class="dt">double</span> coefficient_b<span class="op">;</span></span>
+<span id="cb48-34"><a href="#cb48-34" aria-hidden="true" tabindex="-1"></a>  <span class="dt">double</span> coefficient_c<span class="op">;</span></span>
+<span id="cb48-35"><a href="#cb48-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-36"><a href="#cb48-36" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(</span>theta <span class="op">&lt;=</span> policy<span class="op">.</span>series_angle_threshold<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb48-37"><a href="#cb48-37" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> <span class="dt">double</span> theta_fourth <span class="op">=</span> theta_squared <span class="op">*</span> theta_squared<span class="op">;</span></span>
+<span id="cb48-38"><a href="#cb48-38" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> <span class="dt">double</span> theta_sixth <span class="op">=</span> theta_fourth <span class="op">*</span> theta_squared<span class="op">;</span></span>
+<span id="cb48-39"><a href="#cb48-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-40"><a href="#cb48-40" aria-hidden="true" tabindex="-1"></a>    coefficient_b <span class="op">=</span></span>
+<span id="cb48-41"><a href="#cb48-41" aria-hidden="true" tabindex="-1"></a>      <span class="fl">0.5</span> <span class="op">-</span> theta_squared <span class="op">/</span> <span class="fl">24.0</span> <span class="op">+</span> theta_fourth <span class="op">/</span> <span class="fl">720.0</span> <span class="op">-</span></span>
+<span id="cb48-42"><a href="#cb48-42" aria-hidden="true" tabindex="-1"></a>      theta_sixth <span class="op">/</span> <span class="fl">40320.0</span><span class="op">;</span></span>
+<span id="cb48-43"><a href="#cb48-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-44"><a href="#cb48-44" aria-hidden="true" tabindex="-1"></a>    coefficient_c <span class="op">=</span></span>
+<span id="cb48-45"><a href="#cb48-45" aria-hidden="true" tabindex="-1"></a>      <span class="fl">1.0</span> <span class="op">/</span> <span class="fl">6.0</span> <span class="op">-</span> theta_squared <span class="op">/</span> <span class="fl">120.0</span> <span class="op">+</span></span>
+<span id="cb48-46"><a href="#cb48-46" aria-hidden="true" tabindex="-1"></a>      theta_fourth <span class="op">/</span> <span class="fl">5040.0</span> <span class="op">-</span> theta_sixth <span class="op">/</span> <span class="fl">362880.0</span><span class="op">;</span></span>
+<span id="cb48-47"><a href="#cb48-47" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb48-48"><a href="#cb48-48" aria-hidden="true" tabindex="-1"></a>    coefficient_b <span class="op">=</span> <span class="op">(</span><span class="fl">1.0</span> <span class="op">-</span> <span class="bu">std::</span>cos<span class="op">(</span>theta<span class="op">))</span> <span class="op">/</span> theta_squared<span class="op">;</span></span>
+<span id="cb48-49"><a href="#cb48-49" aria-hidden="true" tabindex="-1"></a>    coefficient_c <span class="op">=</span></span>
+<span id="cb48-50"><a href="#cb48-50" aria-hidden="true" tabindex="-1"></a>      <span class="op">(</span>theta <span class="op">-</span> <span class="bu">std::</span>sin<span class="op">(</span>theta<span class="op">))</span> <span class="op">/</span> <span class="op">(</span>theta_squared <span class="op">*</span> theta<span class="op">);</span></span>
+<span id="cb48-51"><a href="#cb48-51" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb48-52"><a href="#cb48-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-53"><a href="#cb48-53" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(!</span><span class="bu">std::</span>isfinite<span class="op">(</span>coefficient_b<span class="op">)</span> <span class="op">||</span></span>
+<span id="cb48-54"><a href="#cb48-54" aria-hidden="true" tabindex="-1"></a>      <span class="op">!</span><span class="bu">std::</span>isfinite<span class="op">(</span>coefficient_c<span class="op">))</span> <span class="op">{</span></span>
+<span id="cb48-55"><a href="#cb48-55" aria-hidden="true" tabindex="-1"></a>    <span class="cf">throw</span> GeometryException<span class="op">(</span></span>
+<span id="cb48-56"><a href="#cb48-56" aria-hidden="true" tabindex="-1"></a>      GeometryError<span class="op">::</span>unsupported_magnitude<span class="op">,</span></span>
+<span id="cb48-57"><a href="#cb48-57" aria-hidden="true" tabindex="-1"></a>      <span class="st">"SE(3) left-Jacobian coefficients are not finite."</span><span class="op">);</span></span>
+<span id="cb48-58"><a href="#cb48-58" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb48-59"><a href="#cb48-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-60"><a href="#cb48-60" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Phi = [phi]_x.</span></span>
+<span id="cb48-61"><a href="#cb48-61" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> Eigen<span class="op">::</span>Matrix3d rotation_generator <span class="op">=</span> hat_so3<span class="op">(</span>rotation_vector<span class="op">);</span></span>
+<span id="cb48-62"><a href="#cb48-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-63"><a href="#cb48-63" aria-hidden="true" tabindex="-1"></a>  <span class="co">// J(phi) = I + B(theta) Phi + C(theta) Phi^2.</span></span>
+<span id="cb48-64"><a href="#cb48-64" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> Eigen<span class="op">::</span>Matrix3d left_jacobian <span class="op">=</span></span>
+<span id="cb48-65"><a href="#cb48-65" aria-hidden="true" tabindex="-1"></a>    Eigen<span class="op">::</span>Matrix3d<span class="op">::</span>Identity<span class="op">()</span> <span class="op">+</span> coefficient_b <span class="op">*</span> rotation_generator <span class="op">+</span></span>
+<span id="cb48-66"><a href="#cb48-66" aria-hidden="true" tabindex="-1"></a>    coefficient_c <span class="op">*</span> rotation_generator <span class="op">*</span> rotation_generator<span class="op">;</span></span>
+<span id="cb48-67"><a href="#cb48-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-68"><a href="#cb48-68" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(!</span>left_jacobian<span class="op">.</span>allFinite<span class="op">())</span> <span class="op">{</span></span>
+<span id="cb48-69"><a href="#cb48-69" aria-hidden="true" tabindex="-1"></a>    <span class="cf">throw</span> GeometryException<span class="op">(</span></span>
+<span id="cb48-70"><a href="#cb48-70" aria-hidden="true" tabindex="-1"></a>      GeometryError<span class="op">::</span>unsupported_magnitude<span class="op">,</span></span>
+<span id="cb48-71"><a href="#cb48-71" aria-hidden="true" tabindex="-1"></a>      <span class="st">"SE(3) left Jacobian is outside the finite numerical range."</span><span class="op">);</span></span>
+<span id="cb48-72"><a href="#cb48-72" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb48-73"><a href="#cb48-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-74"><a href="#cb48-74" aria-hidden="true" tabindex="-1"></a>  <span class="co">// p = J(phi) rho.</span></span>
+<span id="cb48-75"><a href="#cb48-75" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> Eigen<span class="op">::</span>Vector3d translation <span class="op">=</span></span>
+<span id="cb48-76"><a href="#cb48-76" aria-hidden="true" tabindex="-1"></a>    left_jacobian <span class="op">*</span> linear_coordinates<span class="op">;</span></span>
+<span id="cb48-77"><a href="#cb48-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-78"><a href="#cb48-78" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(!</span>translation<span class="op">.</span>allFinite<span class="op">())</span> <span class="op">{</span></span>
+<span id="cb48-79"><a href="#cb48-79" aria-hidden="true" tabindex="-1"></a>    <span class="cf">throw</span> GeometryException<span class="op">(</span></span>
+<span id="cb48-80"><a href="#cb48-80" aria-hidden="true" tabindex="-1"></a>      GeometryError<span class="op">::</span>unsupported_magnitude<span class="op">,</span></span>
+<span id="cb48-81"><a href="#cb48-81" aria-hidden="true" tabindex="-1"></a>      <span class="st">"SE(3) exponential translation is outside the finite numerical range."</span><span class="op">);</span></span>
+<span id="cb48-82"><a href="#cb48-82" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb48-83"><a href="#cb48-83" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-84"><a href="#cb48-84" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> Transform3<span class="op">(</span>rotation<span class="op">,</span> translation<span class="op">);</span></span>
+<span id="cb48-85"><a href="#cb48-85" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The line breaks in this presentation keep the code readable in both HTML and PDF. They do not change the operations performed by the production function.</p>
+</section>
+<section id="equation-to-code-map" class="level3" data-number="9.10.3">
+<h3 data-number="9.10.3" class="anchored" data-anchor-id="equation-to-code-map"><span class="header-section-number">9.10.3</span> Equation-to-code map</h3>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 33%">
-<col style="width: 33%">
-<col style="width: 33%">
+<col style="width: 29%">
+<col style="width: 28%">
+<col style="width: 42%">
 </colgroup>
 <thead>
 <tr class="header">
-<th>Quantity</th>
-<th>Physical and mathematical role</th>
-<th>Units</th>
+<th>Mathematics</th>
+<th>Code</th>
+<th>Meaning</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td><span class="math inline">\({}^{a}\boldsymbol\phi\)</span></td>
-<td>Finite angular exponential-coordinate input; its direction and magnitude specify the oriented axis and angle</td>
-<td>radians</td>
+<td><span class="math inline">\({}^{a}\boldsymbol\eta\in\mathbb R^6\)</span></td>
+<td><code>coordinates</code></td>
+<td>Linear-first exponential-coordinate column</td>
 </tr>
 <tr class="even">
-<td><span class="math inline">\({}^{a}\boldsymbol\rho\)</span></td>
-<td>Finite linear exponential-coordinate input paired with <span class="math inline">\({}^{a}\boldsymbol\phi\)</span></td>
-<td>metres</td>
+<td><span class="math inline">\({}^{a}\boldsymbol\rho\in\mathbb R^3\)</span></td>
+<td><code>linear_coordinates</code></td>
+<td>First three entries of <code>coordinates</code>, in metres</td>
 </tr>
 <tr class="odd">
-<td><span class="math inline">\(\mathbf R({}^{a}\boldsymbol\phi)\)</span></td>
-<td>Resulting finite rotation operator obtained from <span class="math inline">\(\exp([{}^{a}\boldsymbol\phi]_\times)\)</span></td>
-<td>dimensionless</td>
+<td><span class="math inline">\({}^{a}\boldsymbol\phi\in\mathbb R^3\)</span></td>
+<td><code>rotation_vector</code></td>
+<td>Last three entries of <code>coordinates</code>, in radians</td>
 </tr>
 <tr class="even">
-<td><span class="math inline">\({}^{a}\mathbf p\)</span></td>
-<td>Resulting translation column obtained from <span class="math inline">\(\mathbf J({}^{a}\boldsymbol\phi){}^{a}\boldsymbol\rho\)</span></td>
-<td>metres</td>
+<td><span class="math inline">\(\mathbf R=\exp([{}^{a}\boldsymbol\phi]_\times)\)</span></td>
+<td><code>rotation</code></td>
+<td>Resulting proper rotation</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\theta=\|{}^{a}\boldsymbol\phi\|_2\)</span></td>
+<td><code>theta</code></td>
+<td>Rotation angle, in radians</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\theta^2\)</span>, <span class="math inline">\(\theta^4\)</span>, <span class="math inline">\(\theta^6\)</span></td>
+<td><code>theta_squared</code>, <code>theta_fourth</code>, <code>theta_sixth</code></td>
+<td>Reused even powers of the angle</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(B(\theta)\)</span></td>
+<td><code>coefficient_b</code></td>
+<td>Coefficient multiplying <span class="math inline">\(\boldsymbol\Phi\)</span></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(C(\theta)\)</span></td>
+<td><code>coefficient_c</code></td>
+<td>Coefficient multiplying <span class="math inline">\(\boldsymbol\Phi^2\)</span></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\boldsymbol\Phi=[{}^{a}\boldsymbol\phi]_\times\)</span></td>
+<td><code>rotation_generator</code></td>
+<td>Skew-symmetric rotation generator</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\mathbf J({}^{a}\boldsymbol\phi)\)</span></td>
+<td><code>left_jacobian</code></td>
+<td>Mapping from linear exponential coordinates to the translation column</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\({}^{a}\mathbf p=\mathbf J{}^{a}\boldsymbol\rho\)</span></td>
+<td><code>translation</code></td>
+<td>Translation column of the resulting transform, in metres</td>
 </tr>
 </tbody>
 </table>
-<p>Thus <span class="math inline">\({}^{a}\boldsymbol\phi\)</span> is a three-coordinate description used to construct <span class="math inline">\(\mathbf R\)</span>, whereas <span class="math inline">\(\mathbf R\)</span> is the operator that performs the finite rotation. Similarly, <span class="math inline">\({}^{a}\boldsymbol\rho\)</span> is an input coordinate used to construct <span class="math inline">\({}^{a}\mathbf p\)</span>, whereas <span class="math inline">\({}^{a}\mathbf p\)</span> is the translation that appears in the resulting point action <span class="math inline">\({}^{a}\mathbf x'=\mathbf R{}^{a}\mathbf x+{}^{a}\mathbf p\)</span>. Only when <span class="math inline">\({}^{a}\boldsymbol\phi=\mathbf 0_3\)</span>, or in another special direction left unchanged by <span class="math inline">\(\mathbf J\)</span>, does <span class="math inline">\({}^{a}\mathbf p={}^a\boldsymbol\rho\)</span>.</p>
+<p>Eigen’s <code>head&lt;3&gt;()</code> selects the first three entries of the fixed-size six-vector, and <code>tail&lt;3&gt;()</code> selects the last three. The number <code>3</code> is a compile-time template argument between angle brackets, so these expressions preserve the project’s declared <span class="math inline">\([\boldsymbol\rho;\boldsymbol\phi]\)</span> component order without allocating dynamic vectors.</p>
+<p>The call to <code>Rotation3::from_rotation_vector</code> reuses the completed <span class="math inline">\(SO(3)\)</span> exponential for <span class="math inline">\(\mathbf R\)</span>. It also owns validation of the angular numerical policy and the supported rotation-vector magnitude. The <span class="math inline">\(SE(3)\)</span> factory then uses the same <code>series_angle_threshold</code> for the two left-Jacobian coefficients, so the rotation and translation blocks switch numerical regimes at the same angle.</p>
+</section>
+<section id="finite-pitch-screw-example" class="level3" data-number="9.10.4">
+<h3 data-number="9.10.4" class="anchored" data-anchor-id="finite-pitch-screw-example"><span class="header-section-number">9.10.4</span> Finite-pitch screw example</h3>
+<p>Consider the normalised screw</p>
+<p><span class="math display">\[
+{}^{a}\mathbf s_v
+=
+\begin{bmatrix}0&amp;-2&amp;0.05\end{bmatrix}^{\mathsf T}
+\ \mathrm{m\,rad^{-1}},
+\qquad
+{}^{a}\mathbf s_\omega
+=
+\begin{bmatrix}0&amp;0&amp;1\end{bmatrix}^{\mathsf T},
+\]</span></p>
+<p>followed through <span class="math inline">\(\sigma=\theta=\pi/2\ \mathrm{rad}\)</span>. Its finite exponential coordinates are</p>
+<p><span class="math display">\[
+{}^{a}\boldsymbol\rho
+=
+{}^{a}\mathbf s_v\theta
+=
+\begin{bmatrix}
+0\\-\pi\\\pi/40
+\end{bmatrix}
+\mathrm m,
+\qquad
+{}^{a}\boldsymbol\phi
+=
+{}^{a}\mathbf s_\omega\theta
+=
+\begin{bmatrix}
+0\\0\\\pi/2
+\end{bmatrix}
+\mathrm{rad}.
+\]</span></p>
+<p>For a rotation vector <span class="math inline">\(\boldsymbol\phi=\theta\mathbf e_z\)</span>,</p>
+<p><span class="math display">\[
+\boldsymbol\Phi
+=
+\begin{bmatrix}
+0&amp;-\theta&amp;0\\
+\theta&amp;0&amp;0\\
+0&amp;0&amp;0
+\end{bmatrix},
+\qquad
+\boldsymbol\Phi^2
+=
+\begin{bmatrix}
+-\theta^2&amp;0&amp;0\\
+0&amp;-\theta^2&amp;0\\
+0&amp;0&amp;0
+\end{bmatrix}.
+\]</span></p>
+<p>Substitution into <span class="math inline">\(\mathbf J=\mathbf I_3+B\boldsymbol\Phi+C\boldsymbol\Phi^2\)</span> gives</p>
+<p><span class="math display">\[
+\mathbf J_z(\theta)
+=
+\begin{bmatrix}
+\dfrac{\sin\theta}{\theta}&amp;
+-\dfrac{1-\cos\theta}{\theta}&amp;0\\[6pt]
+\dfrac{1-\cos\theta}{\theta}&amp;
+\dfrac{\sin\theta}{\theta}&amp;0\\[6pt]
+0&amp;0&amp;1
+\end{bmatrix}.
+\]</span></p>
+<p>At <span class="math inline">\(\theta=\pi/2\)</span>, this becomes</p>
+<p><span class="math display">\[
+\mathbf J_z\!\left(\frac\pi2\right)
+=
+\begin{bmatrix}
+2/\pi&amp;-2/\pi&amp;0\\
+2/\pi&amp;2/\pi&amp;0\\
+0&amp;0&amp;1
+\end{bmatrix},
+\]</span></p>
+<p>and therefore</p>
+<p><span class="math display">\[
+{}^{a}\mathbf p
+=
+\mathbf J_z\!\left(\frac\pi2\right)
+{}^{a}\boldsymbol\rho
+=
+\begin{bmatrix}
+2\\-2\\\pi/40
+\end{bmatrix}
+\mathrm m.
+\]</span></p>
+<p>The resulting finite displacement is</p>
+<p><span class="math display">\[
+\mathbf T_\Delta
+=
+\begin{bmatrix}
+0&amp;-1&amp;0&amp;2\\
+1&amp;0&amp;0&amp;-2\\
+0&amp;0&amp;1&amp;\pi/40\\
+0&amp;0&amp;0&amp;1
+\end{bmatrix}.
+\]</span></p>
+<p>The corresponding calling code preserves the same linear-first order:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb49"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="dt">double</span> pi <span class="op">=</span> <span class="bu">std::</span>acos<span class="op">(-</span><span class="fl">1.0</span><span class="op">);</span></span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>Vector6LinearFirst coordinates<span class="op">;</span></span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>coordinates <span class="op">&lt;&lt;</span></span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>  <span class="fl">0.0</span><span class="op">,</span> <span class="op">-</span>pi<span class="op">,</span> pi <span class="op">/</span> <span class="fl">40.0</span><span class="op">,</span>  <span class="co">// rho in metres</span></span>
+<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>  <span class="fl">0.0</span><span class="op">,</span> <span class="fl">0.0</span><span class="op">,</span> pi <span class="op">/</span> <span class="fl">2.0</span><span class="op">;</span>  <span class="co">// phi in radians</span></span>
+<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> Transform3 transform <span class="op">=</span></span>
+<span id="cb49-9"><a href="#cb49-9" aria-hidden="true" tabindex="-1"></a>  Transform3<span class="op">::</span>from_exponential_coordinates<span class="op">(</span>coordinates<span class="op">);</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This example makes the distinction between <span class="math inline">\({}^{a}\boldsymbol\rho\)</span> and <span class="math inline">\({}^{a}\mathbf p\)</span> concrete: the input <span class="math inline">\(xy\)</span> coordinates <span class="math inline">\((0,-\pi)\ \mathrm m\)</span> become the finite translation <span class="math inline">\((2,-2)\ \mathrm m\)</span> because the reference velocity field is integrated while the body rotates.</p>
+</section>
+<section id="validation-and-focused-evidence-1" class="level3" data-number="9.10.5">
+<h3 data-number="9.10.5" class="anchored" data-anchor-id="validation-and-focused-evidence-1"><span class="header-section-number">9.10.5</span> Validation and focused evidence</h3>
+<p>The factory accepts only finite coordinate entries. It rejects a non-finite angle norm, coefficient, Jacobian, or translation as <code>GeometryError::unsupported_magnitude</code>; the last check catches the case in which finite values of <span class="math inline">\(\mathbf J\)</span> and <span class="math inline">\({}^{a}\boldsymbol\rho\)</span> produce a non-finite matrix–vector product. Invalid angular policy values and unsupported angular magnitudes are rejected by the reused <code>Rotation3</code> factory before the translation is constructed.</p>
+<p>The focused tests establish the following mathematical and numerical properties:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Case</th>
+<th>Property established</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(\boldsymbol\phi=\mathbf0_3\)</span></td>
+<td>Pure translation returns <span class="math inline">\(\mathbf R=\mathbf I_3\)</span> and <span class="math inline">\({}^{a}\mathbf p={}^a\boldsymbol\rho\)</span> exactly</td>
+</tr>
+<tr class="even">
+<td>Finite-pitch quarter turn</td>
+<td>The implementation agrees with the independently calculated <span class="math inline">\(\mathbf J_z(\pi/2)\)</span> and analytic homogeneous transform</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\theta=10^{-8}\ \mathrm{rad}\)</span></td>
+<td>A small nonzero screw uses the stable coefficient series and is not collapsed to pure translation</td>
+</tr>
+<tr class="even">
+<td>Non-finite entry in <span class="math inline">\({}^{a}\boldsymbol\rho\)</span></td>
+<td>The public boundary reports <code>non_finite</code></td>
+</tr>
+<tr class="odd">
+<td>Finite inputs whose product overflows</td>
+<td>The public boundary reports <code>unsupported_magnitude</code> rather than returning an invalid transform</td>
+</tr>
+</tbody>
+</table>
+<p>The small-angle expected translation is calculated independently from the analytic <span class="math inline">\(z\)</span>-axis Jacobian. In particular, the test evaluates <span class="math inline">\((1-\cos\theta)/\theta\)</span> as <span class="math inline">\(2\sin^2(\theta/2)/\theta\)</span>, which avoids using the same cancellation-prone subtraction or the same series as the production code.</p>
+</section>
+<section id="deliberate-limits-5" class="level3" data-number="9.10.6">
+<h3 data-number="9.10.6" class="anchored" data-anchor-id="deliberate-limits-5"><span class="header-section-number">9.10.6</span> Deliberate limits</h3>
+<p>This cycle implements <span class="math inline">\(\operatorname{Exp}_{SE(3)}\)</span> for the project’s fixed linear-first coordinates; it does not yet recover exponential coordinates from a transform. Frames and units are documented by the API and variable names but remain the caller’s responsibility because Eigen vectors do not encode them in their C++ types. The angular branch and maximum supported angle are inherited from <code>Rotation3::from_rotation_vector</code>, and the input rotation vector is not silently wrapped or canonicalised.</p>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->
