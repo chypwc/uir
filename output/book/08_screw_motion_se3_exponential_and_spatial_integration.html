@@ -1036,7 +1036,19 @@ Figure&nbsp;8.2: Helical motion at a fixed joint angle, showing axial displaceme
 \end{bmatrix}
 \in\mathbb R^6.
 \]</span></p>
-<p>The subscripts <span class="math inline">\(v\)</span> and <span class="math inline">\(\omega\)</span> identify the coefficients that generate the linear and angular parts of the twist after multiplication by the appropriate scalar joint rate. The two valid normalisation cases are</p>
+<p>The subscripts <span class="math inline">\(v\)</span> and <span class="math inline">\(\omega\)</span> identify the coefficients that generate the linear and angular parts of the twist after multiplication by the appropriate scalar joint rate.</p>
+<p>The linear coefficient <span class="math inline">\({}^{a}\mathbf s_v\)</span> must not be read as the velocity of a moving link-frame origin. Multiplication by the scalar screw rate gives <span class="math inline">\({}^{a}\boldsymbol\nu={}^a\mathbf s_v\dot\sigma\)</span>, which is the rigid-motion velocity field evaluated at the reference origin <span class="math inline">\(O_a\)</span>. If a link-frame origin <span class="math inline">\(O_b\)</span> is instead at <span class="math inline">\({}^{a}\mathbf p_b\)</span>, its velocity is obtained by evaluating the complete field at that point:</p>
+<p><span class="math display">\[
+{}^{a}\mathbf v_{O_b}
+=
+\left(
+{}^{a}\mathbf s_v
++{}^{a}\mathbf s_\omega\times{}^{a}\mathbf p_b
+\right)
+\dot\sigma.
+\]</span></p>
+<p>Only when <span class="math inline">\(O_b\)</span> is currently located at <span class="math inline">\(O_a\)</span> does <span class="math inline">\({}^{a}\mathbf v_{O_b}={}^a\mathbf s_v\dot\sigma\)</span>. For rotational or helical motion, <span class="math inline">\({}^{a}\mathbf s_v\)</span> is therefore the velocity-field coefficient at <span class="math inline">\(O_a\)</span> per radian; for prismatic motion, it is the unit translation direction.</p>
+<p>The two valid normalisation cases are</p>
 <p><span class="math display">\[
 \boxed{
 \begin{aligned}
@@ -2116,6 +2128,17 @@ h
 h{}^{a}\mathbf s_\omega
 }_{\text{motion along the axis per radian}}.
 \]</span></p>
+<p>The construction in <a href="#fig-linear-screw-coefficient-decomposition" class="quarto-xref">Figure&nbsp;<span>8.3</span></a> uses <span class="math inline">\({}^{a}\mathbf s_\omega=\mathbf e_z\)</span>, <span class="math inline">\({}^{a}\mathbf p_\ell=3\mathbf e_x\,\mathrm m\)</span>, <span class="math inline">\(h=1\,\mathrm{m\,rad^{-1}}\)</span>, and a <span class="math inline">\(58^\circ\)</span> oblique view to show the vector sum and its cancellation at the axis point.</p>
+<div id="fig-linear-screw-coefficient-decomposition" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-pos="H">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-linear-screw-coefficient-decomposition-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/linear_screw_coefficient_decomposition.svg" class="img-fluid figure-img" style="width:100.0%" data-fig-pos="H">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-linear-screw-coefficient-decomposition-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8.3: Decomposition of the linear screw coefficient into the offset-axis and pitch contributions, with their cancellation at a point on the screw axis.
+</figcaption>
+</figure>
+</div>
 <p>The first term is perpendicular to the axis: it accounts for rotation about a line that is offset from <span class="math inline">\(O_a\)</span> and contributes no motion along that line. The second term is parallel to the axis and has signed magnitude <span class="math inline">\(h\)</span> because <span class="math inline">\({}^{a}\mathbf s_\omega\)</span> is a unit column. Therefore projecting <span class="math inline">\({}^{a}\mathbf s_v\)</span> onto the axis removes the perpendicular offset contribution and retains only the signed axial displacement per radian:</p>
 <p><span class="math display">\[
 \begin{aligned}

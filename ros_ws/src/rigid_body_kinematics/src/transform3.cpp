@@ -17,6 +17,87 @@ Transform3 Transform3::identity()
   return Transform3(Rotation3::identity(), Eigen::Vector3d::Zero());
 }
 
+Transform3 Transform3::from_exponential_coordinates(
+  const Vector6LinearFirst & coordinates, const NumericalPolicy & policy)
+{
+  if (!coordinates.allFinite()) {
+    throw GeometryException(
+      GeometryError::non_finite,
+      "SE(3) exponential coordinates must be finite.");
+  }
+
+  // eta = [rho; phi], with rho in metres and phi in radians.
+  const Eigen::Vector3d linear_coordinates = coordinates.head<3>();
+  const Eigen::Vector3d rotation_vector = coordinates.tail<3>();
+
+  // R = exp([phi]_x).  This also validates the angular policy and magnitude.
+  const Rotation3 rotation =
+    Rotation3::from_rotation_vector(rotation_vector, policy);
+
+  const double theta = rotation_vector.stableNorm();
+
+  if (!std::isfinite(theta)) {
+    throw GeometryException(
+      GeometryError::unsupported_magnitude,
+      "Rotation-vector norm is outside the finite numerical range.");
+  }
+
+  // When phi = 0, J(phi) = I and p = rho exactly.
+  if (theta == 0.0) {
+    return Transform3(rotation, linear_coordinates);
+  }
+
+  const double theta_squared = theta * theta;
+
+  double coefficient_b;
+  double coefficient_c;
+
+  if (theta <= policy.series_angle_threshold) {
+    const double theta_fourth = theta_squared * theta_squared;
+    const double theta_sixth = theta_fourth * theta_squared;
+
+    coefficient_b =
+      0.5 - theta_squared / 24.0 + theta_fourth / 720.0 - theta_sixth / 40320.0;
+
+    coefficient_c = 1.0 / 6.0 - theta_squared / 120.0 + theta_fourth / 5040.0 -
+                    theta_sixth / 362880.0;
+  } else {
+    coefficient_b = (1.0 - std::cos(theta)) / theta_squared;
+    coefficient_c = (theta - std::sin(theta)) / (theta_squared * theta);
+  }
+
+  if (!std::isfinite(coefficient_b) || !std::isfinite(coefficient_c)) {
+    throw GeometryException(
+      GeometryError::unsupported_magnitude,
+      "SE(3) left-Jaobian coefficients are not finite.");
+  }
+
+  // Phi = [phi]_x.
+  const Eigen::Matrix3d rotation_generator = hat_so3(rotation_vector);
+
+  // J(phi) = I + B(theta) Phi + C(theta) Phi^2.
+  const Eigen::Matrix3d left_jacobian =
+    Eigen::Matrix3d::Identity() + coefficient_b * rotation_generator +
+    coefficient_c * rotation_generator * rotation_generator;
+
+  if (!left_jacobian.allFinite()) {
+    throw GeometryException(
+      GeometryError::unsupported_magnitude,
+      "SE(3) left Jacobian is outside the finite numerical range.");
+  }
+
+  // p = J(phi) rho.
+  const Eigen::Vector3d translation = left_jacobian * linear_coordinates;
+
+  if (!translation.allFinite()) {
+    throw GeometryException(
+      GeometryError::unsupported_magnitude,
+      "SE(3) exponential translation is outside the finite numerical range.");
+  }
+
+  return Transform3(rotation, translation);
+}
+
 Transform3 Transform3::from_matrix(
   const Eigen::Matrix4d & matrix, const NumericalPolicy & policy)
 {

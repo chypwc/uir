@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
+  <title id="title">Decomposition of the linear coefficient of an offset finite-pitch screw</title>
+  <desc id="desc">An oblique view at fifty-eight degrees shows a screw axis parallel to z a and offset three metres along x a. The left construction adds the negative cross product of the axis direction and closest axis point to the pitch contribution, producing s v. The right construction shows the rotational contribution at the axis point cancelling the offset contribution, leaving only motion along the screw axis. The pitch is one metre per radian.</desc>
+  <defs>
+    <clipPath id="plot-clip"><rect x="24" y="24" width="820" height="712" rx="18"/></clipPath>
+    <marker id="arrow-neutral" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#73777a"/></marker>
+    <marker id="arrow-axis" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#2f735e"/></marker>
+    <marker id="arrow-position" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#3ba8cb"/></marker>
+    <marker id="arrow-rotational" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#e2a52b"/></marker>
+    <marker id="arrow-offset" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#cf4f96"/></marker>
+    <marker id="arrow-pitch" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#3f7fe5"/></marker>
+    <marker id="arrow-result" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#7651a8"/></marker>
+  </defs>
+
+  <rect width="1200" height="760" fill="#faf9f5"/>
+  <rect class="panel" x="24" y="24" width="820" height="712" rx="18"/>
+  <rect class="panel" x="868" y="24" width="308" height="712" rx="18"/>
+
+  <g clip-path="url(#plot-clip)">
+    <text class="construction-title" x="54" y="70">Linear screw coefficient</text>
+    <text class="construction-title" x="500" y="70">Motion evaluated on the axis</text>
+
+    <path class="frame-axis" d="M355 470L162 519" marker-end="url(#arrow-neutral)"/>
+    <path class="frame-axis" d="M355 470L444 528" marker-end="url(#arrow-neutral)"/>
+    <path class="frame-axis" d="M355 470L355 295" marker-end="url(#arrow-neutral)"/>
+    <text class="frame-label" x="112" y="552">+x<tspan baseline-shift="sub">a</tspan></text>
+    <text class="frame-label" x="448" y="547">+y<tspan baseline-shift="sub">a</tspan></text>
+    <text class="frame-label" x="365" y="292">+z<tspan baseline-shift="sub">a</tspan></text>
+
+    <circle class="origin" cx="355" cy="470" r="6"/>
+    <text class="point-label" x="365" y="492">O<tspan baseline-shift="sub">a</tspan></text>
+
+    <path class="position" d="M355 470L202 509" marker-end="url(#arrow-position)"/>
+    <circle class="axis-point" cx="202" cy="509" r="7"/>
+    <text class="point-label" x="212" y="532">P<tspan baseline-shift="sub">ℓ</tspan></text>
+    <path class="axis-line" d="M202 548L202 334"/>
+    <path class="axis-direction" d="M202 509L202 427" marker-end="url(#arrow-axis)"/>
+
+    <path class="offset" d="M355 470L260 408" marker-end="url(#arrow-offset)"/>
+    <path class="pitch" d="M260 408L260 353" marker-end="url(#arrow-pitch)"/>
+    <path class="result" d="M355 470L260 353" marker-end="url(#arrow-result)"/>
+
+    <path class="axis-line" d="M650 509L650 342"/>
+    <circle class="axis-point" cx="650" cy="470" r="7"/>
+    <text class="point-label" x="660" y="491">P<tspan baseline-shift="sub">ℓ</tspan></text>
+    <path class="rotational" d="M650 470L733 524" marker-end="url(#arrow-rotational)"/>
+    <path class="offset" d="M650 470L567 416" marker-end="url(#arrow-offset)"/>
+    <path class="pitch" d="M650 470L650 423" marker-end="url(#arrow-pitch)"/>
+    <path class="cancel-guide" d="M574 404Q650 365 726 512"/>
+    <text class="cancel-label" x="620" y="372">cancel</text>
+
+    <text class="plot-note" x="53" y="675">Fixed example: axis offset = 3 m, pitch = 1 m/rad, view angle = 58°</text>
+  </g>
+
+  <g class="legend" aria-label="Vector legend">
+    <text class="legend-title" x="894" y="68">Vectors</text>
+
+    <path class="legend-position" d="M896 118H952" marker-end="url(#arrow-position)"/>
+    <text x="974" y="112">closest-axis position</text>
+    <text class="legend-math" x="974" y="138"><tspan baseline-shift="super">a</tspan>p<tspan baseline-shift="sub">ℓ</tspan> = 3e<tspan baseline-shift="sub">x</tspan> m</text>
+
+    <path class="legend-axis" d="M896 194H952" marker-end="url(#arrow-axis)"/>
+    <text x="974" y="188">axis direction</text>
+    <text class="legend-math" x="974" y="214"><tspan baseline-shift="super">a</tspan>s<tspan baseline-shift="sub">ω</tspan> = e<tspan baseline-shift="sub">z</tspan></text>
+
+    <path class="legend-rotational" d="M896 270H952" marker-end="url(#arrow-rotational)"/>
+    <text x="974" y="264">rotation at P<tspan baseline-shift="sub">ℓ</tspan></text>
+    <text class="legend-math" x="974" y="290">s<tspan baseline-shift="sub">ω</tspan> × p<tspan baseline-shift="sub">ℓ</tspan> = 3e<tspan baseline-shift="sub">y</tspan></text>
+
+    <path class="legend-offset" d="M896 346H952" marker-end="url(#arrow-offset)"/>
+    <text x="974" y="340">offset contribution</text>
+    <text class="legend-math" x="974" y="366">−s<tspan baseline-shift="sub">ω</tspan> × p<tspan baseline-shift="sub">ℓ</tspan> = −3e<tspan baseline-shift="sub">y</tspan></text>
+
+    <path class="legend-pitch" d="M896 422H952" marker-end="url(#arrow-pitch)"/>
+    <text x="974" y="416">pitch contribution</text>
+    <text class="legend-math" x="974" y="442">hs<tspan baseline-shift="sub">ω</tspan> = e<tspan baseline-shift="sub">z</tspan></text>
+
+    <path class="legend-result" d="M896 498H952" marker-end="url(#arrow-result)"/>
+    <text x="974" y="492">linear screw coefficient</text>
+    <text class="legend-math" x="974" y="518">s<tspan baseline-shift="sub">v</tspan> = −3e<tspan baseline-shift="sub">y</tspan> + e<tspan baseline-shift="sub">z</tspan></text>
+
+    <text class="legend-note" x="894" y="586">At O<tspan baseline-shift="sub">a</tspan>, the magenta and blue</text>
+    <text class="legend-note" x="894" y="612">vectors add to the purple vector.</text>
+    <text class="legend-note" x="894" y="654">At P<tspan baseline-shift="sub">ℓ</tspan>, the orange and magenta</text>
+    <text class="legend-note" x="894" y="680">vectors cancel, leaving the blue vector.</text>
+  </g>
+
+  <style>
+    text{fill:#202326;font-family:Arial,Helvetica,sans-serif;font-size:17px;font-weight:400}
+    .panel{fill:#fff;stroke:#ddd9d2;stroke-width:1.5}
+    .construction-title{font-size:20px;font-weight:600}
+    .frame-axis{fill:none;stroke:#9aa2a9;stroke-width:1.8}.frame-label{fill:#555;font-size:16px}
+    .origin{fill:#73777a;stroke:#fff;stroke-width:2}.axis-point{fill:#3ba8cb;stroke:#fff;stroke-width:2}.point-label{font-size:17px;font-weight:600}
+    .axis-line{fill:none;stroke:#2f735e;stroke-width:2;stroke-dasharray:7 6}.axis-direction,.legend-axis{fill:none;stroke:#2f735e;stroke-width:3.5}
+    .position,.legend-position{fill:none;stroke:#3ba8cb;stroke-width:3.5}
+    .rotational,.legend-rotational{fill:none;stroke:#e2a52b;stroke-width:3.5}
+    .offset,.legend-offset{fill:none;stroke:#cf4f96;stroke-width:3.5}
+    .pitch,.legend-pitch{fill:none;stroke:#3f7fe5;stroke-width:3.5}
+    .result,.legend-result{fill:none;stroke:#7651a8;stroke-width:4}
+    .cancel-guide{fill:none;stroke:#9aa2a9;stroke-width:1.5;stroke-dasharray:5 5}.cancel-label{fill:#666;font-size:15px}
+    .plot-note{fill:#555;font-size:16px}
+    .legend-title{font-size:21px;font-weight:600}.legend text{font-size:16px}.legend-math{font-style:italic}.legend-note{fill:#555;font-size:15px}
+  </style>
+</svg>

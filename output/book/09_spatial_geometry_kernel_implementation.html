@@ -511,6 +511,7 @@ window.Quarto = {
   <li><a href="#principal-logarithm-rotation-matrix-to-rotation-vector" id="toc-principal-logarithm-rotation-matrix-to-rotation-vector" class="nav-link" data-scroll-target="#principal-logarithm-rotation-matrix-to-rotation-vector"><span class="header-section-number">9.8.2</span> Principal logarithm: rotation matrix to rotation vector</a></li>
   <li><a href="#production-checks-omitted-from-the-mathematical-pseudocode" id="toc-production-checks-omitted-from-the-mathematical-pseudocode" class="nav-link" data-scroll-target="#production-checks-omitted-from-the-mathematical-pseudocode"><span class="header-section-number">9.8.3</span> Production checks omitted from the mathematical pseudocode</a></li>
   </ul></li>
+  <li><a href="#sec-spatial-kernel-se3-exponential" id="toc-sec-spatial-kernel-se3-exponential" class="nav-link" data-scroll-target="#sec-spatial-kernel-se3-exponential"><span class="header-section-number">9.9</span> Linear-first <span class="math inline">\(SE(3)\)</span> exponential from finite coordinates</a></li>
   </ul>
 </nav>
     </div>
@@ -1432,6 +1433,7 @@ A_{21}
 \qquad
 {}^{a}\boldsymbol\phi\in\mathbb R^3\ \mathrm{rad}.
 \]</span></p>
+<p>Recall from <a href="08_screw_motion_se3_exponential_and_spatial_integration.html#sec-se3-numerical-branches" class="quarto-xref"><span>Section 8.5</span></a> that <span class="math inline">\({}^{a}\boldsymbol\eta\)</span> describes one finite screw displacement. Its rotation-vector block <span class="math inline">\({}^{a}\boldsymbol\phi\)</span> has the oriented screw-axis direction as its direction and the rotation angle as its magnitude. Its finite linear block <span class="math inline">\({}^{a}\boldsymbol\rho\)</span> records the linear part of the same screw displacement, including axis-offset and pitch effects when applicable. Both columns are expressed in frame <span class="math inline">\(\{a\}\)</span>.</p>
 <p>The forward map places the angular block in the upper-left matrix block and the linear block in the upper-right matrix block:</p>
 <p><span class="math display">\[
 \operatorname{hat}_{SE(3)}
@@ -1468,7 +1470,7 @@ A_{21}
 =
 {}^{a}\boldsymbol\eta.
 \]</span></p>
-<p>The same <span class="math inline">\(SE(3)\)</span> map accepts a linear-first twist <span class="math inline">\([({}^{a}\boldsymbol\nu)^{\mathsf T}\;({}^{a}\boldsymbol\omega)^{\mathsf T}]^{\mathsf T}\)</span> when the blocks instead have units <span class="math inline">\(\mathrm{m\,s^{-1}}\)</span> and <span class="math inline">\(\mathrm{rad\,s^{-1}}\)</span>. The hat map rearranges components; it does not add or otherwise mix the linear and angular blocks. Its output belongs to <span class="math inline">\(\mathfrak{se}(3)\)</span> and is not a homogeneous transformation in <span class="math inline">\(SE(3)\)</span>: its bottom-right entry is zero rather than one. The mathematical vee maps above require exact membership in <span class="math inline">\(\mathfrak{so}(3)\)</span> or <span class="math inline">\(\mathfrak{se}(3)\)</span>; the software implementation below extends their accepted numerical inputs only by the explicitly checked tangent tolerance.</p>
+<p>The same <span class="math inline">\(SE(3)\)</span> map accepts a linear-first twist <span class="math inline">\([({}^{a}\boldsymbol\nu)^{\mathsf T}\;({}^{a}\boldsymbol\omega)^{\mathsf T}]^{\mathsf T}\)</span> when the blocks instead have units <span class="math inline">\(\mathrm{m\,s^{-1}}\)</span> and <span class="math inline">\(\mathrm{rad\,s^{-1}}\)</span>. The hat map only rearranges the supplied components into a structured matrix; it does not evaluate an exponential. Its output belongs to <span class="math inline">\(\mathfrak{se}(3)\)</span> and is not a homogeneous transformation in <span class="math inline">\(SE(3)\)</span>: its bottom-right entry is zero rather than one. The mathematical vee maps above require exact membership in <span class="math inline">\(\mathfrak{so}(3)\)</span> or <span class="math inline">\(\mathfrak{se}(3)\)</span>; the software implementation below extends their accepted numerical inputs only by the explicitly checked tangent tolerance.</p>
 </section>
 <section id="public-functions-and-the-fixed-component-order-alias" class="level3" data-number="9.5.2">
 <h3 data-number="9.5.2" class="anchored" data-anchor-id="public-functions-and-the-fixed-component-order-alias"><span class="header-section-number">9.5.2</span> Public functions and the fixed component-order alias</h3>
@@ -2320,9 +2322,67 @@ f(\theta){}^{a}\mathbf u,\\
 \mathbf R,
 \]</span></p>
 <p>whereas <span class="math inline">\(\operatorname{Log}_{SO(3)}^{\mathrm{principal}}(\operatorname{Exp}_{SO(3)}({}^{a}\boldsymbol\phi))={}^{a}\boldsymbol\phi\)</span> requires <span class="math inline">\({}^{a}\boldsymbol\phi\)</span> to lie inside the selected principal domain, including the canonical sign at <span class="math inline">\(\theta=\pi\)</span>.</p>
-
-
 </section>
+</section>
+<section id="sec-spatial-kernel-se3-exponential" class="level2" data-number="9.9">
+<h2 data-number="9.9" class="anchored" data-anchor-id="sec-spatial-kernel-se3-exponential"><span class="header-section-number">9.9</span> Linear-first <span class="math inline">\(SE(3)\)</span> exponential from finite coordinates</h2>
+<p>The <span class="math inline">\(SE(3)\)</span> exponential answers the next finite-motion question: given the linear-first coordinate column <span class="math inline">\({}^{a}\boldsymbol\eta=[({}^{a}\boldsymbol\rho)^{\mathsf T}\;({}^{a}\boldsymbol\phi)^{\mathsf T}]^{\mathsf T}\)</span>, what rotation and translation form the resulting rigid displacement?</p>
+<p>For a normalised screw displacement, <span class="math inline">\({}^{a}\boldsymbol\rho={}^a\mathbf s_v\sigma\)</span> and <span class="math inline">\({}^{a}\boldsymbol\phi={}^a\mathbf s_\omega\sigma\)</span>. The coefficient <span class="math inline">\({}^{a}\mathbf s_v\)</span> generates the velocity-field value at the reference origin <span class="math inline">\(O_a\)</span> after multiplication by the screw rate; it is not generally the velocity of a moving link-frame origin. Consequently, <span class="math inline">\({}^{a}\boldsymbol\rho\)</span> is a finite linear exponential coordinate, not generally the final translation of that origin.</p>
+<p>The two input blocks describe how to generate a finite screw displacement; they are not themselves the rotation and translation blocks of the resulting transformation.</p>
+<p>Exponentiation converts these input coordinates into the finite displacement derived in <a href="08_screw_motion_se3_exponential_and_spatial_integration.html#sec-se3-numerical-branches" class="quarto-xref"><span>Section 8.5</span></a>:</p>
+<p><span class="math display">\[
+\mathbf T_\Delta
+=
+\exp\!\left(\widehat{{}^{a}\boldsymbol\eta}\right)
+=
+\begin{bmatrix}
+\mathbf R({}^{a}\boldsymbol\phi)&amp;{}^{a}\mathbf p\\
+\mathbf 0_3^{\mathsf T}&amp;1
+\end{bmatrix},
+\qquad
+{}^{a}\mathbf p
+=
+\mathbf J({}^{a}\boldsymbol\phi){}^{a}\boldsymbol\rho.
+\]</span></p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Quantity</th>
+<th>Physical and mathematical role</th>
+<th>Units</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\({}^{a}\boldsymbol\phi\)</span></td>
+<td>Finite angular exponential-coordinate input; its direction and magnitude specify the oriented axis and angle</td>
+<td>radians</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\({}^{a}\boldsymbol\rho\)</span></td>
+<td>Finite linear exponential-coordinate input paired with <span class="math inline">\({}^{a}\boldsymbol\phi\)</span></td>
+<td>metres</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\mathbf R({}^{a}\boldsymbol\phi)\)</span></td>
+<td>Resulting finite rotation operator obtained from <span class="math inline">\(\exp([{}^{a}\boldsymbol\phi]_\times)\)</span></td>
+<td>dimensionless</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\({}^{a}\mathbf p\)</span></td>
+<td>Resulting translation column obtained from <span class="math inline">\(\mathbf J({}^{a}\boldsymbol\phi){}^{a}\boldsymbol\rho\)</span></td>
+<td>metres</td>
+</tr>
+</tbody>
+</table>
+<p>Thus <span class="math inline">\({}^{a}\boldsymbol\phi\)</span> is a three-coordinate description used to construct <span class="math inline">\(\mathbf R\)</span>, whereas <span class="math inline">\(\mathbf R\)</span> is the operator that performs the finite rotation. Similarly, <span class="math inline">\({}^{a}\boldsymbol\rho\)</span> is an input coordinate used to construct <span class="math inline">\({}^{a}\mathbf p\)</span>, whereas <span class="math inline">\({}^{a}\mathbf p\)</span> is the translation that appears in the resulting point action <span class="math inline">\({}^{a}\mathbf x'=\mathbf R{}^{a}\mathbf x+{}^{a}\mathbf p\)</span>. Only when <span class="math inline">\({}^{a}\boldsymbol\phi=\mathbf 0_3\)</span>, or in another special direction left unchanged by <span class="math inline">\(\mathbf J\)</span>, does <span class="math inline">\({}^{a}\mathbf p={}^a\boldsymbol\rho\)</span>.</p>
+
+
 </section>
 
 </main> <!-- /main -->

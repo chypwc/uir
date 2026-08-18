@@ -1042,6 +1042,8 @@ $$
 {}^{a}\boldsymbol\phi\in\mathbb R^3\ \mathrm{rad}.
 $$
 
+Recall from @sec-se3-numerical-branches that ${}^{a}\boldsymbol\eta$ describes one finite screw displacement. Its rotation-vector block ${}^{a}\boldsymbol\phi$ has the oriented screw-axis direction as its direction and the rotation angle as its magnitude. Its finite linear block ${}^{a}\boldsymbol\rho$ records the linear part of the same screw displacement, including axis-offset and pitch effects when applicable. Both columns are expressed in frame $\{a\}$.
+
 The forward map places the angular block in the upper-left matrix block and the linear block in the upper-right matrix block:
 
 $$
@@ -1084,7 +1086,7 @@ $$
 {}^{a}\boldsymbol\eta.
 $$
 
-The same $SE(3)$ map accepts a linear-first twist $[({}^{a}\boldsymbol\nu)^{\mathsf T}\;({}^{a}\boldsymbol\omega)^{\mathsf T}]^{\mathsf T}$ when the blocks instead have units $\mathrm{m\,s^{-1}}$ and $\mathrm{rad\,s^{-1}}$. The hat map rearranges components; it does not add or otherwise mix the linear and angular blocks. Its output belongs to $\mathfrak{se}(3)$ and is not a homogeneous transformation in $SE(3)$: its bottom-right entry is zero rather than one. The mathematical vee maps above require exact membership in $\mathfrak{so}(3)$ or $\mathfrak{se}(3)$; the software implementation below extends their accepted numerical inputs only by the explicitly checked tangent tolerance.
+The same $SE(3)$ map accepts a linear-first twist $[({}^{a}\boldsymbol\nu)^{\mathsf T}\;({}^{a}\boldsymbol\omega)^{\mathsf T}]^{\mathsf T}$ when the blocks instead have units $\mathrm{m\,s^{-1}}$ and $\mathrm{rad\,s^{-1}}$. The hat map only rearranges the supplied components into a structured matrix; it does not evaluate an exponential. Its output belongs to $\mathfrak{se}(3)$ and is not a homogeneous transformation in $SE(3)$: its bottom-right entry is zero rather than one. The mathematical vee maps above require exact membership in $\mathfrak{so}(3)$ or $\mathfrak{se}(3)$; the software implementation below extends their accepted numerical inputs only by the explicitly checked tangent tolerance.
 
 ### Public functions and the fixed component-order alias
 
@@ -2102,3 +2104,586 @@ $$
 $$
 
 whereas $\operatorname{Log}_{SO(3)}^{\mathrm{principal}}(\operatorname{Exp}_{SO(3)}({}^{a}\boldsymbol\phi))={}^{a}\boldsymbol\phi$ requires ${}^{a}\boldsymbol\phi$ to lie inside the selected principal domain, including the canonical sign at $\theta=\pi$.
+
+## Why the kernel uses modelled motion coordinates {#sec-spatial-kernel-modelled-motion-coordinates}
+
+Why does the kernel use screw, twist, and exponential coordinates when a robot ultimately reports point coordinates ${}^{a}\mathbf x$, translation ${}^{a}\mathbf p$, and rotation $\mathbf R$? These quantities answer different questions. Point and pose coordinates describe a configuration: where a point or rigid body is. A screw describes the geometry of an allowed one-parameter motion, a twist describes the instantaneous rate of rigid motion, and exponential coordinates describe one finite motion increment. Sensor observations may be used to estimate ${}^{a}\mathbf x$, ${}^{a}\mathbf p$, or $\mathbf R$, while the screw, twist, and exponential coordinates remain internal to a kinematic model, estimator, controller, or optimiser.
+
+The full theory is derived in @sec-screw-axis-joint-motion, @sec-se3-screw-exponential, and @sec-se3-constant-twist-integration. This section recalls the exact definitions needed to understand what the implementation receives and why those inputs are not normally independent sensor measurements.
+
+### A normalised screw describes one motion direction
+
+Consider a rotational or helical motion whose geometry is known from design data or calibration. Let ${}^{a}\mathbf s_\omega\in\mathbb R^3$ be the unit direction of its oriented screw axis, let ${}^{a}\mathbf p_\ell\in\mathbb R^3$ be the position of the closest point on that axis relative to the reference origin $O_a$, and let $h\in\mathbb R$ be the signed distance translated along the axis per radian of rotation. Both vectors are expressed in frame $\{a\}$, ${}^{a}\mathbf p_\ell$ is measured in metres, and $h$ is measured in metres per radian.
+
+These geometric quantities define the linear component of the normalised screw generator:
+
+$$
+{}^{a}\mathbf s_v
+=
+-{}^{a}\mathbf s_\omega\times{}^{a}\mathbf p_\ell
++h{}^{a}\mathbf s_\omega.
+$$
+
+The component ${}^{a}\mathbf s_v\in\mathbb R^3$ is measured in metres per radian. It is not a translation axis or a finite translation. Its perpendicular term $-{}^{a}\mathbf s_\omega\times{}^{a}\mathbf p_\ell$ records the axis offset from $O_a$, while its parallel term $h{}^{a}\mathbf s_\omega$ records the pitch. Placing the linear and angular components in the project's linear-first order gives the normalised screw
+
+$$
+{}^{a}\mathbf S
+=
+\begin{bmatrix}
+{}^{a}\mathbf s_v\\
+{}^{a}\mathbf s_\omega
+\end{bmatrix}.
+$$
+
+For example, a revolute or helical joint stores ${}^{a}\mathbf S$ as part of its kinematic model, while an encoder supplies the amount of motion along that fixed direction. A robot with no such one-degree-of-freedom constraint does not need to invent a normalised screw for every operation.
+
+### A twist describes the instantaneous motion
+
+Let the signed rotation about the screw axis vary with time as $\theta(t)$, measured in radians. Its derivative $\dot\theta$ is the angular rate in radians per second. Multiplying the normalised screw by this rate gives the linear-first spatial twist
+
+$$
+\begin{bmatrix}
+{}^{a}\boldsymbol\nu\\
+{}^{a}\boldsymbol\omega
+\end{bmatrix}
+=
+{}^{a}\mathbf S\dot\theta
+=
+\begin{bmatrix}
+{}^{a}\mathbf s_v\dot\theta\\
+{}^{a}\mathbf s_\omega\dot\theta
+\end{bmatrix}.
+$$
+
+The angular component ${}^{a}\boldsymbol\omega\in\mathbb R^3$ is the angular velocity in radians per second. The linear component ${}^{a}\boldsymbol\nu\in\mathbb R^3$ is measured in metres per second. It is the value of the screw's instantaneous velocity field at $O_a$, not generally the velocity of a moving link-frame origin. Together, the two components determine the velocity assigned to a point at ${}^{a}\mathbf x$:
+
+$$
+{}^{a}\dot{\mathbf x}
+=
+{}^{a}\boldsymbol\nu
++{}^{a}\boldsymbol\omega\times{}^{a}\mathbf x.
+$$
+
+The linear component ${}^{a}\boldsymbol\nu$ therefore need not be measured at the possibly non-material reference origin $O_a$. The twist can instead be calculated from a known screw and joint rate or inferred from inertial, visual, and material-point observations. The velocity-field equation then predicts the velocity at every other point on the rigid body. The current pose $({}^{a}\mathbf p,\mathbf R)$ alone does not contain this rate information.
+
+### Exponential coordinates describe one finite motion increment
+
+Following the same rotational or helical screw through the signed finite angle $\theta$ gives the linear-first exponential-coordinate column
+
+$$
+{}^{a}\boldsymbol\eta
+=
+{}^{a}\mathbf S\theta
+=
+\begin{bmatrix}
+{}^{a}\boldsymbol\rho\\
+{}^{a}\boldsymbol\phi
+\end{bmatrix}
+=
+\begin{bmatrix}
+{}^{a}\mathbf s_v\theta\\
+{}^{a}\mathbf s_\omega\theta
+\end{bmatrix}.
+$$
+
+The angular coordinate ${}^{a}\boldsymbol\phi={}^{a}\mathbf s_\omega\theta$ is measured in radians. Its direction gives the oriented screw-axis direction, and its magnitude gives the rotation amount when the equivalent orientation with $\theta=\|{}^{a}\boldsymbol\phi\|_2>0$ is selected. The linear coordinate ${}^{a}\boldsymbol\rho={}^{a}\mathbf s_v\theta$ is measured in metres. Substitution of the screw geometry shows the information it carries:
+
+$$
+{}^{a}\boldsymbol\rho
+=
+-\left({}^{a}\mathbf s_\omega\times{}^{a}\mathbf p_\ell\right)\theta
++h\theta{}^{a}\mathbf s_\omega.
+$$
+
+The first term records the scaled axis offset, and the second records the axial advance. Thus ${}^{a}\boldsymbol\rho$ is a finite linear generator coordinate, not the final translation of the rigid transformation.
+
+When ${}^{a}\boldsymbol\phi\neq\mathbf0_3$, the selected finite coordinates retain the screw geometry. Choose the equivalent screw orientation for which $\theta=\|{}^{a}\boldsymbol\phi\|_2>0$, then recover
+
+$$
+\theta=\|{}^{a}\boldsymbol\phi\|_2,
+\qquad
+{}^{a}\mathbf s_\omega
+=
+\frac{{}^{a}\boldsymbol\phi}{\theta},
+\qquad
+{}^{a}\mathbf s_v
+=
+\frac{{}^{a}\boldsymbol\rho}{\theta},
+$$
+
+followed by
+
+$$
+h
+=
+({}^{a}\mathbf s_\omega)^{\mathsf T}{}^{a}\mathbf s_v,
+\qquad
+{}^{a}\mathbf p_\ell
+=
+{}^{a}\mathbf s_\omega\times{}^{a}\mathbf s_v.
+$$
+
+The dot product extracts the component of ${}^{a}\mathbf s_v$ parallel to the axis, which is the pitch $h$. The cross product removes that parallel component and recovers ${}^{a}\mathbf p_\ell$, the closest point on the axis. This recovery confirms that ${}^{a}\boldsymbol\phi$ carries the axis direction and rotation amount, while ${}^{a}\boldsymbol\rho$ carries the information needed to locate the axis and determine its pitch.
+
+Pure translation uses a separate normalisation because there is no rotation angle. Let ${}^{a}\mathbf s_v$ now be a unit translation direction, let $d$ be the signed translation distance in metres, and set ${}^{a}\mathbf s_\omega=\mathbf0_3$. The finite coordinates are then
+
+$$
+{}^{a}\boldsymbol\eta
+=
+\begin{bmatrix}
+{}^{a}\mathbf s_vd\\
+\mathbf0_3
+\end{bmatrix},
+\qquad
+{}^{a}\boldsymbol\rho
+=
+{}^{a}\mathbf s_vd,
+\qquad
+{}^{a}\boldsymbol\phi
+=
+\mathbf0_3.
+$$
+
+For a rotational or helical motion, the three model representations can now be compared without confusing their units or purposes:
+
+| Representation | Linear block | Angular block | Question answered |
+| --- | --- | --- | --- |
+| Normalised screw | ${}^{a}\mathbf s_v$ in metres per radian | ${}^{a}\mathbf s_\omega$ as a unit direction | What fixed screw geometry defines the motion? |
+| Spatial twist | ${}^{a}\boldsymbol\nu={}^{a}\mathbf s_v\dot\theta$ in metres per second | ${}^{a}\boldsymbol\omega={}^{a}\mathbf s_\omega\dot\theta$ in radians per second | How is the rigid body moving now? |
+| Finite exponential coordinates | ${}^{a}\boldsymbol\rho={}^{a}\mathbf s_v\theta$ in metres | ${}^{a}\boldsymbol\phi={}^{a}\mathbf s_\omega\theta$ in radians | What finite motion increment will be exponentiated? |
+
+These finite coordinates are normally modelled or derived rather than measured independently. A kinematic model supplies ${}^{a}\mathbf S$ and a joint measurement supplies $\theta$ or $d$. If a spatial twist expressed in frame $\{a\}$ remains constant over a time step $\Delta t$, its blocks give ${}^{a}\boldsymbol\rho={}^{a}\boldsymbol\nu\Delta t$ and ${}^{a}\boldsymbol\phi={}^{a}\boldsymbol\omega\Delta t$. An optimiser may instead choose the six coordinates directly as a local pose increment.
+
+Finite exponential coordinates are useful because directly adding entries to $\mathbf R$ does not preserve $\mathbf R^{\mathsf T}\mathbf R=\mathbf I_3$ and $\det(\mathbf R)=1$. Exponentiation maps the six-component increment to a valid rigid transformation that can be composed with the current pose. The external state may still be stored and reported as $({}^{a}\mathbf p,\mathbf R)$; the exponential coordinates are needed only while representing the increment. The inverse problem—recovering a selected increment from a finite pose—belongs to the principal $SE(3)$ logarithm cycle.
+
+## Linear-first $SE(3)$ exponential from finite coordinates {#sec-spatial-kernel-se3-exponential}
+
+Using the finite coordinates defined in @sec-spatial-kernel-modelled-motion-coordinates, the $SE(3)$ exponential answers the forward finite-motion question: what rigid displacement does the supplied six-component column generate? The implementation uses the linear-first input
+
+$$
+{}^{a}\boldsymbol\eta
+=
+\begin{bmatrix}
+{}^{a}\boldsymbol\rho\\
+{}^{a}\boldsymbol\phi
+\end{bmatrix}.
+$$
+
+Both blocks are expressed in frame $\{a\}$. The linear block ${}^{a}\boldsymbol\rho\in\mathbb R^3$ is measured in metres, and the angular block ${}^{a}\boldsymbol\phi\in\mathbb R^3$ is measured in radians. They are generator coordinates: they describe the motion before exponentiation. The output is the rigid displacement
+
+$$
+\mathbf T_\Delta
+=
+\exp\!\left(\widehat{{}^{a}\boldsymbol\eta}\right)
+=
+\begin{bmatrix}
+\mathbf R({}^{a}\boldsymbol\phi)&{}^{a}\mathbf p\\
+\mathbf 0_3^{\mathsf T}&1
+\end{bmatrix},
+\qquad
+\mathbf R({}^{a}\boldsymbol\phi)
+=
+\exp\!\left([{}^{a}\boldsymbol\phi]_\times\right),
+\qquad
+\boxed{
+{}^{a}\mathbf p
+=
+\mathbf J({}^{a}\boldsymbol\phi){}^{a}\boldsymbol\rho
+}.
+$$
+
+This mapping separates two pairs of quantities that are easy to confuse. The input block ${}^{a}\boldsymbol\phi$ generates the final rotation $\mathbf R$, while the input block ${}^{a}\boldsymbol\rho$ contributes to the final translation ${}^{a}\mathbf p$. In general, ${}^{a}\boldsymbol\rho\neq{}^{a}\mathbf p$: rotation couples the linear and angular generators through the $SO(3)$ left Jacobian $\mathbf J({}^{a}\boldsymbol\phi)$. The remaining question is why exponentiation applies this Jacobian instead of copying ${}^{a}\boldsymbol\rho$ directly into the transform.
+
+### Why the left Jacobian produces the translation
+
+Let $\boldsymbol\Phi=[{}^{a}\boldsymbol\phi]_\times\in\mathfrak{so}(3)$. The linear-first hat map places $\boldsymbol\Phi$ and ${}^{a}\boldsymbol\rho$ in one $\mathfrak{se}(3)$ matrix:
+
+$$
+\widehat{{}^{a}\boldsymbol\eta}
+=
+\begin{bmatrix}
+\boldsymbol\Phi&{}^{a}\boldsymbol\rho\\
+\mathbf 0_3^{\mathsf T}&0
+\end{bmatrix}.
+$$
+
+For every integer $k\geq1$, block multiplication gives
+
+$$
+\left(\widehat{{}^{a}\boldsymbol\eta}\right)^k
+=
+\begin{bmatrix}
+\boldsymbol\Phi^k&\boldsymbol\Phi^{k-1}{}^{a}\boldsymbol\rho\\
+\mathbf 0_3^{\mathsf T}&0
+\end{bmatrix}.
+$$
+
+Substitution into the matrix-exponential series separates the rotation block from the translation column:
+
+$$
+\begin{aligned}
+\exp\!\left(\widehat{{}^{a}\boldsymbol\eta}\right)
+&=
+\begin{bmatrix}
+\displaystyle\sum_{k=0}^{\infty}\frac{\boldsymbol\Phi^k}{k!}
+&
+\displaystyle\sum_{k=1}^{\infty}
+\frac{\boldsymbol\Phi^{k-1}}{k!}{}^{a}\boldsymbol\rho\\
+\mathbf 0_3^{\mathsf T}&1
+\end{bmatrix}\\
+&=
+\begin{bmatrix}
+\exp(\boldsymbol\Phi)&
+\mathbf J({}^{a}\boldsymbol\phi){}^{a}\boldsymbol\rho\\
+\mathbf 0_3^{\mathsf T}&1
+\end{bmatrix},
+\end{aligned}
+$$
+
+where the $SO(3)$ left Jacobian is the dimensionless mapping
+
+$$
+\mathbf J:\mathbb R^3\rightarrow\mathbb R^{3\times3},
+\qquad
+\mathbf J({}^{a}\boldsymbol\phi)
+=
+\sum_{j=0}^{\infty}
+\frac{\boldsymbol\Phi^j}{(j+1)!}.
+$$
+
+With $\theta=\|{}^{a}\boldsymbol\phi\|_2$ and $\boldsymbol\Phi^3=-\theta^2\boldsymbol\Phi$, the powers in this series reduce to $\mathbf I_3$, $\boldsymbol\Phi$, and $\boldsymbol\Phi^2$. Grouping their coefficients gives the closed form derived in @sec-se3-numerical-branches:
+
+$$
+\boxed{
+\mathbf J({}^{a}\boldsymbol\phi)
+=
+\mathbf I_3
++B(\theta)\boldsymbol\Phi
++C(\theta)\boldsymbol\Phi^2
+},
+\qquad
+B(\theta)=\frac{1-\cos\theta}{\theta^2},
+\qquad
+C(\theta)=\frac{\theta-\sin\theta}{\theta^3}.
+$$
+
+The direct quotients are unsuitable near $\theta=0$ because their numerators subtract nearly equal floating-point values. Their sixth-order series are
+
+$$
+\begin{aligned}
+B(\theta)
+&=
+\frac12-\frac{\theta^2}{24}
++\frac{\theta^4}{720}
+-\frac{\theta^6}{40320}
++O(\theta^8),\\
+C(\theta)
+&=
+\frac16-\frac{\theta^2}{120}
++\frac{\theta^4}{5040}
+-\frac{\theta^6}{362880}
++O(\theta^8).
+\end{aligned}
+$$
+
+At ${}^{a}\boldsymbol\phi=\mathbf0_3$, the angle is $\theta=0$ and the cross-product matrix is $\boldsymbol\Phi=[\mathbf0_3]_\times=\mathbf0_{3\times3}$. The coefficient limits $B(0)=1/2$ and $C(0)=1/6$ are finite, so substitution into the closed form gives
+
+$$
+\begin{aligned}
+\mathbf J(\mathbf0_3)
+&=
+\mathbf I_3
++B(0)\mathbf0_{3\times3}
++C(0)\mathbf0_{3\times3}^{2}\\
+&=
+\mathbf I_3.
+\end{aligned}
+$$
+
+The implementation returns this exact zero-angle result directly, so pure translation satisfies ${}^{a}\mathbf p={}^a\boldsymbol\rho$ without a trigonometric calculation.
+
+### Public factory and complete implementation
+
+The public factory accepts one linear-first coordinate column and returns a validated `Transform3` value:
+
+```cpp
+// Exponentiate finite linear-first coordinates [rho; phi].
+// rho is measured in metres and phi in radians.
+static Transform3 from_exponential_coordinates(
+  const Vector6LinearFirst & coordinates,
+  const NumericalPolicy & policy = NumericalPolicy{});
+```
+
+The mathematical path through the function is:
+
+1. Split the linear-first input ${}^{a}\boldsymbol\eta=[({}^{a}\boldsymbol\rho)^{\mathsf T}\;({}^{a}\boldsymbol\phi)^{\mathsf T}]^{\mathsf T}$. In the code, `coordinates.head<3>()` becomes `linear_coordinates` ${}^{a}\boldsymbol\rho$ in metres, and `coordinates.tail<3>()` becomes `rotation_vector` ${}^{a}\boldsymbol\phi$ in radians.
+
+2. Reuse the $SO(3)$ exponential to construct `rotation` $\mathbf R=\exp([{}^{a}\boldsymbol\phi]_\times)$, then calculate `theta` $\theta=\|{}^{a}\boldsymbol\phi\|_2$ for the translation calculation.
+
+3. If $\theta=0$, use $\mathbf J(\mathbf0_3)=\mathbf I_3$ and return $(\mathbf R,{}^{a}\boldsymbol\rho)=(\mathbf I_3,{}^{a}\boldsymbol\rho)$ exactly. This is the pure-translation branch.
+
+4. If $\theta>0$, calculate `coefficient_b` $B(\theta)$ and `coefficient_c` $C(\theta)$. The small-angle branch uses their series, while the remaining supported angles use their direct trigonometric formulas.
+
+5. Construct `rotation_generator` $\boldsymbol\Phi=[{}^{a}\boldsymbol\phi]_\times$ and then construct `left_jacobian` from $\mathbf J=\mathbf I_3+B(\theta)\boldsymbol\Phi+C(\theta)\boldsymbol\Phi^2$.
+
+6. Calculate `translation` from ${}^{a}\mathbf p=\mathbf J({}^{a}\boldsymbol\phi){}^{a}\boldsymbol\rho$. This is the step that converts the finite linear generator coordinate ${}^{a}\boldsymbol\rho$ into the final translation column ${}^{a}\mathbf p$.
+
+7. Return `Transform3(rotation, translation)`, which stores the pair $(\mathbf R,{}^{a}\mathbf p)$ representing $\mathbf T_\Delta$.
+
+The complete implementation keeps these stages in the same order:
+
+```cpp
+Transform3 Transform3::from_exponential_coordinates(
+  const Vector6LinearFirst & coordinates, const NumericalPolicy & policy)
+{
+  if (!coordinates.allFinite()) {
+    throw GeometryException(
+      GeometryError::non_finite,
+      "SE(3) exponential coordinates must be finite.");
+  }
+
+  // eta = [rho; phi], with rho in metres and phi in radians.
+  const Eigen::Vector3d linear_coordinates = coordinates.head<3>();
+  const Eigen::Vector3d rotation_vector = coordinates.tail<3>();
+
+  // R = exp([phi]_x). This also validates the angular policy and magnitude.
+  const Rotation3 rotation =
+    Rotation3::from_rotation_vector(rotation_vector, policy);
+
+  const double theta = rotation_vector.stableNorm();
+
+  if (!std::isfinite(theta)) {
+    throw GeometryException(
+      GeometryError::unsupported_magnitude,
+      "Rotation-vector norm is outside the finite numerical range.");
+  }
+
+  // When phi = 0, J(phi) = I and p = rho exactly.
+  if (theta == 0.0) {
+    return Transform3(rotation, linear_coordinates);
+  }
+
+  const double theta_squared = theta * theta;
+
+  double coefficient_b;
+  double coefficient_c;
+
+  if (theta <= policy.series_angle_threshold) {
+    const double theta_fourth = theta_squared * theta_squared;
+    const double theta_sixth = theta_fourth * theta_squared;
+
+    coefficient_b =
+      0.5 - theta_squared / 24.0 + theta_fourth / 720.0 -
+      theta_sixth / 40320.0;
+
+    coefficient_c =
+      1.0 / 6.0 - theta_squared / 120.0 +
+      theta_fourth / 5040.0 - theta_sixth / 362880.0;
+  } else {
+    coefficient_b = (1.0 - std::cos(theta)) / theta_squared;
+    coefficient_c =
+      (theta - std::sin(theta)) / (theta_squared * theta);
+  }
+
+  if (!std::isfinite(coefficient_b) ||
+      !std::isfinite(coefficient_c)) {
+    throw GeometryException(
+      GeometryError::unsupported_magnitude,
+      "SE(3) left-Jacobian coefficients are not finite.");
+  }
+
+  // Phi = [phi]_x.
+  const Eigen::Matrix3d rotation_generator = hat_so3(rotation_vector);
+
+  // J(phi) = I + B(theta) Phi + C(theta) Phi^2.
+  const Eigen::Matrix3d left_jacobian =
+    Eigen::Matrix3d::Identity() + coefficient_b * rotation_generator +
+    coefficient_c * rotation_generator * rotation_generator;
+
+  if (!left_jacobian.allFinite()) {
+    throw GeometryException(
+      GeometryError::unsupported_magnitude,
+      "SE(3) left Jacobian is outside the finite numerical range.");
+  }
+
+  // p = J(phi) rho.
+  const Eigen::Vector3d translation =
+    left_jacobian * linear_coordinates;
+
+  if (!translation.allFinite()) {
+    throw GeometryException(
+      GeometryError::unsupported_magnitude,
+      "SE(3) exponential translation is outside the finite numerical range.");
+  }
+
+  return Transform3(rotation, translation);
+}
+```
+
+The line breaks in this presentation keep the code readable in both HTML and PDF. They do not change the operations performed by the production function.
+
+### Equation-to-code map
+
+| Mathematics                                      | Code                                           | Meaning                                                               |
+| ------------------------------------------------ | ---------------------------------------------- | --------------------------------------------------------------------- |
+| ${}^{a}\boldsymbol\eta\in\mathbb R^6$            | `coordinates`                                  | Linear-first exponential-coordinate column                            |
+| ${}^{a}\boldsymbol\rho\in\mathbb R^3$            | `linear_coordinates`                           | First three entries of `coordinates`, in metres                       |
+| ${}^{a}\boldsymbol\phi\in\mathbb R^3$            | `rotation_vector`                              | Last three entries of `coordinates`, in radians                       |
+| $\mathbf R=\exp([{}^{a}\boldsymbol\phi]_\times)$ | `rotation`                                     | Resulting proper rotation                                             |
+| $\theta=\|{}^{a}\boldsymbol\phi\|_2$             | `theta`                                        | Rotation angle, in radians                                            |
+| $\theta^2$, $\theta^4$, $\theta^6$               | `theta_squared`, `theta_fourth`, `theta_sixth` | Reused even powers of the angle                                       |
+| $B(\theta)$                                      | `coefficient_b`                                | Coefficient multiplying $\boldsymbol\Phi$                             |
+| $C(\theta)$                                      | `coefficient_c`                                | Coefficient multiplying $\boldsymbol\Phi^2$                           |
+| $\boldsymbol\Phi=[{}^{a}\boldsymbol\phi]_\times$ | `rotation_generator`                           | Skew-symmetric rotation generator                                     |
+| $\mathbf J({}^{a}\boldsymbol\phi)$               | `left_jacobian`                                | Mapping from linear exponential coordinates to the translation column |
+| ${}^{a}\mathbf p=\mathbf J{}^{a}\boldsymbol\rho$ | `translation`                                  | Translation column of the resulting transform, in metres              |
+
+Eigen's `head<3>()` selects the first three entries of the fixed-size six-vector, and `tail<3>()` selects the last three. The number `3` is a compile-time template argument between angle brackets, so these expressions preserve the project's declared $[\boldsymbol\rho;\boldsymbol\phi]$ component order without allocating dynamic vectors.
+
+The call to `Rotation3::from_rotation_vector` reuses the completed $SO(3)$ exponential for $\mathbf R$. It also owns validation of the angular numerical policy and the supported rotation-vector magnitude. The $SE(3)$ factory then uses the same `series_angle_threshold` for the two left-Jacobian coefficients, so the rotation and translation blocks switch numerical regimes at the same angle.
+
+### Finite-pitch screw example
+
+Consider the normalised screw
+
+$$
+{}^{a}\mathbf s_v
+=
+\begin{bmatrix}0&-2&0.05\end{bmatrix}^{\mathsf T}
+\ \mathrm{m\,rad^{-1}},
+\qquad
+{}^{a}\mathbf s_\omega
+=
+\begin{bmatrix}0&0&1\end{bmatrix}^{\mathsf T},
+$$
+
+followed through $\sigma=\theta=\pi/2\ \mathrm{rad}$. Its finite exponential coordinates are
+
+$$
+{}^{a}\boldsymbol\rho
+=
+{}^{a}\mathbf s_v\theta
+=
+\begin{bmatrix}
+0\\-\pi\\\pi/40
+\end{bmatrix}
+\mathrm m,
+\qquad
+{}^{a}\boldsymbol\phi
+=
+{}^{a}\mathbf s_\omega\theta
+=
+\begin{bmatrix}
+0\\0\\\pi/2
+\end{bmatrix}
+\mathrm{rad}.
+$$
+
+For a rotation vector $\boldsymbol\phi=\theta\mathbf e_z$,
+
+$$
+\boldsymbol\Phi
+=
+\begin{bmatrix}
+0&-\theta&0\\
+\theta&0&0\\
+0&0&0
+\end{bmatrix},
+\qquad
+\boldsymbol\Phi^2
+=
+\begin{bmatrix}
+-\theta^2&0&0\\
+0&-\theta^2&0\\
+0&0&0
+\end{bmatrix}.
+$$
+
+Substitution into $\mathbf J=\mathbf I_3+B\boldsymbol\Phi+C\boldsymbol\Phi^2$ gives
+
+$$
+\mathbf J_z(\theta)
+=
+\begin{bmatrix}
+\dfrac{\sin\theta}{\theta}&
+-\dfrac{1-\cos\theta}{\theta}&0\\[6pt]
+\dfrac{1-\cos\theta}{\theta}&
+\dfrac{\sin\theta}{\theta}&0\\[6pt]
+0&0&1
+\end{bmatrix}.
+$$
+
+At $\theta=\pi/2$, this becomes
+
+$$
+\mathbf J_z\!\left(\frac\pi2\right)
+=
+\begin{bmatrix}
+2/\pi&-2/\pi&0\\
+2/\pi&2/\pi&0\\
+0&0&1
+\end{bmatrix},
+$$
+
+and therefore
+
+$$
+{}^{a}\mathbf p
+=
+\mathbf J_z\!\left(\frac\pi2\right)
+{}^{a}\boldsymbol\rho
+=
+\begin{bmatrix}
+2\\-2\\\pi/40
+\end{bmatrix}
+\mathrm m.
+$$
+
+The resulting finite displacement is
+
+$$
+\mathbf T_\Delta
+=
+\begin{bmatrix}
+0&-1&0&2\\
+1&0&0&-2\\
+0&0&1&\pi/40\\
+0&0&0&1
+\end{bmatrix}.
+$$
+
+The corresponding calling code preserves the same linear-first order:
+
+```cpp
+const double pi = std::acos(-1.0);
+
+Vector6LinearFirst coordinates;
+coordinates <<
+  0.0, -pi, pi / 40.0,  // rho in metres
+  0.0, 0.0, pi / 2.0;  // phi in radians
+
+const Transform3 transform =
+  Transform3::from_exponential_coordinates(coordinates);
+```
+
+This example makes the distinction between ${}^{a}\boldsymbol\rho$ and ${}^{a}\mathbf p$ concrete: the input $xy$ coordinates $(0,-\pi)\ \mathrm m$ become the finite translation $(2,-2)\ \mathrm m$ because the reference velocity field is integrated while the body rotates.
+
+### Validation and focused evidence
+
+The factory accepts only finite coordinate entries. It rejects a non-finite angle norm, coefficient, Jacobian, or translation as `GeometryError::unsupported_magnitude`; the last check catches the case in which finite values of $\mathbf J$ and ${}^{a}\boldsymbol\rho$ produce a non-finite matrix--vector product. Invalid angular policy values and unsupported angular magnitudes are rejected by the reused `Rotation3` factory before the translation is constructed.
+
+The focused tests establish the following mathematical and numerical properties:
+
+| Case | Property established |
+|---|---|
+| $\boldsymbol\phi=\mathbf0_3$ | Pure translation returns $\mathbf R=\mathbf I_3$ and ${}^{a}\mathbf p={}^a\boldsymbol\rho$ exactly |
+| Finite-pitch quarter turn | The implementation agrees with the independently calculated $\mathbf J_z(\pi/2)$ and analytic homogeneous transform |
+| $\theta=10^{-8}\ \mathrm{rad}$ | A small nonzero screw uses the stable coefficient series and is not collapsed to pure translation |
+| Non-finite entry in ${}^{a}\boldsymbol\rho$ | The public boundary reports `non_finite` |
+| Finite inputs whose product overflows | The public boundary reports `unsupported_magnitude` rather than returning an invalid transform |
+
+The small-angle expected translation is calculated independently from the analytic $z$-axis Jacobian. In particular, the test evaluates $(1-\cos\theta)/\theta$ as $2\sin^2(\theta/2)/\theta$, which avoids using the same cancellation-prone subtraction or the same series as the production code.
+
+### Deliberate limits
+
+This cycle implements $\operatorname{Exp}_{SE(3)}$ for the project's fixed linear-first coordinates; it does not yet recover exponential coordinates from a transform. Frames and units are documented by the API and variable names but remain the caller's responsibility because Eigen vectors do not encode them in their C++ types. The angular branch and maximum supported angle are inherited from `Rotation3::from_rotation_vector`, and the input rotation vector is not silently wrapped or canonicalised.

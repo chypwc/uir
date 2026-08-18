@@ -656,7 +656,23 @@ $$
 \in\mathbb R^6.
 $$
 
-The subscripts $v$ and $\omega$ identify the coefficients that generate the linear and angular parts of the twist after multiplication by the appropriate scalar joint rate. The two valid normalisation cases are
+The subscripts $v$ and $\omega$ identify the coefficients that generate the linear and angular parts of the twist after multiplication by the appropriate scalar joint rate.
+
+The linear coefficient ${}^{a}\mathbf s_v$ must not be read as the velocity of a moving link-frame origin. Multiplication by the scalar screw rate gives ${}^{a}\boldsymbol\nu={}^a\mathbf s_v\dot\sigma$, which is the rigid-motion velocity field evaluated at the reference origin $O_a$. If a link-frame origin $O_b$ is instead at ${}^{a}\mathbf p_b$, its velocity is obtained by evaluating the complete field at that point:
+
+$$
+{}^{a}\mathbf v_{O_b}
+=
+\left(
+{}^{a}\mathbf s_v
++{}^{a}\mathbf s_\omega\times{}^{a}\mathbf p_b
+\right)
+\dot\sigma.
+$$
+
+Only when $O_b$ is currently located at $O_a$ does ${}^{a}\mathbf v_{O_b}={}^a\mathbf s_v\dot\sigma$. For rotational or helical motion, ${}^{a}\mathbf s_v$ is therefore the velocity-field coefficient at $O_a$ per radian; for prismatic motion, it is the unit translation direction.
+
+The two valid normalisation cases are
 
 $$
 \boxed{
@@ -1885,6 +1901,10 @@ $$
 h{}^{a}\mathbf s_\omega
 }_{\text{motion along the axis per radian}}.
 $$
+
+The construction in @fig-linear-screw-coefficient-decomposition uses ${}^{a}\mathbf s_\omega=\mathbf e_z$, ${}^{a}\mathbf p_\ell=3\mathbf e_x\,\mathrm m$, $h=1\,\mathrm{m\,rad^{-1}}$, and a $58^\circ$ oblique view to show the vector sum and its cancellation at the axis point.
+
+![Decomposition of the linear screw coefficient into the offset-axis and pitch contributions, with their cancellation at a point on the screw axis.](figures/linear_screw_coefficient_decomposition.svg){#fig-linear-screw-coefficient-decomposition width=100% fig-pos="H"}
 
 The first term is perpendicular to the axis: it accounts for rotation about a line that is offset from $O_a$ and contributes no motion along that line. The second term is parallel to the axis and has signed magnitude $h$ because ${}^{a}\mathbf s_\omega$ is a unit column. Therefore projecting ${}^{a}\mathbf s_v$ onto the axis removes the perpendicular offset contribution and retains only the signed axial displacement per radian:
 

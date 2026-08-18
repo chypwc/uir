@@ -3,6 +3,7 @@
 
 #include <Eigen/Core>
 
+#include "rigid_body_kinematics/lie_algebra.hpp"
 #include "rigid_body_kinematics/numerical_policy.hpp"
 #include "rigid_body_kinematics/rotation3.hpp"
 
@@ -13,6 +14,12 @@ class Transform3
 public:
   // Create the identity transform
   static Transform3 identity();
+
+  // Exponentiate finite linear-first coordinates [rho; phi].
+  // rho is measured in metres and phi in radians.
+  static Transform3 from_exponential_coordinates(
+    const Vector6LinearFirst & coordinates,
+    const NumericalPolicy & policy = NumericalPolicy{});
 
   // Validate a raw homogeneous matrix and create a rigid transform
   static Transform3 from_matrix(
