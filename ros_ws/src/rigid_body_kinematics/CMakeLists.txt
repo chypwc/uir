@@ -132,6 +132,14 @@ if(BUILD_TESTING)
     ${PROJECT_NAME}
   )
 
+  ament_add_gtest(test_se3_logarithm
+    test/test_se3_logarithm.cpp
+  )
+
+  target_link_libraries(test_se3_logarithm
+    ${PROJECT_NAME}
+  )
+
   # Enable automatic ROS 2 linting support.
   find_package(ament_lint_auto REQUIRED)
   find_package(ament_cmake_clang_format REQUIRED)

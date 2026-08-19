@@ -1989,12 +1989,15 @@ R_{21}-R_{12}
 \end{aligned}
 $$
 
-For a non-identity rotation, test the near-$\pi$ condition first. If it holds, begin the symmetric axis recovery:
+For a non-identity rotation, calculate the representable near-$\pi$ boundary once and compare the recovered angle directly with that boundary. If the condition holds, begin the symmetric axis recovery:
 
 $$
 \begin{aligned}
+&\theta_{\pi,b}\ [\mathtt{near\_pi\_boundary}]
+&&\gets
+\pi-\theta_{\mathrm{near}\text{-}\pi},\\
 &\textbf{if }
-\pi-\theta\leq\theta_{\mathrm{near}\text{-}\pi},
+\theta\geq\theta_{\pi,b},
 &&\textbf{enter the near-}\pi\textbf{ branch:}\\[2pt]
 &\quad\mathbf R_{\mathrm{sym}}
 \ [\mathtt{symmetric\_part}]
@@ -2686,4 +2689,334 @@ The small-angle expected translation is calculated independently from the analyt
 
 ### Deliberate limits
 
-This cycle implements $\operatorname{Exp}_{SE(3)}$ for the project's fixed linear-first coordinates; it does not yet recover exponential coordinates from a transform. Frames and units are documented by the API and variable names but remain the caller's responsibility because Eigen vectors do not encode them in their C++ types. The angular branch and maximum supported angle are inherited from `Rotation3::from_rotation_vector`, and the input rotation vector is not silently wrapped or canonicalised.
+`Transform3::from_exponential_coordinates()` implements the forward $SE(3)$ map for the project's fixed linear-first coordinates. The factory does not itself select a principal logarithm or factor the input into a normalised screw axis and displacement. Frames and units are documented by the API and variable names but remain the caller's responsibility because Eigen vectors do not encode them in their C++ types. The angular branch and maximum supported angle are inherited from `Rotation3::from_rotation_vector`, and the input rotation vector is not silently wrapped or canonicalised.
+
+## Principal linear-first $SE(3)$ logarithm to finite coordinates {#sec-spatial-kernel-se3-logarithm}
+
+The $SE(3)$ exponential in @sec-spatial-kernel-se3-exponential answers the forward question: given finite linear-first coordinates, which rigid transformation do they produce? The principal $SE(3)$ logarithm answers the inverse question needed when a finite relative transformation must be represented as one selected six-entry coordinate column. Given a validated rotation and translation, it returns the finite coordinates that reproduce the transformation through the exponential, together with the numerical branch used to recover them.
+
+The mathematical derivation belongs to @sec-se3-numerical-branches, especially @eq-se3-left-jacobian-inverse, @eq-se3-small-angle-left-jacobian-inverse-series, and @eq-se3-principal-logarithm-finite-blocks. This section records how the public `Transform3` logarithm member implements that reviewed result. Routine point transformation, pose composition, and pose storage do not require a logarithm; callers should continue to use the validated transformation directly unless a finite coordinate representation is actually needed.
+
+### Input, output, frame, and units
+
+Let the stored finite displacement, expressed relative to frame $\{a\}$, be
+
+$$
+\mathbf T_\Delta
+=
+\begin{bmatrix}
+\mathbf R&{}^{a}\mathbf p\\
+\mathbf 0_3^{\mathsf T}&1
+\end{bmatrix}
+\in SE(3),
+$$
+
+where $\mathbf R\in SO(3)$ is dimensionless and ${}^{a}\mathbf p\in\mathbb R^3$ is the translation column expressed in frame $\{a\}$ and measured in metres. A `Transform3` already owns a validated `Rotation3` and a finite translation, so the member function does not accept an arbitrary unvalidated $4\times4$ array.
+
+The output coordinate column uses the project's linear-first convention:
+
+$$
+{}^{a}\boldsymbol\eta_{\mathrm{principal}}
+=
+\begin{bmatrix}
+{}^{a}\boldsymbol\rho\\
+{}^{a}\boldsymbol\phi
+\end{bmatrix}
+\in\mathbb R^6,
+$$
+
+where ${}^{a}\boldsymbol\rho\in\mathbb R^3$ is measured in metres and ${}^{a}\boldsymbol\phi\in\mathbb R^3$ is measured in radians. The rotation-vector norm $\theta=\|{}^{a}\boldsymbol\phi\|_2$ lies in the selected principal interval $[0,\pi]$. Both blocks are expressed in frame $\{a\}$.
+
+The public result keeps the coordinate column and the observable numerical classification together:
+
+```cpp
+enum class TransformLogBranch
+{
+  identity,
+  pure_translation,
+  small_angle,
+  nominal,
+  near_pi
+};
+
+struct TransformLogResult
+{
+  Vector6LinearFirst coordinates;
+  TransformLogBranch branch;
+};
+
+[[nodiscard]] TransformLogResult to_principal_exponential_coordinates(
+  const NumericalPolicy & policy = NumericalPolicy{}) const;
+```
+
+An `enum class` defines a scoped set of named branch values, preventing accidental conversion of a branch into an integer. The `struct` groups the two parts of one successful result without hiding either behind accessor functions. The `const` after the member declaration promises not to modify the stored transformation, and `[[nodiscard]]` asks the compiler to warn when a caller discards the recovered result unintentionally.
+
+### Why the linear block is recovered rather than copied
+
+The translation column ${}^{a}\mathbf p$ answers where the transformed origin finishes. The finite linear coordinate ${}^{a}\boldsymbol\rho$ instead parameterises the constant rigid-motion field whose exponential produces that final translation while the body rotates. They coincide only when the selected rotation is the identity.
+
+The forward relationship derived in Chapter 8 is
+
+$$
+{}^{a}\mathbf p
+=
+\mathbf J({}^{a}\boldsymbol\phi)
+{}^{a}\boldsymbol\rho,
+$$
+
+so a non-identity logarithm must invert the left-Jacobian action:
+
+$$
+\boxed{
+{}^{a}\boldsymbol\rho
+=
+\mathbf J({}^{a}\boldsymbol\phi)^{-1}
+{}^{a}\mathbf p
+}.
+$$
+
+For $\boldsymbol\Phi=[{}^{a}\boldsymbol\phi]_\times$ and $\theta=\|{}^{a}\boldsymbol\phi\|_2>0$, the inverse is
+
+$$
+\boxed{
+\mathbf J({}^{a}\boldsymbol\phi)^{-1}
+=
+\mathbf I_3
+-\frac12\boldsymbol\Phi
++D(\theta)\boldsymbol\Phi^2
+},
+$$
+
+with
+
+$$
+\begin{aligned}
+D(\theta)
+&=
+\frac{1}{\theta^2}
+-\frac{1}{2\theta}
+\cot\!\left(\frac{\theta}{2}\right)\\
+&=
+\frac{1}{\theta^2}
+-
+\frac{\cos(\theta/2)}
+{2\theta\sin(\theta/2)}.
+\end{aligned}
+$$
+
+The second line follows from $\cot x=\cos x/\sin x$ and matches the direct expression evaluated by the C++ implementation. On the nonzero principal interval, $0<\theta\leq\pi$, the denominator $\sin(\theta/2)$ is nonzero. Near $\theta=\pi$, it approaches one, so this half-angle form remains suitable.
+
+Near zero, however, the two terms in the direct expression for $D(\theta)$ are individually large and nearly cancel. The implementation therefore evaluates the reviewed series
+
+$$
+D(\theta)
+=
+\frac{1}{12}
++\frac{\theta^2}{720}
++\frac{\theta^4}{30240}
++\frac{\theta^6}{1209600}
++O(\theta^8)
+$$
+
+whenever $0<\theta\leq\theta_{\mathrm{series}}$. The series and direct expressions describe the same inverse Jacobian; the threshold selects the more stable floating-point evaluation and does not change the represented motion.
+
+### Identity rotation and exact translation preservation
+
+The implementation first delegates rotation recovery to the completed principal $SO(3)$ logarithm:
+
+```cpp
+const RotationLogResult rotation_log_result =
+  rotation_.to_principal_rotation_vector(policy);
+
+Vector6LinearFirst coordinates = Vector6LinearFirst::Zero();
+coordinates.tail<3>() = rotation_log_result.rotation_vector;
+```
+
+This call owns the angular policy validation and the identity, small-angle, nominal, and deterministic near-$\pi$ rotation-vector calculations described in @sec-spatial-kernel-so3-logarithm. Initialising the complete six-vector to zero gives every component a defined value before either block is assigned. `tail<3>()` selects the last three entries at compile time and stores the recovered ${}^{a}\boldsymbol\phi$ there.
+
+If the selected rotation is the exact identity, then $\mathbf J(\mathbf 0_3)=\mathbf I_3$ and ${}^{a}\boldsymbol\rho={}^a\mathbf p$. The function preserves that translation directly and distinguishes a complete identity from a pure translation:
+
+```cpp
+if (rotation_log_result.branch == RotationLogBranch::identity) {
+  coordinates.head<3>() = translation_;
+
+  const bool translation_is_zero =
+    (translation_.array() == 0.0).all();
+
+  const TransformLogBranch branch =
+    translation_is_zero
+      ? TransformLogBranch::identity
+      : TransformLogBranch::pure_translation;
+
+  return TransformLogResult{coordinates, branch};
+}
+```
+
+The expression `translation_.array() == 0.0` performs a component-wise comparison and `.all()` requires all three comparisons to be true. This is a deliberate exact-zero contract, not an approximate geometric comparison: the identity classification requires all three stored translation components to equal floating-point zero. Every representable nonzero component, including a subnormal value, produces `pure_translation` and is copied without Jacobian arithmetic. The conditional operator `condition ? first : second` selects the branch value without changing the coordinates.
+
+### Nonzero rotation and the inverse left Jacobian
+
+For a nonzero rotation, the spatial branch inherits the numerically important $SO(3)$ decision. The translation does not create a separate angular branch:
+
+| `TransformLogBranch` | Condition | Translation calculation |
+|---|---|---|
+| `small_angle` | $0<\theta\leq\theta_{\mathrm{series}}$ | Evaluate $D(\theta)$ by its series, then apply $\mathbf J^{-1}$ |
+| `nominal` | $\theta_{\mathrm{series}}<\theta<\pi-\theta_{\mathrm{near}\text{-}\pi}$ | Evaluate $D(\theta)$ by the direct half-angle expression |
+| `near_pi` | $\pi-\theta_{\mathrm{near}\text{-}\pi}\leq\theta\leq\pi$ | Reuse the symmetric $SO(3)$ axis recovery, then evaluate the same direct $D(\theta)$ expression |
+
+After mapping the branch, the implementation forms the inverse Jacobian and recovers the linear block:
+
+```cpp
+const Eigen::Vector3d phi = rotation_log_result.rotation_vector;
+const double theta = phi.stableNorm();
+const double theta_squared = theta * theta;
+
+double coefficient_d;
+if (theta <= policy.series_angle_threshold) {
+  const double theta_fourth = theta_squared * theta_squared;
+  const double theta_sixth = theta_fourth * theta_squared;
+
+  coefficient_d = 1.0 / 12.0 + theta_squared / 720.0 +
+                  theta_fourth / 30240.0 +
+                  theta_sixth / 1209600.0;
+} else {
+  const double half_theta = 0.5 * theta;
+  coefficient_d =
+    1.0 / theta_squared -
+    std::cos(half_theta) /
+      (2.0 * theta * std::sin(half_theta));
+}
+
+const Eigen::Matrix3d rotation_vector_hat = hat_so3(phi);
+
+const Eigen::Matrix3d inverse_left_jacobian =
+  Eigen::Matrix3d::Identity() - 0.5 * rotation_vector_hat +
+  coefficient_d * rotation_vector_hat * rotation_vector_hat;
+
+const Eigen::Vector3d linear_coordinates =
+  inverse_left_jacobian * translation_;
+
+coordinates.head<3>() = linear_coordinates;
+return TransformLogResult{coordinates, branch};
+```
+
+
+### Equation-to-code map
+
+| Mathematics | Code | Meaning |
+|---|---|---|
+| $\mathbf T_\Delta=(\mathbf R,{}^{a}\mathbf p)$ | `rotation_`, `translation_` | Validated stored finite displacement |
+| ${}^{a}\boldsymbol\phi$ | `phi` | Selected principal rotation-vector block, in radians |
+| $\theta=\|{}^{a}\boldsymbol\phi\|_2$ | `theta` | Principal rotation angle, in radians |
+| $\theta^2$, $\theta^4$, $\theta^6$ | `theta_squared`, `theta_fourth`, `theta_sixth` | Reused even powers for the series |
+| $D(\theta)$ | `coefficient_d` | Coefficient multiplying $\boldsymbol\Phi^2$ in $\mathbf J^{-1}$ |
+| $\boldsymbol\Phi=[{}^{a}\boldsymbol\phi]_\times$ | `rotation_vector_hat` | Skew-symmetric matrix of the selected rotation vector |
+| $\mathbf J({}^{a}\boldsymbol\phi)^{-1}$ | `inverse_left_jacobian` | Dimensionless map from final translation to finite linear coordinates |
+| ${}^{a}\boldsymbol\rho=\mathbf J^{-1}{}^{a}\mathbf p$ | `linear_coordinates` | Recovered finite linear block, in metres |
+| $[{}^{a}\boldsymbol\rho;{}^{a}\boldsymbol\phi]$ | `coordinates` | Returned linear-first six-column |
+| Numerical classification | `branch` | Observable identity, translation, or angular formula region |
+
+Eigen's `stableNorm()` evaluates the Euclidean norm with internal scaling, reducing avoidable overflow or underflow in the norm calculation. The fixed-size matrices and vectors preserve the declared dimensions at compile time. Matrix multiplication remains ordered: `inverse_left_jacobian * translation_` implements $\mathbf J^{-1}{}^{a}\mathbf p$, not the reversed product.
+
+### A representable near-$\pi$ boundary
+
+The principal $SO(3)$ logarithm supplies the angular branch used by the spatial result. Its near-$\pi$ interval begins at the representable boundary
+
+$$
+\theta_{\pi,b}
+=
+\operatorname{fl}
+\!\left(
+\pi-\theta_{\mathrm{near}\text{-}\pi}
+\right),
+$$
+
+where $\operatorname{fl}$ denotes rounding to the binary64 result of the subtraction. The implementation calculates this value once:
+
+```cpp
+const double near_pi_boundary =
+  kPi - policy.near_pi_tolerance;
+
+if (theta >= near_pi_boundary) {
+  // Enter the near-pi branch.
+}
+```
+
+In exact real arithmetic, testing $\theta\geq\pi-\theta_{\mathrm{near}\text{-}\pi}$ is equivalent to testing $\pi-\theta\leq\theta_{\mathrm{near}\text{-}\pi}$. In binary64 arithmetic, recomputing `kPi - theta` at the boundary introduces another rounded subtraction and can produce a value slightly greater than the stored tolerance. Comparing `theta` directly with the single named boundary implements the declared inclusive interval deterministically and keeps policy validation and formula selection aligned.
+
+### Finite-pitch quarter-turn example
+
+Reuse the analytic displacement constructed in @sec-spatial-kernel-se3-exponential:
+
+$$
+\mathbf T_\Delta
+=
+\begin{bmatrix}
+0&-1&0&2\\
+1&0&0&-2\\
+0&0&1&\pi/40\\
+0&0&0&1
+\end{bmatrix}.
+$$
+
+The final translation is ${}^{a}\mathbf p=[2\;-2\;\pi/40]^{\mathsf T}\ \mathrm m$, but the principal logarithm must recover
+
+$$
+{}^{a}\boldsymbol\phi
+=
+\begin{bmatrix}0\\0\\\pi/2\end{bmatrix}
+\mathrm{rad},
+\qquad
+{}^{a}\boldsymbol\rho
+=
+\begin{bmatrix}0\\-\pi\\\pi/40\end{bmatrix}
+\mathrm m.
+$$
+
+The corresponding use of the public API is
+
+```cpp
+Eigen::Matrix4d matrix;
+matrix <<
+  0.0, -1.0, 0.0, 2.0,
+  1.0,  0.0, 0.0, -2.0,
+  0.0,  0.0, 1.0, pi / 40.0,
+  0.0,  0.0, 0.0, 1.0;
+
+const Transform3 transform = Transform3::from_matrix(matrix);
+
+const TransformLogResult logarithm =
+  transform.to_principal_exponential_coordinates();
+
+const Eigen::Vector3d rho = logarithm.coordinates.head<3>();
+const Eigen::Vector3d phi = logarithm.coordinates.tail<3>();
+```
+
+This is a `nominal` case because $\theta=\pi/2$ lies between the two formula-selection regions. Re-exponentiating the recovered coordinate column reconstructs the same finite transformation. The example also shows why copying the transform's translation into the first three output entries would be wrong: $[2\;-2\;\pi/40]^{\mathsf T}$ and $[0\;-\pi\;\pi/40]^{\mathsf T}$ answer different questions.
+
+### Validation and focused evidence
+
+The stored transformation has already passed `Transform3` construction, including finite-component, homogeneous-row, and proper-rotation checks. The logarithm reuses `Rotation3::to_principal_rotation_vector()` to validate the angular branch policy before any identity shortcut. An invalid or overlapping threshold configuration therefore reports `GeometryError::invalid_policy` even when the stored transform is the identity.
+
+For a nonzero rotation, the function checks the recovered angle, $D(\theta)$, the inverse Jacobian, and the recovered linear coordinates for finiteness. A non-finite required intermediate or output reports `GeometryError::unsupported_magnitude` and returns no `TransformLogResult`. This includes a valid transform with a finite but extremely large translation for which $\mathbf J^{-1}{}^{a}\mathbf p$ overflows.
+
+The eleven focused tests establish the following properties:
+
+| Cases | Property established |
+|---|---|
+| Complete identity and ordinary pure translation | Exact coordinates and distinct `identity` and `pure_translation` classifications |
+| Smallest positive subnormal translation | Every representable nonzero translation is preserved rather than classified as identity |
+| Analytic finite-pitch quarter turn | Independent nominal recovery of both ${}^{a}\boldsymbol\rho$ and ${}^{a}\boldsymbol\phi$ |
+| Analytic $10^{-8}\ \mathrm{rad}$ screw | Stable $D(\theta)$ series recovery without erasing the rotation |
+| Analytic half-turn about $+z_a$ | Deterministic `near_pi` recovery and correct inverse-Jacobian action |
+| Arbitrary principal-axis round trip | Coupled exponential--logarithm compatibility and separate rotation and translation residuals |
+| Extreme finite translation | Overflow in the recovered linear block reports `unsupported_magnitude` |
+| Overlapping angular thresholds | Invalid numerical policy is rejected before geometric processing |
+| Values immediately below, on, and above $\theta_{\mathrm{series}}$ | The small-angle boundary is inclusive and the adjacent formulas recover the same motion |
+| Values immediately below, on, and above $\theta_{\pi,b}$ | The near-$\pi$ boundary is inclusive and deterministic in binary64 |
+
+The analytic tests construct the input matrix directly from closed-form geometry instead of calling the production exponential. This prevents matching forward and inverse errors from hiding a defect. The separate arbitrary-axis round trip is then appropriate integration evidence because the individual branches already have independent analytic checks.
+
+### Deliberate limits
+
+This member returns one principal finite coordinate column; it does not return every matrix logarithm of the transformation. At an exact half-turn, the rotation axis has an unavoidable sign ambiguity, so the reused $SO(3)$ logarithm applies its documented deterministic convention. The returned coordinates reconstruct the same transformation, but another valid logarithm may use the opposite boundary axis with a corresponding linear block.

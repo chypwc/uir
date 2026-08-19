@@ -98,6 +98,94 @@ Transform3 Transform3::from_exponential_coordinates(
   return Transform3(rotation, translation);
 }
 
+TransformLogResult Transform3::to_principal_exponential_coordinates(
+  const NumericalPolicy & policy) const
+{
+  // Reuse policy validation in to_principal_rotation_vector().
+  const RotationLogResult rotation_log_result =
+    rotation_.to_principal_rotation_vector(policy);
+
+  Vector6LinearFirst coordinates = Vector6LinearFirst::Zero();
+  coordinates.tail<3>() = rotation_log_result.rotation_vector;
+
+  // Identity rotation case.
+  if (rotation_log_result.branch == RotationLogBranch::identity) {
+    coordinates.head<3>() = translation_;
+
+    const bool translation_is_zero = (translation_.array() == 0.0).all();
+
+    const TransformLogBranch branch = translation_is_zero
+                                        ? TransformLogBranch::identity
+                                        : TransformLogBranch::pure_translation;
+    return TransformLogResult{coordinates, branch};
+  }
+
+  TransformLogBranch branch;
+  if (rotation_log_result.branch == RotationLogBranch::small_angle) {
+    branch = TransformLogBranch::small_angle;
+  } else if (rotation_log_result.branch == RotationLogBranch::near_pi) {
+    branch = TransformLogBranch::near_pi;
+  } else {
+    branch = TransformLogBranch::nominal;
+  }
+
+  const Eigen::Vector3d phi = rotation_log_result.rotation_vector;
+  const double theta = phi.stableNorm();
+
+  if (!std::isfinite(theta)) {
+    throw GeometryException(
+      GeometryError::unsupported_magnitude,
+      "Principal rotation-vector norm is not finite.");
+  }
+
+  const double theta_squared = theta * theta;
+
+  double coefficient_d;
+  if (theta <= policy.series_angle_threshold) {
+    const double theta_fourth = theta_squared * theta_squared;
+    const double theta_sixth = theta_fourth * theta_squared;
+
+    coefficient_d = 1.0 / 12.0 + theta_squared / 720.0 +
+                    theta_fourth / 30240.0 + theta_sixth / 1209600.0;
+  } else {
+    const double half_theta = 0.5 * theta;
+    coefficient_d = 1.0 / theta_squared -
+                    std::cos(half_theta) / (2.0 * theta * std::sin(half_theta));
+  }
+
+  if (!std::isfinite(coefficient_d)) {
+    throw GeometryException(
+      GeometryError::unsupported_magnitude,
+      "Inverse left-Jacobian coefficient is not finite.");
+  }
+
+  const Eigen::Matrix3d rotation_vector_hat = hat_so3(phi);
+
+  const Eigen::Matrix3d inverse_left_jacobian =
+    Eigen::Matrix3d::Identity() - 0.5 * rotation_vector_hat +
+    coefficient_d * rotation_vector_hat * rotation_vector_hat;
+
+  if (!inverse_left_jacobian.allFinite()) {
+    throw GeometryException(
+      GeometryError::unsupported_magnitude,
+      "Inverse SE(3) left Jacobian is outside the finite numerical range.");
+  }
+
+  const Eigen::Vector3d linear_coordinates =
+    inverse_left_jacobian * translation_;
+
+  if (!linear_coordinates.allFinite()) {
+    throw GeometryException(
+      GeometryError::unsupported_magnitude,
+      "SE(3) logarithm linear coordinates are outside the finite numerical "
+      "range.");
+  }
+
+  coordinates.head<3>() = linear_coordinates;
+
+  return TransformLogResult{coordinates, branch};
+}
+
 Transform3 Transform3::from_matrix(
   const Eigen::Matrix4d & matrix, const NumericalPolicy & policy)
 {

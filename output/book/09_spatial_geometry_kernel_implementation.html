@@ -526,6 +526,18 @@ window.Quarto = {
   <li><a href="#validation-and-focused-evidence-1" id="toc-validation-and-focused-evidence-1" class="nav-link" data-scroll-target="#validation-and-focused-evidence-1"><span class="header-section-number">9.10.5</span> Validation and focused evidence</a></li>
   <li><a href="#deliberate-limits-5" id="toc-deliberate-limits-5" class="nav-link" data-scroll-target="#deliberate-limits-5"><span class="header-section-number">9.10.6</span> Deliberate limits</a></li>
   </ul></li>
+  <li><a href="#sec-spatial-kernel-se3-logarithm" id="toc-sec-spatial-kernel-se3-logarithm" class="nav-link" data-scroll-target="#sec-spatial-kernel-se3-logarithm"><span class="header-section-number">9.11</span> Principal linear-first <span class="math inline">\(SE(3)\)</span> logarithm to finite coordinates</a>
+  <ul class="collapse">
+  <li><a href="#input-output-frame-and-units-2" id="toc-input-output-frame-and-units-2" class="nav-link" data-scroll-target="#input-output-frame-and-units-2"><span class="header-section-number">9.11.1</span> Input, output, frame, and units</a></li>
+  <li><a href="#why-the-linear-block-is-recovered-rather-than-copied" id="toc-why-the-linear-block-is-recovered-rather-than-copied" class="nav-link" data-scroll-target="#why-the-linear-block-is-recovered-rather-than-copied"><span class="header-section-number">9.11.2</span> Why the linear block is recovered rather than copied</a></li>
+  <li><a href="#identity-rotation-and-exact-translation-preservation" id="toc-identity-rotation-and-exact-translation-preservation" class="nav-link" data-scroll-target="#identity-rotation-and-exact-translation-preservation"><span class="header-section-number">9.11.3</span> Identity rotation and exact translation preservation</a></li>
+  <li><a href="#nonzero-rotation-and-the-inverse-left-jacobian" id="toc-nonzero-rotation-and-the-inverse-left-jacobian" class="nav-link" data-scroll-target="#nonzero-rotation-and-the-inverse-left-jacobian"><span class="header-section-number">9.11.4</span> Nonzero rotation and the inverse left Jacobian</a></li>
+  <li><a href="#equation-to-code-map-1" id="toc-equation-to-code-map-1" class="nav-link" data-scroll-target="#equation-to-code-map-1"><span class="header-section-number">9.11.5</span> Equation-to-code map</a></li>
+  <li><a href="#a-representable-near-pi-boundary" id="toc-a-representable-near-pi-boundary" class="nav-link" data-scroll-target="#a-representable-near-pi-boundary"><span class="header-section-number">9.11.6</span> A representable near-<span class="math inline">\(\pi\)</span> boundary</a></li>
+  <li><a href="#finite-pitch-quarter-turn-example" id="toc-finite-pitch-quarter-turn-example" class="nav-link" data-scroll-target="#finite-pitch-quarter-turn-example"><span class="header-section-number">9.11.7</span> Finite-pitch quarter-turn example</a></li>
+  <li><a href="#validation-and-focused-evidence-2" id="toc-validation-and-focused-evidence-2" class="nav-link" data-scroll-target="#validation-and-focused-evidence-2"><span class="header-section-number">9.11.8</span> Validation and focused evidence</a></li>
+  <li><a href="#deliberate-limits-6" id="toc-deliberate-limits-6" class="nav-link" data-scroll-target="#deliberate-limits-6"><span class="header-section-number">9.11.9</span> Deliberate limits</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -2229,11 +2241,14 @@ R_{21}-R_{12}
 (\mathbf 0_3,\mathtt{identity}).
 \end{aligned}
 \]</span></p>
-<p>For a non-identity rotation, test the near-<span class="math inline">\(\pi\)</span> condition first. If it holds, begin the symmetric axis recovery:</p>
+<p>For a non-identity rotation, calculate the representable near-<span class="math inline">\(\pi\)</span> boundary once and compare the recovered angle directly with that boundary. If the condition holds, begin the symmetric axis recovery:</p>
 <p><span class="math display">\[
 \begin{aligned}
+&amp;\theta_{\pi,b}\ [\mathtt{near\_pi\_boundary}]
+&amp;&amp;\gets
+\pi-\theta_{\mathrm{near}\text{-}\pi},\\
 &amp;\textbf{if }
-\pi-\theta\leq\theta_{\mathrm{near}\text{-}\pi},
+\theta\geq\theta_{\pi,b},
 &amp;&amp;\textbf{enter the near-}\pi\textbf{ branch:}\\[2pt]
 &amp;\quad\mathbf R_{\mathrm{sym}}
 \ [\mathtt{symmetric\_part}]
@@ -2954,7 +2969,402 @@ C(\theta)
 </section>
 <section id="deliberate-limits-5" class="level3" data-number="9.10.6">
 <h3 data-number="9.10.6" class="anchored" data-anchor-id="deliberate-limits-5"><span class="header-section-number">9.10.6</span> Deliberate limits</h3>
-<p>This cycle implements <span class="math inline">\(\operatorname{Exp}_{SE(3)}\)</span> for the project’s fixed linear-first coordinates; it does not yet recover exponential coordinates from a transform. Frames and units are documented by the API and variable names but remain the caller’s responsibility because Eigen vectors do not encode them in their C++ types. The angular branch and maximum supported angle are inherited from <code>Rotation3::from_rotation_vector</code>, and the input rotation vector is not silently wrapped or canonicalised.</p>
+<p><code>Transform3::from_exponential_coordinates()</code> implements the forward <span class="math inline">\(SE(3)\)</span> map for the project’s fixed linear-first coordinates. The factory does not itself select a principal logarithm or factor the input into a normalised screw axis and displacement. Frames and units are documented by the API and variable names but remain the caller’s responsibility because Eigen vectors do not encode them in their C++ types. The angular branch and maximum supported angle are inherited from <code>Rotation3::from_rotation_vector</code>, and the input rotation vector is not silently wrapped or canonicalised.</p>
+</section>
+</section>
+<section id="sec-spatial-kernel-se3-logarithm" class="level2" data-number="9.11">
+<h2 data-number="9.11" class="anchored" data-anchor-id="sec-spatial-kernel-se3-logarithm"><span class="header-section-number">9.11</span> Principal linear-first <span class="math inline">\(SE(3)\)</span> logarithm to finite coordinates</h2>
+<p>The <span class="math inline">\(SE(3)\)</span> exponential in <a href="#sec-spatial-kernel-se3-exponential" class="quarto-xref"><span>Section 9.10</span></a> answers the forward question: given finite linear-first coordinates, which rigid transformation do they produce? The principal <span class="math inline">\(SE(3)\)</span> logarithm answers the inverse question needed when a finite relative transformation must be represented as one selected six-entry coordinate column. Given a validated rotation and translation, it returns the finite coordinates that reproduce the transformation through the exponential, together with the numerical branch used to recover them.</p>
+<p>The mathematical derivation belongs to <a href="08_screw_motion_se3_exponential_and_spatial_integration.html#sec-se3-numerical-branches" class="quarto-xref"><span>Section 8.5</span></a>, especially <a href="08_screw_motion_se3_exponential_and_spatial_integration.html#eq-se3-left-jacobian-inverse" class="quarto-xref">Equation&nbsp;<span>8.27</span></a>, <a href="08_screw_motion_se3_exponential_and_spatial_integration.html#eq-se3-small-angle-left-jacobian-inverse-series" class="quarto-xref">Equation&nbsp;<span>8.29</span></a>, and <a href="08_screw_motion_se3_exponential_and_spatial_integration.html#eq-se3-principal-logarithm-finite-blocks" class="quarto-xref">Equation&nbsp;<span>8.37</span></a>. This section records how the public <code>Transform3</code> logarithm member implements that reviewed result. Routine point transformation, pose composition, and pose storage do not require a logarithm; callers should continue to use the validated transformation directly unless a finite coordinate representation is actually needed.</p>
+<section id="input-output-frame-and-units-2" class="level3" data-number="9.11.1">
+<h3 data-number="9.11.1" class="anchored" data-anchor-id="input-output-frame-and-units-2"><span class="header-section-number">9.11.1</span> Input, output, frame, and units</h3>
+<p>Let the stored finite displacement, expressed relative to frame <span class="math inline">\(\{a\}\)</span>, be</p>
+<p><span class="math display">\[
+\mathbf T_\Delta
+=
+\begin{bmatrix}
+\mathbf R&amp;{}^{a}\mathbf p\\
+\mathbf 0_3^{\mathsf T}&amp;1
+\end{bmatrix}
+\in SE(3),
+\]</span></p>
+<p>where <span class="math inline">\(\mathbf R\in SO(3)\)</span> is dimensionless and <span class="math inline">\({}^{a}\mathbf p\in\mathbb R^3\)</span> is the translation column expressed in frame <span class="math inline">\(\{a\}\)</span> and measured in metres. A <code>Transform3</code> already owns a validated <code>Rotation3</code> and a finite translation, so the member function does not accept an arbitrary unvalidated <span class="math inline">\(4\times4\)</span> array.</p>
+<p>The output coordinate column uses the project’s linear-first convention:</p>
+<p><span class="math display">\[
+{}^{a}\boldsymbol\eta_{\mathrm{principal}}
+=
+\begin{bmatrix}
+{}^{a}\boldsymbol\rho\\
+{}^{a}\boldsymbol\phi
+\end{bmatrix}
+\in\mathbb R^6,
+\]</span></p>
+<p>where <span class="math inline">\({}^{a}\boldsymbol\rho\in\mathbb R^3\)</span> is measured in metres and <span class="math inline">\({}^{a}\boldsymbol\phi\in\mathbb R^3\)</span> is measured in radians. The rotation-vector norm <span class="math inline">\(\theta=\|{}^{a}\boldsymbol\phi\|_2\)</span> lies in the selected principal interval <span class="math inline">\([0,\pi]\)</span>. Both blocks are expressed in frame <span class="math inline">\(\{a\}\)</span>.</p>
+<p>The public result keeps the coordinate column and the observable numerical classification together:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb50"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="kw">enum</span> <span class="kw">class</span> TransformLogBranch</span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>  identity<span class="op">,</span></span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a>  pure_translation<span class="op">,</span></span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a>  small_angle<span class="op">,</span></span>
+<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a>  nominal<span class="op">,</span></span>
+<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a>  near_pi</span>
+<span id="cb50-8"><a href="#cb50-8" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span>
+<span id="cb50-9"><a href="#cb50-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-10"><a href="#cb50-10" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> TransformLogResult</span>
+<span id="cb50-11"><a href="#cb50-11" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb50-12"><a href="#cb50-12" aria-hidden="true" tabindex="-1"></a>  Vector6LinearFirst coordinates<span class="op">;</span></span>
+<span id="cb50-13"><a href="#cb50-13" aria-hidden="true" tabindex="-1"></a>  TransformLogBranch branch<span class="op">;</span></span>
+<span id="cb50-14"><a href="#cb50-14" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span>
+<span id="cb50-15"><a href="#cb50-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-16"><a href="#cb50-16" aria-hidden="true" tabindex="-1"></a><span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> TransformLogResult to_principal_exponential_coordinates<span class="op">(</span></span>
+<span id="cb50-17"><a href="#cb50-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> NumericalPolicy <span class="op">&amp;</span> policy <span class="op">=</span> NumericalPolicy<span class="op">{})</span> <span class="at">const</span><span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>An <code>enum class</code> defines a scoped set of named branch values, preventing accidental conversion of a branch into an integer. The <code>struct</code> groups the two parts of one successful result without hiding either behind accessor functions. The <code>const</code> after the member declaration promises not to modify the stored transformation, and <code>[[nodiscard]]</code> asks the compiler to warn when a caller discards the recovered result unintentionally.</p>
+</section>
+<section id="why-the-linear-block-is-recovered-rather-than-copied" class="level3" data-number="9.11.2">
+<h3 data-number="9.11.2" class="anchored" data-anchor-id="why-the-linear-block-is-recovered-rather-than-copied"><span class="header-section-number">9.11.2</span> Why the linear block is recovered rather than copied</h3>
+<p>The translation column <span class="math inline">\({}^{a}\mathbf p\)</span> answers where the transformed origin finishes. The finite linear coordinate <span class="math inline">\({}^{a}\boldsymbol\rho\)</span> instead parameterises the constant rigid-motion field whose exponential produces that final translation while the body rotates. They coincide only when the selected rotation is the identity.</p>
+<p>The forward relationship derived in Chapter 8 is</p>
+<p><span class="math display">\[
+{}^{a}\mathbf p
+=
+\mathbf J({}^{a}\boldsymbol\phi)
+{}^{a}\boldsymbol\rho,
+\]</span></p>
+<p>so a non-identity logarithm must invert the left-Jacobian action:</p>
+<p><span class="math display">\[
+\boxed{
+{}^{a}\boldsymbol\rho
+=
+\mathbf J({}^{a}\boldsymbol\phi)^{-1}
+{}^{a}\mathbf p
+}.
+\]</span></p>
+<p>For <span class="math inline">\(\boldsymbol\Phi=[{}^{a}\boldsymbol\phi]_\times\)</span> and <span class="math inline">\(\theta=\|{}^{a}\boldsymbol\phi\|_2&gt;0\)</span>, the inverse is</p>
+<p><span class="math display">\[
+\boxed{
+\mathbf J({}^{a}\boldsymbol\phi)^{-1}
+=
+\mathbf I_3
+-\frac12\boldsymbol\Phi
++D(\theta)\boldsymbol\Phi^2
+},
+\]</span></p>
+<p>with</p>
+<p><span class="math display">\[
+\begin{aligned}
+D(\theta)
+&amp;=
+\frac{1}{\theta^2}
+-\frac{1}{2\theta}
+\cot\!\left(\frac{\theta}{2}\right)\\
+&amp;=
+\frac{1}{\theta^2}
+-
+\frac{\cos(\theta/2)}
+{2\theta\sin(\theta/2)}.
+\end{aligned}
+\]</span></p>
+<p>The second line follows from <span class="math inline">\(\cot x=\cos x/\sin x\)</span> and matches the direct expression evaluated by the C++ implementation. On the nonzero principal interval, <span class="math inline">\(0&lt;\theta\leq\pi\)</span>, the denominator <span class="math inline">\(\sin(\theta/2)\)</span> is nonzero. Near <span class="math inline">\(\theta=\pi\)</span>, it approaches one, so this half-angle form remains suitable.</p>
+<p>Near zero, however, the two terms in the direct expression for <span class="math inline">\(D(\theta)\)</span> are individually large and nearly cancel. The implementation therefore evaluates the reviewed series</p>
+<p><span class="math display">\[
+D(\theta)
+=
+\frac{1}{12}
++\frac{\theta^2}{720}
++\frac{\theta^4}{30240}
++\frac{\theta^6}{1209600}
++O(\theta^8)
+\]</span></p>
+<p>whenever <span class="math inline">\(0&lt;\theta\leq\theta_{\mathrm{series}}\)</span>. The series and direct expressions describe the same inverse Jacobian; the threshold selects the more stable floating-point evaluation and does not change the represented motion.</p>
+</section>
+<section id="identity-rotation-and-exact-translation-preservation" class="level3" data-number="9.11.3">
+<h3 data-number="9.11.3" class="anchored" data-anchor-id="identity-rotation-and-exact-translation-preservation"><span class="header-section-number">9.11.3</span> Identity rotation and exact translation preservation</h3>
+<p>The implementation first delegates rotation recovery to the completed principal <span class="math inline">\(SO(3)\)</span> logarithm:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb51"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> RotationLogResult rotation_log_result <span class="op">=</span></span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>  <span class="va">rotation_</span><span class="op">.</span>to_principal_rotation_vector<span class="op">(</span>policy<span class="op">);</span></span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a>Vector6LinearFirst coordinates <span class="op">=</span> Vector6LinearFirst<span class="op">::</span>Zero<span class="op">();</span></span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a>coordinates<span class="op">.</span>tail<span class="op">&lt;</span><span class="dv">3</span><span class="op">&gt;()</span> <span class="op">=</span> rotation_log_result<span class="op">.</span>rotation_vector<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This call owns the angular policy validation and the identity, small-angle, nominal, and deterministic near-<span class="math inline">\(\pi\)</span> rotation-vector calculations described in <a href="#sec-spatial-kernel-so3-logarithm" class="quarto-xref"><span>Section 9.7</span></a>. Initialising the complete six-vector to zero gives every component a defined value before either block is assigned. <code>tail&lt;3&gt;()</code> selects the last three entries at compile time and stores the recovered <span class="math inline">\({}^{a}\boldsymbol\phi\)</span> there.</p>
+<p>If the selected rotation is the exact identity, then <span class="math inline">\(\mathbf J(\mathbf 0_3)=\mathbf I_3\)</span> and <span class="math inline">\({}^{a}\boldsymbol\rho={}^a\mathbf p\)</span>. The function preserves that translation directly and distinguishes a complete identity from a pure translation:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb52"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="op">(</span>rotation_log_result<span class="op">.</span>branch <span class="op">==</span> RotationLogBranch<span class="op">::</span>identity<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>  coordinates<span class="op">.</span>head<span class="op">&lt;</span><span class="dv">3</span><span class="op">&gt;()</span> <span class="op">=</span> <span class="va">translation_</span><span class="op">;</span></span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> <span class="dt">bool</span> translation_is_zero <span class="op">=</span></span>
+<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">(</span><span class="va">translation_</span><span class="op">.</span>array<span class="op">()</span> <span class="op">==</span> <span class="fl">0.0</span><span class="op">).</span>all<span class="op">();</span></span>
+<span id="cb52-6"><a href="#cb52-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-7"><a href="#cb52-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> TransformLogBranch branch <span class="op">=</span></span>
+<span id="cb52-8"><a href="#cb52-8" aria-hidden="true" tabindex="-1"></a>    translation_is_zero</span>
+<span id="cb52-9"><a href="#cb52-9" aria-hidden="true" tabindex="-1"></a>      <span class="op">?</span> TransformLogBranch<span class="op">::</span>identity</span>
+<span id="cb52-10"><a href="#cb52-10" aria-hidden="true" tabindex="-1"></a>      <span class="op">:</span> TransformLogBranch<span class="op">::</span>pure_translation<span class="op">;</span></span>
+<span id="cb52-11"><a href="#cb52-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-12"><a href="#cb52-12" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> TransformLogResult<span class="op">{</span>coordinates<span class="op">,</span> branch<span class="op">};</span></span>
+<span id="cb52-13"><a href="#cb52-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The expression <code>translation_.array() == 0.0</code> performs a component-wise comparison and <code>.all()</code> requires all three comparisons to be true. This is a deliberate exact-zero contract, not an approximate geometric comparison: the identity classification requires all three stored translation components to equal floating-point zero. Every representable nonzero component, including a subnormal value, produces <code>pure_translation</code> and is copied without Jacobian arithmetic. The conditional operator <code>condition ? first : second</code> selects the branch value without changing the coordinates.</p>
+</section>
+<section id="nonzero-rotation-and-the-inverse-left-jacobian" class="level3" data-number="9.11.4">
+<h3 data-number="9.11.4" class="anchored" data-anchor-id="nonzero-rotation-and-the-inverse-left-jacobian"><span class="header-section-number">9.11.4</span> Nonzero rotation and the inverse left Jacobian</h3>
+<p>For a nonzero rotation, the spatial branch inherits the numerically important <span class="math inline">\(SO(3)\)</span> decision. The translation does not create a separate angular branch:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><code>TransformLogBranch</code></th>
+<th>Condition</th>
+<th>Translation calculation</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>small_angle</code></td>
+<td><span class="math inline">\(0&lt;\theta\leq\theta_{\mathrm{series}}\)</span></td>
+<td>Evaluate <span class="math inline">\(D(\theta)\)</span> by its series, then apply <span class="math inline">\(\mathbf J^{-1}\)</span></td>
+</tr>
+<tr class="even">
+<td><code>nominal</code></td>
+<td><span class="math inline">\(\theta_{\mathrm{series}}&lt;\theta&lt;\pi-\theta_{\mathrm{near}\text{-}\pi}\)</span></td>
+<td>Evaluate <span class="math inline">\(D(\theta)\)</span> by the direct half-angle expression</td>
+</tr>
+<tr class="odd">
+<td><code>near_pi</code></td>
+<td><span class="math inline">\(\pi-\theta_{\mathrm{near}\text{-}\pi}\leq\theta\leq\pi\)</span></td>
+<td>Reuse the symmetric <span class="math inline">\(SO(3)\)</span> axis recovery, then evaluate the same direct <span class="math inline">\(D(\theta)\)</span> expression</td>
+</tr>
+</tbody>
+</table>
+<p>After mapping the branch, the implementation forms the inverse Jacobian and recovers the linear block:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb53"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> Eigen<span class="op">::</span>Vector3d phi <span class="op">=</span> rotation_log_result<span class="op">.</span>rotation_vector<span class="op">;</span></span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="dt">double</span> theta <span class="op">=</span> phi<span class="op">.</span>stableNorm<span class="op">();</span></span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="dt">double</span> theta_squared <span class="op">=</span> theta <span class="op">*</span> theta<span class="op">;</span></span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a><span class="dt">double</span> coefficient_d<span class="op">;</span></span>
+<span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="op">(</span>theta <span class="op">&lt;=</span> policy<span class="op">.</span>series_angle_threshold<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb53-7"><a href="#cb53-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> <span class="dt">double</span> theta_fourth <span class="op">=</span> theta_squared <span class="op">*</span> theta_squared<span class="op">;</span></span>
+<span id="cb53-8"><a href="#cb53-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> <span class="dt">double</span> theta_sixth <span class="op">=</span> theta_fourth <span class="op">*</span> theta_squared<span class="op">;</span></span>
+<span id="cb53-9"><a href="#cb53-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-10"><a href="#cb53-10" aria-hidden="true" tabindex="-1"></a>  coefficient_d <span class="op">=</span> <span class="fl">1.0</span> <span class="op">/</span> <span class="fl">12.0</span> <span class="op">+</span> theta_squared <span class="op">/</span> <span class="fl">720.0</span> <span class="op">+</span></span>
+<span id="cb53-11"><a href="#cb53-11" aria-hidden="true" tabindex="-1"></a>                  theta_fourth <span class="op">/</span> <span class="fl">30240.0</span> <span class="op">+</span></span>
+<span id="cb53-12"><a href="#cb53-12" aria-hidden="true" tabindex="-1"></a>                  theta_sixth <span class="op">/</span> <span class="fl">1209600.0</span><span class="op">;</span></span>
+<span id="cb53-13"><a href="#cb53-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb53-14"><a href="#cb53-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> <span class="dt">double</span> half_theta <span class="op">=</span> <span class="fl">0.5</span> <span class="op">*</span> theta<span class="op">;</span></span>
+<span id="cb53-15"><a href="#cb53-15" aria-hidden="true" tabindex="-1"></a>  coefficient_d <span class="op">=</span></span>
+<span id="cb53-16"><a href="#cb53-16" aria-hidden="true" tabindex="-1"></a>    <span class="fl">1.0</span> <span class="op">/</span> theta_squared <span class="op">-</span></span>
+<span id="cb53-17"><a href="#cb53-17" aria-hidden="true" tabindex="-1"></a>    <span class="bu">std::</span>cos<span class="op">(</span>half_theta<span class="op">)</span> <span class="op">/</span></span>
+<span id="cb53-18"><a href="#cb53-18" aria-hidden="true" tabindex="-1"></a>      <span class="op">(</span><span class="fl">2.0</span> <span class="op">*</span> theta <span class="op">*</span> <span class="bu">std::</span>sin<span class="op">(</span>half_theta<span class="op">));</span></span>
+<span id="cb53-19"><a href="#cb53-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb53-20"><a href="#cb53-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-21"><a href="#cb53-21" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> Eigen<span class="op">::</span>Matrix3d rotation_vector_hat <span class="op">=</span> hat_so3<span class="op">(</span>phi<span class="op">);</span></span>
+<span id="cb53-22"><a href="#cb53-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-23"><a href="#cb53-23" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> Eigen<span class="op">::</span>Matrix3d inverse_left_jacobian <span class="op">=</span></span>
+<span id="cb53-24"><a href="#cb53-24" aria-hidden="true" tabindex="-1"></a>  Eigen<span class="op">::</span>Matrix3d<span class="op">::</span>Identity<span class="op">()</span> <span class="op">-</span> <span class="fl">0.5</span> <span class="op">*</span> rotation_vector_hat <span class="op">+</span></span>
+<span id="cb53-25"><a href="#cb53-25" aria-hidden="true" tabindex="-1"></a>  coefficient_d <span class="op">*</span> rotation_vector_hat <span class="op">*</span> rotation_vector_hat<span class="op">;</span></span>
+<span id="cb53-26"><a href="#cb53-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-27"><a href="#cb53-27" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> Eigen<span class="op">::</span>Vector3d linear_coordinates <span class="op">=</span></span>
+<span id="cb53-28"><a href="#cb53-28" aria-hidden="true" tabindex="-1"></a>  inverse_left_jacobian <span class="op">*</span> <span class="va">translation_</span><span class="op">;</span></span>
+<span id="cb53-29"><a href="#cb53-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-30"><a href="#cb53-30" aria-hidden="true" tabindex="-1"></a>coordinates<span class="op">.</span>head<span class="op">&lt;</span><span class="dv">3</span><span class="op">&gt;()</span> <span class="op">=</span> linear_coordinates<span class="op">;</span></span>
+<span id="cb53-31"><a href="#cb53-31" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> TransformLogResult<span class="op">{</span>coordinates<span class="op">,</span> branch<span class="op">};</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="equation-to-code-map-1" class="level3" data-number="9.11.5">
+<h3 data-number="9.11.5" class="anchored" data-anchor-id="equation-to-code-map-1"><span class="header-section-number">9.11.5</span> Equation-to-code map</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Mathematics</th>
+<th>Code</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(\mathbf T_\Delta=(\mathbf R,{}^{a}\mathbf p)\)</span></td>
+<td><code>rotation_</code>, <code>translation_</code></td>
+<td>Validated stored finite displacement</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\({}^{a}\boldsymbol\phi\)</span></td>
+<td><code>phi</code></td>
+<td>Selected principal rotation-vector block, in radians</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\theta=\|{}^{a}\boldsymbol\phi\|_2\)</span></td>
+<td><code>theta</code></td>
+<td>Principal rotation angle, in radians</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\theta^2\)</span>, <span class="math inline">\(\theta^4\)</span>, <span class="math inline">\(\theta^6\)</span></td>
+<td><code>theta_squared</code>, <code>theta_fourth</code>, <code>theta_sixth</code></td>
+<td>Reused even powers for the series</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(D(\theta)\)</span></td>
+<td><code>coefficient_d</code></td>
+<td>Coefficient multiplying <span class="math inline">\(\boldsymbol\Phi^2\)</span> in <span class="math inline">\(\mathbf J^{-1}\)</span></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\boldsymbol\Phi=[{}^{a}\boldsymbol\phi]_\times\)</span></td>
+<td><code>rotation_vector_hat</code></td>
+<td>Skew-symmetric matrix of the selected rotation vector</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\mathbf J({}^{a}\boldsymbol\phi)^{-1}\)</span></td>
+<td><code>inverse_left_jacobian</code></td>
+<td>Dimensionless map from final translation to finite linear coordinates</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\({}^{a}\boldsymbol\rho=\mathbf J^{-1}{}^{a}\mathbf p\)</span></td>
+<td><code>linear_coordinates</code></td>
+<td>Recovered finite linear block, in metres</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\([{}^{a}\boldsymbol\rho;{}^{a}\boldsymbol\phi]\)</span></td>
+<td><code>coordinates</code></td>
+<td>Returned linear-first six-column</td>
+</tr>
+<tr class="even">
+<td>Numerical classification</td>
+<td><code>branch</code></td>
+<td>Observable identity, translation, or angular formula region</td>
+</tr>
+</tbody>
+</table>
+<p>Eigen’s <code>stableNorm()</code> evaluates the Euclidean norm with internal scaling, reducing avoidable overflow or underflow in the norm calculation. The fixed-size matrices and vectors preserve the declared dimensions at compile time. Matrix multiplication remains ordered: <code>inverse_left_jacobian * translation_</code> implements <span class="math inline">\(\mathbf J^{-1}{}^{a}\mathbf p\)</span>, not the reversed product.</p>
+</section>
+<section id="a-representable-near-pi-boundary" class="level3" data-number="9.11.6">
+<h3 data-number="9.11.6" class="anchored" data-anchor-id="a-representable-near-pi-boundary"><span class="header-section-number">9.11.6</span> A representable near-<span class="math inline">\(\pi\)</span> boundary</h3>
+<p>The principal <span class="math inline">\(SO(3)\)</span> logarithm supplies the angular branch used by the spatial result. Its near-<span class="math inline">\(\pi\)</span> interval begins at the representable boundary</p>
+<p><span class="math display">\[
+\theta_{\pi,b}
+=
+\operatorname{fl}
+\!\left(
+\pi-\theta_{\mathrm{near}\text{-}\pi}
+\right),
+\]</span></p>
+<p>where <span class="math inline">\(\operatorname{fl}\)</span> denotes rounding to the binary64 result of the subtraction. The implementation calculates this value once:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb54"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="dt">double</span> near_pi_boundary <span class="op">=</span></span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>  kPi <span class="op">-</span> policy<span class="op">.</span>near_pi_tolerance<span class="op">;</span></span>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="op">(</span>theta <span class="op">&gt;=</span> near_pi_boundary<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Enter the near-pi branch.</span></span>
+<span id="cb54-6"><a href="#cb54-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>In exact real arithmetic, testing <span class="math inline">\(\theta\geq\pi-\theta_{\mathrm{near}\text{-}\pi}\)</span> is equivalent to testing <span class="math inline">\(\pi-\theta\leq\theta_{\mathrm{near}\text{-}\pi}\)</span>. In binary64 arithmetic, recomputing <code>kPi - theta</code> at the boundary introduces another rounded subtraction and can produce a value slightly greater than the stored tolerance. Comparing <code>theta</code> directly with the single named boundary implements the declared inclusive interval deterministically and keeps policy validation and formula selection aligned.</p>
+</section>
+<section id="finite-pitch-quarter-turn-example" class="level3" data-number="9.11.7">
+<h3 data-number="9.11.7" class="anchored" data-anchor-id="finite-pitch-quarter-turn-example"><span class="header-section-number">9.11.7</span> Finite-pitch quarter-turn example</h3>
+<p>Reuse the analytic displacement constructed in <a href="#sec-spatial-kernel-se3-exponential" class="quarto-xref"><span>Section 9.10</span></a>:</p>
+<p><span class="math display">\[
+\mathbf T_\Delta
+=
+\begin{bmatrix}
+0&amp;-1&amp;0&amp;2\\
+1&amp;0&amp;0&amp;-2\\
+0&amp;0&amp;1&amp;\pi/40\\
+0&amp;0&amp;0&amp;1
+\end{bmatrix}.
+\]</span></p>
+<p>The final translation is <span class="math inline">\({}^{a}\mathbf p=[2\;-2\;\pi/40]^{\mathsf T}\ \mathrm m\)</span>, but the principal logarithm must recover</p>
+<p><span class="math display">\[
+{}^{a}\boldsymbol\phi
+=
+\begin{bmatrix}0\\0\\\pi/2\end{bmatrix}
+\mathrm{rad},
+\qquad
+{}^{a}\boldsymbol\rho
+=
+\begin{bmatrix}0\\-\pi\\\pi/40\end{bmatrix}
+\mathrm m.
+\]</span></p>
+<p>The corresponding use of the public API is</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb55"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>Eigen<span class="op">::</span>Matrix4d matrix<span class="op">;</span></span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a>matrix <span class="op">&lt;&lt;</span></span>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a>  <span class="fl">0.0</span><span class="op">,</span> <span class="op">-</span><span class="fl">1.0</span><span class="op">,</span> <span class="fl">0.0</span><span class="op">,</span> <span class="fl">2.0</span><span class="op">,</span></span>
+<span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a>  <span class="fl">1.0</span><span class="op">,</span>  <span class="fl">0.0</span><span class="op">,</span> <span class="fl">0.0</span><span class="op">,</span> <span class="op">-</span><span class="fl">2.0</span><span class="op">,</span></span>
+<span id="cb55-5"><a href="#cb55-5" aria-hidden="true" tabindex="-1"></a>  <span class="fl">0.0</span><span class="op">,</span>  <span class="fl">0.0</span><span class="op">,</span> <span class="fl">1.0</span><span class="op">,</span> pi <span class="op">/</span> <span class="fl">40.0</span><span class="op">,</span></span>
+<span id="cb55-6"><a href="#cb55-6" aria-hidden="true" tabindex="-1"></a>  <span class="fl">0.0</span><span class="op">,</span>  <span class="fl">0.0</span><span class="op">,</span> <span class="fl">0.0</span><span class="op">,</span> <span class="fl">1.0</span><span class="op">;</span></span>
+<span id="cb55-7"><a href="#cb55-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-8"><a href="#cb55-8" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> Transform3 transform <span class="op">=</span> Transform3<span class="op">::</span>from_matrix<span class="op">(</span>matrix<span class="op">);</span></span>
+<span id="cb55-9"><a href="#cb55-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-10"><a href="#cb55-10" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> TransformLogResult logarithm <span class="op">=</span></span>
+<span id="cb55-11"><a href="#cb55-11" aria-hidden="true" tabindex="-1"></a>  transform<span class="op">.</span>to_principal_exponential_coordinates<span class="op">();</span></span>
+<span id="cb55-12"><a href="#cb55-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-13"><a href="#cb55-13" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> Eigen<span class="op">::</span>Vector3d rho <span class="op">=</span> logarithm<span class="op">.</span>coordinates<span class="op">.</span>head<span class="op">&lt;</span><span class="dv">3</span><span class="op">&gt;();</span></span>
+<span id="cb55-14"><a href="#cb55-14" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> Eigen<span class="op">::</span>Vector3d phi <span class="op">=</span> logarithm<span class="op">.</span>coordinates<span class="op">.</span>tail<span class="op">&lt;</span><span class="dv">3</span><span class="op">&gt;();</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This is a <code>nominal</code> case because <span class="math inline">\(\theta=\pi/2\)</span> lies between the two formula-selection regions. Re-exponentiating the recovered coordinate column reconstructs the same finite transformation. The example also shows why copying the transform’s translation into the first three output entries would be wrong: <span class="math inline">\([2\;-2\;\pi/40]^{\mathsf T}\)</span> and <span class="math inline">\([0\;-\pi\;\pi/40]^{\mathsf T}\)</span> answer different questions.</p>
+</section>
+<section id="validation-and-focused-evidence-2" class="level3" data-number="9.11.8">
+<h3 data-number="9.11.8" class="anchored" data-anchor-id="validation-and-focused-evidence-2"><span class="header-section-number">9.11.8</span> Validation and focused evidence</h3>
+<p>The stored transformation has already passed <code>Transform3</code> construction, including finite-component, homogeneous-row, and proper-rotation checks. The logarithm reuses <code>Rotation3::to_principal_rotation_vector()</code> to validate the angular branch policy before any identity shortcut. An invalid or overlapping threshold configuration therefore reports <code>GeometryError::invalid_policy</code> even when the stored transform is the identity.</p>
+<p>For a nonzero rotation, the function checks the recovered angle, <span class="math inline">\(D(\theta)\)</span>, the inverse Jacobian, and the recovered linear coordinates for finiteness. A non-finite required intermediate or output reports <code>GeometryError::unsupported_magnitude</code> and returns no <code>TransformLogResult</code>. This includes a valid transform with a finite but extremely large translation for which <span class="math inline">\(\mathbf J^{-1}{}^{a}\mathbf p\)</span> overflows.</p>
+<p>The eleven focused tests establish the following properties:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Cases</th>
+<th>Property established</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Complete identity and ordinary pure translation</td>
+<td>Exact coordinates and distinct <code>identity</code> and <code>pure_translation</code> classifications</td>
+</tr>
+<tr class="even">
+<td>Smallest positive subnormal translation</td>
+<td>Every representable nonzero translation is preserved rather than classified as identity</td>
+</tr>
+<tr class="odd">
+<td>Analytic finite-pitch quarter turn</td>
+<td>Independent nominal recovery of both <span class="math inline">\({}^{a}\boldsymbol\rho\)</span> and <span class="math inline">\({}^{a}\boldsymbol\phi\)</span></td>
+</tr>
+<tr class="even">
+<td>Analytic <span class="math inline">\(10^{-8}\ \mathrm{rad}\)</span> screw</td>
+<td>Stable <span class="math inline">\(D(\theta)\)</span> series recovery without erasing the rotation</td>
+</tr>
+<tr class="odd">
+<td>Analytic half-turn about <span class="math inline">\(+z_a\)</span></td>
+<td>Deterministic <code>near_pi</code> recovery and correct inverse-Jacobian action</td>
+</tr>
+<tr class="even">
+<td>Arbitrary principal-axis round trip</td>
+<td>Coupled exponential–logarithm compatibility and separate rotation and translation residuals</td>
+</tr>
+<tr class="odd">
+<td>Extreme finite translation</td>
+<td>Overflow in the recovered linear block reports <code>unsupported_magnitude</code></td>
+</tr>
+<tr class="even">
+<td>Overlapping angular thresholds</td>
+<td>Invalid numerical policy is rejected before geometric processing</td>
+</tr>
+<tr class="odd">
+<td>Values immediately below, on, and above <span class="math inline">\(\theta_{\mathrm{series}}\)</span></td>
+<td>The small-angle boundary is inclusive and the adjacent formulas recover the same motion</td>
+</tr>
+<tr class="even">
+<td>Values immediately below, on, and above <span class="math inline">\(\theta_{\pi,b}\)</span></td>
+<td>The near-<span class="math inline">\(\pi\)</span> boundary is inclusive and deterministic in binary64</td>
+</tr>
+</tbody>
+</table>
+<p>The analytic tests construct the input matrix directly from closed-form geometry instead of calling the production exponential. This prevents matching forward and inverse errors from hiding a defect. The separate arbitrary-axis round trip is then appropriate integration evidence because the individual branches already have independent analytic checks.</p>
+</section>
+<section id="deliberate-limits-6" class="level3" data-number="9.11.9">
+<h3 data-number="9.11.9" class="anchored" data-anchor-id="deliberate-limits-6"><span class="header-section-number">9.11.9</span> Deliberate limits</h3>
+<p>This member returns one principal finite coordinate column; it does not return every matrix logarithm of the transformation. At an exact half-turn, the rotation axis has an unavoidable sign ambiguity, so the reused <span class="math inline">\(SO(3)\)</span> logarithm applies its documented deterministic convention. The returned coordinates reconstruct the same transformation, but another valid logarithm may use the opposite boundary axis with a corresponding linear block.</p>
 
 
 </section>

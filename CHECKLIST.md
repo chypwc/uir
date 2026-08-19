@@ -6,12 +6,13 @@ When a phase closes, link its verification report in the programme table, remove
 
 ## Working rules
 
-1. Keep exactly one implementation-sized capability and one task active.
-2. Complete each capability in dependency order: learn and review, specify, implement, verify, and close.
-3. Make every task name a concrete artifact or verifiable action.
+1. Keep exactly one implementation-sized capability cycle, one stage, and one task active.
+2. Complete each cycle in dependency order: learn and write, review and quiz, create or extend the specification, implement with verifying tests, write and review the retrospective companion section, then close.
+3. Make every task name a concrete artifact or verifiable action; name an exact boundary or failure case instead of adding a generic limitations task.
 4. Link evidence instead of copying results into this file.
 5. Preserve accepted implementation and useful learning material when closing an earlier process gap.
 6. Put non-blocking work in the backlog; do not expand the active capability around it.
+7. Keep queued capabilities as concise artifact-level outlines and decompose them into implementation-sized cycles only when they approach activation; do not rewrite closed or in-progress history merely to adopt a newer tracking format.
 
 ## Programme status
 
@@ -34,7 +35,9 @@ All phases belong to the learning programme. Phase 9 and Phase 12 are distinct r
 - **Milestone:** `M1` — Classical intelligence foundation.
 - **Phase:** Phase 1 — Geometry, mechanics, and control.
 - **Capability:** `P1.2` — Spatial geometry kernel.
-- **Active task:** Implement, test, understand, and retrospectively document the linear-first $SE(3)$ exponential mathematical cycle, keeping translational coordinates in metres and rotational coordinates in radians distinct.
+- **Cycle:** Constant-twist integration using the completed $SE(3)$ exponential.
+- **Active stage:** Implement with verifying tests.
+- **Active task:** Implement and test constant-twist integration with explicit body-versus-space multiplication order.
 - **Next capability:** `P1.3` — General robot kinematics and Jacobians.
 - **Blockers:** None.
 
@@ -89,7 +92,7 @@ Phase 1 closes when its shared mathematical references and two bounded learning 
 | Capability | Learning artifact | Side project and principal tools | Status |
 |---|---|---|---|
 | `P1.1` — Ideal planar motion kernel | Close Chapters 2–3 and preserve Chapters 4 and 6 | Existing `differential_drive_motion_model`, Python and `pytest` | Complete |
-| `P1.2` — Spatial geometry kernel | Complete Chapter 8 and its Chapter 9 implementation companion | `rigid_body_kinematics`, modern C++, CMake, Eigen, and GTest | Active: linear-first $SE(3)$ exponential cycle |
+| `P1.2` — Spatial geometry kernel | Complete Chapter 8 and its Chapter 9 implementation companion | `rigid_body_kinematics`, modern C++, CMake, Eigen, and GTest | Active: principal $SE(3)$ logarithm cycle |
 | `P1.3` — General kinematics and Jacobians | Complete Chapter 10 and its Chapter 11 implementation companion | Extend `rigid_body_kinematics` with bounded forward and velocity kinematics | Queued: opening theory block drafted; review and remaining blocks pending |
 | `P1.4` — Planar manipulator kinematics laboratory | Chapter 12 and its Chapter 13 implementation companion | Begin `planar_manipulator_lab` with 2R/3R inverse kinematics, modern C++, Eigen, GTest, and offline visualisation | Queued |
 | `P1.5` — Wheel-odometry pipeline | Chapter 14 and its Chapter 15 implementation companion | `differential_drive_odometry`, pure Python core plus thin ROS 2 adapter, `nav_msgs`, and `tf2` | Queued |
@@ -160,9 +163,9 @@ The outcome is the geometry layer of the spatial and general kinematics workbenc
 - [x] Implement, test, understand, and retrospectively document the $SO(3)$ and linear-first $SE(3)$ hat-and-vee mathematical cycle; preserve the reviewed explanation in the [hat-and-vee companion section](notes/09_spatial_geometry_kernel_implementation.qmd#sec-spatial-kernel-hat-vee) and its 16 deterministic cases in [`test_lie_algebra.cpp`](ros_ws/src/rigid_body_kinematics/test/test_lie_algebra.cpp).
 - [x] Implement, test, understand, and retrospectively document the $SO(3)$ exponential mathematical cycle, including its exact-zero, stable small-angle, and nominal Rodrigues branches; preserve the reviewed explanation in the [$SO(3)$ exponential companion section](notes/09_spatial_geometry_kernel_implementation.qmd#sec-spatial-kernel-so3-exponential) and its nine deterministic cases in [`test_so3_exponential.cpp`](ros_ws/src/rigid_body_kinematics/test/test_so3_exponential.cpp).
 - [x] Implement, test, understand, and retrospectively document the principal $SO(3)$ logarithm mathematical cycle, including its identity, small-angle, nominal-angle, and deterministic near-$\pi$ branches; preserve the reviewed explanation in the [principal $SO(3)$ logarithm companion section](notes/09_spatial_geometry_kernel_implementation.qmd#sec-spatial-kernel-so3-logarithm) and its deterministic evidence in [`test_so3_logarithm.cpp`](ros_ws/src/rigid_body_kinematics/test/test_so3_logarithm.cpp).
-- [ ] **Active:** Implement, test, understand, and retrospectively document the linear-first $SE(3)$ exponential mathematical cycle, keeping the translational coordinates in metres and rotational coordinates in radians distinct.
-- [ ] Implement, test, understand, and retrospectively document the principal $SE(3)$ logarithm mathematical cycle using the completed principal $SO(3)$ logarithm.
-- [ ] Implement, test, understand, and retrospectively document the constant-twist-integration mathematical cycle using the completed $SE(3)$ exponential and explicit body-versus-space multiplication order.
+- [x] Implement, test, understand, and retrospectively document the linear-first $SE(3)$ exponential mathematical cycle, keeping translational coordinates in metres and rotational coordinates in radians distinct; preserve the reviewed explanation in the [$SE(3)$ exponential companion section](notes/09_spatial_geometry_kernel_implementation.qmd#sec-spatial-kernel-se3-exponential) and its five deterministic cases in [`test_se3_exponential.cpp`](ros_ws/src/rigid_body_kinematics/test/test_se3_exponential.cpp).
+- [x] Implement, test, understand, and retrospectively document the principal $SE(3)$ logarithm mathematical cycle using the completed principal $SO(3)$ logarithm; preserve the reviewed explanation in the [principal $SE(3)$ logarithm companion section](notes/09_spatial_geometry_kernel_implementation.qmd#sec-spatial-kernel-se3-logarithm) and its 11 deterministic cases in [`test_se3_logarithm.cpp`](ros_ws/src/rigid_body_kinematics/test/test_se3_logarithm.cpp).
+- [ ] **Active:** Implement, test, understand, and retrospectively document the constant-twist-integration mathematical cycle using the completed $SE(3)$ exponential and explicit body-versus-space multiplication order.
 - [ ] Implement, test, understand, and retrospectively document the $SE(3)$ adjoint mathematical cycle using the project's linear-first twist order.
 - [ ] Implement, test, understand, and retrospectively document planar-pose embedding and extraction plus normalised planar-yaw quaternion conversion without attempting to replace `tf2`.
 
@@ -179,32 +182,58 @@ The outcome is the geometry layer of the spatial and general kinematics workbenc
 
 The outcome is a bounded reusable implementation of general forward and velocity kinematics that the next educational manipulator capability and later robot products can share.
 
-#### Learn and review
+#### Cycle 1 — Space-form product-of-exponentials forward kinematics
 
-- [ ] Before drafting, route the chapter through *Modern Robotics*, Chapters 4–5, compare with Craig, Chapters 3 and 5, and use Corke, Chapters 7–8, for an independent numerical viewpoint.
-- [x] Draft the opening block of `notes/10_general_robot_kinematics_and_jacobians.qmd` on configuration space versus coordinate vector, task variables, the forward map $T(\mathbf q)$, the total derivative, and the multivariable chain rule.
-- [ ] Review the drafted Chapter 10 opening block before continuing to the product-of-exponentials block.
-- [ ] Draft and review the transform-chain and space-form/body-form product-of-exponentials block for validated revolute and prismatic screw axes.
-- [ ] Draft and review the task, body, and space Jacobian block, including derivation from pose rate and frame conversion through the adjoint.
-- [ ] Draft and review the rank, range, null-space, and singularity block, including finite-difference verification on a planar 2R chain embedded in $SE(3)$ and one small non-planar chain.
-- [ ] Add retrieval tests after each major concept, a cumulative test with answers or hints, limitations, and an explicit dependency map to the inverse-kinematics laboratory in `P1.4` and the full manipulation product in Phase 7.
-- [ ] Review and approve the chapter, then update notation, glossary, `notes/_quarto.yml`, and the rendered book in that order.
+- [x] Draft the prerequisite opening block of `notes/10_general_robot_kinematics_and_jacobians.qmd` on configuration space versus coordinate vector, task variables, the forward map $T(\mathbf q)$, the total derivative, and the multivariable chain rule.
+- [ ] Review the prerequisite opening block and complete its retrieval test before continuing the Cycle 1 learning stage.
+- [ ] Learn and write the home configuration, validated revolute and prismatic space screw axes, transform-chain equivalence, multiplication order, and space-form product of exponentials; route the block through *Modern Robotics*, Chapter 4, compare it with Craig, Chapter 3, and use Corke, Chapter 7, as an independent numerical viewpoint.
+- [ ] Review the space-form block and complete its retrieval questions on notation, frames, units, product order, application, and supported serial-chain assumptions.
+- [ ] Create `docs/02_spatial_kinematics/general_kinematics_and_jacobians.md` with the shared serial-chain contract and the space-form operation's inputs, outputs, validation, exclusions, and independent analytic acceptance cases.
+- [ ] Implement space-form forward kinematics in `rigid_body_kinematics` with focused tests for zero joint displacement, single revolute and prismatic joints, invalid models, and a planar 2R chain checked against independent trigonometric kinematics.
+- [ ] After the implementation and focused tests work, create the first substantive section of `notes/11_general_robot_kinematics_and_jacobians_implementation.qmd` and review its serial-chain representation, equation-to-code mapping, multiplication order, public interface, validation, and test meaning.
+- [ ] Run the focused package build and acceptance cases, inspect the affected artifacts, link the evidence, and close the space-form cycle.
 
-#### Specify
+#### Cycle 2 — Body-form product-of-exponentials forward kinematics
 
-- [ ] Create `docs/02_spatial_kinematics/general_kinematics_and_jacobians.md` with serial-chain inputs, home pose, screw-axis matrices, frame conventions, outputs, invalid-input behaviour, exclusions, and fixed analytic acceptance cases.
+- [ ] Learn and write body screw axes, the body-form product, its multiplication order, and its equivalence to the space form and the declared transform chain using *Modern Robotics*, Chapter 4, and the selected supporting sources.
+- [ ] Review the body-form block and complete its retrieval questions on frame meaning, axis conversion, product order, equivalence, and supported inputs.
+- [ ] Extend the general-kinematics specification with body-form inputs, validation, exclusions, and fixed space/body pose-equivalence cases.
+- [ ] Implement body-form forward kinematics with focused tests for independent single-joint cases and agreement with the space form on the planar 2R and one small non-planar chain.
+- [ ] Write and review the retrospective body-form companion section after its implementation and tests work.
+- [ ] Run the focused package build and acceptance cases, inspect the affected artifacts, link the evidence, and close the body-form cycle.
 
-#### Implement and document
+#### Cycle 3 — Space Jacobian
 
-- [ ] When implementation begins, create `notes/11_general_robot_kinematics_and_jacobians_implementation.qmd` with the serial-chain representation, multiplication order, public interfaces, and finite-difference verification method.
-- [ ] Extend `rigid_body_kinematics` with space-form and body-form product-of-exponentials forward kinematics.
-- [ ] Implement space and body Jacobians for a validated $n$-joint open chain without adding inverse kinematics, pseudoinverse control, URDF parsing, collision, or dynamics to this general-purpose package.
+- [ ] Learn and write spatial end-effector velocity, the derivation of the space Jacobian from the pose map, and the configuration-dependent transformation of its columns using *Modern Robotics*, Chapter 5, Craig, Chapter 5, and Corke, Chapter 8.
+- [ ] Review the space-Jacobian block and complete its retrieval questions on column meaning, frames, units, differentiation, application, and finite-difference verification.
+- [ ] Extend the specification with the space-Jacobian contract, validation, exclusions, analytic fixtures, and finite-difference acceptance method.
+- [ ] Implement the space Jacobian for a validated $n$-joint open chain with independent zero-configuration checks and finite-difference velocity checks on the planar 2R and one small non-planar chain.
+- [ ] Write and review the retrospective space-Jacobian companion section after its implementation and tests work.
+- [ ] Run the focused package build and acceptance cases, inspect the affected artifacts, link the evidence, and close the space-Jacobian cycle.
 
-#### Verify and close
+#### Cycle 4 — Body Jacobian and frame conversion
 
-- [ ] Verify that zero joint displacement returns the home pose and that single revolute and prismatic joints match independent closed forms.
-- [ ] Verify a planar 2R chain against independent trigonometric kinematics and verify that the space and body forms describe the same pose.
-- [ ] Compare the analytic Jacobian with a finite-difference velocity check and verify the body/space adjoint relation; demonstrate rank loss of the $2\times2$ end-effector position-task Jacobian at a straightened planar 2R configuration and contrast it with the full twist Jacobian, which retains the angular-velocity row.
+- [ ] Learn and write body end-effector velocity, the body Jacobian, and the body–space adjoint relation.
+- [ ] Review the body-Jacobian block and complete its retrieval questions on frame conversion, multiplication direction, equivalence, application, and adjoint verification.
+- [ ] Extend the specification with the body-Jacobian contract and fixed body–space adjoint acceptance cases.
+- [ ] Implement the body Jacobian with independent finite-difference checks and deterministic verification of the body–space adjoint relation.
+- [ ] Write and review the retrospective body-Jacobian companion section after its implementation and tests work.
+- [ ] Run the focused package build and acceptance cases, inspect the affected artifacts, link the evidence, and close the body-Jacobian cycle.
+
+#### Cycle 5 — Task Jacobians, rank, and singularity evidence
+
+- [ ] Learn and write task Jacobians, full-twist versus reduced-task Jacobians, rank, range, null space, singular values, conditioning, and task-specific singularities.
+- [ ] Review the analysis block and complete its retrieval questions, including the straightened planar 2R position task and the contrast with the full twist Jacobian.
+- [ ] Extend the specification with the bounded task-projection and rank-analysis evidence required for the planar 2R and small non-planar fixtures, without adding inverse kinematics or a speculative generic task-map API.
+- [ ] Implement deterministic analysis tests that compare the planar 2R task Jacobian with finite differences, demonstrate its $2\times2$ position-task rank loss at a straightened configuration, contrast it with the full twist Jacobian's retained angular row, and exercise the declared non-planar fixture.
+- [ ] Write and review the retrospective finite-difference and rank-analysis companion section after the evidence works.
+- [ ] Run the focused package build and acceptance cases, inspect the affected artifacts, link the evidence, and close the task-Jacobian and singularity cycle.
+
+#### Chapter synthesis and capability closure
+
+- [ ] Add a cumulative test with answers or hints and an explicit dependency map to the inverse-kinematics laboratory in `P1.4` and the full manipulation product in Phase 7.
+- [ ] Review and approve Chapter 10, then update notation, glossary, `notes/_quarto.yml`, and the rendered book in that order.
+- [ ] Run the complete affected-package build and deterministic test set, confirm that the general-purpose package excludes inverse kinematics, pseudoinverse control, URDF parsing, collision, and dynamics, and inspect the final P1.3 artifacts.
 - [ ] Link the approved theory, specification, companion, package, and deterministic tests and close `P1.3`.
 - [ ] Record the actual effort and elapsed time for `P1.1`–`P1.3` so the scope checkpoint after the first planar-manipulator stage has a reliable baseline.
 

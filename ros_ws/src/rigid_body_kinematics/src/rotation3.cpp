@@ -147,6 +147,8 @@ RotationLogResult Rotation3::to_principal_rotation_vector(
 {
   constexpr double kPi = 3.141592653589793238462643383279502884;
 
+  const double near_pi_boundary = kPi - policy.near_pi_tolerance;
+
   /*
   theta = 0                                             identity
   0 < theta <= series_angle_threshold                   small_angle
@@ -154,14 +156,14 @@ RotationLogResult Rotation3::to_principal_rotation_vector(
     kPi - near_pi_tolerance                             nominal
   kPi - near_pi_tolerance <= theta <= kPi               near_pi
   */
-  const bool policy_is_valid =
-    std::isfinite(policy.orthogonality_tolerance) &&
-    std::isfinite(policy.series_angle_threshold) &&
-    std::isfinite(policy.near_pi_tolerance) &&
-    policy.orthogonality_tolerance >= 0.0 &&
-    policy.series_angle_threshold > 0.0 && policy.near_pi_tolerance >= 0.0 &&
-    policy.near_pi_tolerance < kPi &&
-    policy.series_angle_threshold < kPi - policy.near_pi_tolerance;
+  const bool policy_is_valid = std::isfinite(policy.orthogonality_tolerance) &&
+                               std::isfinite(policy.series_angle_threshold) &&
+                               std::isfinite(policy.near_pi_tolerance) &&
+                               policy.orthogonality_tolerance >= 0.0 &&
+                               policy.series_angle_threshold > 0.0 &&
+                               policy.near_pi_tolerance >= 0.0 &&
+                               policy.near_pi_tolerance < kPi &&
+                               policy.series_angle_threshold < near_pi_boundary;
 
   if (!policy_is_valid) {
     throw GeometryException(
@@ -233,7 +235,7 @@ RotationLogResult Rotation3::to_principal_rotation_vector(
       Eigen::Vector3d::Zero(), RotationLogBranch::identity};
   }
 
-  if (kPi - theta <= policy.near_pi_tolerance) {
+  if (theta >= near_pi_boundary) {
     // Near pi, u approaches zero. Recover Q = s s^T from the symmetric part,
     // where s = s_ω is the unit rotation axis.
     const double denominator = 1.0 - cosine_theta;

@@ -9,6 +9,21 @@
 
 namespace rigid_body_kinematics
 {
+enum class TransformLogBranch
+{
+  identity,
+  pure_translation,
+  small_angle,
+  nominal,
+  near_pi
+};
+
+struct TransformLogResult
+{
+  Vector6LinearFirst coordinates;
+  TransformLogBranch branch;
+};
+
 class Transform3
 {
 public:
@@ -20,6 +35,10 @@ public:
   static Transform3 from_exponential_coordinates(
     const Vector6LinearFirst & coordinates,
     const NumericalPolicy & policy = NumericalPolicy{});
+
+  // Recover principal finite linear-first coordinates [rho; phi].
+  [[nodiscard]] TransformLogResult to_principal_exponential_coordinates(
+    const NumericalPolicy & policy = NumericalPolicy{}) const;
 
   // Validate a raw homogeneous matrix and create a rigid transform
   static Transform3 from_matrix(
