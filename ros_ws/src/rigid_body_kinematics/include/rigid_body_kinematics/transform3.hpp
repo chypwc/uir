@@ -58,6 +58,18 @@ public:
   // Return the inverse transform T_ba
   [[nodiscard]] Transform3 inverse() const;
 
+  // Integrate a constant space twist over a non-negative duration
+  // The twist is ordered [linear velocity; angular velocity].
+  [[nodiscard]] Transform3 integrate_constant_space_twist(
+    const Vector6LinearFirst & space_twist, double delta_time,
+    const NumericalPolicy & policy = NumericalPolicy{}) const;
+
+  // Integrate a constant body twist over a non-negative duration.
+  // The twist is ordered [linear velocity; angular velocity].
+  [[nodiscard]] Transform3 integrate_constant_body_twist(
+    const Vector6LinearFirst & body_twist, double delta_time,
+    const NumericalPolicy & policy = NumericalPolicy{}) const;
+
 private:
   Transform3(const Rotation3 & rotation, const Eigen::Vector3d & translation);
 

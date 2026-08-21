@@ -3020,3 +3020,857 @@ The analytic tests construct the input matrix directly from closed-form geometry
 ### Deliberate limits
 
 This member returns one principal finite coordinate column; it does not return every matrix logarithm of the transformation. At an exact half-turn, the rotation axis has an unavoidable sign ambiguity, so the reused $SO(3)$ logarithm applies its documented deterministic convention. The returned coordinates reconstruct the same transformation, but another valid logarithm may use the opposite boundary axis with a corresponding linear block.
+
+## Exact constant-twist pose integration {#sec-spatial-kernel-constant-twist-integration}
+
+The completed $SE(3)$ exponential in @sec-spatial-kernel-se3-exponential constructs a finite rigid displacement whose path starts at the identity. Constant-twist integration answers the next implementation question: given an existing pose and a constant rigid-body velocity over a non-negative time interval, how should that finite displacement be composed with the existing pose? The answer must preserve the distinction between a twist expressed using fixed space coordinates and one expressed using moving body coordinates because that distinction determines the multiplication side.
+
+### Input, output, frame, and units
+
+Let $t_0\in\mathbb R$ be the initial time in seconds, let $\Delta t\geq0$ be the integration duration in seconds, and let $\{a\}$ be a fixed frame and $\{b\}$ a frame rigidly attached to the moving body. The initial pose is
+
+$$
+\mathbf T_0
+\mathrel{:=}
+\mathbf T_{ab}(t_0)
+=
+\begin{bmatrix}
+\mathbf R_0&{}^{a}\mathbf p_0\\
+\mathbf0_3^{\mathsf T}&1
+\end{bmatrix}
+\in SE(3),
+$$
+
+where $\mathbf R_0\in SO(3)$ is the orientation of $\{b\}$ relative to $\{a\}$ and ${}^{a}\mathbf p_0\in\mathbb R^3$ is the position of the body origin $O_b$ relative to $O_a$, expressed in $\{a\}$ and measured in metres. The required output is the updated pose $\mathbf T_1\mathrel{:=}\mathbf T_{ab}(t_0+\Delta t)\in SE(3)$.
+
+The two supported constant velocity inputs use the project's linear-first order:
+
+$$
+{}^{a}\boldsymbol\xi_s
+=
+\begin{bmatrix}
+{}^{a}\boldsymbol\nu_s\\
+{}^{a}\boldsymbol\omega_s
+\end{bmatrix},
+\qquad
+{}^{b}\boldsymbol\xi_b
+=
+\begin{bmatrix}
+{}^{b}\boldsymbol\nu_b\\
+{}^{b}\boldsymbol\omega_b
+\end{bmatrix}
+\in\mathbb R^6.
+$$
+
+The linear blocks ${}^{a}\boldsymbol\nu_s$ and ${}^{b}\boldsymbol\nu_b$ are measured in $\mathrm{m\,s^{-1}}$, and the angular blocks ${}^{a}\boldsymbol\omega_s$ and ${}^{b}\boldsymbol\omega_b$ are measured in $\mathrm{rad\,s^{-1}}$. The body linear block is the velocity of $O_b$ expressed along the moving body axes. The space linear block instead gives the same rigid velocity field at the fixed origin $O_a$, expressed along the fixed axes; it is generally not the velocity of $O_b$.
+
+### Exact updates from the pose-rate equations
+
+The definitions reviewed in @sec-se3-constant-twist-integration are
+
+$$
+\widehat{{}^{b}\boldsymbol\xi}_b
+=
+\mathbf T_{ab}^{-1}\dot{\mathbf T}_{ab},
+\qquad
+\widehat{{}^{a}\boldsymbol\xi}_s
+=
+\dot{\mathbf T}_{ab}\mathbf T_{ab}^{-1}.
+$$
+
+Multiplying the first equation on the left by $\mathbf T_{ab}$ and the second equation on the right by $\mathbf T_{ab}$ gives the two pose-rate equations
+
+$$
+\dot{\mathbf T}_{ab}
+=
+\mathbf T_{ab}\widehat{{}^{b}\boldsymbol\xi}_b,
+\qquad
+\dot{\mathbf T}_{ab}
+=
+\widehat{{}^{a}\boldsymbol\xi}_s\mathbf T_{ab}.
+$$
+
+If the six numerical space-twist components remain constant throughout $[t_0,t_0+\Delta t]$, the constant matrix generator multiplies the pose from the left. The exact solution of that linear matrix differential equation is
+
+$$
+\boxed{
+\mathbf T_1
+=
+\exp\!\left(
+\widehat{{}^{a}\boldsymbol\xi}_s\Delta t
+\right)
+\mathbf T_0
+}.
+$$
+
+If the six numerical body-twist components remain constant throughout the same interval, the generator multiplies from the right and the exact solution is
+
+$$
+\boxed{
+\mathbf T_1
+=
+\mathbf T_0
+\exp\!\left(
+\widehat{{}^{b}\boldsymbol\xi}_b\Delta t
+\right)
+}.
+$$
+
+Differentiating either candidate solution recovers its pose-rate equation, and setting $\Delta t=0$ makes the exponential $\mathbf I_4$, so both solutions recover the initial pose. These formulas are exact for a constant twist; they are not Forward Euler approximations and do not add entries directly to a transformation matrix.
+
+### From velocity to a finite $SE(3)$ increment
+
+The implementation first multiplies each velocity block by the common duration:
+
+$$
+\boldsymbol\eta
+=
+\boldsymbol\xi\Delta t
+=
+\begin{bmatrix}
+\boldsymbol\rho\\
+\boldsymbol\phi
+\end{bmatrix}
+=
+\begin{bmatrix}
+\boldsymbol\nu\Delta t\\
+\boldsymbol\omega\Delta t
+\end{bmatrix}.
+$$
+
+The finite linear coordinate $\boldsymbol\rho$ is measured in metres and the finite rotation vector $\boldsymbol\phi$ is measured in radians. The completed factory then calculates
+
+$$
+\mathbf T_\Delta
+=
+\exp(\widehat{\boldsymbol\eta})
+=
+\begin{bmatrix}
+\exp([\boldsymbol\phi]_\times)&
+\mathbf J(\boldsymbol\phi)\boldsymbol\rho\\
+\mathbf0_3^{\mathsf T}&1
+\end{bmatrix}.
+$$
+
+When $\boldsymbol\phi\neq\mathbf0_3$, the finite coordinate $\boldsymbol\rho=\boldsymbol\nu\Delta t$ is not generally the translation column of $\mathbf T_\Delta$. The translation is $\mathbf J(\boldsymbol\phi)\boldsymbol\rho$ because the directions used by a constant body twist rotate during the interval. The left Jacobian performs the required integration after expressing those changing velocity directions in one common coordinate frame.
+
+The `Transform3` public interface declares separate methods so the twist representation is explicit at every call site:
+
+```cpp
+[[nodiscard]] Transform3 integrate_constant_space_twist(
+  const Vector6LinearFirst & space_twist, double delta_time,
+  const NumericalPolicy & policy = NumericalPolicy{}) const;
+
+[[nodiscard]] Transform3 integrate_constant_body_twist(
+  const Vector6LinearFirst & body_twist, double delta_time,
+  const NumericalPolicy & policy = NumericalPolicy{}) const;
+```
+
+Both are `const` member functions, so the `Transform3` object before the dot is the validated initial pose $\mathbf T_0$ and is not mutated. A caller uses either representation as follows; omitting the final argument selects the public default numerical policy:
+
+```cpp
+const Transform3 updated_from_space =
+  initial_pose.integrate_constant_space_twist(space_twist, delta_time);
+
+const Transform3 updated_from_body =
+  initial_pose.integrate_constant_body_twist(body_twist, delta_time);
+```
+
+These calls are alternative representations of one update only when `space_twist` and `body_twist` describe the same physical motion. At the initial pose, that requires $\boldsymbol\xi_s=\operatorname{Ad}_{\mathbf T_0}\boldsymbol\xi_b$; supplying the same numerical six-vector to both methods does not generally satisfy that relation.
+
+After validating the duration and twist, the two implementations reuse the same twist-time product and $SE(3)$ exponential but preserve different multiplication sides:
+
+```cpp
+const Vector6LinearFirst exponential_coordinates = twist * delta_time;
+
+const Transform3 increment =
+  Transform3::from_exponential_coordinates(exponential_coordinates, policy);
+
+// Space form: T_delta T_0.
+return increment.compose(*this);
+
+// Body form: T_0 T_delta.
+return this->compose(increment);
+```
+
+Inside either non-static member function, `this` points to the initial `Transform3` object $\mathbf T_0$. The expression `*this` supplies that object as the right operand of `increment.compose(...)`, whereas `this->compose(increment)` invokes composition on $\mathbf T_0$ and supplies the increment as its right operand.
+
+### Equation-to-code map
+
+| Mathematics | Code | Meaning |
+|---|---|---|
+| $\mathbf T_0$ | `*this` | Validated initial pose |
+| ${}^{a}\boldsymbol\xi_s$ | `space_twist` | Constant linear-first space twist expressed in $\{a\}$ |
+| ${}^{b}\boldsymbol\xi_b$ | `body_twist` | Constant linear-first body twist expressed in $\{b\}$ |
+| $\Delta t$ | `delta_time` | Non-negative duration in seconds |
+| $\boldsymbol\eta=\boldsymbol\xi\Delta t$ | `exponential_coordinates` | Finite linear-first coordinates in metres and radians |
+| $\mathbf T_\Delta=\exp(\widehat{\boldsymbol\eta})$ | `increment` | Validated finite rigid displacement |
+| $\mathbf T_\Delta\mathbf T_0$ | `increment.compose(*this)` | Space-referred update |
+| $\mathbf T_0\mathbf T_\Delta$ | `this->compose(increment)` | Body-referred update |
+| $\mathbf T_1$ | returned `Transform3` | Updated pose |
+
+### Equivalent body and space quarter-circle example
+
+This example starts from one physical motion. It then describes that motion with a body twist and with a space twist. The two six-component columns will look different because they use different coordinate axes and different reference origins, but both must predict the same velocity at every physical point and the same final pose.
+
+#### Begin with the physical motion
+
+Let $\{s\}$ be a fixed space frame with origin $O_s$. Let $\{b\}$ be a frame fixed to a moving body, with origin $O_b$. At the initial time $t_0=0$, the body origin is at $[1\;0\;0]^{\mathsf T}\ \mathrm m$ in space coordinates, and the body axes align with the space axes. Observe the motion for $\Delta t=\pi/2\ \mathrm s$, and call the end of this interval $t_1=t_0+\Delta t$.
+
+The body rotates counterclockwise about the fixed point $O_s$ at $1\ \mathrm{rad\,s^{-1}}$. The distance from $O_s$ to $O_b$ remains $1\ \mathrm m$, so $O_b$ follows a quarter-circle in the $x_s$--$y_s$ plane during this interval. Because the frame $\{b\}$ is attached to the body, its axes rotate with the body:
+
+~~~text
+                      ^ x_b(t_1)
+                      |
+         y_b(t_1) <---* O_b(t_1)
+                      |    .
+                      |       .       counterclockwise path
+                      |          .
+                 +y_s |             .
+                      |                ^ y_b(t_0)
+                      |                |
+                 O_s  +----------------* O_b(t_0) ---> x_s, x_b(t_0)
+                 (0, 0)                (1 m, 0)
+~~~
+
+At $t_0$, $x_b$ points along $+x_s$ and $y_b$ points along $+y_s$. After a counterclockwise quarter-turn, $x_b$ points along $+y_s$ and $y_b$ points along $-x_s$. Notice two geometric facts in the diagram: the radius from $O_s$ to $O_b$ always points along $+x_b$, while the velocity tangent to the circle always points along $+y_b$.
+
+Let $\theta(t)$ be the angle turned by elapsed time $t$. The constant angular speed gives
+
+$$
+\theta(t)
+=
+(1\ \mathrm{rad\,s^{-1}})t.
+$$
+
+The geometry therefore determines the complete pose trajectory. The orientation of the body frame relative to the space frame is
+
+$$
+\mathbf R_{sb}(t)
+=
+\mathbf R_z(\theta(t)),
+$$
+
+and the position of $O_b$ relative to $O_s$, expressed in space coordinates, is
+
+$$
+\begin{aligned}
+{}^{s}\mathbf p_b(t)
+&=
+\mathbf R_z(\theta(t))
+\begin{bmatrix}1\\0\\0\end{bmatrix}\mathrm m\\
+&=
+\begin{bmatrix}
+\cos\theta(t)\\
+\sin\theta(t)\\
+0
+\end{bmatrix}
+\mathrm m.
+\end{aligned}
+$$
+
+This explicit column is another way to read the circle in the diagram: its first two entries are the $x_s$ and $y_s$ coordinates of a point at unit radius.
+
+The elapsed interval is
+
+$$
+\Delta t
+=
+\frac{\pi}{2}\ \mathrm s.
+$$
+
+Then $\theta(\Delta t)=\pi/2\ \mathrm{rad}$, so the geometry fixes the answer before either twist calculation begins:
+
+$$
+\mathbf R_{sb}(\Delta t)
+=
+\mathbf R_z(\pi/2),
+\qquad
+{}^{s}\mathbf p_b(\Delta t)
+=
+\begin{bmatrix}0\\1\\0\end{bmatrix}\mathrm m.
+$$
+
+Thus the expected final pose is
+
+$$
+\boxed{
+\mathbf T_1
+=
+\begin{bmatrix}
+0&-1&0&0\\
+1&0&0&1\\
+0&0&1&0\\
+0&0&0&1
+\end{bmatrix}
+}.
+$$
+
+The entries in the upper-right pose column are position coordinates in metres. This independently derived pose will be the oracle for both integration forms.
+
+#### The initial pose does not equal the identity pose
+
+At $t_0$, the pose is
+
+$$
+\mathbf T_0
+=
+\begin{bmatrix}
+\mathbf R_0&\mathbf p_0\\
+\mathbf0_3^{\mathsf T}&1
+\end{bmatrix}
+=
+\begin{bmatrix}
+\mathbf I_3&[1\;0\;0]^{\mathsf T}\\
+\mathbf0_3^{\mathsf T}&1
+\end{bmatrix},
+$$
+
+where the translation column has units of metres.
+
+Why is $\mathbf R_0=\mathbf I_3$? The columns of $\mathbf R_0$ are the directions of $x_b$, $y_b$, and $z_b$ expressed in space coordinates. Initially those directions are
+
+$$
+\mathbf R_0
+=
+\begin{bmatrix}
+[1\;0\;0]^{\mathsf T}&
+[0\;1\;0]^{\mathsf T}&
+[0\;0\;1]^{\mathsf T}
+\end{bmatrix}
+=
+\mathbf I_3.
+$$
+
+The identity rotation means that the two frames initially have the same orientation. It does not mean that their origins coincide. Their origins are separated by
+
+$$
+\mathbf p_0
+=
+\begin{bmatrix}1\\0\\0\end{bmatrix}\mathrm m,
+$$
+
+so $\mathbf T_0\neq\mathbf I_4$. This separation of origins is exactly why the adjoint conversion below contains a cross-product term even though $\mathbf R_0=\mathbf I_3$.
+
+#### Describe the tangent motion with a body twist
+
+Differentiate the space-coordinate position to see the velocity of the body origin. Using $\dot{\theta}=1\ \mathrm{s^{-1}}$, with radians treated as dimensionless in the derivative, gives
+
+$$
+{}^{s}\dot{\mathbf p}_b(t)
+=
+\begin{bmatrix}
+-\sin\theta(t)\\
+\cos\theta(t)\\
+0
+\end{bmatrix}
+\mathrm{m\,s^{-1}}.
+$$
+
+This velocity changes direction in the fixed space axes as the body moves around the circle. In the rotating body axes, however, the velocity always points along $+y_b$. Its body-coordinate column therefore remains constant:
+
+$$
+\boldsymbol\nu_b
+=
+\begin{bmatrix}0\\1\\0\end{bmatrix}
+\mathrm{m\,s^{-1}}.
+$$
+
+The counterclockwise angular velocity always points along the common $+z$ direction, so its body-coordinate column is also constant:
+
+$$
+\boldsymbol\omega_b
+=
+\begin{bmatrix}0\\0\\1\end{bmatrix}
+\mathrm{rad\,s^{-1}}.
+$$
+
+Using the project's linear-first order, the constant body twist is consequently
+
+$$
+\boldsymbol\xi_b
+=
+\begin{bmatrix}
+\boldsymbol\nu_b\\
+\boldsymbol\omega_b
+\end{bmatrix}
+=
+\begin{bmatrix}
+0\\1\\0\\0\\0\\1
+\end{bmatrix}.
+$$
+
+The first three entries carry units of $\mathrm{m\,s^{-1}}$, and the last three carry units of $\mathrm{rad\,s^{-1}}$. The name body twist means that these components are expressed along the moving body axes. It does not mean that the motion is different from the physical motion drawn above.
+
+#### Read the same motion as a space twist
+
+The body-twist construction expressed the velocity of the body origin along the rotating body axes. The space-twist construction asks a different question: what constant velocity field, written along the fixed space axes and referenced to the fixed space origin $O_s$, generates the same motion?
+
+Start with the angular block. The rotation axis is the fixed $+z_s$ axis and the angular speed is $1\ \mathrm{rad\,s^{-1}}$, so the space-coordinate angular velocity is
+
+$$
+\boldsymbol\omega_s
+=
+\begin{bmatrix}0\\0\\1\end{bmatrix}
+\mathrm{rad\,s^{-1}}.
+$$
+
+Now determine the linear block. A point at space-coordinate location $\mathbf x$ undergoing rotation with angular velocity $\boldsymbol\omega_s$ about a fixed centre $\mathbf q$ has velocity
+
+$$
+{}^{s}\mathbf v(\mathbf x)
+=
+\boldsymbol\omega_s
+\times
+(\mathbf x-\mathbf q).
+$$
+
+Expanding the cross product separates the part that is independent of $\mathbf x$ from the part that changes with the point location:
+
+$$
+{}^{s}\mathbf v(\mathbf x)
+=
+-\boldsymbol\omega_s\times\mathbf q
++
+\boldsymbol\omega_s\times\mathbf x.
+$$
+
+The standard velocity field of a space twist is
+
+$$
+{}^{s}\mathbf v(\mathbf x)
+=
+\boldsymbol\nu_s
++
+\boldsymbol\omega_s\times\mathbf x.
+$$
+
+Comparing the two equations identifies the spatial linear block:
+
+$$
+\boxed{
+\boldsymbol\nu_s
+=
+-\boldsymbol\omega_s\times\mathbf q
+}.
+$$
+
+This equation explains what $\boldsymbol\nu_s$ represents. It is the velocity assigned by the rigid-body velocity field to the space origin, not generally the velocity of the body origin. Evaluating the field at $\mathbf x=\mathbf0_3$ leaves only $\boldsymbol\nu_s$.
+
+In this example, the centre of rotation is the space origin itself, so $\mathbf q=\mathbf0_3$. Therefore,
+
+$$
+\boldsymbol\nu_s
+=
+-\boldsymbol\omega_s\times\mathbf0_3
+=
+\mathbf0_3.
+$$
+
+The constant space twist is consequently
+
+$$
+\boldsymbol\xi_s
+=
+\begin{bmatrix}
+\boldsymbol\nu_s\\
+\boldsymbol\omega_s
+\end{bmatrix}
+=
+\begin{bmatrix}
+0\\0\\0\\0\\0\\1
+\end{bmatrix}.
+$$
+
+The first three zeros do not say that the body origin $O_b$ is stationary. They say that the velocity field is zero at its reference point $O_s$, which is the centre of rotation.
+
+To verify that this space twist describes the complete circular motion, evaluate its velocity field at the moving body origin. Its location is
+
+$$
+{}^{s}\mathbf p_b(t)
+=
+\begin{bmatrix}
+\cos\theta(t)\\
+\sin\theta(t)\\
+0
+\end{bmatrix}
+\mathrm m.
+$$
+
+Because $\boldsymbol\nu_s=\mathbf0_3$, and because radians are dimensionless in the cross-product units, the field predicts
+
+$$
+\begin{aligned}
+{}^{s}\mathbf v\left({}^{s}\mathbf p_b(t)\right)
+&=
+\boldsymbol\omega_s
+\times
+{}^{s}\mathbf p_b(t)\\
+&=
+\left(
+\begin{bmatrix}0\\0\\1\end{bmatrix}
+\mathrm{rad\,s^{-1}}
+\right)
+\times
+\left(
+\begin{bmatrix}
+\cos\theta(t)\\
+\sin\theta(t)\\
+0
+\end{bmatrix}
+\mathrm m
+\right)\\
+&=
+\begin{bmatrix}
+-\sin\theta(t)\\
+\cos\theta(t)\\
+0
+\end{bmatrix}
+\mathrm{m\,s^{-1}}.
+\end{aligned}
+$$
+
+This is exactly the derivative of the circular position found in the body-twist construction. The body description says that the tangent velocity has the constant components $[0\;1\;0]^{\mathsf T}\ \mathrm{m\,s^{-1}}$ along the rotating body axes. The space description says that the same tangent velocity has the changing components $[-\sin\theta(t)\;\cos\theta(t)\;0]^{\mathsf T}\ \mathrm{m\,s^{-1}}$ along the fixed space axes. These are two coordinate descriptions of the same physical velocity.
+
+#### The adjoint formula expresses the same geometric comparison
+
+The geometry also explains why the body-to-space adjoint formula has its particular cross-product term. The body-twist linear block is the velocity of $O_b$ expressed along body axes. Rotating that column into space coordinates gives
+
+$$
+{}^{s}\mathbf v_{O_b}
+=
+\mathbf R_0\boldsymbol\nu_b.
+$$
+
+The space velocity field, evaluated at the same physical point $O_b$, gives
+
+$$
+{}^{s}\mathbf v_{O_b}
+=
+\boldsymbol\nu_s
++
+\boldsymbol\omega_s\times\mathbf p_0.
+$$
+
+These two expressions must be equal because they describe the velocity of the same point:
+
+$$
+\mathbf R_0\boldsymbol\nu_b
+=
+\boldsymbol\nu_s
++
+\boldsymbol\omega_s\times\mathbf p_0.
+$$
+
+Solve for $\boldsymbol\nu_s$ and use the antisymmetry $\mathbf a\times\mathbf b=-\mathbf b\times\mathbf a$:
+
+$$
+\begin{aligned}
+\boldsymbol\nu_s
+&=
+\mathbf R_0\boldsymbol\nu_b
+-
+\boldsymbol\omega_s\times\mathbf p_0\\
+&=
+\mathbf R_0\boldsymbol\nu_b
++
+\mathbf p_0\times\boldsymbol\omega_s.
+\end{aligned}
+$$
+
+The angular columns use different coordinate axes but refer to the same angular velocity, so
+
+$$
+\boldsymbol\omega_s
+=
+\mathbf R_0\boldsymbol\omega_b.
+$$
+
+Substitution produces the linear-first adjoint relation
+
+$$
+\boxed{
+\boldsymbol\nu_s
+=
+\mathbf R_0\boldsymbol\nu_b
++
+\mathbf p_0\times
+\left(\mathbf R_0\boldsymbol\omega_b\right)
+}.
+$$
+
+Stacking the linear and angular component equations gives the equivalent matrix relation
+
+$$
+\boldsymbol\xi_s
+=
+\operatorname{Ad}_{\mathbf T_0}\boldsymbol\xi_b,
+\qquad
+\operatorname{Ad}_{\mathbf T_0}
+=
+\begin{bmatrix}
+\mathbf R_0&[\mathbf p_0]_\times\mathbf R_0\\
+\mathbf0_{3\times3}&\mathbf R_0
+\end{bmatrix}.
+$$
+
+The two terms now have a direct interpretation. The term $\mathbf R_0\boldsymbol\nu_b$ expresses the velocity of $O_b$ in space coordinates. The cross-product term $[\mathbf p_0]_\times \mathbf R_0$ shifts the reference point from $O_b$ to $O_s$.
+
+For the numerical values in this example,
+
+$$
+\begin{aligned}
+\boldsymbol\nu_s
+&=
+\begin{bmatrix}0\\1\\0\end{bmatrix}
++
+\begin{bmatrix}1\\0\\0\end{bmatrix}
+\times
+\begin{bmatrix}0\\0\\1\end{bmatrix}\\
+&=
+\begin{bmatrix}0\\1\\0\end{bmatrix}
++
+\begin{bmatrix}0\\-1\\0\end{bmatrix}\\
+&=
+\mathbf0_3.
+\end{aligned}
+$$
+
+The first two lines have units of $\mathrm{m\,s^{-1}}$; radians are dimensionless in this product. The cancellation is not an algebraic accident. It states geometrically that the velocity field is zero at its centre of rotation, $O_s$.
+
+#### Integrate the space twist on the left
+
+The space twist is a pure rotation about the fixed space origin. Over $\Delta t=\pi/2\ \mathrm s$, its exponential is therefore
+
+$$
+{}^{s}\mathbf T_\Delta
+=
+\exp(\widehat{\boldsymbol\xi}_s\Delta t)
+=
+\begin{bmatrix}
+\mathbf R_z(\pi/2)&\mathbf0_3\\
+\mathbf0_3^{\mathsf T}&1
+\end{bmatrix}.
+$$
+
+Because this increment is expressed relative to the fixed space frame, it acts on the current pose from the left:
+
+$$
+\mathbf T_1
+=
+{}^{s}\mathbf T_\Delta\mathbf T_0.
+$$
+
+Block multiplication shows what the left action does:
+
+$$
+\begin{aligned}
+\mathbf R_1
+&=
+\mathbf R_z(\pi/2)\mathbf I_3
+=
+\mathbf R_z(\pi/2),\\
+\mathbf p_1
+&=
+\mathbf R_z(\pi/2)
+\begin{bmatrix}1\\0\\0\end{bmatrix}
+=
+\begin{bmatrix}0\\1\\0\end{bmatrix}
+\mathrm m.
+\end{aligned}
+$$
+
+This is exactly the fixed-centre rotation drawn in the diagram.
+
+#### Understand why the body exponential coordinate is not the translation column
+
+Multiplying the body twist by the duration produces the finite exponential coordinates
+
+$$
+\boldsymbol\rho_b
+=
+\boldsymbol\nu_b\Delta t
+=
+\begin{bmatrix}0\\\pi/2\\0\end{bmatrix}\mathrm m,
+\qquad
+\boldsymbol\phi_b
+=
+\boldsymbol\omega_b\Delta t
+=
+\begin{bmatrix}0\\0\\\pi/2\end{bmatrix}\mathrm{rad}.
+$$
+
+The column $\boldsymbol\rho_b$ is not generally the translation column of the finite transform. It would be the translation column if no rotation occurred, because the velocity direction would then remain fixed. Here the velocity always points along $+y_b$, but $+y_b$ rotates during the interval. Vectors expressed along changing axes cannot be added as though they all point in one fixed direction.
+
+The actual relative translation, expressed along the initial body axes $\{b_0\}$, is the time integral of that rotating velocity direction. With $\tau$ denoting elapsed time inside the interval,
+
+$$
+\mathbf p_\Delta
+=
+\int_0^{\Delta t}
+\mathbf R_z\left((1\ \mathrm{rad\,s^{-1}})\tau\right)
+\begin{bmatrix}0\\1\\0\end{bmatrix}
+\mathrm{m\,s^{-1}}\,\mathrm d\tau.
+$$
+
+Let $\alpha$ denote the dimensionless numerical value of the angle in radians. Because the angular speed has numerical value one, $\alpha=\tau/(1\ \mathrm s)$ and $\mathrm d\tau=(1\ \mathrm s)\mathrm d\alpha$. The change of variable gives
+
+$$
+\begin{aligned}
+\mathbf p_\Delta
+&=
+\begin{bmatrix}
+\displaystyle\int_0^{\pi/2}-\sin\alpha\,\mathrm d\alpha\\[0.8em]
+\displaystyle\int_0^{\pi/2}\cos\alpha\,\mathrm d\alpha\\
+0
+\end{bmatrix}
+\mathrm m\\
+&=
+\begin{bmatrix}-1\\1\\0\end{bmatrix}
+\mathrm m.
+\end{aligned}
+$$
+
+This distinction has a simple geometric meaning. The norm $\lVert\boldsymbol\rho_b\rVert=\pi/2\ \mathrm m$ is the length travelled along the quarter-circle arc. The norm $\lVert\mathbf p_\Delta\rVert=\sqrt{2}\ \mathrm m$ is the straight-line displacement between the initial and final body origins. Arc length and net displacement are different.
+
+The $SE(3)$ exponential performs the same integration through the left Jacobian:
+
+$$
+\mathbf p_\Delta
+=
+\mathbf J(\boldsymbol\phi_b)\boldsymbol\rho_b.
+$$
+
+For $\theta=\pi/2$,
+
+$$
+\mathbf J\left(
+\begin{bmatrix}0\\0\\\theta\end{bmatrix}
+\right)
+=
+\begin{bmatrix}
+2/\pi&-2/\pi&0\\
+2/\pi&2/\pi&0\\
+0&0&1
+\end{bmatrix},
+$$
+
+so
+
+$$
+\mathbf J(\boldsymbol\phi_b)
+\left(
+\begin{bmatrix}0\\\pi/2\\0\end{bmatrix}
+\mathrm m
+\right)
+=
+\begin{bmatrix}-1\\1\\0\end{bmatrix}
+\mathrm m.
+$$
+
+Thus the Jacobian is not an arbitrary correction factor. It accumulates the translation direction while that direction rotates.
+
+The resulting body-referred finite increment is
+
+$$
+{}^{b}\mathbf T_\Delta
+=
+\exp(\widehat{\boldsymbol\xi}_b\Delta t)
+=
+\begin{bmatrix}
+\mathbf R_z(\pi/2)&[-1\;1\;0]^{\mathsf T}\\
+\mathbf0_3^{\mathsf T}&1
+\end{bmatrix},
+$$
+
+where the upper-right column has units of metres.
+
+#### Integrate the body twist on the right
+
+Give the body frame at the two times distinct names: $\{b_0\}$ is the initial body frame and $\{b_1\}$ is the final body frame. Then
+
+$$
+\mathbf T_0
+=
+\mathbf T_{s b_0},
+\qquad
+{}^{b}\mathbf T_\Delta
+=
+\mathbf T_{b_0 b_1}.
+$$
+
+To map coordinates from $\{b_1\}$ into $\{s\}$, first map from $\{b_1\}$ into $\{b_0\}$ and then from $\{b_0\}$ into $\{s\}$. Transform composition therefore gives
+
+$$
+\boxed{
+\mathbf T_1
+=
+\mathbf T_{s b_1}
+=
+\mathbf T_{s b_0}\mathbf T_{b_0 b_1}
+=
+\mathbf T_0{}^{b}\mathbf T_\Delta
+}.
+$$
+
+This frame chain is the reason for right multiplication; it is not a mnemonic chosen independently of the transform meanings.
+
+For two transforms, block multiplication gives the translation rule
+
+$$
+\mathbf p_1
+=
+\mathbf p_0
++
+\mathbf R_0\mathbf p_\Delta.
+$$
+
+In this example, $\mathbf R_0=\mathbf I_3$, so the relative displacement already has the same numerical components in the initial body and space axes:
+
+$$
+\begin{aligned}
+\mathbf p_1
+&=
+\begin{bmatrix}1\\0\\0\end{bmatrix}
++
+\mathbf I_3
+\begin{bmatrix}-1\\1\\0\end{bmatrix}\\
+&=
+\begin{bmatrix}0\\1\\0\end{bmatrix}
+\mathrm m.
+\end{aligned}
+$$
+
+The identity $\mathbf R_0$ is used only because the frames align at the initial instant. The body axes still rotate during the interval; that rotation has already been accounted for inside $\mathbf p_\Delta$ by the exponential. If $\mathbf R_0$ were not identity, it would rotate the body-referred relative displacement into space coordinates before that displacement was added to $\mathbf p_0$.
+
+#### Both representations recover the geometric answer
+
+The space calculation and the body calculation both give
+
+$$
+\exp(\widehat{\boldsymbol\xi}_s\Delta t)\mathbf T_0
+=
+\mathbf T_0\exp(\widehat{\boldsymbol\xi}_b\Delta t)
+=
+\begin{bmatrix}
+0&-1&0&0\\
+1&0&0&1\\
+0&0&1&0\\
+0&0&0&1
+\end{bmatrix}.
+$$
+
+The equality does not mean that the two twist columns or the two increments are numerically identical. It means that the correctly framed left and right actions describe the same physical motion.
+
+### Validation and deliberate limits
+
+Both public methods reject a non-finite or negative duration as `GeometryError::invalid_time` and reject a non-finite twist as `GeometryError::non_finite`. After calculating `exponential_coordinates = twist * delta_time`, they reject a non-finite product as `GeometryError::unsupported_magnitude`. The reused $SE(3)$ exponential then validates the numerical policy, maximum angular displacement, finite Jacobian coefficients, and finite increment. Composition separately rejects a non-finite translated result. A zero duration deliberately passes through the exponential, producing $\mathbf I_4$ while still validating the supplied twist and numerical policy; the zero-duration test requires the non-identity initial pose to be preserved exactly in both forms.
+
+The ten focused GTest cases provide independent evidence for these contracts. The governing quarter-circle case constructs the expected pose directly from geometry and checks both integration forms with separate dimensionless rotation and metre-valued translation tolerances of $10^{-12}$; reversing either required multiplication side changes the translation and fails this oracle. The zero-duration case requires exact preservation of a non-identity pose. Paired space and body cases require `invalid_time` for a negative duration and for both `NaN` and infinite durations, `non_finite` for a non-finite twist component, and `unsupported_magnitude` when a finite twist multiplied by a finite duration overflows.
+
+The methods integrate one constant twist over one non-negative interval. They do not integrate a time-varying twist, select a time-stepping method, accept a signed displacement in place of time, estimate a twist from sensor measurements, attach runtime frame labels, or propagate uncertainty. Piecewise-constant integration requires the caller to preserve chronological order across successive updates.
+
+## References {.unnumbered}
+
+- Kevin M. Lynch and Frank C. Park, *Modern Robotics: Mechanics, Planning, and Control*, Chapter 3, especially Sections 3.3.2--3.3.3 on body and spatial twists, the adjoint, and the $SE(3)$ exponential.
+- Peter Corke, *Robotics, Vision and Control: Fundamental Algorithms in Python*, third edition, Chapter 2, Section 2.4.8 on twist exponentials, and Chapter 3, Sections 3.1.3--3.1.5 on adjoint velocity conversion and incremental rigid-body motion.

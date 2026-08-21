@@ -35,9 +35,9 @@ All phases belong to the learning programme. Phase 9 and Phase 12 are distinct r
 - **Milestone:** `M1` — Classical intelligence foundation.
 - **Phase:** Phase 1 — Geometry, mechanics, and control.
 - **Capability:** `P1.2` — Spatial geometry kernel.
-- **Cycle:** Constant-twist integration using the completed $SE(3)$ exponential.
+- **Cycle:** Linear-first $SE(3)$ adjoint.
 - **Active stage:** Implement with verifying tests.
-- **Active task:** Implement and test constant-twist integration with explicit body-versus-space multiplication order.
+- **Active task:** Implement and test the $SE(3)$ adjoint using the project's linear-first twist order.
 - **Next capability:** `P1.3` — General robot kinematics and Jacobians.
 - **Blockers:** None.
 
@@ -92,13 +92,13 @@ Phase 1 closes when its shared mathematical references and two bounded learning 
 | Capability | Learning artifact | Side project and principal tools | Status |
 |---|---|---|---|
 | `P1.1` — Ideal planar motion kernel | Close Chapters 2–3 and preserve Chapters 4 and 6 | Existing `differential_drive_motion_model`, Python and `pytest` | Complete |
-| `P1.2` — Spatial geometry kernel | Complete Chapter 8 and its Chapter 9 implementation companion | `rigid_body_kinematics`, modern C++, CMake, Eigen, and GTest | Active: principal $SE(3)$ logarithm cycle |
+| `P1.2` — Spatial geometry kernel | Complete Chapter 8 and its Chapter 9 implementation companion | `rigid_body_kinematics`, modern C++, CMake, Eigen, and GTest | Active: linear-first $SE(3)$ adjoint cycle |
 | `P1.3` — General kinematics and Jacobians | Complete Chapter 10 and its Chapter 11 implementation companion | Extend `rigid_body_kinematics` with bounded forward and velocity kinematics | Queued: opening theory block drafted; review and remaining blocks pending |
 | `P1.4` — Planar manipulator kinematics laboratory | Chapter 12 and its Chapter 13 implementation companion | Begin `planar_manipulator_lab` with 2R/3R inverse kinematics, modern C++, Eigen, GTest, and offline visualisation | Queued |
-| `P1.5` — Wheel-odometry pipeline | Chapter 14 and its Chapter 15 implementation companion | `differential_drive_odometry`, pure Python core plus thin ROS 2 adapter, `nav_msgs`, and `tf2` | Queued |
+| `P1.5` — Wheel-odometry pipeline | Chapter 14 and its Chapter 15 implementation companion | `differential_drive_odometry`, modern C++ core and thin ROS 2 adapter, with the accepted Python kernel as an independent reference | Queued |
 | `P1.6` — Differential-drive dynamics laboratory | Chapter 16 and its Chapter 17 implementation companion | `differential_drive_planar_plant`, modern C++ and deterministic numerical tests | Queued |
 | `P1.7` — Bounded trajectory generator | Chapter 18 and its Chapter 19 implementation companion | `differential_drive_trajectory`, modern C++ and independent constraint checks | Queued |
-| `P1.8` — State-space systems and LQR reference laboratory | Chapter 20 and its Chapter 21 implementation companion | `linear_systems_control_lab`, Python, NumPy/SciPy, and deterministic `pytest` references | Queued |
+| `P1.8` — State-space systems and LQR reference laboratory | Chapter 20 and its Chapter 21 implementation companion | `linear_systems_control_lab`, modern C++, Eigen, GTest, and independent Python/SciPy references | Queued |
 | `P1.9` — Offline controller benchmark | Chapter 22 and its Chapter 23 implementation companion | `differential_drive_control`, modern C++ core and Python analysis | Queued |
 | `P1.10` — Planar manipulator dynamics and control laboratory | Chapter 24 and its Chapter 25 implementation companion | Extend `planar_manipulator_lab` with a 2R plant, joint trajectories, classical controllers including one frozen-gain LQR application, and matched comparisons | Queued |
 | `P1.11` — Nominal Gazebo integration | Chapter 26 implementation companion | `differential_drive_gazebo`, thin ROS 2 adapters, and evaluator-only ground truth | Queued |
@@ -165,8 +165,8 @@ The outcome is the geometry layer of the spatial and general kinematics workbenc
 - [x] Implement, test, understand, and retrospectively document the principal $SO(3)$ logarithm mathematical cycle, including its identity, small-angle, nominal-angle, and deterministic near-$\pi$ branches; preserve the reviewed explanation in the [principal $SO(3)$ logarithm companion section](notes/09_spatial_geometry_kernel_implementation.qmd#sec-spatial-kernel-so3-logarithm) and its deterministic evidence in [`test_so3_logarithm.cpp`](ros_ws/src/rigid_body_kinematics/test/test_so3_logarithm.cpp).
 - [x] Implement, test, understand, and retrospectively document the linear-first $SE(3)$ exponential mathematical cycle, keeping translational coordinates in metres and rotational coordinates in radians distinct; preserve the reviewed explanation in the [$SE(3)$ exponential companion section](notes/09_spatial_geometry_kernel_implementation.qmd#sec-spatial-kernel-se3-exponential) and its five deterministic cases in [`test_se3_exponential.cpp`](ros_ws/src/rigid_body_kinematics/test/test_se3_exponential.cpp).
 - [x] Implement, test, understand, and retrospectively document the principal $SE(3)$ logarithm mathematical cycle using the completed principal $SO(3)$ logarithm; preserve the reviewed explanation in the [principal $SE(3)$ logarithm companion section](notes/09_spatial_geometry_kernel_implementation.qmd#sec-spatial-kernel-se3-logarithm) and its 11 deterministic cases in [`test_se3_logarithm.cpp`](ros_ws/src/rigid_body_kinematics/test/test_se3_logarithm.cpp).
-- [ ] **Active:** Implement, test, understand, and retrospectively document the constant-twist-integration mathematical cycle using the completed $SE(3)$ exponential and explicit body-versus-space multiplication order.
-- [ ] Implement, test, understand, and retrospectively document the $SE(3)$ adjoint mathematical cycle using the project's linear-first twist order.
+- [x] Implement, test, understand, and retrospectively document the constant-twist-integration mathematical cycle using the completed $SE(3)$ exponential and explicit body-versus-space multiplication order; preserve the reviewed explanation in the [constant-twist-integration companion section](notes/09_spatial_geometry_kernel_implementation.qmd#sec-spatial-kernel-constant-twist-integration) and its 10 deterministic cases in [`test_constant_twist_integration.cpp`](ros_ws/src/rigid_body_kinematics/test/test_constant_twist_integration.cpp).
+- [ ] **Active:** Implement, test, understand, and retrospectively document the $SE(3)$ adjoint mathematical cycle using the project's linear-first twist order.
 - [ ] Implement, test, understand, and retrospectively document planar-pose embedding and extraction plus normalised planar-yaw quaternion conversion without attempting to replace `tf2`.
 
 #### Verify and close
@@ -295,7 +295,7 @@ The outcome is one deterministic differential-drive odometry pipeline. The bicyc
 #### Implement and document
 
 - [ ] When implementation begins, create `notes/15_wheeled_robot_constraints_and_odometry_implementation.qmd` covering encoder differencing, timestamp validation, state ownership, ROS message semantics, `tf2`, parameters, and the pure-core/adapter boundary.
-- [ ] Create `ros_ws/src/differential_drive_odometry` as an `ament_python` package that depends on and reuses `differential_drive_motion_model`; do not duplicate its wheel/body mapping or exact integration.
+- [ ] Create `ros_ws/src/differential_drive_odometry` as an `ament_cmake` package with a pure modern C++ odometry core and a thin C++ ROS 2 adapter; preserve the accepted Python `differential_drive_motion_model` as an independent equation-level reference rather than a runtime dependency or a target for retroactive rewriting.
 - [ ] Implement a pure odometer state machine that accepts cumulative wheel angles and a timestamp and returns planar pose, body twist, status, and timestamp.
 - [ ] Add a thin ROS 2 node that consumes `sensor_msgs/JointState` and publishes consistent `nav_msgs/Odometry` and `odom` to `base_link` transforms through `tf2`.
 
@@ -395,8 +395,8 @@ The outcome is a bounded mathematical reference laboratory for the state-space a
 #### Implement and document
 
 - [ ] When implementation begins, create `notes/21_state_space_stability_and_lqr_implementation.qmd` with model shapes, continuous/discrete conventions, derivative evaluation, rank tolerance, eigenvalue classification, cost-matrix validation, Riccati-solver boundary, gain sign, result schema, and failure behaviour.
-- [ ] Create `ros_ws/src/linear_systems_control_lab` as a pure Python `ament_python` package using NumPy, SciPy, and deterministic `pytest` tests without a ROS runtime, simulator, or general nonlinear-optimisation dependency.
-- [ ] Implement the bounded model evaluation, equilibrium and dimension checks, analytic or finite-difference linearisation path, controllability and observability matrices, stability classification, Lyapunov residual checks, and continuous/discrete LQR adapter; use the established SciPy Riccati solvers rather than implementing a general Riccati solver.
+- [ ] Create `ros_ws/src/linear_systems_control_lab` as a pure modern C++ `ament_cmake` package using Eigen and deterministic GTest checks without a ROS runtime, simulator, or general nonlinear-optimisation dependency; retain Python and SciPy only as an independent numerical reference path.
+- [ ] Implement the bounded model evaluation, equilibrium and dimension checks, analytic or finite-difference linearisation path, controllability and observability matrices, stability classification, Lyapunov residual checks, and continuous/discrete LQR adapter in C++; place the Riccati calculation behind a narrow established-solver boundary selected by the specification, verify it independently with SciPy, and do not implement a general Riccati solver.
 - [ ] Add one deterministic scenario runner for the frozen reference cases and a versioned model-and-gain export schema that `P1.10` can use after its 2R specification is frozen; do not precompute manipulator gains before the owning model and scenario exist.
 
 #### Verify and close

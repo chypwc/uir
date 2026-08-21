@@ -307,4 +307,69 @@ Transform3 Transform3::inverse() const
 
   return Transform3(rotation_ba, translation_ba);
 }
+
+Transform3 Transform3::integrate_constant_space_twist(
+  const Vector6LinearFirst & space_twist, double delta_time,
+  const NumericalPolicy & policy) const
+{
+  if (!std::isfinite(delta_time) || delta_time < 0.0) {
+    throw GeometryException(
+      GeometryError::invalid_time,
+      "delta time should be finite and non-negative");
+  }
+
+  if (!space_twist.allFinite()) {
+    throw GeometryException(
+      GeometryError::non_finite, "space twist should be finite");
+  }
+
+  const Vector6LinearFirst exponential_coordinates = space_twist * delta_time;
+
+  if (!exponential_coordinates.allFinite()) {
+    throw GeometryException(
+      GeometryError::unsupported_magnitude,
+      "Exponential coordinates are outside the supported numerical range.");
+  }
+
+  // T_Δ
+  const Transform3 increment =
+    Transform3::from_exponential_coordinates(exponential_coordinates, policy);
+
+  // T_Δ T_0. this == &initial_pose.
+  // Dereference a pointer "this" to obtain the required object.
+  return increment.compose(*this);
+}
+
+// Integrate a constant body twist over a non-negative duration.
+// The twist is ordered [linear velocity; angular velocity].
+Transform3 Transform3::integrate_constant_body_twist(
+  const Vector6LinearFirst & body_twist, double delta_time,
+  const NumericalPolicy & policy) const
+{
+  if (!std::isfinite(delta_time) || delta_time < 0.0) {
+    throw GeometryException(
+      GeometryError::invalid_time,
+      "delta time should be finite and non-negative");
+  }
+
+  if (!body_twist.allFinite()) {
+    throw GeometryException(
+      GeometryError::non_finite, "body twist should be finite");
+  }
+
+  const Vector6LinearFirst exponential_coordinates = body_twist * delta_time;
+
+  if (!exponential_coordinates.allFinite()) {
+    throw GeometryException(
+      GeometryError::unsupported_magnitude,
+      "Exponential coordinates are outside the supported numerical range.");
+  }
+
+  // T_Δ
+  const Transform3 increment =
+    Transform3::from_exponential_coordinates(exponential_coordinates, policy);
+
+  // T_0 T_Δ. Access compose through the initial-pose pointer.
+  return this->compose(increment);
+}
 }  // namespace rigid_body_kinematics
