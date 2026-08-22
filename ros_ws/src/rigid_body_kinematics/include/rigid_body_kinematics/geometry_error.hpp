@@ -13,7 +13,8 @@ enum class GeometryError
   invalid_tangent,
   invalid_policy,         // a tolerance is invalid.
   unsupported_magnitude,  // exceeds the finite numerical domain
-  invalid_time,
+  invalid_time,           // invalid time inverval
+  non_planar,             // non-planar pose
 };
 
 /*

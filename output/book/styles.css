@@ -1,1 +1,71 @@
-@import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&family=Roboto+Mono:wght@400;500;600;700&display=swap")
+@import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&family=Roboto+Mono:wght@400;500;600;700&display=swap");
+
+/* The custom sidebar controls are used only with Quarto's full desktop grid. */
+.sidebar-toggle-button {
+    display: none;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    padding: 0.25rem;
+}
+
+@media (min-width: 1200px) {
+    .sidebar-toggle-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Hide the chapter-navigation sidebar independently. */
+    body.left-sidebar-hidden #quarto-sidebar,
+    body.left-sidebar-hidden #quarto-sidebar-glass,
+    body.left-sidebar-hidden #quarto-sidebarnav-toggle {
+        display: none !important;
+    }
+
+    /* Hide the page table of contents independently. */
+    body.right-sidebar-hidden #quarto-margin-sidebar,
+    body.right-sidebar-hidden #quarto-toc-toggle {
+        display: none !important;
+    }
+
+    /* Left hidden: wide article with the TOC retained on the right. */
+    body.left-sidebar-hidden #quarto-content.page-columns {
+        grid-template-columns:
+            [screen-start] 1.5rem
+            [screen-start-inset] minmax(0, 1fr)
+            [page-start page-start-inset body-start-outset body-start] 1.5rem
+            [body-content-start] min(1000px, calc(100vw - 22rem))
+            [body-content-end] 1.5rem
+            [body-end body-end-outset] 16rem
+            [page-end-inset page-end] minmax(0, 1fr)
+            [screen-end-inset] 1.5rem
+            [screen-end];
+    }
+
+    /* Right hidden: chapter navigation retained beside a wide article. */
+    body.right-sidebar-hidden #quarto-content.page-columns {
+        grid-template-columns:
+            [screen-start] minmax(1.5rem, 1fr)
+            [screen-start-inset page-start] 16rem
+            [page-start-inset body-start-outset] 1.5rem
+            [body-start] 1.5rem
+            [body-content-start] min(1000px, calc(100vw - 22rem))
+            [body-content-end body-end body-end-outset page-end-inset page-end]
+            minmax(1.5rem, 1fr)
+            [screen-end-inset screen-end];
+    }
+
+    /* Both hidden: centre the article and use the maximum reading width. */
+    body.left-sidebar-hidden.right-sidebar-hidden #quarto-content.page-columns {
+        grid-template-columns:
+            [screen-start] minmax(1.5rem, 1fr)
+            [screen-start-inset page-start page-start-inset body-start-outset
+            body-start body-content-start]
+            min(1000px, calc(100vw - 3rem))
+            [body-content-end body-end body-end-outset page-end-inset page-end
+            screen-end-inset]
+            minmax(1.5rem, 1fr)
+            [screen-end];
+    }
+}

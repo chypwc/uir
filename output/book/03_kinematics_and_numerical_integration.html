@@ -1386,6 +1386,82 @@ e_p
 </section>
 
 </main> <!-- /main -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const toolbar = document.querySelector(".navbar .quarto-navbar-tools");
+
+  if (!toolbar || document.getElementById("left-sidebar-button")) {
+    return;
+  }
+
+  const controls = [
+    {
+      id: "left-sidebar-button",
+      className: "left-sidebar-hidden",
+      storageKey: "quarto-left-sidebar-hidden",
+      targetId: "quarto-sidebar",
+      noun: "chapter navigation",
+      icon: "bi-layout-sidebar-reverse"
+    },
+    {
+      id: "right-sidebar-button",
+      className: "right-sidebar-hidden",
+      storageKey: "quarto-right-sidebar-hidden",
+      targetId: "quarto-margin-sidebar",
+      noun: "table of contents",
+      icon: "bi-layout-sidebar"
+    }
+  ];
+
+  const storedState = (key) => {
+    try {
+      return window.localStorage.getItem(key) === "true";
+    } catch {
+      return false;
+    }
+  };
+
+  const storeState = (key, hidden) => {
+    try {
+      window.localStorage.setItem(key, String(hidden));
+    } catch {
+      // The controls still work when browser storage is unavailable.
+    }
+  };
+
+  controls.forEach((control) => {
+    document.body.classList.toggle(
+      control.className,
+      storedState(control.storageKey)
+    );
+
+    const button = document.createElement("button");
+    button.id = control.id;
+    button.type = "button";
+    button.className = "sidebar-toggle-button quarto-navigation-tool";
+    button.setAttribute("aria-controls", control.targetId);
+    button.innerHTML = `<i class="bi ${control.icon}" aria-hidden="true"></i>`;
+
+    const updateButton = () => {
+      const hidden = document.body.classList.contains(control.className);
+      const label = `${hidden ? "Show" : "Hide"} ${control.noun}`;
+
+      button.title = label;
+      button.setAttribute("aria-label", label);
+      button.setAttribute("aria-expanded", String(!hidden));
+    };
+
+    button.addEventListener("click", () => {
+      const hidden = document.body.classList.toggle(control.className);
+      storeState(control.storageKey, hidden);
+      updateButton();
+    });
+
+    toolbar.appendChild(button);
+    updateButton();
+  });
+});
+</script>
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     // Ensure there is a toggle, if there isn't float one in the top right
