@@ -315,7 +315,9 @@ The parameter type `const Eigen::Matrix3d &` passes the existing matrix without 
 
 ### Numerical policy and error types
 
-The two tolerances needed by this block are stored together:
+`NumericalPolicy` and `GeometryError` are shared types used by several kernel operations. The production headers define each type once, but this retrospective introduces their members in dependency order. The snippets in this subsection therefore show the members needed by the first `Rotation3` block, not the final chapter-wide declarations. When a later operation needs a genuinely new policy value or failure category, its section explicitly adds that member to the same shared type before using it.
+
+The first two tolerances are stored together:
 
 ```cpp
 struct NumericalPolicy
@@ -327,7 +329,7 @@ struct NumericalPolicy
 
 A `struct` is used because these two values are simple public settings. The braces after each member give the default value used by `NumericalPolicy{}`. Both values are dimensionless because they are compared with dimensionless rotation residuals.
 
-Failures contain both a category that code can test and a message that a person can read:
+The first four error categories support rotation construction and free-vector action. Failures contain both a category that code can test and a message that a person can read:
 
 ```cpp
 enum class GeometryError
@@ -543,6 +545,8 @@ private:
 `rotation_` can contain only a `Rotation3` that has passed the $SO(3)$ checks from @sec-spatial-kernel-rotation3. `translation_` stores ${}^{a}\mathbf p_b$ in metres. The private constructor prevents a caller from combining an unchecked rotation with a translation. `identity()` constructs the pair $(\mathbf I_3,\mathbf 0_3)$.
 
 The class does not store the raw $4\times4$ input. After validation, its bottom row contains no additional information, so storing only $(\mathbf R_{ab},{}^{a}\mathbf p_b)$ prevents an internally malformed homogeneous row. A later matrix accessor can reconstruct the convenient homogeneous representation with the exact bottom row $[0\;0\;0\;1]$.
+
+The `Transform3` block extends the shared `NumericalPolicy` with `double homogeneous_row_tolerance{1.0e-12};`, a dimensionless absolute tolerance for the fixed bottom row. It also extends the shared `GeometryError` enumeration with `invalid_transform`, which reports a finite homogeneous matrix whose required structure is malformed. These are additions to the types introduced in @sec-spatial-kernel-rotation3, not separate transform-specific policy or error types.
 
 ### Complete `from_matrix` implementation
 
@@ -1086,7 +1090,9 @@ $$
 {}^{a}\boldsymbol\eta.
 $$
 
-The same $SE(3)$ map accepts a linear-first twist $[({}^{a}\boldsymbol\nu)^{\mathsf T}\;({}^{a}\boldsymbol\omega)^{\mathsf T}]^{\mathsf T}$ when the blocks instead have units $\mathrm{m\,s^{-1}}$ and $\mathrm{rad\,s^{-1}}$. The hat map only rearranges the supplied components into a structured matrix; it does not evaluate an exponential. Its output belongs to $\mathfrak{se}(3)$ and is not a homogeneous transformation in $SE(3)$: its bottom-right entry is zero rather than one. The mathematical vee maps above require exact membership in $\mathfrak{so}(3)$ or $\mathfrak{se}(3)$; the software implementation below extends their accepted numerical inputs only by the explicitly checked tangent tolerance.
+The same $SE(3)$ map accepts a linear-first twist $[({}^{a}\boldsymbol\nu)^{\mathsf T}\;({}^{a}\boldsymbol\omega)^{\mathsf T}]^{\mathsf T}$ when the blocks instead have units $\mathrm{m\,s^{-1}}$ and $\mathrm{rad\,s^{-1}}$. The hat map only rearranges the supplied components into a structured matrix; it does not evaluate an exponential. Its output belongs to $\mathfrak{se}(3)$ and is not a homogeneous transformation in $SE(3)$: its bottom-right entry is zero rather than one. The mathematical vee maps above require exact membership in $\mathfrak{so}(3)$ or $\mathfrak{se}(3)$; the software implementation below accepts only explicitly bounded structural residuals beyond those exact domains.
+
+The hat-and-vee block extends `NumericalPolicy` with `double tangent_tolerance{1.0e-12};`, the absolute tolerance used to accept only small structural residuals in a numerical tangent matrix. It also extends `GeometryError` with `invalid_tangent`, which reports a finite matrix that violates the required skew symmetry or $\mathfrak{se}(3)$ bottom-row structure. The hat operations do not need this tolerance because they construct the required structure directly; the vee operations use it when validating an external matrix.
 
 ### Public functions and the fixed component-order alias
 
@@ -1343,7 +1349,7 @@ static Rotation3 from_rotation_vector(
   const NumericalPolicy & policy = NumericalPolicy{});
 ```
 
-The two policy values introduced by this operation are
+This operation extends the existing `NumericalPolicy` with two more members:
 
 ```cpp
 // Inclusive upper bound for the small-angle series
@@ -1353,7 +1359,7 @@ double series_angle_threshold{1.0e-4};
 double maximum_exponential_angle{1.0e6};
 ```
 
-The first value selects a numerically stable formula; it does not classify a small nonzero motion as zero. The second value declares the largest angular input for which the interface promises to evaluate trigonometric functions and the subsequent matrix arithmetic.
+These members are added to the same policy that already contains the rotation, homogeneous-row, and tangent tolerances. The first value selects a numerically stable formula; it does not classify a small nonzero motion as zero. The second value declares the largest angular input for which the interface promises to evaluate trigonometric functions and the subsequent matrix arithmetic.
 
 ### Validation and overflow-safe angle calculation
 
@@ -1575,6 +1581,15 @@ struct RotationLogResult
   RotationLogBranch branch;
 };
 ```
+
+Near $\pi$, recovering the rotation axis requires a separate stable formula region. This operation therefore extends `NumericalPolicy` with
+
+```cpp
+// Inclusive distance from pi for near-pi axis recovery.
+double near_pi_tolerance{1.0e-6};
+```
+
+The new member is measured in radians and sets the inclusive distance below $\pi$ at which the near-$\pi$ formula begins. The logarithm reuses the previously added `series_angle_threshold` for its small-angle region.
 
 The branch value makes a numerically important decision observable in tests and diagnostics. Here `nominal` means the ordinary middle-angle case in which the direct logarithm formula is suitable; it does not mean a desired or commanded angle. The four regions are
 
@@ -3154,6 +3169,8 @@ $$
 
 When $\boldsymbol\phi\neq\mathbf0_3$, the finite coordinate $\boldsymbol\rho=\boldsymbol\nu\Delta t$ is not generally the translation column of $\mathbf T_\Delta$. The translation is $\mathbf J(\boldsymbol\phi)\boldsymbol\rho$ because the directions used by a constant body twist rotate during the interval. The left Jacobian performs the required integration after expressing those changing velocity directions in one common coordinate frame.
 
+The integration methods introduce duration as a new kind of public input, so the integration block extends `GeometryError` with `invalid_time`. This category reports a duration that is negative or non-finite. A non-finite twist remains `non_finite`, while overflow produced by multiplying two finite values remains `unsupported_magnitude`; `invalid_time` therefore identifies a distinct failure at the time-input boundary.
+
 The `Transform3` public interface declares separate methods so the twist representation is explicit at every call site:
 
 ```cpp
@@ -3869,6 +3886,295 @@ Both public methods reject a non-finite or negative duration as `GeometryError::
 The ten focused GTest cases provide independent evidence for these contracts. The governing quarter-circle case constructs the expected pose directly from geometry and checks both integration forms with separate dimensionless rotation and metre-valued translation tolerances of $10^{-12}$; reversing either required multiplication side changes the translation and fails this oracle. The zero-duration case requires exact preservation of a non-identity pose. Paired space and body cases require `invalid_time` for a negative duration and for both `NaN` and infinite durations, `non_finite` for a non-finite twist component, and `unsupported_magnitude` when a finite twist multiplied by a finite duration overflows.
 
 The methods integrate one constant twist over one non-negative interval. They do not integrate a time-varying twist, select a time-stepping method, accept a signed displacement in place of time, estimate a twist from sensor measurements, attach runtime frame labels, or propagate uncertainty. Piecewise-constant integration requires the caller to preserve chronological order across successive updates.
+
+## Linear-first $SE(3)$ adjoint {#sec-spatial-kernel-se3-adjoint}
+
+The constant-twist example in @sec-spatial-kernel-constant-twist-integration used two coordinate columns for one physical rigid-body velocity. The adjoint answers the implementation question exposed by that example: given a stored transformation between two frames, how should the coordinates of one twist be converted from the second frame into the first? This conversion is useful whenever a velocity, screw axis, or finite motion direction must be compared or combined in one common frame.
+
+### Input, output, frame, and units
+
+Let the stored transformation be
+
+$$
+\mathbf T_{ab}
+=
+\begin{bmatrix}
+\mathbf R_{ab}&{}^{a}\mathbf p_b\\
+\mathbf0_3^{\mathsf T}&1
+\end{bmatrix}
+\in SE(3),
+$$
+
+where $\mathbf R_{ab}\in SO(3)$ expresses frame $\{b\}$ axes in frame $\{a\}$ axes, and ${}^{a}\mathbf p_b\in\mathbb R^3$ is the position of the origin $O_b$ relative to $O_a$, expressed in $\{a\}$ and measured in metres. Let one physical twist have the two linear-first coordinate columns
+
+$$
+{}^{b}\boldsymbol\xi
+=
+\begin{bmatrix}
+{}^{b}\boldsymbol\nu\\
+{}^{b}\boldsymbol\omega
+\end{bmatrix},
+\qquad
+{}^{a}\boldsymbol\xi
+=
+\begin{bmatrix}
+{}^{a}\boldsymbol\nu\\
+{}^{a}\boldsymbol\omega
+\end{bmatrix}
+\in\mathbb R^6.
+$$
+
+The columns ${}^{b}\boldsymbol\nu$ and ${}^{a}\boldsymbol\nu$ have units of $\mathrm{m\,s^{-1}}$, while ${}^{b}\boldsymbol\omega$ and ${}^{a}\boldsymbol\omega$ have units of $\mathrm{rad\,s^{-1}}$. The superscript identifies the axes used for the numerical components; it does not identify a different physical motion.
+
+The geometry derived in @sec-spatial-kernel-constant-twist-integration established the component relations
+
+$$
+{}^{a}\boldsymbol\omega
+=
+\mathbf R_{ab}{}^{b}\boldsymbol\omega,
+$$
+
+and
+
+$$
+{}^{a}\boldsymbol\nu
+=
+\mathbf R_{ab}{}^{b}\boldsymbol\nu
++
+{}^{a}\mathbf p_b
+\times
+\left(\mathbf R_{ab}{}^{b}\boldsymbol\omega\right).
+$$
+
+The angular equation expresses the same angular velocity along the new axes. In the linear equation, $\mathbf R_{ab}{}^{b}\boldsymbol\nu$ first expresses the body-origin velocity along frame $\{a\}$ axes, and the cross product then shifts the velocity field's reference point from $O_b$ to $O_a$.
+
+For every $\mathbf y\in\mathbb R^3$, the cross-product matrix is defined by $[{}^{a}\mathbf p_b]_{\times}\mathbf y={}^a\mathbf p_b\times\mathbf y$. Using that definition and stacking the linear block above the angular block produces the project's linear-first adjoint:
+
+$$
+\boxed{
+{}^{a}\boldsymbol\xi
+=
+\operatorname{Ad}_{\mathbf T_{ab}}{}^{b}\boldsymbol\xi
+},
+\qquad
+\boxed{
+\operatorname{Ad}_{\mathbf T_{ab}}
+=
+\begin{bmatrix}
+\mathbf R_{ab}&[{}^{a}\mathbf p_b]_{\times}\mathbf R_{ab}\\
+\mathbf0_{3\times3}&\mathbf R_{ab}
+\end{bmatrix}
+\in\mathbb R^{6\times6}
+}.
+$$
+
+The two diagonal rotation blocks are dimensionless. The upper-right block contains the translation in metres; multiplying it by angular velocity produces linear velocity because radians are dimensionless. Modern Robotics writes a twist in angular-first order, so its equivalent translation-coupling block appears in the lower-left. The project deliberately uses linear-first order, matching the declared `Vector6LinearFirst` layout, so copying an angular-first block arrangement would implement the wrong public convention.
+
+### The conjugation identity checks the convention
+
+The $6\times6$ formula must agree with the corresponding change of coordinates for the $4\times4$ tangent matrix. For the linear-first twist ${}^{b}\boldsymbol\xi$, the hat map is
+
+$$
+\widehat{{}^{b}\boldsymbol\xi}
+=
+\begin{bmatrix}
+[{}^{b}\boldsymbol\omega]_{\times}&{}^{b}\boldsymbol\nu\\
+\mathbf0_3^{\mathsf T}&0
+\end{bmatrix}.
+$$
+
+Substitute this matrix and the rigid-transform inverse into the conjugation product:
+
+$$
+\begin{aligned}
+\mathbf T_{ab}
+\widehat{{}^{b}\boldsymbol\xi}
+\mathbf T_{ab}^{-1}
+&=
+\begin{bmatrix}
+\mathbf R_{ab}[{}^{b}\boldsymbol\omega]_{\times}\mathbf R_{ab}^{\mathsf T}
+&
+-\mathbf R_{ab}[{}^{b}\boldsymbol\omega]_{\times}\mathbf R_{ab}^{\mathsf T}{}^{a}\mathbf p_b
++\mathbf R_{ab}{}^{b}\boldsymbol\nu\\
+\mathbf0_3^{\mathsf T}&0
+\end{bmatrix}\\
+&=
+\begin{bmatrix}
+[\mathbf R_{ab}{}^{b}\boldsymbol\omega]_{\times}
+&
+\mathbf R_{ab}{}^{b}\boldsymbol\nu
++{}^{a}\mathbf p_b\times(\mathbf R_{ab}{}^{b}\boldsymbol\omega)\\
+\mathbf0_3^{\mathsf T}&0
+\end{bmatrix}.
+\end{aligned}
+$$
+
+The second equality uses $\mathbf R[\boldsymbol\omega]_{\times}\mathbf R^{\mathsf T}=[\mathbf R\boldsymbol\omega]_{\times}$ and $-[\mathbf y]_{\times}\mathbf p=\mathbf p\times\mathbf y$.[^adjoint-cross-product-identities] The resulting rotational block and linear column are exactly the hat matrix of the adjoint-transformed twist. Therefore,
+
+[^adjoint-cross-product-identities]: To verify the first identity, apply both sides to an arbitrary $\mathbf x\in\mathbb R^3$. The left side gives $\mathbf R\bigl(\boldsymbol\omega\times(\mathbf R^{\mathsf T}\mathbf x)\bigr)=(\mathbf R\boldsymbol\omega)\times(\mathbf R\mathbf R^{\mathsf T}\mathbf x)=(\mathbf R\boldsymbol\omega)\times\mathbf x$, because a proper rotation preserves cross products and $\mathbf R\mathbf R^{\mathsf T}=\mathbf I_3$. This is $[\mathbf R\boldsymbol\omega]_{\times}\mathbf x$ for every $\mathbf x$, so the two matrices are equal. The second identity follows from cross-product antisymmetry: $-[\mathbf y]_{\times}\mathbf p=-(\mathbf y\times\mathbf p)=\mathbf p\times\mathbf y$.
+
+$$
+\boxed{
+\widehat{\operatorname{Ad}_{\mathbf T_{ab}}{}^{b}\boldsymbol\xi}
+=
+\mathbf T_{ab}
+\widehat{{}^{b}\boldsymbol\xi}
+\mathbf T_{ab}^{-1}
+}.
+$$
+
+This identity is more useful as independent verification than as the production algorithm. Applying it to one twist requires a transform inverse, two $4\times4$ products, a hat operation, and a vee operation. Constructing the complete $6\times6$ adjoint through the identity would require repeating that work for all six basis columns. The direct block formula constructs the requested matrix with one $3\times3$ product while keeping the project's frame and component-order convention visible.
+
+### Public method and implementation
+
+The public member declaration is
+
+```cpp
+// Return the linear-first adjoint Ad_T.
+// It maps twist coordinates referenced to {b} into coordinates
+// referenced to {a} when this transform is T_ab.
+[[nodiscard]] Eigen::Matrix<double, 6, 6> adjoint() const;
+```
+
+The method takes no argument because the stored `Transform3` is the only input needed to construct $\operatorname{Ad}_{\mathbf T_{ab}}$. The trailing `const` promises not to change that stored transformation, and `[[nodiscard]]` asks the compiler to warn when a caller discards the returned coordinate-conversion matrix.
+
+The implementation is
+
+```cpp
+Eigen::Matrix<double, 6, 6> Transform3::adjoint() const
+{
+  const Eigen::Matrix3d rotation = rotation_.matrix();
+  const Eigen::Matrix3d translation_hat = hat_so3(translation_);
+  const Eigen::Matrix3d translation_rotation = translation_hat * rotation;
+
+  if (!translation_rotation.allFinite()) {
+    throw GeometryException(
+      GeometryError::unsupported_magnitude,
+      "Adjoint is outside the supported numerical range.");
+  }
+
+  Eigen::Matrix<double, 6, 6> adjoint_matrix =
+    Eigen::Matrix<double, 6, 6>::Zero();
+
+  adjoint_matrix.block<3, 3>(0, 0) = rotation;
+  adjoint_matrix.block<3, 3>(0, 3) = translation_rotation;
+  adjoint_matrix.block<3, 3>(3, 3) = rotation;
+
+  return adjoint_matrix;
+}
+```
+
+`rotation` is $\mathbf R_{ab}$, `translation_hat` is $[{}^{a}\mathbf p_b]_{\times}$, and `translation_rotation` is their required left-to-right product $[{}^{a}\mathbf p_b]_{\times}\mathbf R_{ab}$. Matrix multiplication acts on a twist from right to left, so this order first rotates ${}^{b}\boldsymbol\omega$ into frame $\{a\}$ and then calculates the cross product with ${}^{a}\mathbf p_b$. Replacing the product with `translation_hat` alone would be correct only when $\mathbf R_{ab}=\mathbf I_3$.
+
+`Eigen::Matrix<double, 6, 6>::Zero()` establishes the complete zero matrix, including the required lower-left block. Each call `block<3, 3>(start_row, start_column)` then selects a fixed $3\times3$ region by its starting indices: `(0, 0)` is the upper-left block, `(0, 3)` is the upper-right block, and `(3, 3)` is the lower-right block. The arguments are locations for `block`, unlike the runtime-size arguments of an Eigen corner accessor.
+
+The equation-to-code correspondence is
+
+| Mathematical object | Code expression | Meaning |
+|---|---|---|
+| $\mathbf R_{ab}$ | `rotation_.matrix()` | Express frame $\{b\}$ axes along frame $\{a\}$ axes |
+| ${}^{a}\mathbf p_b$ | `translation_` | Position of $O_b$ relative to $O_a$, expressed in $\{a\}$ and measured in metres |
+| $[{}^{a}\mathbf p_b]_{\times}$ | `hat_so3(translation_)` | Matrix that calculates ${}^{a}\mathbf p_b\times\mathbf y$ |
+| $[{}^{a}\mathbf p_b]_{\times}\mathbf R_{ab}$ | `translation_hat * rotation` | Rotate angular components into $\{a\}$, then shift the velocity-field reference point |
+| $\operatorname{Ad}_{\mathbf T_{ab}}$ | `adjoint_matrix` | Linear-first $6\times6$ coordinate-conversion matrix |
+
+### Usage and analytic result {#sec-spatial-kernel-adjoint-usage}
+
+This example uses zero relative rotation, $\mathbf R_{ab}=\mathbf I_3$, so the frame axes align. The nonzero ${}^{a}\mathbf p_b$ and ${}^{b}\boldsymbol\omega$ keep the upper-right coupling $[{}^{a}\mathbf p_b]_{\times}\mathbf R_{ab}$ observable. The calculation therefore isolates the shift between the frame origins and supplies the expected result for the first focused adjoint test.
+
+Use the specification acceptance inputs ${}^{a}\mathbf p_b=[1\;2\;3]^{\mathsf T}\ \mathrm m$ and
+
+$$
+{}^{b}\boldsymbol\xi
+=
+\begin{bmatrix}
+4&5&6&1&0&-1
+\end{bmatrix}^{\mathsf T},
+$$
+
+where the first block has units of $\mathrm{m\,s^{-1}}$ and the second has units of $\mathrm{rad\,s^{-1}}$. The translation contribution is
+
+$$
+{}^{a}\mathbf p_b\times\left(\mathbf R_{ab}{}^{b}\boldsymbol\omega\right)
+=
+\begin{bmatrix}1\\2\\3\end{bmatrix}
+\times
+\begin{bmatrix}1\\0\\-1\end{bmatrix}
+=
+\begin{bmatrix}-2\\4\\-2\end{bmatrix}
+\mathrm{m\,s^{-1}}.
+$$
+
+Because the rotation is identity, the converted linear and angular blocks are
+
+$$
+{}^{a}\boldsymbol\nu
+=
+\begin{bmatrix}
+4\\5\\6
+\end{bmatrix}
++
+\begin{bmatrix}
+-2\\4\\-2
+\end{bmatrix}
+=
+\begin{bmatrix}
+2\\9\\4
+\end{bmatrix}
+\mathrm{m\,s^{-1}},
+\qquad
+{}^{a}\boldsymbol\omega
+=
+\begin{bmatrix}
+1\\0\\-1
+\end{bmatrix}
+\mathrm{rad\,s^{-1}}.
+$$
+
+Stacking these two blocks in the declared order gives ${}^{a}\boldsymbol\xi=[2\;9\;4\;1\;0\;-1]^{\mathsf T}$, with the first three components in $\mathrm{m\,s^{-1}}$ and the final three components in $\mathrm{rad\,s^{-1}}$.
+
+The public API is used as follows:
+
+```cpp
+Eigen::Matrix4d matrix_ab = Eigen::Matrix4d::Identity();
+matrix_ab(0, 3) = 1.0;
+matrix_ab(1, 3) = 2.0;
+matrix_ab(2, 3) = 3.0;
+
+const rigid_body_kinematics::Transform3 transform_ab =
+  rigid_body_kinematics::Transform3::from_matrix(matrix_ab);
+
+// xi_b = [nu_b; omega_b].
+const rigid_body_kinematics::Vector6LinearFirst twist_b(
+  4.0, 5.0, 6.0, 1.0, 0.0, -1.0);
+
+const rigid_body_kinematics::Vector6LinearFirst twist_a =
+  transform_ab.adjoint() * twist_b;
+```
+
+The multiplication `transform_ab.adjoint() * twist_b` follows the project's column-vector and rightmost-first convention: construct the adjoint from $\mathbf T_{ab}$, then apply that matrix to ${}^{b}\boldsymbol\xi$ to obtain ${}^{a}\boldsymbol\xi$.
+
+The first focused GTest case uses this same transformation and twist, then checks all six components against the independently derived result $[2\;9\;4\;1\;0\;-1]^{\mathsf T}$. The worked calculation above is therefore the test oracle, not a separate example introduced only to exercise the API.
+
+### Validation and focused evidence
+
+A valid `Transform3` already guarantees finite stored translation components and a finite proper rotation. Those guarantees do not prove that the product $[{}^{a}\mathbf p_b]_{\times}\mathbf R_{ab}$ is representable in binary64. Two finite products may be added inside one matrix entry and overflow. The implementation therefore checks `translation_rotation.allFinite()` before placing the product in a valid-looking adjoint matrix; failure reports `GeometryError::unsupported_magnitude`.
+
+The five focused GTest cases establish complementary properties:
+
+| Case                                                           | Property established                                                                                                                                  |
+| -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Specification case worked in @sec-spatial-kernel-adjoint-usage | Independent linear-first result $[2\;9\;4\;1\;0\;-1]^{\mathsf T}$                                                                                     |
+| Quarter-turn rotation with nonzero translation                 | $\mathbf R_{ab}$ acts before the cross product, so omitting the rotation factor is detected                                                           |
+| Homogeneous conjugation identity                               | The complete $6\times6$ convention agrees with $\mathbf T_{ab}\widehat{{}^{b}\boldsymbol\xi}\mathbf T_{ab}^{-1}$ for a nontrivial transform and twist |
+| Identity transform                                             | $\operatorname{Ad}_{\mathbf I_4}=\mathbf I_6$ exactly                                                                                                 |
+| Extreme finite translation with a $\pi/4$ rotation about $x$   | A non-finite required product reports `unsupported_magnitude` rather than returning infinities                                                        |
+
+The analytic specification case alone cannot detect a missing factor $\mathbf R_{ab}$ because its rotation is identity. The separate non-identity case isolates that multiplication-order defect. The conjugation test then checks the same operation through independently tested homogeneous-transform, inverse, and hat-map paths instead of copying the production block construction into the expected result.
+
+### Deliberate limits
+
+The member constructs the adjoint matrix but does not attach runtime frame labels or units to that matrix, so the caller must preserve the declared $\mathbf T_{ab}$ direction and apply it to coordinates expressed in $\{b\}$. It does not mutate the transformation, infer a transform from twist data, or calculate a transformation exponential. Applying the returned matrix to a twist remains an explicit matrix--column product at the call site.
 
 ## References {.unnumbered}
 

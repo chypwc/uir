@@ -70,6 +70,11 @@ public:
     const Vector6LinearFirst & body_twist, double delta_time,
     const NumericalPolicy & policy = NumericalPolicy{}) const;
 
+  // Return the linear-first adjoint Ad_T.
+  // It maps twist coordinates referenced to {b} into coordinates
+  // referenced to {a} when this transform is T_ab.
+  [[nodiscard]] Eigen::Matrix<double, 6, 6> adjoint() const;
+
 private:
   Transform3(const Rotation3 & rotation, const Eigen::Vector3d & translation);
 

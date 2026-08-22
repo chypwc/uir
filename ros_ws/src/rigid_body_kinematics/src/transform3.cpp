@@ -3,6 +3,7 @@
 #include <cmath>
 
 #include "rigid_body_kinematics/geometry_error.hpp"
+#include "rigid_body_kinematics/lie_algebra.hpp"
 
 namespace rigid_body_kinematics
 {
@@ -372,4 +373,27 @@ Transform3 Transform3::integrate_constant_body_twist(
   // T_0 T_Δ. Access compose through the initial-pose pointer.
   return this->compose(increment);
 }
+
+Eigen::Matrix<double, 6, 6> Transform3::adjoint() const
+{
+  const Eigen::Matrix3d rotation = rotation_.matrix();
+  const Eigen::Matrix3d translation_hat = hat_so3(translation_);
+  const Eigen::Matrix3d translation_rotation = translation_hat * rotation;
+
+  if (!translation_rotation.allFinite()) {
+    throw GeometryException(
+      GeometryError::unsupported_magnitude,
+      "Adjoint is outside the supported numerical range.");
+  }
+
+  Eigen::Matrix<double, 6, 6> adjoint_matrix =
+    Eigen::Matrix<double, 6, 6>::Zero();
+
+  adjoint_matrix.block<3, 3>(0, 0) = rotation;
+  adjoint_matrix.block<3, 3>(0, 3) = translation_rotation;
+  adjoint_matrix.block<3, 3>(3, 3) = rotation;
+
+  return adjoint_matrix;
+}
+
 }  // namespace rigid_body_kinematics

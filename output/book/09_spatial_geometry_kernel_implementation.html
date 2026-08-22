@@ -547,6 +547,15 @@ window.Quarto = {
   <li><a href="#equivalent-body-and-space-quarter-circle-example" id="toc-equivalent-body-and-space-quarter-circle-example" class="nav-link" data-scroll-target="#equivalent-body-and-space-quarter-circle-example"><span class="header-section-number">9.12.5</span> Equivalent body and space quarter-circle example</a></li>
   <li><a href="#validation-and-deliberate-limits" id="toc-validation-and-deliberate-limits" class="nav-link" data-scroll-target="#validation-and-deliberate-limits"><span class="header-section-number">9.12.6</span> Validation and deliberate limits</a></li>
   </ul></li>
+  <li><a href="#sec-spatial-kernel-se3-adjoint" id="toc-sec-spatial-kernel-se3-adjoint" class="nav-link" data-scroll-target="#sec-spatial-kernel-se3-adjoint"><span class="header-section-number">9.13</span> Linear-first <span class="math inline">\(SE(3)\)</span> adjoint</a>
+  <ul class="collapse">
+  <li><a href="#input-output-frame-and-units-4" id="toc-input-output-frame-and-units-4" class="nav-link" data-scroll-target="#input-output-frame-and-units-4"><span class="header-section-number">9.13.1</span> Input, output, frame, and units</a></li>
+  <li><a href="#the-conjugation-identity-checks-the-convention" id="toc-the-conjugation-identity-checks-the-convention" class="nav-link" data-scroll-target="#the-conjugation-identity-checks-the-convention"><span class="header-section-number">9.13.2</span> The conjugation identity checks the convention</a></li>
+  <li><a href="#public-method-and-implementation" id="toc-public-method-and-implementation" class="nav-link" data-scroll-target="#public-method-and-implementation"><span class="header-section-number">9.13.3</span> Public method and implementation</a></li>
+  <li><a href="#sec-spatial-kernel-adjoint-usage" id="toc-sec-spatial-kernel-adjoint-usage" class="nav-link" data-scroll-target="#sec-spatial-kernel-adjoint-usage"><span class="header-section-number">9.13.4</span> Usage and analytic result</a></li>
+  <li><a href="#validation-and-focused-evidence-3" id="toc-validation-and-focused-evidence-3" class="nav-link" data-scroll-target="#validation-and-focused-evidence-3"><span class="header-section-number">9.13.5</span> Validation and focused evidence</a></li>
+  <li><a href="#deliberate-limits-7" id="toc-deliberate-limits-7" class="nav-link" data-scroll-target="#deliberate-limits-7"><span class="header-section-number">9.13.6</span> Deliberate limits</a></li>
+  </ul></li>
   <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
   </ul>
 </nav>
@@ -844,14 +853,15 @@ e_{\det}
 </section>
 <section id="numerical-policy-and-error-types" class="level3" data-number="9.2.3">
 <h3 data-number="9.2.3" class="anchored" data-anchor-id="numerical-policy-and-error-types"><span class="header-section-number">9.2.3</span> Numerical policy and error types</h3>
-<p>The two tolerances needed by this block are stored together:</p>
+<p><code>NumericalPolicy</code> and <code>GeometryError</code> are shared types used by several kernel operations. The production headers define each type once, but this retrospective introduces their members in dependency order. The snippets in this subsection therefore show the members needed by the first <code>Rotation3</code> block, not the final chapter-wide declarations. When a later operation needs a genuinely new policy value or failure category, its section explicitly adds that member to the same shared type before using it.</p>
+<p>The first two tolerances are stored together:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> NumericalPolicy</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">double</span> orthogonality_tolerance<span class="op">{</span><span class="fl">1.0e-12</span><span class="op">};</span></span>
 <span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">double</span> determinant_tolerance<span class="op">{</span><span class="fl">1.0e-12</span><span class="op">};</span></span>
 <span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>A <code>struct</code> is used because these two values are simple public settings. The braces after each member give the default value used by <code>NumericalPolicy{}</code>. Both values are dimensionless because they are compared with dimensionless rotation residuals.</p>
-<p>Failures contain both a category that code can test and a message that a person can read:</p>
+<p>The first four error categories support rotation construction and free-vector action. Failures contain both a category that code can test and a message that a person can read:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">enum</span> <span class="kw">class</span> GeometryError</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  non_finite<span class="op">,</span></span>
@@ -1038,6 +1048,7 @@ e_{\det}
 <span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><code>rotation_</code> can contain only a <code>Rotation3</code> that has passed the <span class="math inline">\(SO(3)\)</span> checks from <a href="#sec-spatial-kernel-rotation3" class="quarto-xref"><span>Section 9.2</span></a>. <code>translation_</code> stores <span class="math inline">\({}^{a}\mathbf p_b\)</span> in metres. The private constructor prevents a caller from combining an unchecked rotation with a translation. <code>identity()</code> constructs the pair <span class="math inline">\((\mathbf I_3,\mathbf 0_3)\)</span>.</p>
 <p>The class does not store the raw <span class="math inline">\(4\times4\)</span> input. After validation, its bottom row contains no additional information, so storing only <span class="math inline">\((\mathbf R_{ab},{}^{a}\mathbf p_b)\)</span> prevents an internally malformed homogeneous row. A later matrix accessor can reconstruct the convenient homogeneous representation with the exact bottom row <span class="math inline">\([0\;0\;0\;1]\)</span>.</p>
+<p>The <code>Transform3</code> block extends the shared <code>NumericalPolicy</code> with <code>double homogeneous_row_tolerance{1.0e-12};</code>, a dimensionless absolute tolerance for the fixed bottom row. It also extends the shared <code>GeometryError</code> enumeration with <code>invalid_transform</code>, which reports a finite homogeneous matrix whose required structure is malformed. These are additions to the types introduced in <a href="#sec-spatial-kernel-rotation3" class="quarto-xref"><span>Section 9.2</span></a>, not separate transform-specific policy or error types.</p>
 </section>
 <section id="complete-from_matrix-implementation-1" class="level3" data-number="9.3.2">
 <h3 data-number="9.3.2" class="anchored" data-anchor-id="complete-from_matrix-implementation-1"><span class="header-section-number">9.3.2</span> Complete <code>from_matrix</code> implementation</h3>
@@ -1506,7 +1517,8 @@ A_{21}
 =
 {}^{a}\boldsymbol\eta.
 \]</span></p>
-<p>The same <span class="math inline">\(SE(3)\)</span> map accepts a linear-first twist <span class="math inline">\([({}^{a}\boldsymbol\nu)^{\mathsf T}\;({}^{a}\boldsymbol\omega)^{\mathsf T}]^{\mathsf T}\)</span> when the blocks instead have units <span class="math inline">\(\mathrm{m\,s^{-1}}\)</span> and <span class="math inline">\(\mathrm{rad\,s^{-1}}\)</span>. The hat map only rearranges the supplied components into a structured matrix; it does not evaluate an exponential. Its output belongs to <span class="math inline">\(\mathfrak{se}(3)\)</span> and is not a homogeneous transformation in <span class="math inline">\(SE(3)\)</span>: its bottom-right entry is zero rather than one. The mathematical vee maps above require exact membership in <span class="math inline">\(\mathfrak{so}(3)\)</span> or <span class="math inline">\(\mathfrak{se}(3)\)</span>; the software implementation below extends their accepted numerical inputs only by the explicitly checked tangent tolerance.</p>
+<p>The same <span class="math inline">\(SE(3)\)</span> map accepts a linear-first twist <span class="math inline">\([({}^{a}\boldsymbol\nu)^{\mathsf T}\;({}^{a}\boldsymbol\omega)^{\mathsf T}]^{\mathsf T}\)</span> when the blocks instead have units <span class="math inline">\(\mathrm{m\,s^{-1}}\)</span> and <span class="math inline">\(\mathrm{rad\,s^{-1}}\)</span>. The hat map only rearranges the supplied components into a structured matrix; it does not evaluate an exponential. Its output belongs to <span class="math inline">\(\mathfrak{se}(3)\)</span> and is not a homogeneous transformation in <span class="math inline">\(SE(3)\)</span>: its bottom-right entry is zero rather than one. The mathematical vee maps above require exact membership in <span class="math inline">\(\mathfrak{so}(3)\)</span> or <span class="math inline">\(\mathfrak{se}(3)\)</span>; the software implementation below accepts only explicitly bounded structural residuals beyond those exact domains.</p>
+<p>The hat-and-vee block extends <code>NumericalPolicy</code> with <code>double tangent_tolerance{1.0e-12};</code>, the absolute tolerance used to accept only small structural residuals in a numerical tangent matrix. It also extends <code>GeometryError</code> with <code>invalid_tangent</code>, which reports a finite matrix that violates the required skew symmetry or <span class="math inline">\(\mathfrak{se}(3)\)</span> bottom-row structure. The hat operations do not need this tolerance because they construct the required structure directly; the vee operations use it when validating an external matrix.</p>
 </section>
 <section id="public-functions-and-the-fixed-component-order-alias" class="level3" data-number="9.5.2">
 <h3 data-number="9.5.2" class="anchored" data-anchor-id="public-functions-and-the-fixed-component-order-alias"><span class="header-section-number">9.5.2</span> Public functions and the fixed component-order alias</h3>
@@ -1718,13 +1730,13 @@ B(\theta)=\frac{1-\cos\theta}{\theta^2}.
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="at">static</span> Rotation3 from_rotation_vector<span class="op">(</span></span>
 <span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> Eigen<span class="op">::</span>Vector3d <span class="op">&amp;</span> rotation_vector<span class="op">,</span></span>
 <span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> NumericalPolicy <span class="op">&amp;</span> policy <span class="op">=</span> NumericalPolicy<span class="op">{});</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>The two policy values introduced by this operation are</p>
+<p>This operation extends the existing <code>NumericalPolicy</code> with two more members:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Inclusive upper bound for the small-angle series</span></span>
 <span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="dt">double</span> series_angle_threshold<span class="op">{</span><span class="fl">1.0e-4</span><span class="op">};</span></span>
 <span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a><span class="co">// Maximum supported rotation-vector norm in radians.</span></span>
 <span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a><span class="dt">double</span> maximum_exponential_angle<span class="op">{</span><span class="fl">1.0e6</span><span class="op">};</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>The first value selects a numerically stable formula; it does not classify a small nonzero motion as zero. The second value declares the largest angular input for which the interface promises to evaluate trigonometric functions and the subsequent matrix arithmetic.</p>
+<p>These members are added to the same policy that already contains the rotation, homogeneous-row, and tangent tolerances. The first value selects a numerically stable formula; it does not classify a small nonzero motion as zero. The second value declares the largest angular input for which the interface promises to evaluate trigonometric functions and the subsequent matrix arithmetic.</p>
 </section>
 <section id="validation-and-overflow-safe-angle-calculation" class="level3" data-number="9.6.4">
 <h3 data-number="9.6.4" class="anchored" data-anchor-id="validation-and-overflow-safe-angle-calculation"><span class="header-section-number">9.6.4</span> Validation and overflow-safe angle calculation</h3>
@@ -1903,6 +1915,10 @@ SO(3)
 <span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a>  Eigen<span class="op">::</span>Vector3d rotation_vector<span class="op">;</span></span>
 <span id="cb39-12"><a href="#cb39-12" aria-hidden="true" tabindex="-1"></a>  RotationLogBranch branch<span class="op">;</span></span>
 <span id="cb39-13"><a href="#cb39-13" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Near <span class="math inline">\(\pi\)</span>, recovering the rotation axis requires a separate stable formula region. This operation therefore extends <code>NumericalPolicy</code> with</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb40"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Inclusive distance from pi for near-pi axis recovery.</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="dt">double</span> near_pi_tolerance<span class="op">{</span><span class="fl">1.0e-6</span><span class="op">};</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The new member is measured in radians and sets the inclusive distance below <span class="math inline">\(\pi\)</span> at which the near-<span class="math inline">\(\pi\)</span> formula begins. The logarithm reuses the previously added <code>series_angle_threshold</code> for its small-angle region.</p>
 <p>The branch value makes a numerically important decision observable in tests and diagnostics. Here <code>nominal</code> means the ordinary middle-angle case in which the direct logarithm formula is suitable; it does not mean a desired or commanded angle. The four regions are</p>
 <pre class="text"><code>theta = 0                                             identity
 0 &lt; theta &lt;= series_angle_threshold                   small_angle
@@ -1937,31 +1953,31 @@ R_{21}-R_{12}
 2\sin\theta\,{}^{a}\mathbf s_\omega.
 \]</span></p>
 <p>The corresponding C++ is</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb41"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="dt">double</span> cosine_theta <span class="op">=</span> <span class="fl">0.5</span> <span class="op">*</span> <span class="op">(</span><span class="va">matrix_</span><span class="op">.</span>trace<span class="op">()</span> <span class="op">-</span> <span class="fl">1.0</span><span class="op">);</span></span>
-<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a><span class="co">// clang-format off</span></span>
-<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> Eigen<span class="op">::</span>Vector3d skew_difference<span class="op">(</span></span>
-<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>  <span class="va">matrix_</span><span class="op">(</span><span class="dv">2</span><span class="op">,</span> <span class="dv">1</span><span class="op">)</span> <span class="op">-</span> <span class="va">matrix_</span><span class="op">(</span><span class="dv">1</span><span class="op">,</span> <span class="dv">2</span><span class="op">),</span></span>
-<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>  <span class="va">matrix_</span><span class="op">(</span><span class="dv">0</span><span class="op">,</span> <span class="dv">2</span><span class="op">)</span> <span class="op">-</span> <span class="va">matrix_</span><span class="op">(</span><span class="dv">2</span><span class="op">,</span> <span class="dv">0</span><span class="op">),</span></span>
-<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>  <span class="va">matrix_</span><span class="op">(</span><span class="dv">1</span><span class="op">,</span> <span class="dv">0</span><span class="op">)</span> <span class="op">-</span> <span class="va">matrix_</span><span class="op">(</span><span class="dv">0</span><span class="op">,</span> <span class="dv">1</span><span class="op">));</span></span>
-<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a><span class="co">// clang-format on</span></span>
-<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="dt">double</span> sine_theta <span class="op">=</span></span>
-<span id="cb41-11"><a href="#cb41-11" aria-hidden="true" tabindex="-1"></a>  <span class="fl">0.5</span> <span class="op">*</span> skew_difference<span class="op">.</span>stableNorm<span class="op">();</span></span>
-<span id="cb41-12"><a href="#cb41-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb41-13"><a href="#cb41-13" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="dt">double</span> theta <span class="op">=</span></span>
-<span id="cb41-14"><a href="#cb41-14" aria-hidden="true" tabindex="-1"></a>  <span class="bu">std::</span>atan2<span class="op">(</span>sine_theta<span class="op">,</span> cosine_theta<span class="op">);</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb42"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="dt">double</span> cosine_theta <span class="op">=</span> <span class="fl">0.5</span> <span class="op">*</span> <span class="op">(</span><span class="va">matrix_</span><span class="op">.</span>trace<span class="op">()</span> <span class="op">-</span> <span class="fl">1.0</span><span class="op">);</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a><span class="co">// clang-format off</span></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> Eigen<span class="op">::</span>Vector3d skew_difference<span class="op">(</span></span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>  <span class="va">matrix_</span><span class="op">(</span><span class="dv">2</span><span class="op">,</span> <span class="dv">1</span><span class="op">)</span> <span class="op">-</span> <span class="va">matrix_</span><span class="op">(</span><span class="dv">1</span><span class="op">,</span> <span class="dv">2</span><span class="op">),</span></span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>  <span class="va">matrix_</span><span class="op">(</span><span class="dv">0</span><span class="op">,</span> <span class="dv">2</span><span class="op">)</span> <span class="op">-</span> <span class="va">matrix_</span><span class="op">(</span><span class="dv">2</span><span class="op">,</span> <span class="dv">0</span><span class="op">),</span></span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a>  <span class="va">matrix_</span><span class="op">(</span><span class="dv">1</span><span class="op">,</span> <span class="dv">0</span><span class="op">)</span> <span class="op">-</span> <span class="va">matrix_</span><span class="op">(</span><span class="dv">0</span><span class="op">,</span> <span class="dv">1</span><span class="op">));</span></span>
+<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a><span class="co">// clang-format on</span></span>
+<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-10"><a href="#cb42-10" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="dt">double</span> sine_theta <span class="op">=</span></span>
+<span id="cb42-11"><a href="#cb42-11" aria-hidden="true" tabindex="-1"></a>  <span class="fl">0.5</span> <span class="op">*</span> skew_difference<span class="op">.</span>stableNorm<span class="op">();</span></span>
+<span id="cb42-12"><a href="#cb42-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-13"><a href="#cb42-13" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="dt">double</span> theta <span class="op">=</span></span>
+<span id="cb42-14"><a href="#cb42-14" aria-hidden="true" tabindex="-1"></a>  <span class="bu">std::</span>atan2<span class="op">(</span>sine_theta<span class="op">,</span> cosine_theta<span class="op">);</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The identifier-to-equation mapping in this block is direct: <code>matrix_</code> is <span class="math inline">\(\mathbf R\)</span>, <code>cosine_theta</code> is <span class="math inline">\(\cos\theta\)</span>, <code>skew_difference</code> is <span class="math inline">\({}^{a}\mathbf u\)</span>, <code>sine_theta</code> is <span class="math inline">\(\sin\theta=\|{}^{a}\mathbf u\|_2/2\)</span>, and <code>theta</code> is the principal angle <span class="math inline">\(\theta\)</span>. In particular, the name <code>skew_difference</code> refers to the three-component column extracted from the skew matrix difference <span class="math inline">\(\mathbf R-\mathbf R^{\mathsf T}\)</span>; it is not itself a matrix. <code>stableNorm()</code> calculates <span class="math inline">\(\|{}^{a}\mathbf u\|_2\)</span> with internal scaling. Because the principal interval makes <span class="math inline">\(\sin\theta\geq0\)</span>, <code>sine_theta</code> is the nonnegative principal sine. <code>atan2(sine_theta, cosine_theta)</code> then recovers the angle in <span class="math inline">\([0,\pi]\)</span> without relying on <code>acos()</code> alone near the identity.</p>
 <p>For an exact rotation, <span class="math inline">\(\cos(\theta)\in[-1,1]\)</span>. Floating-point trace arithmetic can place it just outside that interval. The implementation clamps only an overshoot no larger than the dimensionless <code>orthogonality_tolerance</code>; a larger overshoot reports <code>invalid_rotation</code>. The tolerance is reused here because both checks measure dimensionless departure from a valid rotation, not because the two residuals are algebraically identical.</p>
 </section>
 <section id="identity-small-angle-and-nominal-formulas" class="level3" data-number="9.7.4">
 <h3 data-number="9.7.4" class="anchored" data-anchor-id="identity-small-angle-and-nominal-formulas"><span class="header-section-number">9.7.4</span> Identity, small-angle, and nominal formulas</h3>
 <p>The identity has no unique axis, but its principal rotation vector is uniquely zero. The function therefore returns before attempting to normalise an axis:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb42"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="op">(</span>theta <span class="op">==</span> <span class="fl">0.0</span><span class="op">)</span> <span class="op">{</span></span>
-<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> RotationLogResult<span class="op">{</span></span>
-<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>    Eigen<span class="op">::</span>Vector3d<span class="op">::</span>Zero<span class="op">(),</span></span>
-<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>    RotationLogBranch<span class="op">::</span>identity<span class="op">};</span></span>
-<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb43"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="op">(</span>theta <span class="op">==</span> <span class="fl">0.0</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> RotationLogResult<span class="op">{</span></span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>    Eigen<span class="op">::</span>Vector3d<span class="op">::</span>Zero<span class="op">(),</span></span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>    RotationLogBranch<span class="op">::</span>identity<span class="op">};</span></span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Away from the near-<span class="math inline">\(\pi\)</span> region, both nonzero branches use</p>
 <p><span class="math display">\[
 {}^{a}\boldsymbol\phi
@@ -1979,21 +1995,21 @@ R_{21}-R_{12}
 +O(\theta^6),
 \]</span></p>
 <p>while the nominal branch evaluates the direct ratio:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb43"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="op">(</span>theta <span class="op">&lt;=</span> policy<span class="op">.</span>series_angle_threshold<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> <span class="dt">double</span> theta_squared <span class="op">=</span> theta <span class="op">*</span> theta<span class="op">;</span></span>
-<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> <span class="dt">double</span> theta_fourth <span class="op">=</span> theta_squared <span class="op">*</span> theta_squared<span class="op">;</span></span>
-<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>  recovery_factor <span class="op">=</span></span>
-<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>    <span class="fl">0.5</span> <span class="op">+</span> theta_squared <span class="op">/</span> <span class="fl">12.0</span> <span class="op">+</span> <span class="fl">7.0</span> <span class="op">*</span> theta_fourth <span class="op">/</span> <span class="fl">720.0</span><span class="op">;</span></span>
-<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>  branch <span class="op">=</span> RotationLogBranch<span class="op">::</span>small_angle<span class="op">;</span></span>
-<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
-<span id="cb43-10"><a href="#cb43-10" aria-hidden="true" tabindex="-1"></a>  recovery_factor <span class="op">=</span> theta <span class="op">/</span> <span class="op">(</span><span class="fl">2.0</span> <span class="op">*</span> sine_theta<span class="op">);</span></span>
-<span id="cb43-11"><a href="#cb43-11" aria-hidden="true" tabindex="-1"></a>  branch <span class="op">=</span> RotationLogBranch<span class="op">::</span>nominal<span class="op">;</span></span>
-<span id="cb43-12"><a href="#cb43-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
-<span id="cb43-13"><a href="#cb43-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb43-14"><a href="#cb43-14" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> Eigen<span class="op">::</span>Vector3d rotation_vector <span class="op">=</span></span>
-<span id="cb43-15"><a href="#cb43-15" aria-hidden="true" tabindex="-1"></a>  recovery_factor <span class="op">*</span> skew_difference<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb44"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="op">(</span>theta <span class="op">&lt;=</span> policy<span class="op">.</span>series_angle_threshold<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> <span class="dt">double</span> theta_squared <span class="op">=</span> theta <span class="op">*</span> theta<span class="op">;</span></span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> <span class="dt">double</span> theta_fourth <span class="op">=</span> theta_squared <span class="op">*</span> theta_squared<span class="op">;</span></span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>  recovery_factor <span class="op">=</span></span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>    <span class="fl">0.5</span> <span class="op">+</span> theta_squared <span class="op">/</span> <span class="fl">12.0</span> <span class="op">+</span> <span class="fl">7.0</span> <span class="op">*</span> theta_fourth <span class="op">/</span> <span class="fl">720.0</span><span class="op">;</span></span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a>  branch <span class="op">=</span> RotationLogBranch<span class="op">::</span>small_angle<span class="op">;</span></span>
+<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a>  recovery_factor <span class="op">=</span> theta <span class="op">/</span> <span class="op">(</span><span class="fl">2.0</span> <span class="op">*</span> sine_theta<span class="op">);</span></span>
+<span id="cb44-11"><a href="#cb44-11" aria-hidden="true" tabindex="-1"></a>  branch <span class="op">=</span> RotationLogBranch<span class="op">::</span>nominal<span class="op">;</span></span>
+<span id="cb44-12"><a href="#cb44-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb44-13"><a href="#cb44-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-14"><a href="#cb44-14" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> Eigen<span class="op">::</span>Vector3d rotation_vector <span class="op">=</span></span>
+<span id="cb44-15"><a href="#cb44-15" aria-hidden="true" tabindex="-1"></a>  recovery_factor <span class="op">*</span> skew_difference<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>In this block, <code>theta_squared</code> and <code>theta_fourth</code> are <span class="math inline">\(\theta^2\)</span> and <span class="math inline">\(\theta^4\)</span>. The scalar <code>recovery_factor</code> is the factor <span class="math inline">\(\theta/(2\sin\theta)\)</span>, evaluated either by its series or by the direct formula. Multiplying it by <code>skew_difference</code>, which is <span class="math inline">\({}^{a}\mathbf u\)</span>, produces <code>rotation_vector</code>, which is <span class="math inline">\({}^{a}\boldsymbol\phi\)</span>. The small-angle branch preserves a representable nonzero rotation; only the exact identity returns zero. The nominal branch is used only when the direct denominator is separated from both zero-angle and near-<span class="math inline">\(\pi\)</span> numerical difficulties.</p>
 </section>
 <section id="recovering-the-axis-near-pi" class="level3" data-number="9.7.5">
@@ -2011,32 +2027,32 @@ R_{21}-R_{12}
 ({}^{a}\mathbf s_\omega)^{\mathsf T}.
 \]</span></p>
 <p>The code first constructs that matrix:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb44"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="dt">double</span> denominator <span class="op">=</span> <span class="fl">1.0</span> <span class="op">-</span> cosine_theta<span class="op">;</span></span>
-<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> Eigen<span class="op">::</span>Matrix3d symmetric_part <span class="op">=</span></span>
-<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>  <span class="fl">0.5</span> <span class="op">*</span> <span class="op">(</span><span class="va">matrix_</span> <span class="op">+</span> <span class="va">matrix_</span><span class="op">.</span>transpose<span class="op">());</span></span>
-<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> Eigen<span class="op">::</span>Matrix3d axis_outer_product <span class="op">=</span></span>
-<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a>  <span class="op">(</span>symmetric_part <span class="op">-</span> cosine_theta <span class="op">*</span> Eigen<span class="op">::</span>Matrix3d<span class="op">::</span>Identity<span class="op">())</span> <span class="op">/</span></span>
-<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a>  denominator<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Here <code>denominator</code> is <span class="math inline">\(1-\cos\theta\)</span>, <code>symmetric_part</code> is <span class="math inline">\((\mathbf R+\mathbf R^{\mathsf T})/2\)</span>, and <code>axis_outer_product</code> is <span class="math inline">\(\mathbf Q={}^{a}\mathbf s_\omega({}^{a}\mathbf s_\omega)^{\mathsf T}\)</span>. The largest diagonal entry <span class="math inline">\(Q_{kk}=({}^{a}s_{\omega,k})^2\)</span> identifies the safest component from which to recover the axis. A strict comparison retains the lowest index when two diagonal entries are equal:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb45"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>Eigen<span class="op">::</span>Index dominant_index <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb45"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="dt">double</span> denominator <span class="op">=</span> <span class="fl">1.0</span> <span class="op">-</span> cosine_theta<span class="op">;</span></span>
 <span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> <span class="op">(</span>Eigen<span class="op">::</span>Index index <span class="op">=</span> <span class="dv">1</span><span class="op">;</span> index <span class="op">&lt;</span> <span class="dv">3</span><span class="op">;</span> <span class="op">++</span>index<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(</span>axis_outer_product<span class="op">(</span>index<span class="op">,</span> index<span class="op">)</span> <span class="op">&gt;</span></span>
-<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>      axis_outer_product<span class="op">(</span>dominant_index<span class="op">,</span> dominant_index<span class="op">))</span> <span class="op">{</span></span>
-<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>    dominant_index <span class="op">=</span> index<span class="op">;</span></span>
-<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
-<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
-<span id="cb45-9"><a href="#cb45-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb45-10"><a href="#cb45-10" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="dt">double</span> dominant_component <span class="op">=</span> <span class="bu">std::</span>sqrt<span class="op">(</span></span>
-<span id="cb45-11"><a href="#cb45-11" aria-hidden="true" tabindex="-1"></a>  axis_outer_product<span class="op">(</span>dominant_index<span class="op">,</span> dominant_index<span class="op">));</span></span>
-<span id="cb45-12"><a href="#cb45-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb45-13"><a href="#cb45-13" aria-hidden="true" tabindex="-1"></a>Eigen<span class="op">::</span>Vector3d axis <span class="op">=</span></span>
-<span id="cb45-14"><a href="#cb45-14" aria-hidden="true" tabindex="-1"></a>  axis_outer_product<span class="op">.</span>col<span class="op">(</span>dominant_index<span class="op">)</span> <span class="op">/</span> dominant_component<span class="op">;</span></span>
-<span id="cb45-15"><a href="#cb45-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb45-16"><a href="#cb45-16" aria-hidden="true" tabindex="-1"></a>axis<span class="op">(</span>dominant_index<span class="op">)</span> <span class="op">=</span> dominant_component<span class="op">;</span></span>
-<span id="cb45-17"><a href="#cb45-17" aria-hidden="true" tabindex="-1"></a>axis <span class="op">/=</span> axis<span class="op">.</span>stableNorm<span class="op">();</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> Eigen<span class="op">::</span>Matrix3d symmetric_part <span class="op">=</span></span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>  <span class="fl">0.5</span> <span class="op">*</span> <span class="op">(</span><span class="va">matrix_</span> <span class="op">+</span> <span class="va">matrix_</span><span class="op">.</span>transpose<span class="op">());</span></span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> Eigen<span class="op">::</span>Matrix3d axis_outer_product <span class="op">=</span></span>
+<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a>  <span class="op">(</span>symmetric_part <span class="op">-</span> cosine_theta <span class="op">*</span> Eigen<span class="op">::</span>Matrix3d<span class="op">::</span>Identity<span class="op">())</span> <span class="op">/</span></span>
+<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a>  denominator<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Here <code>denominator</code> is <span class="math inline">\(1-\cos\theta\)</span>, <code>symmetric_part</code> is <span class="math inline">\((\mathbf R+\mathbf R^{\mathsf T})/2\)</span>, and <code>axis_outer_product</code> is <span class="math inline">\(\mathbf Q={}^{a}\mathbf s_\omega({}^{a}\mathbf s_\omega)^{\mathsf T}\)</span>. The largest diagonal entry <span class="math inline">\(Q_{kk}=({}^{a}s_{\omega,k})^2\)</span> identifies the safest component from which to recover the axis. A strict comparison retains the lowest index when two diagonal entries are equal:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb46"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>Eigen<span class="op">::</span>Index dominant_index <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> <span class="op">(</span>Eigen<span class="op">::</span>Index index <span class="op">=</span> <span class="dv">1</span><span class="op">;</span> index <span class="op">&lt;</span> <span class="dv">3</span><span class="op">;</span> <span class="op">++</span>index<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(</span>axis_outer_product<span class="op">(</span>index<span class="op">,</span> index<span class="op">)</span> <span class="op">&gt;</span></span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>      axis_outer_product<span class="op">(</span>dominant_index<span class="op">,</span> dominant_index<span class="op">))</span> <span class="op">{</span></span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>    dominant_index <span class="op">=</span> index<span class="op">;</span></span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-10"><a href="#cb46-10" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="dt">double</span> dominant_component <span class="op">=</span> <span class="bu">std::</span>sqrt<span class="op">(</span></span>
+<span id="cb46-11"><a href="#cb46-11" aria-hidden="true" tabindex="-1"></a>  axis_outer_product<span class="op">(</span>dominant_index<span class="op">,</span> dominant_index<span class="op">));</span></span>
+<span id="cb46-12"><a href="#cb46-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-13"><a href="#cb46-13" aria-hidden="true" tabindex="-1"></a>Eigen<span class="op">::</span>Vector3d axis <span class="op">=</span></span>
+<span id="cb46-14"><a href="#cb46-14" aria-hidden="true" tabindex="-1"></a>  axis_outer_product<span class="op">.</span>col<span class="op">(</span>dominant_index<span class="op">)</span> <span class="op">/</span> dominant_component<span class="op">;</span></span>
+<span id="cb46-15"><a href="#cb46-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-16"><a href="#cb46-16" aria-hidden="true" tabindex="-1"></a>axis<span class="op">(</span>dominant_index<span class="op">)</span> <span class="op">=</span> dominant_component<span class="op">;</span></span>
+<span id="cb46-17"><a href="#cb46-17" aria-hidden="true" tabindex="-1"></a>axis <span class="op">/=</span> axis<span class="op">.</span>stableNorm<span class="op">();</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>In this block, <code>dominant_index</code> is the mathematical index <span class="math inline">\(k\)</span>, <code>dominant_component</code> is the selected positive value <span class="math inline">\(\sqrt{Q_{kk}}\)</span>, and <code>axis</code> is the recovered unit-axis candidate <span class="math inline">\({}^{a}\widetilde{\mathbf s}_\omega\)</span>. The positive square root makes the selected dominant component positive, but that convention does not necessarily recover the orientation represented by the original rotation. The matrix <span class="math inline">\(\mathbf Q\)</span> determines only an unoriented axis line because</p>
 <p><span class="math display">\[
 \mathbf Q
@@ -2067,13 +2083,13 @@ R_{21}-R_{12}
 &lt;0.
 \]</span></p>
 <p>The code detects this case and corrects the orientation directly:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb46"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="dt">double</span> skew_alignment <span class="op">=</span> axis<span class="op">.</span>dot<span class="op">(</span>skew_difference<span class="op">);</span></span>
-<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="op">(</span>skew_alignment <span class="op">&lt;</span> <span class="fl">0.0</span><span class="op">)</span> <span class="op">{</span></span>
-<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>  axis <span class="op">=</span> <span class="op">-</span>axis<span class="op">;</span></span>
-<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
-<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> Eigen<span class="op">::</span>Vector3d rotation_vector <span class="op">=</span> theta <span class="op">*</span> axis<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb47"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="dt">double</span> skew_alignment <span class="op">=</span> axis<span class="op">.</span>dot<span class="op">(</span>skew_difference<span class="op">);</span></span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="op">(</span>skew_alignment <span class="op">&lt;</span> <span class="fl">0.0</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>  axis <span class="op">=</span> <span class="op">-</span>axis<span class="op">;</span></span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> Eigen<span class="op">::</span>Vector3d rotation_vector <span class="op">=</span> theta <span class="op">*</span> axis<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Here <code>axis</code> is the candidate <span class="math inline">\({}^{a}\widetilde{\mathbf s}_\omega\)</span>, <code>skew_difference</code> is <span class="math inline">\({}^{a}\mathbf u\)</span>, and <code>skew_alignment</code> is their dot product. If <code>skew_alignment</code> is negative, <code>axis = -axis</code> changes the candidate to the correct orientation; otherwise the candidate is retained. At exactly <span class="math inline">\(\theta=\pi\)</span>, <span class="math inline">\({}^{a}\mathbf u=\mathbf 0_3\)</span>, so the rotation matrix contains no information that distinguishes the two axis orientations; the strict test <code>&lt; 0.0</code> leaves the deterministic positive-dominant-component convention unchanged. After this decision, <code>rotation_vector</code> implements <span class="math inline">\({}^{a}\boldsymbol\phi=\theta{}^{a}\mathbf s_\omega\)</span>.</p>
 </section>
 <section id="concrete-half-turn-and-principal-branch-examples" class="level3" data-number="9.7.6">
@@ -2650,11 +2666,11 @@ C(\theta)
 <section id="public-factory-and-complete-implementation" class="level3" data-number="9.10.2">
 <h3 data-number="9.10.2" class="anchored" data-anchor-id="public-factory-and-complete-implementation"><span class="header-section-number">9.10.2</span> Public factory and complete implementation</h3>
 <p>The public factory accepts one linear-first coordinate column and returns a validated <code>Transform3</code> value:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb47"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Exponentiate finite linear-first coordinates [rho; phi].</span></span>
-<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a><span class="co">// rho is measured in metres and phi in radians.</span></span>
-<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a><span class="at">static</span> Transform3 from_exponential_coordinates<span class="op">(</span></span>
-<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> Vector6LinearFirst <span class="op">&amp;</span> coordinates<span class="op">,</span></span>
-<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> NumericalPolicy <span class="op">&amp;</span> policy <span class="op">=</span> NumericalPolicy<span class="op">{});</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb48"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Exponentiate finite linear-first coordinates [rho; phi].</span></span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a><span class="co">// rho is measured in metres and phi in radians.</span></span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a><span class="at">static</span> Transform3 from_exponential_coordinates<span class="op">(</span></span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> Vector6LinearFirst <span class="op">&amp;</span> coordinates<span class="op">,</span></span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> NumericalPolicy <span class="op">&amp;</span> policy <span class="op">=</span> NumericalPolicy<span class="op">{});</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The mathematical path through the function is:</p>
 <ol type="1">
 <li><p>Split the linear-first input <span class="math inline">\({}^{a}\boldsymbol\eta=[({}^{a}\boldsymbol\rho)^{\mathsf T}\;({}^{a}\boldsymbol\phi)^{\mathsf T}]^{\mathsf T}\)</span>. In the code, <code>coordinates.head&lt;3&gt;()</code> becomes <code>linear_coordinates</code> <span class="math inline">\({}^{a}\boldsymbol\rho\)</span> in metres, and <code>coordinates.tail&lt;3&gt;()</code> becomes <code>rotation_vector</code> <span class="math inline">\({}^{a}\boldsymbol\phi\)</span> in radians.</p></li>
@@ -2666,91 +2682,91 @@ C(\theta)
 <li><p>Return <code>Transform3(rotation, translation)</code>, which stores the pair <span class="math inline">\((\mathbf R,{}^{a}\mathbf p)\)</span> representing <span class="math inline">\(\mathbf T_\Delta\)</span>.</p></li>
 </ol>
 <p>The complete implementation keeps these stages in the same order:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb48"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>Transform3 Transform3<span class="op">::</span>from_exponential_coordinates<span class="op">(</span></span>
-<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> Vector6LinearFirst <span class="op">&amp;</span> coordinates<span class="op">,</span> <span class="at">const</span> NumericalPolicy <span class="op">&amp;</span> policy<span class="op">)</span></span>
-<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
-<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(!</span>coordinates<span class="op">.</span>allFinite<span class="op">())</span> <span class="op">{</span></span>
-<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">throw</span> GeometryException<span class="op">(</span></span>
-<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>      GeometryError<span class="op">::</span>non_finite<span class="op">,</span></span>
-<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a>      <span class="st">"SE(3) exponential coordinates must be finite."</span><span class="op">);</span></span>
-<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
-<span id="cb48-9"><a href="#cb48-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-10"><a href="#cb48-10" aria-hidden="true" tabindex="-1"></a>  <span class="co">// eta = [rho; phi], with rho in metres and phi in radians.</span></span>
-<span id="cb48-11"><a href="#cb48-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> Eigen<span class="op">::</span>Vector3d linear_coordinates <span class="op">=</span> coordinates<span class="op">.</span>head<span class="op">&lt;</span><span class="dv">3</span><span class="op">&gt;();</span></span>
-<span id="cb48-12"><a href="#cb48-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> Eigen<span class="op">::</span>Vector3d rotation_vector <span class="op">=</span> coordinates<span class="op">.</span>tail<span class="op">&lt;</span><span class="dv">3</span><span class="op">&gt;();</span></span>
-<span id="cb48-13"><a href="#cb48-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-14"><a href="#cb48-14" aria-hidden="true" tabindex="-1"></a>  <span class="co">// R = exp([phi]_x). This also validates the angular policy and magnitude.</span></span>
-<span id="cb48-15"><a href="#cb48-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> Rotation3 rotation <span class="op">=</span></span>
-<span id="cb48-16"><a href="#cb48-16" aria-hidden="true" tabindex="-1"></a>    Rotation3<span class="op">::</span>from_rotation_vector<span class="op">(</span>rotation_vector<span class="op">,</span> policy<span class="op">);</span></span>
-<span id="cb48-17"><a href="#cb48-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-18"><a href="#cb48-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> <span class="dt">double</span> theta <span class="op">=</span> rotation_vector<span class="op">.</span>stableNorm<span class="op">();</span></span>
-<span id="cb48-19"><a href="#cb48-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-20"><a href="#cb48-20" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(!</span><span class="bu">std::</span>isfinite<span class="op">(</span>theta<span class="op">))</span> <span class="op">{</span></span>
-<span id="cb48-21"><a href="#cb48-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">throw</span> GeometryException<span class="op">(</span></span>
-<span id="cb48-22"><a href="#cb48-22" aria-hidden="true" tabindex="-1"></a>      GeometryError<span class="op">::</span>unsupported_magnitude<span class="op">,</span></span>
-<span id="cb48-23"><a href="#cb48-23" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Rotation-vector norm is outside the finite numerical range."</span><span class="op">);</span></span>
-<span id="cb48-24"><a href="#cb48-24" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
-<span id="cb48-25"><a href="#cb48-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-26"><a href="#cb48-26" aria-hidden="true" tabindex="-1"></a>  <span class="co">// When phi = 0, J(phi) = I and p = rho exactly.</span></span>
-<span id="cb48-27"><a href="#cb48-27" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(</span>theta <span class="op">==</span> <span class="fl">0.0</span><span class="op">)</span> <span class="op">{</span></span>
-<span id="cb48-28"><a href="#cb48-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Transform3<span class="op">(</span>rotation<span class="op">,</span> linear_coordinates<span class="op">);</span></span>
-<span id="cb48-29"><a href="#cb48-29" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
-<span id="cb48-30"><a href="#cb48-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-31"><a href="#cb48-31" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> <span class="dt">double</span> theta_squared <span class="op">=</span> theta <span class="op">*</span> theta<span class="op">;</span></span>
-<span id="cb48-32"><a href="#cb48-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-33"><a href="#cb48-33" aria-hidden="true" tabindex="-1"></a>  <span class="dt">double</span> coefficient_b<span class="op">;</span></span>
-<span id="cb48-34"><a href="#cb48-34" aria-hidden="true" tabindex="-1"></a>  <span class="dt">double</span> coefficient_c<span class="op">;</span></span>
-<span id="cb48-35"><a href="#cb48-35" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-36"><a href="#cb48-36" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(</span>theta <span class="op">&lt;=</span> policy<span class="op">.</span>series_angle_threshold<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb48-37"><a href="#cb48-37" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> <span class="dt">double</span> theta_fourth <span class="op">=</span> theta_squared <span class="op">*</span> theta_squared<span class="op">;</span></span>
-<span id="cb48-38"><a href="#cb48-38" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> <span class="dt">double</span> theta_sixth <span class="op">=</span> theta_fourth <span class="op">*</span> theta_squared<span class="op">;</span></span>
-<span id="cb48-39"><a href="#cb48-39" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-40"><a href="#cb48-40" aria-hidden="true" tabindex="-1"></a>    coefficient_b <span class="op">=</span></span>
-<span id="cb48-41"><a href="#cb48-41" aria-hidden="true" tabindex="-1"></a>      <span class="fl">0.5</span> <span class="op">-</span> theta_squared <span class="op">/</span> <span class="fl">24.0</span> <span class="op">+</span> theta_fourth <span class="op">/</span> <span class="fl">720.0</span> <span class="op">-</span></span>
-<span id="cb48-42"><a href="#cb48-42" aria-hidden="true" tabindex="-1"></a>      theta_sixth <span class="op">/</span> <span class="fl">40320.0</span><span class="op">;</span></span>
-<span id="cb48-43"><a href="#cb48-43" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-44"><a href="#cb48-44" aria-hidden="true" tabindex="-1"></a>    coefficient_c <span class="op">=</span></span>
-<span id="cb48-45"><a href="#cb48-45" aria-hidden="true" tabindex="-1"></a>      <span class="fl">1.0</span> <span class="op">/</span> <span class="fl">6.0</span> <span class="op">-</span> theta_squared <span class="op">/</span> <span class="fl">120.0</span> <span class="op">+</span></span>
-<span id="cb48-46"><a href="#cb48-46" aria-hidden="true" tabindex="-1"></a>      theta_fourth <span class="op">/</span> <span class="fl">5040.0</span> <span class="op">-</span> theta_sixth <span class="op">/</span> <span class="fl">362880.0</span><span class="op">;</span></span>
-<span id="cb48-47"><a href="#cb48-47" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
-<span id="cb48-48"><a href="#cb48-48" aria-hidden="true" tabindex="-1"></a>    coefficient_b <span class="op">=</span> <span class="op">(</span><span class="fl">1.0</span> <span class="op">-</span> <span class="bu">std::</span>cos<span class="op">(</span>theta<span class="op">))</span> <span class="op">/</span> theta_squared<span class="op">;</span></span>
-<span id="cb48-49"><a href="#cb48-49" aria-hidden="true" tabindex="-1"></a>    coefficient_c <span class="op">=</span></span>
-<span id="cb48-50"><a href="#cb48-50" aria-hidden="true" tabindex="-1"></a>      <span class="op">(</span>theta <span class="op">-</span> <span class="bu">std::</span>sin<span class="op">(</span>theta<span class="op">))</span> <span class="op">/</span> <span class="op">(</span>theta_squared <span class="op">*</span> theta<span class="op">);</span></span>
-<span id="cb48-51"><a href="#cb48-51" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
-<span id="cb48-52"><a href="#cb48-52" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-53"><a href="#cb48-53" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(!</span><span class="bu">std::</span>isfinite<span class="op">(</span>coefficient_b<span class="op">)</span> <span class="op">||</span></span>
-<span id="cb48-54"><a href="#cb48-54" aria-hidden="true" tabindex="-1"></a>      <span class="op">!</span><span class="bu">std::</span>isfinite<span class="op">(</span>coefficient_c<span class="op">))</span> <span class="op">{</span></span>
-<span id="cb48-55"><a href="#cb48-55" aria-hidden="true" tabindex="-1"></a>    <span class="cf">throw</span> GeometryException<span class="op">(</span></span>
-<span id="cb48-56"><a href="#cb48-56" aria-hidden="true" tabindex="-1"></a>      GeometryError<span class="op">::</span>unsupported_magnitude<span class="op">,</span></span>
-<span id="cb48-57"><a href="#cb48-57" aria-hidden="true" tabindex="-1"></a>      <span class="st">"SE(3) left-Jacobian coefficients are not finite."</span><span class="op">);</span></span>
-<span id="cb48-58"><a href="#cb48-58" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
-<span id="cb48-59"><a href="#cb48-59" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-60"><a href="#cb48-60" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Phi = [phi]_x.</span></span>
-<span id="cb48-61"><a href="#cb48-61" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> Eigen<span class="op">::</span>Matrix3d rotation_generator <span class="op">=</span> hat_so3<span class="op">(</span>rotation_vector<span class="op">);</span></span>
-<span id="cb48-62"><a href="#cb48-62" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-63"><a href="#cb48-63" aria-hidden="true" tabindex="-1"></a>  <span class="co">// J(phi) = I + B(theta) Phi + C(theta) Phi^2.</span></span>
-<span id="cb48-64"><a href="#cb48-64" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> Eigen<span class="op">::</span>Matrix3d left_jacobian <span class="op">=</span></span>
-<span id="cb48-65"><a href="#cb48-65" aria-hidden="true" tabindex="-1"></a>    Eigen<span class="op">::</span>Matrix3d<span class="op">::</span>Identity<span class="op">()</span> <span class="op">+</span> coefficient_b <span class="op">*</span> rotation_generator <span class="op">+</span></span>
-<span id="cb48-66"><a href="#cb48-66" aria-hidden="true" tabindex="-1"></a>    coefficient_c <span class="op">*</span> rotation_generator <span class="op">*</span> rotation_generator<span class="op">;</span></span>
-<span id="cb48-67"><a href="#cb48-67" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-68"><a href="#cb48-68" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(!</span>left_jacobian<span class="op">.</span>allFinite<span class="op">())</span> <span class="op">{</span></span>
-<span id="cb48-69"><a href="#cb48-69" aria-hidden="true" tabindex="-1"></a>    <span class="cf">throw</span> GeometryException<span class="op">(</span></span>
-<span id="cb48-70"><a href="#cb48-70" aria-hidden="true" tabindex="-1"></a>      GeometryError<span class="op">::</span>unsupported_magnitude<span class="op">,</span></span>
-<span id="cb48-71"><a href="#cb48-71" aria-hidden="true" tabindex="-1"></a>      <span class="st">"SE(3) left Jacobian is outside the finite numerical range."</span><span class="op">);</span></span>
-<span id="cb48-72"><a href="#cb48-72" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
-<span id="cb48-73"><a href="#cb48-73" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-74"><a href="#cb48-74" aria-hidden="true" tabindex="-1"></a>  <span class="co">// p = J(phi) rho.</span></span>
-<span id="cb48-75"><a href="#cb48-75" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> Eigen<span class="op">::</span>Vector3d translation <span class="op">=</span></span>
-<span id="cb48-76"><a href="#cb48-76" aria-hidden="true" tabindex="-1"></a>    left_jacobian <span class="op">*</span> linear_coordinates<span class="op">;</span></span>
-<span id="cb48-77"><a href="#cb48-77" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-78"><a href="#cb48-78" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(!</span>translation<span class="op">.</span>allFinite<span class="op">())</span> <span class="op">{</span></span>
-<span id="cb48-79"><a href="#cb48-79" aria-hidden="true" tabindex="-1"></a>    <span class="cf">throw</span> GeometryException<span class="op">(</span></span>
-<span id="cb48-80"><a href="#cb48-80" aria-hidden="true" tabindex="-1"></a>      GeometryError<span class="op">::</span>unsupported_magnitude<span class="op">,</span></span>
-<span id="cb48-81"><a href="#cb48-81" aria-hidden="true" tabindex="-1"></a>      <span class="st">"SE(3) exponential translation is outside the finite numerical range."</span><span class="op">);</span></span>
-<span id="cb48-82"><a href="#cb48-82" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
-<span id="cb48-83"><a href="#cb48-83" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-84"><a href="#cb48-84" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> Transform3<span class="op">(</span>rotation<span class="op">,</span> translation<span class="op">);</span></span>
-<span id="cb48-85"><a href="#cb48-85" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb49"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>Transform3 Transform3<span class="op">::</span>from_exponential_coordinates<span class="op">(</span></span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> Vector6LinearFirst <span class="op">&amp;</span> coordinates<span class="op">,</span> <span class="at">const</span> NumericalPolicy <span class="op">&amp;</span> policy<span class="op">)</span></span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(!</span>coordinates<span class="op">.</span>allFinite<span class="op">())</span> <span class="op">{</span></span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">throw</span> GeometryException<span class="op">(</span></span>
+<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>      GeometryError<span class="op">::</span>non_finite<span class="op">,</span></span>
+<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a>      <span class="st">"SE(3) exponential coordinates must be finite."</span><span class="op">);</span></span>
+<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb49-9"><a href="#cb49-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-10"><a href="#cb49-10" aria-hidden="true" tabindex="-1"></a>  <span class="co">// eta = [rho; phi], with rho in metres and phi in radians.</span></span>
+<span id="cb49-11"><a href="#cb49-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> Eigen<span class="op">::</span>Vector3d linear_coordinates <span class="op">=</span> coordinates<span class="op">.</span>head<span class="op">&lt;</span><span class="dv">3</span><span class="op">&gt;();</span></span>
+<span id="cb49-12"><a href="#cb49-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> Eigen<span class="op">::</span>Vector3d rotation_vector <span class="op">=</span> coordinates<span class="op">.</span>tail<span class="op">&lt;</span><span class="dv">3</span><span class="op">&gt;();</span></span>
+<span id="cb49-13"><a href="#cb49-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-14"><a href="#cb49-14" aria-hidden="true" tabindex="-1"></a>  <span class="co">// R = exp([phi]_x). This also validates the angular policy and magnitude.</span></span>
+<span id="cb49-15"><a href="#cb49-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> Rotation3 rotation <span class="op">=</span></span>
+<span id="cb49-16"><a href="#cb49-16" aria-hidden="true" tabindex="-1"></a>    Rotation3<span class="op">::</span>from_rotation_vector<span class="op">(</span>rotation_vector<span class="op">,</span> policy<span class="op">);</span></span>
+<span id="cb49-17"><a href="#cb49-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-18"><a href="#cb49-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> <span class="dt">double</span> theta <span class="op">=</span> rotation_vector<span class="op">.</span>stableNorm<span class="op">();</span></span>
+<span id="cb49-19"><a href="#cb49-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-20"><a href="#cb49-20" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(!</span><span class="bu">std::</span>isfinite<span class="op">(</span>theta<span class="op">))</span> <span class="op">{</span></span>
+<span id="cb49-21"><a href="#cb49-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">throw</span> GeometryException<span class="op">(</span></span>
+<span id="cb49-22"><a href="#cb49-22" aria-hidden="true" tabindex="-1"></a>      GeometryError<span class="op">::</span>unsupported_magnitude<span class="op">,</span></span>
+<span id="cb49-23"><a href="#cb49-23" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Rotation-vector norm is outside the finite numerical range."</span><span class="op">);</span></span>
+<span id="cb49-24"><a href="#cb49-24" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb49-25"><a href="#cb49-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-26"><a href="#cb49-26" aria-hidden="true" tabindex="-1"></a>  <span class="co">// When phi = 0, J(phi) = I and p = rho exactly.</span></span>
+<span id="cb49-27"><a href="#cb49-27" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(</span>theta <span class="op">==</span> <span class="fl">0.0</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb49-28"><a href="#cb49-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Transform3<span class="op">(</span>rotation<span class="op">,</span> linear_coordinates<span class="op">);</span></span>
+<span id="cb49-29"><a href="#cb49-29" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb49-30"><a href="#cb49-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-31"><a href="#cb49-31" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> <span class="dt">double</span> theta_squared <span class="op">=</span> theta <span class="op">*</span> theta<span class="op">;</span></span>
+<span id="cb49-32"><a href="#cb49-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-33"><a href="#cb49-33" aria-hidden="true" tabindex="-1"></a>  <span class="dt">double</span> coefficient_b<span class="op">;</span></span>
+<span id="cb49-34"><a href="#cb49-34" aria-hidden="true" tabindex="-1"></a>  <span class="dt">double</span> coefficient_c<span class="op">;</span></span>
+<span id="cb49-35"><a href="#cb49-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-36"><a href="#cb49-36" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(</span>theta <span class="op">&lt;=</span> policy<span class="op">.</span>series_angle_threshold<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb49-37"><a href="#cb49-37" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> <span class="dt">double</span> theta_fourth <span class="op">=</span> theta_squared <span class="op">*</span> theta_squared<span class="op">;</span></span>
+<span id="cb49-38"><a href="#cb49-38" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> <span class="dt">double</span> theta_sixth <span class="op">=</span> theta_fourth <span class="op">*</span> theta_squared<span class="op">;</span></span>
+<span id="cb49-39"><a href="#cb49-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-40"><a href="#cb49-40" aria-hidden="true" tabindex="-1"></a>    coefficient_b <span class="op">=</span></span>
+<span id="cb49-41"><a href="#cb49-41" aria-hidden="true" tabindex="-1"></a>      <span class="fl">0.5</span> <span class="op">-</span> theta_squared <span class="op">/</span> <span class="fl">24.0</span> <span class="op">+</span> theta_fourth <span class="op">/</span> <span class="fl">720.0</span> <span class="op">-</span></span>
+<span id="cb49-42"><a href="#cb49-42" aria-hidden="true" tabindex="-1"></a>      theta_sixth <span class="op">/</span> <span class="fl">40320.0</span><span class="op">;</span></span>
+<span id="cb49-43"><a href="#cb49-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-44"><a href="#cb49-44" aria-hidden="true" tabindex="-1"></a>    coefficient_c <span class="op">=</span></span>
+<span id="cb49-45"><a href="#cb49-45" aria-hidden="true" tabindex="-1"></a>      <span class="fl">1.0</span> <span class="op">/</span> <span class="fl">6.0</span> <span class="op">-</span> theta_squared <span class="op">/</span> <span class="fl">120.0</span> <span class="op">+</span></span>
+<span id="cb49-46"><a href="#cb49-46" aria-hidden="true" tabindex="-1"></a>      theta_fourth <span class="op">/</span> <span class="fl">5040.0</span> <span class="op">-</span> theta_sixth <span class="op">/</span> <span class="fl">362880.0</span><span class="op">;</span></span>
+<span id="cb49-47"><a href="#cb49-47" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb49-48"><a href="#cb49-48" aria-hidden="true" tabindex="-1"></a>    coefficient_b <span class="op">=</span> <span class="op">(</span><span class="fl">1.0</span> <span class="op">-</span> <span class="bu">std::</span>cos<span class="op">(</span>theta<span class="op">))</span> <span class="op">/</span> theta_squared<span class="op">;</span></span>
+<span id="cb49-49"><a href="#cb49-49" aria-hidden="true" tabindex="-1"></a>    coefficient_c <span class="op">=</span></span>
+<span id="cb49-50"><a href="#cb49-50" aria-hidden="true" tabindex="-1"></a>      <span class="op">(</span>theta <span class="op">-</span> <span class="bu">std::</span>sin<span class="op">(</span>theta<span class="op">))</span> <span class="op">/</span> <span class="op">(</span>theta_squared <span class="op">*</span> theta<span class="op">);</span></span>
+<span id="cb49-51"><a href="#cb49-51" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb49-52"><a href="#cb49-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-53"><a href="#cb49-53" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(!</span><span class="bu">std::</span>isfinite<span class="op">(</span>coefficient_b<span class="op">)</span> <span class="op">||</span></span>
+<span id="cb49-54"><a href="#cb49-54" aria-hidden="true" tabindex="-1"></a>      <span class="op">!</span><span class="bu">std::</span>isfinite<span class="op">(</span>coefficient_c<span class="op">))</span> <span class="op">{</span></span>
+<span id="cb49-55"><a href="#cb49-55" aria-hidden="true" tabindex="-1"></a>    <span class="cf">throw</span> GeometryException<span class="op">(</span></span>
+<span id="cb49-56"><a href="#cb49-56" aria-hidden="true" tabindex="-1"></a>      GeometryError<span class="op">::</span>unsupported_magnitude<span class="op">,</span></span>
+<span id="cb49-57"><a href="#cb49-57" aria-hidden="true" tabindex="-1"></a>      <span class="st">"SE(3) left-Jacobian coefficients are not finite."</span><span class="op">);</span></span>
+<span id="cb49-58"><a href="#cb49-58" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb49-59"><a href="#cb49-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-60"><a href="#cb49-60" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Phi = [phi]_x.</span></span>
+<span id="cb49-61"><a href="#cb49-61" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> Eigen<span class="op">::</span>Matrix3d rotation_generator <span class="op">=</span> hat_so3<span class="op">(</span>rotation_vector<span class="op">);</span></span>
+<span id="cb49-62"><a href="#cb49-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-63"><a href="#cb49-63" aria-hidden="true" tabindex="-1"></a>  <span class="co">// J(phi) = I + B(theta) Phi + C(theta) Phi^2.</span></span>
+<span id="cb49-64"><a href="#cb49-64" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> Eigen<span class="op">::</span>Matrix3d left_jacobian <span class="op">=</span></span>
+<span id="cb49-65"><a href="#cb49-65" aria-hidden="true" tabindex="-1"></a>    Eigen<span class="op">::</span>Matrix3d<span class="op">::</span>Identity<span class="op">()</span> <span class="op">+</span> coefficient_b <span class="op">*</span> rotation_generator <span class="op">+</span></span>
+<span id="cb49-66"><a href="#cb49-66" aria-hidden="true" tabindex="-1"></a>    coefficient_c <span class="op">*</span> rotation_generator <span class="op">*</span> rotation_generator<span class="op">;</span></span>
+<span id="cb49-67"><a href="#cb49-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-68"><a href="#cb49-68" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(!</span>left_jacobian<span class="op">.</span>allFinite<span class="op">())</span> <span class="op">{</span></span>
+<span id="cb49-69"><a href="#cb49-69" aria-hidden="true" tabindex="-1"></a>    <span class="cf">throw</span> GeometryException<span class="op">(</span></span>
+<span id="cb49-70"><a href="#cb49-70" aria-hidden="true" tabindex="-1"></a>      GeometryError<span class="op">::</span>unsupported_magnitude<span class="op">,</span></span>
+<span id="cb49-71"><a href="#cb49-71" aria-hidden="true" tabindex="-1"></a>      <span class="st">"SE(3) left Jacobian is outside the finite numerical range."</span><span class="op">);</span></span>
+<span id="cb49-72"><a href="#cb49-72" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb49-73"><a href="#cb49-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-74"><a href="#cb49-74" aria-hidden="true" tabindex="-1"></a>  <span class="co">// p = J(phi) rho.</span></span>
+<span id="cb49-75"><a href="#cb49-75" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> Eigen<span class="op">::</span>Vector3d translation <span class="op">=</span></span>
+<span id="cb49-76"><a href="#cb49-76" aria-hidden="true" tabindex="-1"></a>    left_jacobian <span class="op">*</span> linear_coordinates<span class="op">;</span></span>
+<span id="cb49-77"><a href="#cb49-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-78"><a href="#cb49-78" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(!</span>translation<span class="op">.</span>allFinite<span class="op">())</span> <span class="op">{</span></span>
+<span id="cb49-79"><a href="#cb49-79" aria-hidden="true" tabindex="-1"></a>    <span class="cf">throw</span> GeometryException<span class="op">(</span></span>
+<span id="cb49-80"><a href="#cb49-80" aria-hidden="true" tabindex="-1"></a>      GeometryError<span class="op">::</span>unsupported_magnitude<span class="op">,</span></span>
+<span id="cb49-81"><a href="#cb49-81" aria-hidden="true" tabindex="-1"></a>      <span class="st">"SE(3) exponential translation is outside the finite numerical range."</span><span class="op">);</span></span>
+<span id="cb49-82"><a href="#cb49-82" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb49-83"><a href="#cb49-83" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-84"><a href="#cb49-84" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> Transform3<span class="op">(</span>rotation<span class="op">,</span> translation<span class="op">);</span></span>
+<span id="cb49-85"><a href="#cb49-85" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The line breaks in this presentation keep the code readable in both HTML and PDF. They do not change the operations performed by the production function.</p>
 </section>
 <section id="equation-to-code-map" class="level3" data-number="9.10.3">
@@ -2926,15 +2942,15 @@ C(\theta)
 \end{bmatrix}.
 \]</span></p>
 <p>The corresponding calling code preserves the same linear-first order:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb49"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="dt">double</span> pi <span class="op">=</span> <span class="bu">std::</span>acos<span class="op">(-</span><span class="fl">1.0</span><span class="op">);</span></span>
-<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>Vector6LinearFirst coordinates<span class="op">;</span></span>
-<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>coordinates <span class="op">&lt;&lt;</span></span>
-<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>  <span class="fl">0.0</span><span class="op">,</span> <span class="op">-</span>pi<span class="op">,</span> pi <span class="op">/</span> <span class="fl">40.0</span><span class="op">,</span>  <span class="co">// rho in metres</span></span>
-<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>  <span class="fl">0.0</span><span class="op">,</span> <span class="fl">0.0</span><span class="op">,</span> pi <span class="op">/</span> <span class="fl">2.0</span><span class="op">;</span>  <span class="co">// phi in radians</span></span>
-<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> Transform3 transform <span class="op">=</span></span>
-<span id="cb49-9"><a href="#cb49-9" aria-hidden="true" tabindex="-1"></a>  Transform3<span class="op">::</span>from_exponential_coordinates<span class="op">(</span>coordinates<span class="op">);</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb50"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="dt">double</span> pi <span class="op">=</span> <span class="bu">std::</span>acos<span class="op">(-</span><span class="fl">1.0</span><span class="op">);</span></span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>Vector6LinearFirst coordinates<span class="op">;</span></span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a>coordinates <span class="op">&lt;&lt;</span></span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a>  <span class="fl">0.0</span><span class="op">,</span> <span class="op">-</span>pi<span class="op">,</span> pi <span class="op">/</span> <span class="fl">40.0</span><span class="op">,</span>  <span class="co">// rho in metres</span></span>
+<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a>  <span class="fl">0.0</span><span class="op">,</span> <span class="fl">0.0</span><span class="op">,</span> pi <span class="op">/</span> <span class="fl">2.0</span><span class="op">;</span>  <span class="co">// phi in radians</span></span>
+<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-8"><a href="#cb50-8" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> Transform3 transform <span class="op">=</span></span>
+<span id="cb50-9"><a href="#cb50-9" aria-hidden="true" tabindex="-1"></a>  Transform3<span class="op">::</span>from_exponential_coordinates<span class="op">(</span>coordinates<span class="op">);</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>This example makes the distinction between <span class="math inline">\({}^{a}\boldsymbol\rho\)</span> and <span class="math inline">\({}^{a}\mathbf p\)</span> concrete: the input <span class="math inline">\(xy\)</span> coordinates <span class="math inline">\((0,-\pi)\ \mathrm m\)</span> become the finite translation <span class="math inline">\((2,-2)\ \mathrm m\)</span> because the reference velocity field is integrated while the body rotates.</p>
 </section>
 <section id="validation-and-focused-evidence-1" class="level3" data-number="9.10.5">
@@ -3011,23 +3027,23 @@ C(\theta)
 \]</span></p>
 <p>where <span class="math inline">\({}^{a}\boldsymbol\rho\in\mathbb R^3\)</span> is measured in metres and <span class="math inline">\({}^{a}\boldsymbol\phi\in\mathbb R^3\)</span> is measured in radians. The rotation-vector norm <span class="math inline">\(\theta=\|{}^{a}\boldsymbol\phi\|_2\)</span> lies in the selected principal interval <span class="math inline">\([0,\pi]\)</span>. Both blocks are expressed in frame <span class="math inline">\(\{a\}\)</span>.</p>
 <p>The public result keeps the coordinate column and the observable numerical classification together:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb50"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="kw">enum</span> <span class="kw">class</span> TransformLogBranch</span>
-<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
-<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>  identity<span class="op">,</span></span>
-<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a>  pure_translation<span class="op">,</span></span>
-<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a>  small_angle<span class="op">,</span></span>
-<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a>  nominal<span class="op">,</span></span>
-<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a>  near_pi</span>
-<span id="cb50-8"><a href="#cb50-8" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span>
-<span id="cb50-9"><a href="#cb50-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb50-10"><a href="#cb50-10" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> TransformLogResult</span>
-<span id="cb50-11"><a href="#cb50-11" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
-<span id="cb50-12"><a href="#cb50-12" aria-hidden="true" tabindex="-1"></a>  Vector6LinearFirst coordinates<span class="op">;</span></span>
-<span id="cb50-13"><a href="#cb50-13" aria-hidden="true" tabindex="-1"></a>  TransformLogBranch branch<span class="op">;</span></span>
-<span id="cb50-14"><a href="#cb50-14" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span>
-<span id="cb50-15"><a href="#cb50-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb50-16"><a href="#cb50-16" aria-hidden="true" tabindex="-1"></a><span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> TransformLogResult to_principal_exponential_coordinates<span class="op">(</span></span>
-<span id="cb50-17"><a href="#cb50-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> NumericalPolicy <span class="op">&amp;</span> policy <span class="op">=</span> NumericalPolicy<span class="op">{})</span> <span class="at">const</span><span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb51"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="kw">enum</span> <span class="kw">class</span> TransformLogBranch</span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>  identity<span class="op">,</span></span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a>  pure_translation<span class="op">,</span></span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a>  small_angle<span class="op">,</span></span>
+<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a>  nominal<span class="op">,</span></span>
+<span id="cb51-7"><a href="#cb51-7" aria-hidden="true" tabindex="-1"></a>  near_pi</span>
+<span id="cb51-8"><a href="#cb51-8" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span>
+<span id="cb51-9"><a href="#cb51-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-10"><a href="#cb51-10" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> TransformLogResult</span>
+<span id="cb51-11"><a href="#cb51-11" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb51-12"><a href="#cb51-12" aria-hidden="true" tabindex="-1"></a>  Vector6LinearFirst coordinates<span class="op">;</span></span>
+<span id="cb51-13"><a href="#cb51-13" aria-hidden="true" tabindex="-1"></a>  TransformLogBranch branch<span class="op">;</span></span>
+<span id="cb51-14"><a href="#cb51-14" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span>
+<span id="cb51-15"><a href="#cb51-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-16"><a href="#cb51-16" aria-hidden="true" tabindex="-1"></a><span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> TransformLogResult to_principal_exponential_coordinates<span class="op">(</span></span>
+<span id="cb51-17"><a href="#cb51-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> NumericalPolicy <span class="op">&amp;</span> policy <span class="op">=</span> NumericalPolicy<span class="op">{})</span> <span class="at">const</span><span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>An <code>enum class</code> defines a scoped set of named branch values, preventing accidental conversion of a branch into an integer. The <code>struct</code> groups the two parts of one successful result without hiding either behind accessor functions. The <code>const</code> after the member declaration promises not to modify the stored transformation, and <code>[[nodiscard]]</code> asks the compiler to warn when a caller discards the recovered result unintentionally.</p>
 </section>
 <section id="why-the-linear-block-is-recovered-rather-than-copied" class="level3" data-number="9.11.2">
@@ -3090,26 +3106,26 @@ D(\theta)
 <section id="identity-rotation-and-exact-translation-preservation" class="level3" data-number="9.11.3">
 <h3 data-number="9.11.3" class="anchored" data-anchor-id="identity-rotation-and-exact-translation-preservation"><span class="header-section-number">9.11.3</span> Identity rotation and exact translation preservation</h3>
 <p>The implementation first delegates rotation recovery to the completed principal <span class="math inline">\(SO(3)\)</span> logarithm:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb51"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> RotationLogResult rotation_log_result <span class="op">=</span></span>
-<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>  <span class="va">rotation_</span><span class="op">.</span>to_principal_rotation_vector<span class="op">(</span>policy<span class="op">);</span></span>
-<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a>Vector6LinearFirst coordinates <span class="op">=</span> Vector6LinearFirst<span class="op">::</span>Zero<span class="op">();</span></span>
-<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a>coordinates<span class="op">.</span>tail<span class="op">&lt;</span><span class="dv">3</span><span class="op">&gt;()</span> <span class="op">=</span> rotation_log_result<span class="op">.</span>rotation_vector<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb52"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> RotationLogResult rotation_log_result <span class="op">=</span></span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>  <span class="va">rotation_</span><span class="op">.</span>to_principal_rotation_vector<span class="op">(</span>policy<span class="op">);</span></span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a>Vector6LinearFirst coordinates <span class="op">=</span> Vector6LinearFirst<span class="op">::</span>Zero<span class="op">();</span></span>
+<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a>coordinates<span class="op">.</span>tail<span class="op">&lt;</span><span class="dv">3</span><span class="op">&gt;()</span> <span class="op">=</span> rotation_log_result<span class="op">.</span>rotation_vector<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>This call owns the angular policy validation and the identity, small-angle, nominal, and deterministic near-<span class="math inline">\(\pi\)</span> rotation-vector calculations described in <a href="#sec-spatial-kernel-so3-logarithm" class="quarto-xref"><span>Section 9.7</span></a>. Initialising the complete six-vector to zero gives every component a defined value before either block is assigned. <code>tail&lt;3&gt;()</code> selects the last three entries at compile time and stores the recovered <span class="math inline">\({}^{a}\boldsymbol\phi\)</span> there.</p>
 <p>If the selected rotation is the exact identity, then <span class="math inline">\(\mathbf J(\mathbf 0_3)=\mathbf I_3\)</span> and <span class="math inline">\({}^{a}\boldsymbol\rho={}^a\mathbf p\)</span>. The function preserves that translation directly and distinguishes a complete identity from a pure translation:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb52"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="op">(</span>rotation_log_result<span class="op">.</span>branch <span class="op">==</span> RotationLogBranch<span class="op">::</span>identity<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>  coordinates<span class="op">.</span>head<span class="op">&lt;</span><span class="dv">3</span><span class="op">&gt;()</span> <span class="op">=</span> <span class="va">translation_</span><span class="op">;</span></span>
-<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> <span class="dt">bool</span> translation_is_zero <span class="op">=</span></span>
-<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">(</span><span class="va">translation_</span><span class="op">.</span>array<span class="op">()</span> <span class="op">==</span> <span class="fl">0.0</span><span class="op">).</span>all<span class="op">();</span></span>
-<span id="cb52-6"><a href="#cb52-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb52-7"><a href="#cb52-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> TransformLogBranch branch <span class="op">=</span></span>
-<span id="cb52-8"><a href="#cb52-8" aria-hidden="true" tabindex="-1"></a>    translation_is_zero</span>
-<span id="cb52-9"><a href="#cb52-9" aria-hidden="true" tabindex="-1"></a>      <span class="op">?</span> TransformLogBranch<span class="op">::</span>identity</span>
-<span id="cb52-10"><a href="#cb52-10" aria-hidden="true" tabindex="-1"></a>      <span class="op">:</span> TransformLogBranch<span class="op">::</span>pure_translation<span class="op">;</span></span>
-<span id="cb52-11"><a href="#cb52-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb52-12"><a href="#cb52-12" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> TransformLogResult<span class="op">{</span>coordinates<span class="op">,</span> branch<span class="op">};</span></span>
-<span id="cb52-13"><a href="#cb52-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb53"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="op">(</span>rotation_log_result<span class="op">.</span>branch <span class="op">==</span> RotationLogBranch<span class="op">::</span>identity<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>  coordinates<span class="op">.</span>head<span class="op">&lt;</span><span class="dv">3</span><span class="op">&gt;()</span> <span class="op">=</span> <span class="va">translation_</span><span class="op">;</span></span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> <span class="dt">bool</span> translation_is_zero <span class="op">=</span></span>
+<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">(</span><span class="va">translation_</span><span class="op">.</span>array<span class="op">()</span> <span class="op">==</span> <span class="fl">0.0</span><span class="op">).</span>all<span class="op">();</span></span>
+<span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-7"><a href="#cb53-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> TransformLogBranch branch <span class="op">=</span></span>
+<span id="cb53-8"><a href="#cb53-8" aria-hidden="true" tabindex="-1"></a>    translation_is_zero</span>
+<span id="cb53-9"><a href="#cb53-9" aria-hidden="true" tabindex="-1"></a>      <span class="op">?</span> TransformLogBranch<span class="op">::</span>identity</span>
+<span id="cb53-10"><a href="#cb53-10" aria-hidden="true" tabindex="-1"></a>      <span class="op">:</span> TransformLogBranch<span class="op">::</span>pure_translation<span class="op">;</span></span>
+<span id="cb53-11"><a href="#cb53-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-12"><a href="#cb53-12" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> TransformLogResult<span class="op">{</span>coordinates<span class="op">,</span> branch<span class="op">};</span></span>
+<span id="cb53-13"><a href="#cb53-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The expression <code>translation_.array() == 0.0</code> performs a component-wise comparison and <code>.all()</code> requires all three comparisons to be true. This is a deliberate exact-zero contract, not an approximate geometric comparison: the identity classification requires all three stored translation components to equal floating-point zero. Every representable nonzero component, including a subnormal value, produces <code>pure_translation</code> and is copied without Jacobian arithmetic. The conditional operator <code>condition ? first : second</code> selects the branch value without changing the coordinates.</p>
 </section>
 <section id="nonzero-rotation-and-the-inverse-left-jacobian" class="level3" data-number="9.11.4">
@@ -3147,37 +3163,37 @@ D(\theta)
 </tbody>
 </table>
 <p>After mapping the branch, the implementation forms the inverse Jacobian and recovers the linear block:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb53"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> Eigen<span class="op">::</span>Vector3d phi <span class="op">=</span> rotation_log_result<span class="op">.</span>rotation_vector<span class="op">;</span></span>
-<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="dt">double</span> theta <span class="op">=</span> phi<span class="op">.</span>stableNorm<span class="op">();</span></span>
-<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="dt">double</span> theta_squared <span class="op">=</span> theta <span class="op">*</span> theta<span class="op">;</span></span>
-<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a><span class="dt">double</span> coefficient_d<span class="op">;</span></span>
-<span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="op">(</span>theta <span class="op">&lt;=</span> policy<span class="op">.</span>series_angle_threshold<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb53-7"><a href="#cb53-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> <span class="dt">double</span> theta_fourth <span class="op">=</span> theta_squared <span class="op">*</span> theta_squared<span class="op">;</span></span>
-<span id="cb53-8"><a href="#cb53-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> <span class="dt">double</span> theta_sixth <span class="op">=</span> theta_fourth <span class="op">*</span> theta_squared<span class="op">;</span></span>
-<span id="cb53-9"><a href="#cb53-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb53-10"><a href="#cb53-10" aria-hidden="true" tabindex="-1"></a>  coefficient_d <span class="op">=</span> <span class="fl">1.0</span> <span class="op">/</span> <span class="fl">12.0</span> <span class="op">+</span> theta_squared <span class="op">/</span> <span class="fl">720.0</span> <span class="op">+</span></span>
-<span id="cb53-11"><a href="#cb53-11" aria-hidden="true" tabindex="-1"></a>                  theta_fourth <span class="op">/</span> <span class="fl">30240.0</span> <span class="op">+</span></span>
-<span id="cb53-12"><a href="#cb53-12" aria-hidden="true" tabindex="-1"></a>                  theta_sixth <span class="op">/</span> <span class="fl">1209600.0</span><span class="op">;</span></span>
-<span id="cb53-13"><a href="#cb53-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
-<span id="cb53-14"><a href="#cb53-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> <span class="dt">double</span> half_theta <span class="op">=</span> <span class="fl">0.5</span> <span class="op">*</span> theta<span class="op">;</span></span>
-<span id="cb53-15"><a href="#cb53-15" aria-hidden="true" tabindex="-1"></a>  coefficient_d <span class="op">=</span></span>
-<span id="cb53-16"><a href="#cb53-16" aria-hidden="true" tabindex="-1"></a>    <span class="fl">1.0</span> <span class="op">/</span> theta_squared <span class="op">-</span></span>
-<span id="cb53-17"><a href="#cb53-17" aria-hidden="true" tabindex="-1"></a>    <span class="bu">std::</span>cos<span class="op">(</span>half_theta<span class="op">)</span> <span class="op">/</span></span>
-<span id="cb53-18"><a href="#cb53-18" aria-hidden="true" tabindex="-1"></a>      <span class="op">(</span><span class="fl">2.0</span> <span class="op">*</span> theta <span class="op">*</span> <span class="bu">std::</span>sin<span class="op">(</span>half_theta<span class="op">));</span></span>
-<span id="cb53-19"><a href="#cb53-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
-<span id="cb53-20"><a href="#cb53-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb53-21"><a href="#cb53-21" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> Eigen<span class="op">::</span>Matrix3d rotation_vector_hat <span class="op">=</span> hat_so3<span class="op">(</span>phi<span class="op">);</span></span>
-<span id="cb53-22"><a href="#cb53-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb53-23"><a href="#cb53-23" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> Eigen<span class="op">::</span>Matrix3d inverse_left_jacobian <span class="op">=</span></span>
-<span id="cb53-24"><a href="#cb53-24" aria-hidden="true" tabindex="-1"></a>  Eigen<span class="op">::</span>Matrix3d<span class="op">::</span>Identity<span class="op">()</span> <span class="op">-</span> <span class="fl">0.5</span> <span class="op">*</span> rotation_vector_hat <span class="op">+</span></span>
-<span id="cb53-25"><a href="#cb53-25" aria-hidden="true" tabindex="-1"></a>  coefficient_d <span class="op">*</span> rotation_vector_hat <span class="op">*</span> rotation_vector_hat<span class="op">;</span></span>
-<span id="cb53-26"><a href="#cb53-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb53-27"><a href="#cb53-27" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> Eigen<span class="op">::</span>Vector3d linear_coordinates <span class="op">=</span></span>
-<span id="cb53-28"><a href="#cb53-28" aria-hidden="true" tabindex="-1"></a>  inverse_left_jacobian <span class="op">*</span> <span class="va">translation_</span><span class="op">;</span></span>
-<span id="cb53-29"><a href="#cb53-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb53-30"><a href="#cb53-30" aria-hidden="true" tabindex="-1"></a>coordinates<span class="op">.</span>head<span class="op">&lt;</span><span class="dv">3</span><span class="op">&gt;()</span> <span class="op">=</span> linear_coordinates<span class="op">;</span></span>
-<span id="cb53-31"><a href="#cb53-31" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> TransformLogResult<span class="op">{</span>coordinates<span class="op">,</span> branch<span class="op">};</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb54"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> Eigen<span class="op">::</span>Vector3d phi <span class="op">=</span> rotation_log_result<span class="op">.</span>rotation_vector<span class="op">;</span></span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="dt">double</span> theta <span class="op">=</span> phi<span class="op">.</span>stableNorm<span class="op">();</span></span>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="dt">double</span> theta_squared <span class="op">=</span> theta <span class="op">*</span> theta<span class="op">;</span></span>
+<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a><span class="dt">double</span> coefficient_d<span class="op">;</span></span>
+<span id="cb54-6"><a href="#cb54-6" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="op">(</span>theta <span class="op">&lt;=</span> policy<span class="op">.</span>series_angle_threshold<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb54-7"><a href="#cb54-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> <span class="dt">double</span> theta_fourth <span class="op">=</span> theta_squared <span class="op">*</span> theta_squared<span class="op">;</span></span>
+<span id="cb54-8"><a href="#cb54-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> <span class="dt">double</span> theta_sixth <span class="op">=</span> theta_fourth <span class="op">*</span> theta_squared<span class="op">;</span></span>
+<span id="cb54-9"><a href="#cb54-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-10"><a href="#cb54-10" aria-hidden="true" tabindex="-1"></a>  coefficient_d <span class="op">=</span> <span class="fl">1.0</span> <span class="op">/</span> <span class="fl">12.0</span> <span class="op">+</span> theta_squared <span class="op">/</span> <span class="fl">720.0</span> <span class="op">+</span></span>
+<span id="cb54-11"><a href="#cb54-11" aria-hidden="true" tabindex="-1"></a>                  theta_fourth <span class="op">/</span> <span class="fl">30240.0</span> <span class="op">+</span></span>
+<span id="cb54-12"><a href="#cb54-12" aria-hidden="true" tabindex="-1"></a>                  theta_sixth <span class="op">/</span> <span class="fl">1209600.0</span><span class="op">;</span></span>
+<span id="cb54-13"><a href="#cb54-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb54-14"><a href="#cb54-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> <span class="dt">double</span> half_theta <span class="op">=</span> <span class="fl">0.5</span> <span class="op">*</span> theta<span class="op">;</span></span>
+<span id="cb54-15"><a href="#cb54-15" aria-hidden="true" tabindex="-1"></a>  coefficient_d <span class="op">=</span></span>
+<span id="cb54-16"><a href="#cb54-16" aria-hidden="true" tabindex="-1"></a>    <span class="fl">1.0</span> <span class="op">/</span> theta_squared <span class="op">-</span></span>
+<span id="cb54-17"><a href="#cb54-17" aria-hidden="true" tabindex="-1"></a>    <span class="bu">std::</span>cos<span class="op">(</span>half_theta<span class="op">)</span> <span class="op">/</span></span>
+<span id="cb54-18"><a href="#cb54-18" aria-hidden="true" tabindex="-1"></a>      <span class="op">(</span><span class="fl">2.0</span> <span class="op">*</span> theta <span class="op">*</span> <span class="bu">std::</span>sin<span class="op">(</span>half_theta<span class="op">));</span></span>
+<span id="cb54-19"><a href="#cb54-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb54-20"><a href="#cb54-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-21"><a href="#cb54-21" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> Eigen<span class="op">::</span>Matrix3d rotation_vector_hat <span class="op">=</span> hat_so3<span class="op">(</span>phi<span class="op">);</span></span>
+<span id="cb54-22"><a href="#cb54-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-23"><a href="#cb54-23" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> Eigen<span class="op">::</span>Matrix3d inverse_left_jacobian <span class="op">=</span></span>
+<span id="cb54-24"><a href="#cb54-24" aria-hidden="true" tabindex="-1"></a>  Eigen<span class="op">::</span>Matrix3d<span class="op">::</span>Identity<span class="op">()</span> <span class="op">-</span> <span class="fl">0.5</span> <span class="op">*</span> rotation_vector_hat <span class="op">+</span></span>
+<span id="cb54-25"><a href="#cb54-25" aria-hidden="true" tabindex="-1"></a>  coefficient_d <span class="op">*</span> rotation_vector_hat <span class="op">*</span> rotation_vector_hat<span class="op">;</span></span>
+<span id="cb54-26"><a href="#cb54-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-27"><a href="#cb54-27" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> Eigen<span class="op">::</span>Vector3d linear_coordinates <span class="op">=</span></span>
+<span id="cb54-28"><a href="#cb54-28" aria-hidden="true" tabindex="-1"></a>  inverse_left_jacobian <span class="op">*</span> <span class="va">translation_</span><span class="op">;</span></span>
+<span id="cb54-29"><a href="#cb54-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-30"><a href="#cb54-30" aria-hidden="true" tabindex="-1"></a>coordinates<span class="op">.</span>head<span class="op">&lt;</span><span class="dv">3</span><span class="op">&gt;()</span> <span class="op">=</span> linear_coordinates<span class="op">;</span></span>
+<span id="cb54-31"><a href="#cb54-31" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> TransformLogResult<span class="op">{</span>coordinates<span class="op">,</span> branch<span class="op">};</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="equation-to-code-map-1" class="level3" data-number="9.11.5">
 <h3 data-number="9.11.5" class="anchored" data-anchor-id="equation-to-code-map-1"><span class="header-section-number">9.11.5</span> Equation-to-code map</h3>
@@ -3261,12 +3277,12 @@ D(\theta)
 \right),
 \]</span></p>
 <p>where <span class="math inline">\(\operatorname{fl}\)</span> denotes rounding to the binary64 result of the subtraction. The implementation calculates this value once:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb54"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="dt">double</span> near_pi_boundary <span class="op">=</span></span>
-<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>  kPi <span class="op">-</span> policy<span class="op">.</span>near_pi_tolerance<span class="op">;</span></span>
-<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="op">(</span>theta <span class="op">&gt;=</span> near_pi_boundary<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Enter the near-pi branch.</span></span>
-<span id="cb54-6"><a href="#cb54-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb55"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="dt">double</span> near_pi_boundary <span class="op">=</span></span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a>  kPi <span class="op">-</span> policy<span class="op">.</span>near_pi_tolerance<span class="op">;</span></span>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="op">(</span>theta <span class="op">&gt;=</span> near_pi_boundary<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb55-5"><a href="#cb55-5" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Enter the near-pi branch.</span></span>
+<span id="cb55-6"><a href="#cb55-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>In exact real arithmetic, testing <span class="math inline">\(\theta\geq\pi-\theta_{\mathrm{near}\text{-}\pi}\)</span> is equivalent to testing <span class="math inline">\(\pi-\theta\leq\theta_{\mathrm{near}\text{-}\pi}\)</span>. In binary64 arithmetic, recomputing <code>kPi - theta</code> at the boundary introduces another rounded subtraction and can produce a value slightly greater than the stored tolerance. Comparing <code>theta</code> directly with the single named boundary implements the declared inclusive interval deterministically and keeps policy validation and formula selection aligned.</p>
 </section>
 <section id="finite-pitch-quarter-turn-example" class="level3" data-number="9.11.7">
@@ -3295,20 +3311,20 @@ D(\theta)
 \mathrm m.
 \]</span></p>
 <p>The corresponding use of the public API is</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb55"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>Eigen<span class="op">::</span>Matrix4d matrix<span class="op">;</span></span>
-<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a>matrix <span class="op">&lt;&lt;</span></span>
-<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a>  <span class="fl">0.0</span><span class="op">,</span> <span class="op">-</span><span class="fl">1.0</span><span class="op">,</span> <span class="fl">0.0</span><span class="op">,</span> <span class="fl">2.0</span><span class="op">,</span></span>
-<span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a>  <span class="fl">1.0</span><span class="op">,</span>  <span class="fl">0.0</span><span class="op">,</span> <span class="fl">0.0</span><span class="op">,</span> <span class="op">-</span><span class="fl">2.0</span><span class="op">,</span></span>
-<span id="cb55-5"><a href="#cb55-5" aria-hidden="true" tabindex="-1"></a>  <span class="fl">0.0</span><span class="op">,</span>  <span class="fl">0.0</span><span class="op">,</span> <span class="fl">1.0</span><span class="op">,</span> pi <span class="op">/</span> <span class="fl">40.0</span><span class="op">,</span></span>
-<span id="cb55-6"><a href="#cb55-6" aria-hidden="true" tabindex="-1"></a>  <span class="fl">0.0</span><span class="op">,</span>  <span class="fl">0.0</span><span class="op">,</span> <span class="fl">0.0</span><span class="op">,</span> <span class="fl">1.0</span><span class="op">;</span></span>
-<span id="cb55-7"><a href="#cb55-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb55-8"><a href="#cb55-8" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> Transform3 transform <span class="op">=</span> Transform3<span class="op">::</span>from_matrix<span class="op">(</span>matrix<span class="op">);</span></span>
-<span id="cb55-9"><a href="#cb55-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb55-10"><a href="#cb55-10" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> TransformLogResult logarithm <span class="op">=</span></span>
-<span id="cb55-11"><a href="#cb55-11" aria-hidden="true" tabindex="-1"></a>  transform<span class="op">.</span>to_principal_exponential_coordinates<span class="op">();</span></span>
-<span id="cb55-12"><a href="#cb55-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb55-13"><a href="#cb55-13" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> Eigen<span class="op">::</span>Vector3d rho <span class="op">=</span> logarithm<span class="op">.</span>coordinates<span class="op">.</span>head<span class="op">&lt;</span><span class="dv">3</span><span class="op">&gt;();</span></span>
-<span id="cb55-14"><a href="#cb55-14" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> Eigen<span class="op">::</span>Vector3d phi <span class="op">=</span> logarithm<span class="op">.</span>coordinates<span class="op">.</span>tail<span class="op">&lt;</span><span class="dv">3</span><span class="op">&gt;();</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb56"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>Eigen<span class="op">::</span>Matrix4d matrix<span class="op">;</span></span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a>matrix <span class="op">&lt;&lt;</span></span>
+<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a>  <span class="fl">0.0</span><span class="op">,</span> <span class="op">-</span><span class="fl">1.0</span><span class="op">,</span> <span class="fl">0.0</span><span class="op">,</span> <span class="fl">2.0</span><span class="op">,</span></span>
+<span id="cb56-4"><a href="#cb56-4" aria-hidden="true" tabindex="-1"></a>  <span class="fl">1.0</span><span class="op">,</span>  <span class="fl">0.0</span><span class="op">,</span> <span class="fl">0.0</span><span class="op">,</span> <span class="op">-</span><span class="fl">2.0</span><span class="op">,</span></span>
+<span id="cb56-5"><a href="#cb56-5" aria-hidden="true" tabindex="-1"></a>  <span class="fl">0.0</span><span class="op">,</span>  <span class="fl">0.0</span><span class="op">,</span> <span class="fl">1.0</span><span class="op">,</span> pi <span class="op">/</span> <span class="fl">40.0</span><span class="op">,</span></span>
+<span id="cb56-6"><a href="#cb56-6" aria-hidden="true" tabindex="-1"></a>  <span class="fl">0.0</span><span class="op">,</span>  <span class="fl">0.0</span><span class="op">,</span> <span class="fl">0.0</span><span class="op">,</span> <span class="fl">1.0</span><span class="op">;</span></span>
+<span id="cb56-7"><a href="#cb56-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb56-8"><a href="#cb56-8" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> Transform3 transform <span class="op">=</span> Transform3<span class="op">::</span>from_matrix<span class="op">(</span>matrix<span class="op">);</span></span>
+<span id="cb56-9"><a href="#cb56-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb56-10"><a href="#cb56-10" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> TransformLogResult logarithm <span class="op">=</span></span>
+<span id="cb56-11"><a href="#cb56-11" aria-hidden="true" tabindex="-1"></a>  transform<span class="op">.</span>to_principal_exponential_coordinates<span class="op">();</span></span>
+<span id="cb56-12"><a href="#cb56-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb56-13"><a href="#cb56-13" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> Eigen<span class="op">::</span>Vector3d rho <span class="op">=</span> logarithm<span class="op">.</span>coordinates<span class="op">.</span>head<span class="op">&lt;</span><span class="dv">3</span><span class="op">&gt;();</span></span>
+<span id="cb56-14"><a href="#cb56-14" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> Eigen<span class="op">::</span>Vector3d phi <span class="op">=</span> logarithm<span class="op">.</span>coordinates<span class="op">.</span>tail<span class="op">&lt;</span><span class="dv">3</span><span class="op">&gt;();</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>This is a <code>nominal</code> case because <span class="math inline">\(\theta=\pi/2\)</span> lies between the two formula-selection regions. Re-exponentiating the recovered coordinate column reconstructs the same finite transformation. The example also shows why copying the transform’s translation into the first three output entries would be wrong: <span class="math inline">\([2\;-2\;\pi/40]^{\mathsf T}\)</span> and <span class="math inline">\([0\;-\pi\;\pi/40]^{\mathsf T}\)</span> answer different questions.</p>
 </section>
 <section id="validation-and-focused-evidence-2" class="level3" data-number="9.11.8">
@@ -3491,32 +3507,33 @@ D(\theta)
 \end{bmatrix}.
 \]</span></p>
 <p>When <span class="math inline">\(\boldsymbol\phi\neq\mathbf0_3\)</span>, the finite coordinate <span class="math inline">\(\boldsymbol\rho=\boldsymbol\nu\Delta t\)</span> is not generally the translation column of <span class="math inline">\(\mathbf T_\Delta\)</span>. The translation is <span class="math inline">\(\mathbf J(\boldsymbol\phi)\boldsymbol\rho\)</span> because the directions used by a constant body twist rotate during the interval. The left Jacobian performs the required integration after expressing those changing velocity directions in one common coordinate frame.</p>
+<p>The integration methods introduce duration as a new kind of public input, so the integration block extends <code>GeometryError</code> with <code>invalid_time</code>. This category reports a duration that is negative or non-finite. A non-finite twist remains <code>non_finite</code>, while overflow produced by multiplying two finite values remains <code>unsupported_magnitude</code>; <code>invalid_time</code> therefore identifies a distinct failure at the time-input boundary.</p>
 <p>The <code>Transform3</code> public interface declares separate methods so the twist representation is explicit at every call site:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb56"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> Transform3 integrate_constant_space_twist<span class="op">(</span></span>
-<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> Vector6LinearFirst <span class="op">&amp;</span> space_twist<span class="op">,</span> <span class="dt">double</span> delta_time<span class="op">,</span></span>
-<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> NumericalPolicy <span class="op">&amp;</span> policy <span class="op">=</span> NumericalPolicy<span class="op">{})</span> <span class="at">const</span><span class="op">;</span></span>
-<span id="cb56-4"><a href="#cb56-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb56-5"><a href="#cb56-5" aria-hidden="true" tabindex="-1"></a><span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> Transform3 integrate_constant_body_twist<span class="op">(</span></span>
-<span id="cb56-6"><a href="#cb56-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> Vector6LinearFirst <span class="op">&amp;</span> body_twist<span class="op">,</span> <span class="dt">double</span> delta_time<span class="op">,</span></span>
-<span id="cb56-7"><a href="#cb56-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> NumericalPolicy <span class="op">&amp;</span> policy <span class="op">=</span> NumericalPolicy<span class="op">{})</span> <span class="at">const</span><span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb57"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a><span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> Transform3 integrate_constant_space_twist<span class="op">(</span></span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> Vector6LinearFirst <span class="op">&amp;</span> space_twist<span class="op">,</span> <span class="dt">double</span> delta_time<span class="op">,</span></span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> NumericalPolicy <span class="op">&amp;</span> policy <span class="op">=</span> NumericalPolicy<span class="op">{})</span> <span class="at">const</span><span class="op">;</span></span>
+<span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-5"><a href="#cb57-5" aria-hidden="true" tabindex="-1"></a><span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> Transform3 integrate_constant_body_twist<span class="op">(</span></span>
+<span id="cb57-6"><a href="#cb57-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> Vector6LinearFirst <span class="op">&amp;</span> body_twist<span class="op">,</span> <span class="dt">double</span> delta_time<span class="op">,</span></span>
+<span id="cb57-7"><a href="#cb57-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> NumericalPolicy <span class="op">&amp;</span> policy <span class="op">=</span> NumericalPolicy<span class="op">{})</span> <span class="at">const</span><span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Both are <code>const</code> member functions, so the <code>Transform3</code> object before the dot is the validated initial pose <span class="math inline">\(\mathbf T_0\)</span> and is not mutated. A caller uses either representation as follows; omitting the final argument selects the public default numerical policy:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb57"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> Transform3 updated_from_space <span class="op">=</span></span>
-<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>  initial_pose<span class="op">.</span>integrate_constant_space_twist<span class="op">(</span>space_twist<span class="op">,</span> delta_time<span class="op">);</span></span>
-<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> Transform3 updated_from_body <span class="op">=</span></span>
-<span id="cb57-5"><a href="#cb57-5" aria-hidden="true" tabindex="-1"></a>  initial_pose<span class="op">.</span>integrate_constant_body_twist<span class="op">(</span>body_twist<span class="op">,</span> delta_time<span class="op">);</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb58"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> Transform3 updated_from_space <span class="op">=</span></span>
+<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a>  initial_pose<span class="op">.</span>integrate_constant_space_twist<span class="op">(</span>space_twist<span class="op">,</span> delta_time<span class="op">);</span></span>
+<span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb58-4"><a href="#cb58-4" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> Transform3 updated_from_body <span class="op">=</span></span>
+<span id="cb58-5"><a href="#cb58-5" aria-hidden="true" tabindex="-1"></a>  initial_pose<span class="op">.</span>integrate_constant_body_twist<span class="op">(</span>body_twist<span class="op">,</span> delta_time<span class="op">);</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>These calls are alternative representations of one update only when <code>space_twist</code> and <code>body_twist</code> describe the same physical motion. At the initial pose, that requires <span class="math inline">\(\boldsymbol\xi_s=\operatorname{Ad}_{\mathbf T_0}\boldsymbol\xi_b\)</span>; supplying the same numerical six-vector to both methods does not generally satisfy that relation.</p>
 <p>After validating the duration and twist, the two implementations reuse the same twist-time product and <span class="math inline">\(SE(3)\)</span> exponential but preserve different multiplication sides:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb58"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> Vector6LinearFirst exponential_coordinates <span class="op">=</span> twist <span class="op">*</span> delta_time<span class="op">;</span></span>
-<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> Transform3 increment <span class="op">=</span></span>
-<span id="cb58-4"><a href="#cb58-4" aria-hidden="true" tabindex="-1"></a>  Transform3<span class="op">::</span>from_exponential_coordinates<span class="op">(</span>exponential_coordinates<span class="op">,</span> policy<span class="op">);</span></span>
-<span id="cb58-5"><a href="#cb58-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb58-6"><a href="#cb58-6" aria-hidden="true" tabindex="-1"></a><span class="co">// Space form: T_delta T_0.</span></span>
-<span id="cb58-7"><a href="#cb58-7" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> increment<span class="op">.</span>compose<span class="op">(*</span><span class="kw">this</span><span class="op">);</span></span>
-<span id="cb58-8"><a href="#cb58-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb58-9"><a href="#cb58-9" aria-hidden="true" tabindex="-1"></a><span class="co">// Body form: T_0 T_delta.</span></span>
-<span id="cb58-10"><a href="#cb58-10" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> <span class="kw">this</span><span class="op">-&gt;</span>compose<span class="op">(</span>increment<span class="op">);</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb59"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> Vector6LinearFirst exponential_coordinates <span class="op">=</span> twist <span class="op">*</span> delta_time<span class="op">;</span></span>
+<span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb59-3"><a href="#cb59-3" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> Transform3 increment <span class="op">=</span></span>
+<span id="cb59-4"><a href="#cb59-4" aria-hidden="true" tabindex="-1"></a>  Transform3<span class="op">::</span>from_exponential_coordinates<span class="op">(</span>exponential_coordinates<span class="op">,</span> policy<span class="op">);</span></span>
+<span id="cb59-5"><a href="#cb59-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb59-6"><a href="#cb59-6" aria-hidden="true" tabindex="-1"></a><span class="co">// Space form: T_delta T_0.</span></span>
+<span id="cb59-7"><a href="#cb59-7" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> increment<span class="op">.</span>compose<span class="op">(*</span><span class="kw">this</span><span class="op">);</span></span>
+<span id="cb59-8"><a href="#cb59-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb59-9"><a href="#cb59-9" aria-hidden="true" tabindex="-1"></a><span class="co">// Body form: T_0 T_delta.</span></span>
+<span id="cb59-10"><a href="#cb59-10" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> <span class="kw">this</span><span class="op">-&gt;</span>compose<span class="op">(</span>increment<span class="op">);</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Inside either non-static member function, <code>this</code> points to the initial <code>Transform3</code> object <span class="math inline">\(\mathbf T_0\)</span>. The expression <code>*this</code> supplies that object as the right operand of <code>increment.compose(...)</code>, whereas <code>this-&gt;compose(increment)</code> invokes composition on <span class="math inline">\(\mathbf T_0\)</span> and supplies the increment as its right operand.</p>
 </section>
 <section id="equation-to-code-map-2" class="level3" data-number="9.12.4">
@@ -4137,6 +4154,308 @@ D(\theta)
 <p>The methods integrate one constant twist over one non-negative interval. They do not integrate a time-varying twist, select a time-stepping method, accept a signed displacement in place of time, estimate a twist from sensor measurements, attach runtime frame labels, or propagate uncertainty. Piecewise-constant integration requires the caller to preserve chronological order across successive updates.</p>
 </section>
 </section>
+<section id="sec-spatial-kernel-se3-adjoint" class="level2" data-number="9.13">
+<h2 data-number="9.13" class="anchored" data-anchor-id="sec-spatial-kernel-se3-adjoint"><span class="header-section-number">9.13</span> Linear-first <span class="math inline">\(SE(3)\)</span> adjoint</h2>
+<p>The constant-twist example in <a href="#sec-spatial-kernel-constant-twist-integration" class="quarto-xref"><span>Section 9.12</span></a> used two coordinate columns for one physical rigid-body velocity. The adjoint answers the implementation question exposed by that example: given a stored transformation between two frames, how should the coordinates of one twist be converted from the second frame into the first? This conversion is useful whenever a velocity, screw axis, or finite motion direction must be compared or combined in one common frame.</p>
+<section id="input-output-frame-and-units-4" class="level3" data-number="9.13.1">
+<h3 data-number="9.13.1" class="anchored" data-anchor-id="input-output-frame-and-units-4"><span class="header-section-number">9.13.1</span> Input, output, frame, and units</h3>
+<p>Let the stored transformation be</p>
+<p><span class="math display">\[
+\mathbf T_{ab}
+=
+\begin{bmatrix}
+\mathbf R_{ab}&amp;{}^{a}\mathbf p_b\\
+\mathbf0_3^{\mathsf T}&amp;1
+\end{bmatrix}
+\in SE(3),
+\]</span></p>
+<p>where <span class="math inline">\(\mathbf R_{ab}\in SO(3)\)</span> expresses frame <span class="math inline">\(\{b\}\)</span> axes in frame <span class="math inline">\(\{a\}\)</span> axes, and <span class="math inline">\({}^{a}\mathbf p_b\in\mathbb R^3\)</span> is the position of the origin <span class="math inline">\(O_b\)</span> relative to <span class="math inline">\(O_a\)</span>, expressed in <span class="math inline">\(\{a\}\)</span> and measured in metres. Let one physical twist have the two linear-first coordinate columns</p>
+<p><span class="math display">\[
+{}^{b}\boldsymbol\xi
+=
+\begin{bmatrix}
+{}^{b}\boldsymbol\nu\\
+{}^{b}\boldsymbol\omega
+\end{bmatrix},
+\qquad
+{}^{a}\boldsymbol\xi
+=
+\begin{bmatrix}
+{}^{a}\boldsymbol\nu\\
+{}^{a}\boldsymbol\omega
+\end{bmatrix}
+\in\mathbb R^6.
+\]</span></p>
+<p>The columns <span class="math inline">\({}^{b}\boldsymbol\nu\)</span> and <span class="math inline">\({}^{a}\boldsymbol\nu\)</span> have units of <span class="math inline">\(\mathrm{m\,s^{-1}}\)</span>, while <span class="math inline">\({}^{b}\boldsymbol\omega\)</span> and <span class="math inline">\({}^{a}\boldsymbol\omega\)</span> have units of <span class="math inline">\(\mathrm{rad\,s^{-1}}\)</span>. The superscript identifies the axes used for the numerical components; it does not identify a different physical motion.</p>
+<p>The geometry derived in <a href="#sec-spatial-kernel-constant-twist-integration" class="quarto-xref"><span>Section 9.12</span></a> established the component relations</p>
+<p><span class="math display">\[
+{}^{a}\boldsymbol\omega
+=
+\mathbf R_{ab}{}^{b}\boldsymbol\omega,
+\]</span></p>
+<p>and</p>
+<p><span class="math display">\[
+{}^{a}\boldsymbol\nu
+=
+\mathbf R_{ab}{}^{b}\boldsymbol\nu
++
+{}^{a}\mathbf p_b
+\times
+\left(\mathbf R_{ab}{}^{b}\boldsymbol\omega\right).
+\]</span></p>
+<p>The angular equation expresses the same angular velocity along the new axes. In the linear equation, <span class="math inline">\(\mathbf R_{ab}{}^{b}\boldsymbol\nu\)</span> first expresses the body-origin velocity along frame <span class="math inline">\(\{a\}\)</span> axes, and the cross product then shifts the velocity field’s reference point from <span class="math inline">\(O_b\)</span> to <span class="math inline">\(O_a\)</span>.</p>
+<p>For every <span class="math inline">\(\mathbf y\in\mathbb R^3\)</span>, the cross-product matrix is defined by <span class="math inline">\([{}^{a}\mathbf p_b]_{\times}\mathbf y={}^a\mathbf p_b\times\mathbf y\)</span>. Using that definition and stacking the linear block above the angular block produces the project’s linear-first adjoint:</p>
+<p><span class="math display">\[
+\boxed{
+{}^{a}\boldsymbol\xi
+=
+\operatorname{Ad}_{\mathbf T_{ab}}{}^{b}\boldsymbol\xi
+},
+\qquad
+\boxed{
+\operatorname{Ad}_{\mathbf T_{ab}}
+=
+\begin{bmatrix}
+\mathbf R_{ab}&amp;[{}^{a}\mathbf p_b]_{\times}\mathbf R_{ab}\\
+\mathbf0_{3\times3}&amp;\mathbf R_{ab}
+\end{bmatrix}
+\in\mathbb R^{6\times6}
+}.
+\]</span></p>
+<p>The two diagonal rotation blocks are dimensionless. The upper-right block contains the translation in metres; multiplying it by angular velocity produces linear velocity because radians are dimensionless. Modern Robotics writes a twist in angular-first order, so its equivalent translation-coupling block appears in the lower-left. The project deliberately uses linear-first order, matching the declared <code>Vector6LinearFirst</code> layout, so copying an angular-first block arrangement would implement the wrong public convention.</p>
+</section>
+<section id="the-conjugation-identity-checks-the-convention" class="level3" data-number="9.13.2">
+<h3 data-number="9.13.2" class="anchored" data-anchor-id="the-conjugation-identity-checks-the-convention"><span class="header-section-number">9.13.2</span> The conjugation identity checks the convention</h3>
+<p>The <span class="math inline">\(6\times6\)</span> formula must agree with the corresponding change of coordinates for the <span class="math inline">\(4\times4\)</span> tangent matrix. For the linear-first twist <span class="math inline">\({}^{b}\boldsymbol\xi\)</span>, the hat map is</p>
+<p><span class="math display">\[
+\widehat{{}^{b}\boldsymbol\xi}
+=
+\begin{bmatrix}
+[{}^{b}\boldsymbol\omega]_{\times}&amp;{}^{b}\boldsymbol\nu\\
+\mathbf0_3^{\mathsf T}&amp;0
+\end{bmatrix}.
+\]</span></p>
+<p>Substitute this matrix and the rigid-transform inverse into the conjugation product:</p>
+<p><span class="math display">\[
+\begin{aligned}
+\mathbf T_{ab}
+\widehat{{}^{b}\boldsymbol\xi}
+\mathbf T_{ab}^{-1}
+&amp;=
+\begin{bmatrix}
+\mathbf R_{ab}[{}^{b}\boldsymbol\omega]_{\times}\mathbf R_{ab}^{\mathsf T}
+&amp;
+-\mathbf R_{ab}[{}^{b}\boldsymbol\omega]_{\times}\mathbf R_{ab}^{\mathsf T}{}^{a}\mathbf p_b
++\mathbf R_{ab}{}^{b}\boldsymbol\nu\\
+\mathbf0_3^{\mathsf T}&amp;0
+\end{bmatrix}\\
+&amp;=
+\begin{bmatrix}
+[\mathbf R_{ab}{}^{b}\boldsymbol\omega]_{\times}
+&amp;
+\mathbf R_{ab}{}^{b}\boldsymbol\nu
++{}^{a}\mathbf p_b\times(\mathbf R_{ab}{}^{b}\boldsymbol\omega)\\
+\mathbf0_3^{\mathsf T}&amp;0
+\end{bmatrix}.
+\end{aligned}
+\]</span></p>
+<p>The second equality uses <span class="math inline">\(\mathbf R[\boldsymbol\omega]_{\times}\mathbf R^{\mathsf T}=[\mathbf R\boldsymbol\omega]_{\times}\)</span> and <span class="math inline">\(-[\mathbf y]_{\times}\mathbf p=\mathbf p\times\mathbf y\)</span>.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> The resulting rotational block and linear column are exactly the hat matrix of the adjoint-transformed twist. Therefore,</p>
+<p><span class="math display">\[
+\boxed{
+\widehat{\operatorname{Ad}_{\mathbf T_{ab}}{}^{b}\boldsymbol\xi}
+=
+\mathbf T_{ab}
+\widehat{{}^{b}\boldsymbol\xi}
+\mathbf T_{ab}^{-1}
+}.
+\]</span></p>
+<p>This identity is more useful as independent verification than as the production algorithm. Applying it to one twist requires a transform inverse, two <span class="math inline">\(4\times4\)</span> products, a hat operation, and a vee operation. Constructing the complete <span class="math inline">\(6\times6\)</span> adjoint through the identity would require repeating that work for all six basis columns. The direct block formula constructs the requested matrix with one <span class="math inline">\(3\times3\)</span> product while keeping the project’s frame and component-order convention visible.</p>
+</section>
+<section id="public-method-and-implementation" class="level3" data-number="9.13.3">
+<h3 data-number="9.13.3" class="anchored" data-anchor-id="public-method-and-implementation"><span class="header-section-number">9.13.3</span> Public method and implementation</h3>
+<p>The public member declaration is</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb61"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Return the linear-first adjoint Ad_T.</span></span>
+<span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a><span class="co">// It maps twist coordinates referenced to {b} into coordinates</span></span>
+<span id="cb61-3"><a href="#cb61-3" aria-hidden="true" tabindex="-1"></a><span class="co">// referenced to {a} when this transform is T_ab.</span></span>
+<span id="cb61-4"><a href="#cb61-4" aria-hidden="true" tabindex="-1"></a><span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> Eigen<span class="op">::</span>Matrix<span class="op">&lt;</span><span class="dt">double</span><span class="op">,</span> <span class="dv">6</span><span class="op">,</span> <span class="dv">6</span><span class="op">&gt;</span> adjoint<span class="op">()</span> <span class="at">const</span><span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The method takes no argument because the stored <code>Transform3</code> is the only input needed to construct <span class="math inline">\(\operatorname{Ad}_{\mathbf T_{ab}}\)</span>. The trailing <code>const</code> promises not to change that stored transformation, and <code>[[nodiscard]]</code> asks the compiler to warn when a caller discards the returned coordinate-conversion matrix.</p>
+<p>The implementation is</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb62"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a>Eigen<span class="op">::</span>Matrix<span class="op">&lt;</span><span class="dt">double</span><span class="op">,</span> <span class="dv">6</span><span class="op">,</span> <span class="dv">6</span><span class="op">&gt;</span> Transform3<span class="op">::</span>adjoint<span class="op">()</span> <span class="at">const</span></span>
+<span id="cb62-2"><a href="#cb62-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb62-3"><a href="#cb62-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> Eigen<span class="op">::</span>Matrix3d rotation <span class="op">=</span> <span class="va">rotation_</span><span class="op">.</span>matrix<span class="op">();</span></span>
+<span id="cb62-4"><a href="#cb62-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> Eigen<span class="op">::</span>Matrix3d translation_hat <span class="op">=</span> hat_so3<span class="op">(</span><span class="va">translation_</span><span class="op">);</span></span>
+<span id="cb62-5"><a href="#cb62-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> Eigen<span class="op">::</span>Matrix3d translation_rotation <span class="op">=</span> translation_hat <span class="op">*</span> rotation<span class="op">;</span></span>
+<span id="cb62-6"><a href="#cb62-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb62-7"><a href="#cb62-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(!</span>translation_rotation<span class="op">.</span>allFinite<span class="op">())</span> <span class="op">{</span></span>
+<span id="cb62-8"><a href="#cb62-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">throw</span> GeometryException<span class="op">(</span></span>
+<span id="cb62-9"><a href="#cb62-9" aria-hidden="true" tabindex="-1"></a>      GeometryError<span class="op">::</span>unsupported_magnitude<span class="op">,</span></span>
+<span id="cb62-10"><a href="#cb62-10" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Adjoint is outside the supported numerical range."</span><span class="op">);</span></span>
+<span id="cb62-11"><a href="#cb62-11" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb62-12"><a href="#cb62-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb62-13"><a href="#cb62-13" aria-hidden="true" tabindex="-1"></a>  Eigen<span class="op">::</span>Matrix<span class="op">&lt;</span><span class="dt">double</span><span class="op">,</span> <span class="dv">6</span><span class="op">,</span> <span class="dv">6</span><span class="op">&gt;</span> adjoint_matrix <span class="op">=</span></span>
+<span id="cb62-14"><a href="#cb62-14" aria-hidden="true" tabindex="-1"></a>    Eigen<span class="op">::</span>Matrix<span class="op">&lt;</span><span class="dt">double</span><span class="op">,</span> <span class="dv">6</span><span class="op">,</span> <span class="dv">6</span><span class="op">&gt;::</span>Zero<span class="op">();</span></span>
+<span id="cb62-15"><a href="#cb62-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb62-16"><a href="#cb62-16" aria-hidden="true" tabindex="-1"></a>  adjoint_matrix<span class="op">.</span>block<span class="op">&lt;</span><span class="dv">3</span><span class="op">,</span> <span class="dv">3</span><span class="op">&gt;(</span><span class="dv">0</span><span class="op">,</span> <span class="dv">0</span><span class="op">)</span> <span class="op">=</span> rotation<span class="op">;</span></span>
+<span id="cb62-17"><a href="#cb62-17" aria-hidden="true" tabindex="-1"></a>  adjoint_matrix<span class="op">.</span>block<span class="op">&lt;</span><span class="dv">3</span><span class="op">,</span> <span class="dv">3</span><span class="op">&gt;(</span><span class="dv">0</span><span class="op">,</span> <span class="dv">3</span><span class="op">)</span> <span class="op">=</span> translation_rotation<span class="op">;</span></span>
+<span id="cb62-18"><a href="#cb62-18" aria-hidden="true" tabindex="-1"></a>  adjoint_matrix<span class="op">.</span>block<span class="op">&lt;</span><span class="dv">3</span><span class="op">,</span> <span class="dv">3</span><span class="op">&gt;(</span><span class="dv">3</span><span class="op">,</span> <span class="dv">3</span><span class="op">)</span> <span class="op">=</span> rotation<span class="op">;</span></span>
+<span id="cb62-19"><a href="#cb62-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb62-20"><a href="#cb62-20" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> adjoint_matrix<span class="op">;</span></span>
+<span id="cb62-21"><a href="#cb62-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>rotation</code> is <span class="math inline">\(\mathbf R_{ab}\)</span>, <code>translation_hat</code> is <span class="math inline">\([{}^{a}\mathbf p_b]_{\times}\)</span>, and <code>translation_rotation</code> is their required left-to-right product <span class="math inline">\([{}^{a}\mathbf p_b]_{\times}\mathbf R_{ab}\)</span>. Matrix multiplication acts on a twist from right to left, so this order first rotates <span class="math inline">\({}^{b}\boldsymbol\omega\)</span> into frame <span class="math inline">\(\{a\}\)</span> and then calculates the cross product with <span class="math inline">\({}^{a}\mathbf p_b\)</span>. Replacing the product with <code>translation_hat</code> alone would be correct only when <span class="math inline">\(\mathbf R_{ab}=\mathbf I_3\)</span>.</p>
+<p><code>Eigen::Matrix&lt;double, 6, 6&gt;::Zero()</code> establishes the complete zero matrix, including the required lower-left block. Each call <code>block&lt;3, 3&gt;(start_row, start_column)</code> then selects a fixed <span class="math inline">\(3\times3\)</span> region by its starting indices: <code>(0, 0)</code> is the upper-left block, <code>(0, 3)</code> is the upper-right block, and <code>(3, 3)</code> is the lower-right block. The arguments are locations for <code>block</code>, unlike the runtime-size arguments of an Eigen corner accessor.</p>
+<p>The equation-to-code correspondence is</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Mathematical object</th>
+<th>Code expression</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(\mathbf R_{ab}\)</span></td>
+<td><code>rotation_.matrix()</code></td>
+<td>Express frame <span class="math inline">\(\{b\}\)</span> axes along frame <span class="math inline">\(\{a\}\)</span> axes</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\({}^{a}\mathbf p_b\)</span></td>
+<td><code>translation_</code></td>
+<td>Position of <span class="math inline">\(O_b\)</span> relative to <span class="math inline">\(O_a\)</span>, expressed in <span class="math inline">\(\{a\}\)</span> and measured in metres</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\([{}^{a}\mathbf p_b]_{\times}\)</span></td>
+<td><code>hat_so3(translation_)</code></td>
+<td>Matrix that calculates <span class="math inline">\({}^{a}\mathbf p_b\times\mathbf y\)</span></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\([{}^{a}\mathbf p_b]_{\times}\mathbf R_{ab}\)</span></td>
+<td><code>translation_hat * rotation</code></td>
+<td>Rotate angular components into <span class="math inline">\(\{a\}\)</span>, then shift the velocity-field reference point</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\operatorname{Ad}_{\mathbf T_{ab}}\)</span></td>
+<td><code>adjoint_matrix</code></td>
+<td>Linear-first <span class="math inline">\(6\times6\)</span> coordinate-conversion matrix</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="sec-spatial-kernel-adjoint-usage" class="level3" data-number="9.13.4">
+<h3 data-number="9.13.4" class="anchored" data-anchor-id="sec-spatial-kernel-adjoint-usage"><span class="header-section-number">9.13.4</span> Usage and analytic result</h3>
+<p>This example uses zero relative rotation, <span class="math inline">\(\mathbf R_{ab}=\mathbf I_3\)</span>, so the frame axes align. The nonzero <span class="math inline">\({}^{a}\mathbf p_b\)</span> and <span class="math inline">\({}^{b}\boldsymbol\omega\)</span> keep the upper-right coupling <span class="math inline">\([{}^{a}\mathbf p_b]_{\times}\mathbf R_{ab}\)</span> observable. The calculation therefore isolates the shift between the frame origins and supplies the expected result for the first focused adjoint test.</p>
+<p>Use the specification acceptance inputs <span class="math inline">\({}^{a}\mathbf p_b=[1\;2\;3]^{\mathsf T}\ \mathrm m\)</span> and</p>
+<p><span class="math display">\[
+{}^{b}\boldsymbol\xi
+=
+\begin{bmatrix}
+4&amp;5&amp;6&amp;1&amp;0&amp;-1
+\end{bmatrix}^{\mathsf T},
+\]</span></p>
+<p>where the first block has units of <span class="math inline">\(\mathrm{m\,s^{-1}}\)</span> and the second has units of <span class="math inline">\(\mathrm{rad\,s^{-1}}\)</span>. The translation contribution is</p>
+<p><span class="math display">\[
+{}^{a}\mathbf p_b\times\left(\mathbf R_{ab}{}^{b}\boldsymbol\omega\right)
+=
+\begin{bmatrix}1\\2\\3\end{bmatrix}
+\times
+\begin{bmatrix}1\\0\\-1\end{bmatrix}
+=
+\begin{bmatrix}-2\\4\\-2\end{bmatrix}
+\mathrm{m\,s^{-1}}.
+\]</span></p>
+<p>Because the rotation is identity, the converted linear and angular blocks are</p>
+<p><span class="math display">\[
+{}^{a}\boldsymbol\nu
+=
+\begin{bmatrix}
+4\\5\\6
+\end{bmatrix}
++
+\begin{bmatrix}
+-2\\4\\-2
+\end{bmatrix}
+=
+\begin{bmatrix}
+2\\9\\4
+\end{bmatrix}
+\mathrm{m\,s^{-1}},
+\qquad
+{}^{a}\boldsymbol\omega
+=
+\begin{bmatrix}
+1\\0\\-1
+\end{bmatrix}
+\mathrm{rad\,s^{-1}}.
+\]</span></p>
+<p>Stacking these two blocks in the declared order gives <span class="math inline">\({}^{a}\boldsymbol\xi=[2\;9\;4\;1\;0\;-1]^{\mathsf T}\)</span>, with the first three components in <span class="math inline">\(\mathrm{m\,s^{-1}}\)</span> and the final three components in <span class="math inline">\(\mathrm{rad\,s^{-1}}\)</span>.</p>
+<p>The public API is used as follows:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb63"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a>Eigen<span class="op">::</span>Matrix4d matrix_ab <span class="op">=</span> Eigen<span class="op">::</span>Matrix4d<span class="op">::</span>Identity<span class="op">();</span></span>
+<span id="cb63-2"><a href="#cb63-2" aria-hidden="true" tabindex="-1"></a>matrix_ab<span class="op">(</span><span class="dv">0</span><span class="op">,</span> <span class="dv">3</span><span class="op">)</span> <span class="op">=</span> <span class="fl">1.0</span><span class="op">;</span></span>
+<span id="cb63-3"><a href="#cb63-3" aria-hidden="true" tabindex="-1"></a>matrix_ab<span class="op">(</span><span class="dv">1</span><span class="op">,</span> <span class="dv">3</span><span class="op">)</span> <span class="op">=</span> <span class="fl">2.0</span><span class="op">;</span></span>
+<span id="cb63-4"><a href="#cb63-4" aria-hidden="true" tabindex="-1"></a>matrix_ab<span class="op">(</span><span class="dv">2</span><span class="op">,</span> <span class="dv">3</span><span class="op">)</span> <span class="op">=</span> <span class="fl">3.0</span><span class="op">;</span></span>
+<span id="cb63-5"><a href="#cb63-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-6"><a href="#cb63-6" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> rigid_body_kinematics<span class="op">::</span>Transform3 transform_ab <span class="op">=</span></span>
+<span id="cb63-7"><a href="#cb63-7" aria-hidden="true" tabindex="-1"></a>  rigid_body_kinematics<span class="op">::</span>Transform3<span class="op">::</span>from_matrix<span class="op">(</span>matrix_ab<span class="op">);</span></span>
+<span id="cb63-8"><a href="#cb63-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-9"><a href="#cb63-9" aria-hidden="true" tabindex="-1"></a><span class="co">// xi_b = [nu_b; omega_b].</span></span>
+<span id="cb63-10"><a href="#cb63-10" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> rigid_body_kinematics<span class="op">::</span>Vector6LinearFirst twist_b<span class="op">(</span></span>
+<span id="cb63-11"><a href="#cb63-11" aria-hidden="true" tabindex="-1"></a>  <span class="fl">4.0</span><span class="op">,</span> <span class="fl">5.0</span><span class="op">,</span> <span class="fl">6.0</span><span class="op">,</span> <span class="fl">1.0</span><span class="op">,</span> <span class="fl">0.0</span><span class="op">,</span> <span class="op">-</span><span class="fl">1.0</span><span class="op">);</span></span>
+<span id="cb63-12"><a href="#cb63-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-13"><a href="#cb63-13" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> rigid_body_kinematics<span class="op">::</span>Vector6LinearFirst twist_a <span class="op">=</span></span>
+<span id="cb63-14"><a href="#cb63-14" aria-hidden="true" tabindex="-1"></a>  transform_ab<span class="op">.</span>adjoint<span class="op">()</span> <span class="op">*</span> twist_b<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The multiplication <code>transform_ab.adjoint() * twist_b</code> follows the project’s column-vector and rightmost-first convention: construct the adjoint from <span class="math inline">\(\mathbf T_{ab}\)</span>, then apply that matrix to <span class="math inline">\({}^{b}\boldsymbol\xi\)</span> to obtain <span class="math inline">\({}^{a}\boldsymbol\xi\)</span>.</p>
+<p>The first focused GTest case uses this same transformation and twist, then checks all six components against the independently derived result <span class="math inline">\([2\;9\;4\;1\;0\;-1]^{\mathsf T}\)</span>. The worked calculation above is therefore the test oracle, not a separate example introduced only to exercise the API.</p>
+</section>
+<section id="validation-and-focused-evidence-3" class="level3" data-number="9.13.5">
+<h3 data-number="9.13.5" class="anchored" data-anchor-id="validation-and-focused-evidence-3"><span class="header-section-number">9.13.5</span> Validation and focused evidence</h3>
+<p>A valid <code>Transform3</code> already guarantees finite stored translation components and a finite proper rotation. Those guarantees do not prove that the product <span class="math inline">\([{}^{a}\mathbf p_b]_{\times}\mathbf R_{ab}\)</span> is representable in binary64. Two finite products may be added inside one matrix entry and overflow. The implementation therefore checks <code>translation_rotation.allFinite()</code> before placing the product in a valid-looking adjoint matrix; failure reports <code>GeometryError::unsupported_magnitude</code>.</p>
+<p>The five focused GTest cases establish complementary properties:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 29%">
+<col style="width: 70%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Case</th>
+<th>Property established</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Specification case worked in <a href="#sec-spatial-kernel-adjoint-usage" class="quarto-xref"><span>Section 9.13.4</span></a></td>
+<td>Independent linear-first result <span class="math inline">\([2\;9\;4\;1\;0\;-1]^{\mathsf T}\)</span></td>
+</tr>
+<tr class="even">
+<td>Quarter-turn rotation with nonzero translation</td>
+<td><span class="math inline">\(\mathbf R_{ab}\)</span> acts before the cross product, so omitting the rotation factor is detected</td>
+</tr>
+<tr class="odd">
+<td>Homogeneous conjugation identity</td>
+<td>The complete <span class="math inline">\(6\times6\)</span> convention agrees with <span class="math inline">\(\mathbf T_{ab}\widehat{{}^{b}\boldsymbol\xi}\mathbf T_{ab}^{-1}\)</span> for a nontrivial transform and twist</td>
+</tr>
+<tr class="even">
+<td>Identity transform</td>
+<td><span class="math inline">\(\operatorname{Ad}_{\mathbf I_4}=\mathbf I_6\)</span> exactly</td>
+</tr>
+<tr class="odd">
+<td>Extreme finite translation with a <span class="math inline">\(\pi/4\)</span> rotation about <span class="math inline">\(x\)</span></td>
+<td>A non-finite required product reports <code>unsupported_magnitude</code> rather than returning infinities</td>
+</tr>
+</tbody>
+</table>
+<p>The analytic specification case alone cannot detect a missing factor <span class="math inline">\(\mathbf R_{ab}\)</span> because its rotation is identity. The separate non-identity case isolates that multiplication-order defect. The conjugation test then checks the same operation through independently tested homogeneous-transform, inverse, and hat-map paths instead of copying the production block construction into the expected result.</p>
+</section>
+<section id="deliberate-limits-7" class="level3" data-number="9.13.6">
+<h3 data-number="9.13.6" class="anchored" data-anchor-id="deliberate-limits-7"><span class="header-section-number">9.13.6</span> Deliberate limits</h3>
+<p>The member constructs the adjoint matrix but does not attach runtime frame labels or units to that matrix, so the caller must preserve the declared <span class="math inline">\(\mathbf T_{ab}\)</span> direction and apply it to coordinates expressed in <span class="math inline">\(\{b\}\)</span>. It does not mutate the transformation, infer a transform from twist data, or calculate a transformation exponential. Applying the returned matrix to a twist remains an explicit matrix–column product at the call site.</p>
+</section>
+</section>
 <section id="references" class="level2 unnumbered">
 <h2 class="unnumbered anchored" data-anchor-id="references">References</h2>
 <ul>
@@ -4145,6 +4464,12 @@ D(\theta)
 </ul>
 
 
+</section>
+<section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn1"><p>To verify the first identity, apply both sides to an arbitrary <span class="math inline">\(\mathbf x\in\mathbb R^3\)</span>. The left side gives <span class="math inline">\(\mathbf R\bigl(\boldsymbol\omega\times(\mathbf R^{\mathsf T}\mathbf x)\bigr)=(\mathbf R\boldsymbol\omega)\times(\mathbf R\mathbf R^{\mathsf T}\mathbf x)=(\mathbf R\boldsymbol\omega)\times\mathbf x\)</span>, because a proper rotation preserves cross products and <span class="math inline">\(\mathbf R\mathbf R^{\mathsf T}=\mathbf I_3\)</span>. This is <span class="math inline">\([\mathbf R\boldsymbol\omega]_{\times}\mathbf x\)</span> for every <span class="math inline">\(\mathbf x\)</span>, so the two matrices are equal. The second identity follows from cross-product antisymmetry: <span class="math inline">\(-[\mathbf y]_{\times}\mathbf p=-(\mathbf y\times\mathbf p)=\mathbf p\times\mathbf y\)</span>.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
 </section>
 
 </main> <!-- /main -->
