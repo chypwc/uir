@@ -214,6 +214,14 @@ install(
 )
 
 
+# Install the vendored ROS package manifest schema so the installed
+# package.xml can also be validated without network access.
+install(
+  DIRECTORY schema/
+  DESTINATION share/${PROJECT_NAME}/schema/
+)
+
+
 # Export the installed CMake target so downstream ROS 2 packages
 # can use this library.
 ament_export_targets(

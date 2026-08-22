@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
-<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<!-- Vendored from http://download.ros.org/schema/package_format3.xsd for offline validation. -->
+<?xml-model href="schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>rigid_body_kinematics</name>
   <version>0.0.0</version>
