@@ -40,6 +40,9 @@ format:
     theme:
       light: yeti
       dark: solar
+    syntax-highlighting:
+      light: arrow-light
+      dark: arrow-dark
     css: styles.css
     include-after-body: toc-toggle.html
     mainfont: "Roboto"
@@ -57,6 +60,9 @@ format:
     monofont: "Roboto Mono"
     monofontoptions:
       - Scale=0.80
+    syntax-highlighting: arrow-light
+    code-block-bg: "#F1F3F5"
+    code-block-border-left: "#6272A4"
     include-in-header:
       text: |
         \usepackage{pmboxdraw}

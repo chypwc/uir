@@ -23,6 +23,7 @@ add_library(${PROJECT_NAME}
   src/rotation3.cpp
   src/transform3.cpp
   src/lie_algebra.cpp
+  src/planar_geometry.cpp
 )
 
 
@@ -153,6 +154,14 @@ if(BUILD_TESTING)
   )
 
   target_link_libraries(test_se3_adjoint
+    ${PROJECT_NAME}
+  )
+
+  ament_add_gtest(test_planar_geometry
+    test/test_planar_geometry.cpp
+  )
+
+  target_link_libraries(test_planar_geometry
     ${PROJECT_NAME}
   )
 
