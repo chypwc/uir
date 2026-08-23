@@ -18,6 +18,14 @@ struct NumericalPolicy
 
   // Inclusive distance from pi for near-pi axis recovery.
   double near_pi_tolerance{1.0e-6};
+
+  // Dimensionless tolerance for preserving the positive z-axis:
+  // || R e_z - e_z || <= planar_orientation_tolerance
+  double planar_orientation_tolerance{1.0e-12};
+
+  // Vertical-position tolerance in metres:
+  // |p_z| <= planar_position_tolerance
+  double planar_position_tolerance{1.0e-12};
 };
 
 }  // namespace rigid_body_kinematics

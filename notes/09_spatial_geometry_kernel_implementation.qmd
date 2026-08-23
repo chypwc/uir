@@ -4176,7 +4176,251 @@ The analytic specification case alone cannot detect a missing factor $\mathbf R_
 
 The member constructs the adjoint matrix but does not attach runtime frame labels or units to that matrix, so the caller must preserve the declared $\mathbf T_{ab}$ direction and apply it to coordinates expressed in $\{b\}$. It does not mutate the transformation, infer a transform from twist data, or calculate a transformation exponential. Applying the returned matrix to a twist remains an explicit matrix--column product at the call site.
 
+## Planar pose embedding and extraction {#sec-spatial-kernel-planar-pose-interoperability}
+
+### Purpose, inputs, outputs, frames, and units
+
+Chapter 7 derived how a planar pose is embedded in $SE(3)$ in @sec-se2-se3-embedding. The mathematical question here is when a planar pose and a spatial transformation contain the same pose information. The forward direction must place the planar coordinates inside $SE(3)$. The reverse direction must reject a spatial transformation containing vertical translation, roll, or pitch instead of quietly discarding those three-dimensional components.
+
+Let $\mathbf T_{ab}$ describe the pose of frame $\{b\}$ relative to frame $\{a\}$ and map point coordinates from $\{b\}$ into $\{a\}$. Let $x$ and $y$ be the first two components of the position ${}^{a}\mathbf p_b$ of origin $O_b$ relative to origin $O_a$, expressed along the axes of $\{a\}$ and measured in metres. Let $\theta$ be the right-handed rotation of the $\{b\}$ axes about the positive $z_a$-axis, measured in radians.
+
+Embedding maps the three planar coordinates $(x,y,\theta)$ to
+
+$$
+\mathbf T_{ab}
+=
+\begin{bmatrix}
+\cos\theta&-\sin\theta&0&x\\
+\sin\theta&\cos\theta&0&y\\
+0&0&1&0\\
+0&0&0&1
+\end{bmatrix}.
+$$
+
+The embedded matrix has zero vertical translation, and its rotation leaves the positive $z$-axis unchanged. These two properties determine whether the reverse operation is applicable. Write a candidate spatial transformation as $\mathbf T_{ab}=[\mathbf R_{ab},{}^{a}\mathbf p_b;\mathbf0_3^{\mathsf T},1]$ and define $\mathbf e_z=[0\;0\;1]^{\mathsf T}$. The dimensionless orientation residual and metre-valued vertical-position residual are
+
+$$
+\delta_R
+=
+\left\|\mathbf R_{ab}\mathbf e_z-\mathbf e_z\right\|_2,
+\qquad
+\delta_p
+=
+\left|\mathbf e_z^{\mathsf T}{}^{a}\mathbf p_b\right|.
+$$
+
+The first residual detects roll or pitch because either motion tilts the $z_b$-axis away from the positive $z_a$-axis. The second residual detects vertical translation. For declared tolerances $\varepsilon_{R,\mathrm{planar}}$ and $\varepsilon_{p,\mathrm{planar}}$, extraction is applicable only when
+
+$$
+\delta_R\leq\varepsilon_{R,\mathrm{planar}},
+\qquad
+\delta_p\leq\varepsilon_{p,\mathrm{planar}}.
+$$
+
+If either inequality fails, the spatial transformation does not belong to the accepted planar subset. The operation must fail rather than project the transformation onto that subset, because projection would discard vertical translation, roll, or pitch. When both inequalities hold, the planar coordinates are
+
+$$
+x=T_{14},
+\qquad
+y=T_{24},
+\qquad
+\theta=\operatorname{atan2}(R_{21},R_{11})\in(-\pi,\pi].
+$$
+
+The C++ interface represents these mathematical inputs and outputs with
+
+```cpp
+struct PlanarPose
+{
+  double x_metres;
+  double y_metres;
+  double yaw_radians;
+};
+
+[[nodiscard]] Transform3 embed_planar_pose(
+  const PlanarPose & pose,
+  const NumericalPolicy & policy = NumericalPolicy{});
+
+[[nodiscard]] PlanarPose extract_planar_pose(
+  const Transform3 & transform,
+  const NumericalPolicy & policy = NumericalPolicy{});
+```
+
+The fields `x_metres`, `y_metres`, and `yaw_radians` represent $x$, $y$, and $\theta$. The type does not carry runtime frame labels, so the caller remains responsible for preserving the declared relationship between frames $\{a\}$ and $\{b\}$.
+
+After the policy and pose components pass validation, `embed_planar_pose` implements the embedding matrix directly:
+
+```cpp
+const double cos_theta = std::cos(pose.yaw_radians);
+const double sin_theta = std::sin(pose.yaw_radians);
+
+Eigen::Matrix4d matrix;
+// clang-format off
+matrix <<
+  cos_theta, -sin_theta, 0.0, pose.x_metres,
+  sin_theta,  cos_theta, 0.0, pose.y_metres,
+  0.0,        0.0,       1.0, 0.0,
+  0.0,        0.0,       0.0, 1.0;
+// clang-format on
+
+return Transform3::from_matrix(matrix, policy);
+```
+
+`embed_planar_pose` validates the angular policy before inspecting `pose`, rejects every non-finite pose component, and rejects a finite yaw satisfying $|\theta|>\theta_{\max}$. The function evaluates the displayed sine and cosine entries and passes the complete matrix to `Transform3::from_matrix`; this final construction preserves the existing $SE(3)$ validation boundary instead of creating a second unchecked transform representation. The yaw is validated and evaluated without first wrapping it into $(-\pi,\pi]$. Therefore, supported inputs that differ by complete turns produce the same embedded rotation, and the resulting Transform3 does not preserve the number of complete turns.
+
+After validating the two planar tolerances, `extract_planar_pose` computes the residuals, rejects a genuinely spatial transformation, and reads the three planar coordinates:
+
+```cpp
+const Eigen::Matrix4d transform_matrix = transform.matrix();
+
+const Eigen::Vector3d e_z(0.0, 0.0, 1.0);
+const Eigen::Matrix3d rotation = transform_matrix.block<3, 3>(0, 0);
+const double planar_orientation_error = (rotation * e_z - e_z).stableNorm();
+
+if (planar_orientation_error > policy.planar_orientation_tolerance) {
+  throw GeometryException(
+    GeometryError::non_planar,
+    "Planar orientation does not preserve the positive z-axis.");
+}
+
+if (std::abs(transform_matrix(2, 3)) > policy.planar_position_tolerance) {
+  throw GeometryException(
+    GeometryError::non_planar,
+    "Vertical translation exceeds the planar-position tolerance.");
+}
+
+constexpr double kPi = 3.141592653589793238462643383279502884;
+
+double yaw_radians =
+  std::atan2(transform_matrix(1, 0), transform_matrix(0, 0));
+
+if (yaw_radians <= -kPi) {
+  yaw_radians = kPi;
+}
+
+return PlanarPose{
+  transform_matrix(0, 3), transform_matrix(1, 3), yaw_radians};
+```
+
+`extract_planar_pose` begins from an already validated `Transform3`. The code stores $\delta_R$ as `planar_orientation_error` and evaluates $\delta_p$ as `std::abs(transform_matrix(2, 3))`. Their policy limits, `planar_orientation_tolerance` and `planar_position_tolerance`, represent $\varepsilon_{R,\mathrm{planar}}$ and $\varepsilon_{p,\mathrm{planar}}$; they are respectively dimensionless and measured in metres, and both must be finite and nonnegative. If either residual exceeds its own limit, the function reports `GeometryError::non_planar` and returns no `PlanarPose`.
+
+When both constraints pass, the function reads $x$ and $y$ from matrix entries `(0, 3)` and `(1, 3)` and evaluates `std::atan2(transform_matrix(1, 0), transform_matrix(0, 0))` for $\theta$. The C++ `atan2` range includes both signed half-turn endpoints. The public contract instead uses $(-\pi,\pi]$, so an exact result of $-\pi$ is replaced by the equivalent value $+\pi$ before `PlanarPose{x, y, theta}` is returned. No tolerance band is used for this replacement because a representable angle just greater than $-\pi$ already belongs to the promised interval and must remain unchanged.
+
+## Normalized planar-yaw quaternion conversion {#sec-spatial-kernel-planar-yaw-quaternion}
+
+### Purpose, convention, and mathematical result
+
+The planar pose uses one yaw angle, while a ROS-compatible spatial orientation interface uses four quaternion fields. The required conversion must represent the same right-handed rotation through yaw $\theta\in\mathbb R$ about the positive $z$-axis, return the fields in `x`, `y`, `z`, `w` order, and ensure that the returned dimensionless quaternion has unit norm. It converts an orientation representation only; it does not convert the planar position.
+
+Chapter 7 derived the axis--angle unit quaternion in @sec-so3-unit-quaternion-yaw. For the unit rotation axis $\mathbf e_z=[0\;0\;1]^{\mathsf T}$ and rotation angle $\theta$ radians, its scalar--vector form is
+
+$$
+\mathsf q(\theta)
+=
+\left(
+\cos\frac{\theta}{2},
+\mathbf e_z\sin\frac{\theta}{2}
+\right).
+$$
+
+Placing the three vector components first and the scalar component last gives the required field-order column
+
+$$
+\boxed{
+\mathbf q_{xyzw}(\theta)
+=
+\begin{bmatrix}
+q_x\\q_y\\q_z\\q_w
+\end{bmatrix}
+=
+\begin{bmatrix}
+0\\0\\\sin(\theta/2)\\\cos(\theta/2)
+\end{bmatrix}
+}.
+$$
+
+The $x$ and $y$ quaternion components are zero because the rotation axis has no $x$- or $y$-component; they are not planar position coordinates. The $z$ component stores the $z$-axis contribution scaled by the half-angle sine, and the `w` component stores the scalar half-angle cosine. The quaternion represents a physical rotation through $\theta$, not through $\theta/2$.
+
+The exact column is already normalized because
+
+$$
+\left\|\mathbf q_{xyzw}(\theta)\right\|_2
+=
+\sqrt{
+\sin^2\frac{\theta}{2}
++
+\cos^2\frac{\theta}{2}
+}
+=1.
+$$
+
+Yaw angles separated by one complete turn produce opposite quaternion columns:
+
+$$
+\begin{aligned}
+\sin\left(\frac{\theta+2\pi}{2}\right)
+&=-\sin\frac{\theta}{2},\\
+\cos\left(\frac{\theta+2\pi}{2}\right)
+&=-\cos\frac{\theta}{2},
+\end{aligned}
+\qquad
+\mathbf q_{xyzw}(\theta+2\pi)
+=
+-\mathbf q_{xyzw}(\theta).
+$$
+
+The two signs represent the same orientation, so the conversion does not force one canonical quaternion sign. For two unit quaternions that differ only by sign, the absolute inner product satisfies $|\mathbf q_1^{\mathsf T}\mathbf q_2|=1$; this sign-invariant comparison is therefore suitable for the focused equivalence test.
+
+### C++ representation and implementation
+
+The public type names the required storage order directly:
+
+```cpp
+struct QuaternionXYZW
+{
+  double x;
+  double y;
+  double z;
+  double w;
+};
+
+[[nodiscard]] QuaternionXYZW planar_yaw_to_quaternion(
+  double yaw_radians,
+  const NumericalPolicy & policy = NumericalPolicy{});
+```
+
+The input `yaw_radians` represents $\theta$ in radians. After validating the policy and the input angle, the implementation evaluates the two nonzero mathematical components and explicitly normalizes them:
+
+```cpp
+double z = std::sin(0.5 * yaw_radians);
+double w = std::cos(0.5 * yaw_radians);
+
+const double norm = std::hypot(z, w);
+
+if (!std::isfinite(norm) || norm == 0.0) {
+  throw GeometryException(
+    GeometryError::unsupported_magnitude,
+    "Planar-yaw quaternion norm is outside the supported range.");
+}
+
+z /= norm;
+w /= norm;
+
+return QuaternionXYZW{0.0, 0.0, z, w};
+```
+
+The code variable `norm` represents the complete quaternion norm because `x` and `y` are exactly zero. `std::hypot(z, w)` calculates $\sqrt{z^2+w^2}$ using a scaled numerical method that avoids unnecessary intermediate overflow or underflow. Dividing `z` and `w` by this norm removes finite-precision drift from the unit-norm identity before the value crosses the public interface. A non-finite or zero norm cannot be normalized into a valid orientation, so the function reports `GeometryError::unsupported_magnitude` instead of returning a valid-looking quaternion.
+
+The function first requires `maximum_exponential_angle` to be finite and at least $\pi$. Although this conversion does not calculate a matrix exponential, the shared policy member supplies the kernel's upper bound $\theta_{\max}$ for any angle passed to a trigonometric function. The function then rejects a non-finite `yaw_radians` as `non_finite` and rejects a finite angle satisfying $|\theta|>\theta_{\max}$ as `unsupported_magnitude`. It neither wraps the input yaw nor reduces it modulo $2\pi$ before evaluation.
+
+### Focused verification and deliberate limit
+
+The quarter-turn case checks the independent result $\mathbf q_{xyzw}(\pi/2)=[0\;0\;\sqrt2/2\;\sqrt2/2]^{\mathsf T}$ and verifies unit norm. The complete-turn-offset case checks that $\pi/2+2\pi$ returns the negative quaternion, again with unit norm, and that the absolute inner product of the two outputs is one. The invalid-policy case supplies both an invalid angular bound and a NaN yaw and verifies that `invalid_policy` is reported first, preserving the public validation order.
+
+This operation intentionally returns a small ROS-order data carrier without depending on ROS runtime types. It does not implement general quaternion construction, multiplication, interpolation, arbitrary Euler-angle conversion, invalid-quaternion repair, or a replacement for `tf2`.
+
 ## References {.unnumbered}
 
-- Kevin M. Lynch and Frank C. Park, *Modern Robotics: Mechanics, Planning, and Control*, Chapter 3, especially Sections 3.3.2--3.3.3 on body and spatial twists, the adjoint, and the $SE(3)$ exponential.
-- Peter Corke, *Robotics, Vision and Control: Fundamental Algorithms in Python*, third edition, Chapter 2, Section 2.4.8 on twist exponentials, and Chapter 3, Sections 3.1.3--3.1.5 on adjoint velocity conversion and incremental rigid-body motion.
+- Kevin M. Lynch and Frank C. Park, *Modern Robotics: Mechanics, Planning, and Control*, Chapter 3 on axis--angle rotations, body and spatial twists, the adjoint, and the $SE(3)$ exponential, and Appendix B on unit quaternions.
+- John J. Craig, *Introduction to Robotics: Mechanics and Control*, fourth edition, Chapter 2 on equivalent axis--angle rotations and Euler-parameter unit quaternions.
+- Peter Corke, *Robotics, Vision and Control: Fundamental Algorithms in Python*, third edition, Chapter 2 on unit quaternions and normalized orientation representations, Section 2.4.8 on twist exponentials, and Chapter 3, Sections 3.1.3--3.1.5 on adjoint velocity conversion and incremental rigid-body motion.

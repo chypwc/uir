@@ -36,9 +36,9 @@ All phases belong to the learning programme. Phase 7 is the intermediate epistem
 - **Milestone:** `M1` — Classical intelligence foundation.
 - **Phase:** Phase 1 — Geometry, mechanics, and control.
 - **Capability:** `P1.2` — Spatial geometry kernel.
-- **Cycle:** Planar-pose embedding and extraction with planar-yaw quaternion conversion.
-- **Active stage:** Implement with verifying tests.
-- **Active task:** Implement and test planar-pose embedding and extraction plus normalised planar-yaw quaternion conversion.
+- **Cycle:** Capability verification and closure.
+- **Active stage:** Verify and close.
+- **Active task:** Link the approved theory, specification, companion, package, and deterministic tests and close `P1.2`.
 - **Next capability:** `P1.3` — General robot kinematics and Jacobians.
 - **Blockers:** None.
 
@@ -168,16 +168,16 @@ The outcome is the geometry layer of the spatial and general kinematics workbenc
 - [x] Implement, test, understand, and retrospectively document the principal $SE(3)$ logarithm mathematical cycle using the completed principal $SO(3)$ logarithm; preserve the reviewed explanation in the [principal $SE(3)$ logarithm companion section](notes/09_spatial_geometry_kernel_implementation.qmd#sec-spatial-kernel-se3-logarithm) and its 11 deterministic cases in [`test_se3_logarithm.cpp`](ros_ws/src/rigid_body_kinematics/test/test_se3_logarithm.cpp).
 - [x] Implement, test, understand, and retrospectively document the constant-twist-integration mathematical cycle using the completed $SE(3)$ exponential and explicit body-versus-space multiplication order; preserve the reviewed explanation in the [constant-twist-integration companion section](notes/09_spatial_geometry_kernel_implementation.qmd#sec-spatial-kernel-constant-twist-integration) and its 10 deterministic cases in [`test_constant_twist_integration.cpp`](ros_ws/src/rigid_body_kinematics/test/test_constant_twist_integration.cpp).
 - [x] Implement, test, understand, and retrospectively document the $SE(3)$ adjoint mathematical cycle using the project's linear-first twist order; preserve the reviewed explanation in the [adjoint companion section](notes/09_spatial_geometry_kernel_implementation.qmd#sec-spatial-kernel-se3-adjoint) and its five deterministic cases in [`test_se3_adjoint.cpp`](ros_ws/src/rigid_body_kinematics/test/test_se3_adjoint.cpp).
-- [ ] **Active:** Implement, test, understand, and retrospectively document planar-pose embedding and extraction plus normalised planar-yaw quaternion conversion without attempting to replace `tf2`.
+- [x] Implement, test, understand, and retrospectively document planar-pose embedding and extraction plus normalised planar-yaw quaternion conversion without attempting to replace `tf2`; preserve the reviewed explanations in the [planar interoperability](notes/09_spatial_geometry_kernel_implementation.qmd#sec-spatial-kernel-planar-pose-interoperability) and [normalized planar-yaw quaternion](notes/09_spatial_geometry_kernel_implementation.qmd#sec-spatial-kernel-planar-yaw-quaternion) companion sections and their 15 deterministic cases in [`test_planar_geometry.cpp`](ros_ws/src/rigid_body_kinematics/test/test_planar_geometry.cpp).
 
 #### Verify and close
 
-- [ ] Test identity, inverse round trips, noncommuting composition order, known rotations about two axes, point-versus-vector behaviour, planar embedding, and quaternion sign equivalence.
-- [ ] Test exponential/logarithm round trips away from declared branch ambiguities and the identity $\widehat{\operatorname{Ad}_{T}\boldsymbol\xi}=T\widehat{\boldsymbol\xi}T^{-1}$.
-- [ ] Test the identity and small-angle series path, deterministic near-$\pi$ axis handling, and documented rejection or canonicalisation at ambiguous logarithm branches.
-- [ ] Reject non-finite, malformed, non-orthogonal, reflective, and inapplicable non-planar inputs without returning a valid-looking result.
-- [ ] Run the checklist-declared pre-closure C++ quality gate across the stable package, public API, Eigen representations, CMake export, and focused GTest evidence.
-- [ ] Link the approved note blocks, specification, companion, package, and tests and close `P1.2`.
+- [x] Test identity, inverse round trips, noncommuting composition order, known rotations about two axes, point-versus-vector behaviour, planar embedding, and quaternion sign equivalence.
+- [x] Test exponential/logarithm round trips away from declared branch ambiguities and the identity $\widehat{\operatorname{Ad}_{T}\boldsymbol\xi}=T\widehat{\boldsymbol\xi}T^{-1}$.
+- [x] Test the identity and small-angle series path, deterministic near-$\pi$ axis handling, and documented rejection or canonicalisation at ambiguous logarithm branches.
+- [x] Reject non-finite, malformed, non-orthogonal, reflective, and inapplicable non-planar inputs without returning a valid-looking result.
+- [x] Run the checklist-declared pre-closure C++ quality gate across the stable package, public API, Eigen representations, CMake export, and focused GTest evidence.
+- [ ] **Active:** Link the approved note blocks, specification, companion, package, and tests and close `P1.2`.
 
 ### P1.3 — General robot kinematics and Jacobians
 
