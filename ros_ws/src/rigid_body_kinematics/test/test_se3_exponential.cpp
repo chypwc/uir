@@ -3,6 +3,7 @@
 #include <Eigen/Core>
 #include <cmath>
 #include <limits>
+#include <numbers>
 
 #include "rigid_body_kinematics/geometry_error.hpp"
 #include "rigid_body_kinematics/transform3.hpp"
@@ -28,7 +29,7 @@ TEST(Se3ExponentialTest, PureTranslationPreservesLinearCoordinatesExactly)
 
 TEST(Se3ExponentialTest, FinitePitchScrewMatchesAnalyticTransform)
 {
-  const double pi = std::acos(-1.0);
+  const double pi = std::numbers::pi;
   const double half_pi = 0.5 * pi;
 
   rigid_body_kinematics::Vector6LinearFirst coordinates;
@@ -137,7 +138,7 @@ TEST(Se3ExponentialTest, RejectsNonFiniteLinearCoordinate)
 TEST(Se3ExponentialTest, ReportsUnsupportedMagnitudeWhenTranslationOverflows)
 {
   const double largest_finite = std::numeric_limits<double>::max();
-  const double half_pi = 0.5 * std::acos(-1.0);
+  const double half_pi = 0.5 * std::numbers::pi;
 
   rigid_body_kinematics::Vector6LinearFirst coordinates;
 

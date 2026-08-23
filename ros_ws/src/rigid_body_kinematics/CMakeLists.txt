@@ -1,7 +1,10 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.12)
 
 # Define the project name and specify that this project uses C++.
 project(rigid_body_kinematics LANGUAGES CXX)
+
+# Compile package targets using ISO C++ rather than compiler-specific extensions.
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Find the ROS 2 ament CMake build system.
 find_package(ament_cmake REQUIRED)
@@ -35,9 +38,9 @@ add_library(${PROJECT_NAME}::${PROJECT_NAME}
 )
 
 
-# Require C++17 for this library and for targets that depend on it.
+# Require C++20 for this library and for targets that depend on it.
 target_compile_features(${PROJECT_NAME}
-  PUBLIC cxx_std_17
+  PUBLIC cxx_std_20
 )
 
 
@@ -168,7 +171,21 @@ if(BUILD_TESTING)
   # Enable automatic ROS 2 linting support.
   find_package(ament_lint_auto REQUIRED)
   find_package(ament_cmake_clang_format REQUIRED)
-  find_package(ament_cmake_cpplint REQUIRED)
+  find_package(ament_cmake_test REQUIRED)
+
+  find_program(
+    PROJECT_CPPLINT_EXECUTABLE
+    NAMES cpplint
+    HINTS "${CMAKE_CURRENT_SOURCE_DIR}/../../../.venv/bin"
+    NO_DEFAULT_PATH
+  )
+
+  if(NOT PROJECT_CPPLINT_EXECUTABLE)
+    message(FATAL_ERROR
+      "cpplint 2.0.2 was not found in the project virtual environment. "
+      "Install requirements-dev.txt before configuring tests."
+    )
+  endif()
 
   # Do not let ament_lint_auto register these checks automatically:
   # - copyright is intentionally skipped;
@@ -190,9 +207,45 @@ if(BUILD_TESTING)
     src
     test
   )
-  ament_cpplint(
-    FILTERS
-      -legal/copyright
+
+  # cpplint
+  set(PROJECT_CPPLINT_FILTERS
+    -legal/copyright
+    -runtime/references
+    -whitespace/braces
+    -whitespace/indent
+    -whitespace/parens
+    -whitespace/semicolon
+  )
+
+  list(
+    JOIN PROJECT_CPPLINT_FILTERS
+    ","
+    PROJECT_CPPLINT_FILTER_ARGUMENT
+  )
+
+  ament_add_test(
+    cpplint
+    COMMAND
+      "${PROJECT_CPPLINT_EXECUTABLE}"
+      --recursive
+      "--root=${CMAKE_CURRENT_SOURCE_DIR}/include"
+      --linelength=100
+      "--filter=${PROJECT_CPPLINT_FILTER_ARGUMENT}"
+      include
+      src
+      test
+    OUTPUT_FILE
+      "${CMAKE_CURRENT_BINARY_DIR}/ament_cpplint/cpplint.txt"
+    WORKING_DIRECTORY
+      "${CMAKE_CURRENT_SOURCE_DIR}"
+    TIMEOUT 120
+    GENERATE_RESULT_FOR_RETURN_CODE_ZERO
+  )
+
+  set_tests_properties(
+    cpplint
+    PROPERTIES LABELS "cpplint;linter"
   )
 endif()
 

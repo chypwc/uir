@@ -3,6 +3,7 @@
 #include <Eigen/Core>
 #include <cmath>
 #include <limits>
+#include <numbers>
 
 #include "rigid_body_kinematics/geometry_error.hpp"
 #include "rigid_body_kinematics/numerical_policy.hpp"
@@ -69,11 +70,9 @@ TEST(
   const rigid_body_kinematics::Vector6LinearFirst space_twist(
     0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
 
-  const double pi = std::acos(-1.0);
-
   // Unit angular speed integrated for pi/2 seconds gives a quarter turn.  The
   // body origin therefore follows the unit circle from +x_s to +y_s.
-  const double delta_time = 0.5 * pi;
+  const double delta_time = 0.5 * std::numbers::pi;
 
   // The space increment acts on T_0 from the left; the body increment acts from
   // the right.  Equivalent twists must nevertheless produce the same pose.

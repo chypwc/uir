@@ -1,6 +1,7 @@
 #include "rigid_body_kinematics/planar_geometry.hpp"
 
 #include <cmath>
+#include <numbers>
 
 #include "rigid_body_kinematics/geometry_error.hpp"
 
@@ -9,11 +10,9 @@ namespace rigid_body_kinematics
 Transform3 embed_planar_pose(
   const PlanarPose & pose, const NumericalPolicy & policy)
 {
-  constexpr double kPi = 3.141592653589793238462643383279502884;
-
   const bool yaw_policy_is_valid =
     std::isfinite(policy.maximum_exponential_angle) &&
-    policy.maximum_exponential_angle >= kPi;
+    policy.maximum_exponential_angle >= std::numbers::pi;
 
   if (!yaw_policy_is_valid) {
     throw GeometryException(
@@ -85,14 +84,12 @@ PlanarPose extract_planar_pose(
       "Vertical translation exceeds the planar-position tolerance.");
   }
 
-  constexpr double kPi = 3.141592653589793238462643383279502884;
-
   double yaw_radians =
     std::atan2(transform_matrix(1, 0), transform_matrix(0, 0));
 
   // Ensure the yaw_radians is in (-pi, pi].
-  if (yaw_radians <= -kPi) {
-    yaw_radians = kPi;
+  if (yaw_radians <= -std::numbers::pi) {
+    yaw_radians = std::numbers::pi;
   }
 
   return PlanarPose{
@@ -102,12 +99,10 @@ PlanarPose extract_planar_pose(
 QuaternionXYZW planar_yaw_to_quaternion(
   double yaw_radians, const NumericalPolicy & policy)
 {
-  constexpr double kPi = 3.141592653589793238462643383279502884;
-
   // 1. Validate the policy.
   const bool policy_is_valid =
     std::isfinite(policy.maximum_exponential_angle) &&
-    policy.maximum_exponential_angle >= kPi;
+    policy.maximum_exponential_angle >= std::numbers::pi;
 
   if (!policy_is_valid) {
     throw GeometryException(

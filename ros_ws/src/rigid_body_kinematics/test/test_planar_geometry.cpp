@@ -2,15 +2,15 @@
 
 #include <cmath>
 #include <limits>
+#include <numbers>
 
 #include "rigid_body_kinematics/geometry_error.hpp"
 #include "rigid_body_kinematics/planar_geometry.hpp"
 
 TEST(PlanarGeometryTest, AcceptanceCaseEmbedsQuarterTurnPose)
 {
-  constexpr double kPi = 3.141592653589793238462643383279502884;
-
-  const rigid_body_kinematics::PlanarPose planar_pose{2.0, -1.0, kPi / 2.0};
+  const rigid_body_kinematics::PlanarPose planar_pose{
+    2.0, -1.0, std::numbers::pi / 2.0};
 
   const Eigen::Matrix4d actual =
     rigid_body_kinematics::embed_planar_pose(planar_pose).matrix();
@@ -124,8 +124,6 @@ TEST(PlanarGeometryTest, RejectsInvalidPolicyBeforeInspectingPose)
 
 TEST(PlanarGeometryTest, AcceptanceCaseExtractsQuarterTurnPose)
 {
-  constexpr double kPi = 3.141592653589793238462643383279502884;
-
   Eigen::Matrix4d matrix;
   // clang-format off
   matrix <<
@@ -146,7 +144,7 @@ TEST(PlanarGeometryTest, AcceptanceCaseExtractsQuarterTurnPose)
 
   EXPECT_NEAR(actual.x_metres, 2.0, position_tolerance);
   EXPECT_NEAR(actual.y_metres, -1.0, position_tolerance);
-  EXPECT_NEAR(actual.yaw_radians, 0.5 * kPi, angle_tolerance);
+  EXPECT_NEAR(actual.yaw_radians, 0.5 * std::numbers::pi, angle_tolerance);
 }
 
 TEST(PlanarGeometryTest, RejectsVerticalTranslationAsNonPlanar)
@@ -201,8 +199,6 @@ TEST(PlanarGeometryTest, RejectsRollAsNonPlanar)
 // test the promised yaw range (-π, π]
 TEST(PlanarGeometryTest, CanonicalizesNegativePiYawToPositivePi)
 {
-  constexpr double kPi = 3.141592653589793238462643383279502884;
-
   Eigen::Matrix4d matrix;
   // clang-format off
   matrix <<
@@ -224,7 +220,7 @@ TEST(PlanarGeometryTest, CanonicalizesNegativePiYawToPositivePi)
 
   EXPECT_EQ(actual.x_metres, 0.0);
   EXPECT_EQ(actual.y_metres, 0.0);
-  EXPECT_EQ(actual.yaw_radians, kPi);
+  EXPECT_EQ(actual.yaw_radians, std::numbers::pi);
 }
 
 TEST(PlanarGeometryTest, RejectsNegativePlanarToleranceAsInvalidPolicy)
@@ -246,11 +242,10 @@ TEST(PlanarGeometryTest, RejectsNegativePlanarToleranceAsInvalidPolicy)
 
 TEST(PlanarGeometryTest, QuarterTurnYawProducesNormalizedRosOrderQuaternion)
 {
-  constexpr double kPi = 3.141592653589793238462643383279502884;
   constexpr double tolerance = 1.0e-12;
 
   const rigid_body_kinematics::QuaternionXYZW quaternion =
-    rigid_body_kinematics::planar_yaw_to_quaternion(0.5 * kPi);
+    rigid_body_kinematics::planar_yaw_to_quaternion(0.5 * std::numbers::pi);
 
   const double expected_component = std::sqrt(0.5);
 
@@ -269,14 +264,14 @@ TEST(PlanarGeometryTest, QuarterTurnYawProducesNormalizedRosOrderQuaternion)
 // Test q = -q, since sin((θ + 2π)/2) = sin(θ/2 + π) = - sin(θ/2).
 TEST(PlanarGeometryTest, YawPlusFullTurnProducesSignEquivalentQuaternion)
 {
-  constexpr double kPi = 3.141592653589793238462643383279502884;
   constexpr double tolerance = 1.0e-12;
 
   const rigid_body_kinematics::QuaternionXYZW first =
-    rigid_body_kinematics::planar_yaw_to_quaternion(0.5 * kPi);
+    rigid_body_kinematics::planar_yaw_to_quaternion(0.5 * std::numbers::pi);
 
   const rigid_body_kinematics::QuaternionXYZW second =
-    rigid_body_kinematics::planar_yaw_to_quaternion(0.5 * kPi + 2.0 * kPi);
+    rigid_body_kinematics::planar_yaw_to_quaternion(
+      0.5 * std::numbers::pi + 2.0 * std::numbers::pi);
 
   EXPECT_NEAR(second.x, -first.x, tolerance);
   EXPECT_NEAR(second.y, -first.y, tolerance);

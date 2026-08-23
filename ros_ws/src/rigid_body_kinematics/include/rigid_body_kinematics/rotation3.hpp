@@ -1,5 +1,5 @@
-#ifndef RIGID_BODY_KINEMATICS__ROTATION3_HPP_
-#define RIGID_BODY_KINEMATICS__ROTATION3_HPP_
+#ifndef RIGID_BODY_KINEMATICS_ROTATION3_HPP_
+#define RIGID_BODY_KINEMATICS_ROTATION3_HPP_
 
 #include <Eigen/Core>
 
@@ -64,4 +64,4 @@ private:
 
 }  // namespace rigid_body_kinematics
 
-#endif  // RIGID_BODY_KINEMATICS__ROTATION3_HPP_
+#endif  // RIGID_BODY_KINEMATICS_ROTATION3_HPP_

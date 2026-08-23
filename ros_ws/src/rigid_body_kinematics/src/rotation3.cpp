@@ -2,6 +2,7 @@
 
 #include <Eigen/LU>  // matrix.determinant()
 #include <cmath>     // std::isfinite(), std::abs()
+#include <numbers>
 
 #include "rigid_body_kinematics/geometry_error.hpp"
 #include "rigid_body_kinematics/lie_algebra.hpp"
@@ -64,14 +65,12 @@ Rotation3 Rotation3::from_matrix(
 Rotation3 Rotation3::from_rotation_vector(
   const Eigen::Vector3d & rotation_vector, const NumericalPolicy & policy)
 {
-  constexpr double kPi = 3.141592653589793238462643383279502884;
-
   const bool policy_is_valid =
     std::isfinite(policy.series_angle_threshold) &&
     std::isfinite(policy.maximum_exponential_angle) &&
     policy.series_angle_threshold > 0.0 &&
-    policy.series_angle_threshold < kPi &&
-    policy.maximum_exponential_angle >= kPi;
+    policy.series_angle_threshold < std::numbers::pi &&
+    policy.maximum_exponential_angle >= std::numbers::pi;
 
   if (!policy_is_valid) {
     throw GeometryException(
@@ -145,16 +144,14 @@ Rotation3 Rotation3::from_rotation_vector(
 RotationLogResult Rotation3::to_principal_rotation_vector(
   const NumericalPolicy & policy) const
 {
-  constexpr double kPi = 3.141592653589793238462643383279502884;
-
-  const double near_pi_boundary = kPi - policy.near_pi_tolerance;
+  const double near_pi_boundary = std::numbers::pi - policy.near_pi_tolerance;
 
   /*
   theta = 0                                             identity
   0 < theta <= series_angle_threshold                   small_angle
   series_angle_threshold < theta <
-    kPi - near_pi_tolerance                             nominal
-  kPi - near_pi_tolerance <= theta <= kPi               near_pi
+    pi - near_pi_tolerance                             nominal
+  pi - near_pi_tolerance <= theta <= pi               near_pi
   */
   const bool policy_is_valid = std::isfinite(policy.orthogonality_tolerance) &&
                                std::isfinite(policy.series_angle_threshold) &&
@@ -162,7 +159,7 @@ RotationLogResult Rotation3::to_principal_rotation_vector(
                                policy.orthogonality_tolerance >= 0.0 &&
                                policy.series_angle_threshold > 0.0 &&
                                policy.near_pi_tolerance >= 0.0 &&
-                               policy.near_pi_tolerance < kPi &&
+                               policy.near_pi_tolerance < std::numbers::pi &&
                                policy.series_angle_threshold < near_pi_boundary;
 
   if (!policy_is_valid) {

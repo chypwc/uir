@@ -1,5 +1,5 @@
-#ifndef RIGID_BODY_KINEMATICS__LIE_ALGEBRA_HPP_
-#define RIGID_BODY_KINEMATICS__LIE_ALGEBRA_HPP_
+#ifndef RIGID_BODY_KINEMATICS_LIE_ALGEBRA_HPP_
+#define RIGID_BODY_KINEMATICS_LIE_ALGEBRA_HPP_
 
 #include <Eigen/Core>
 
@@ -28,4 +28,4 @@ using Vector6LinearFirst = Eigen::Matrix<double, 6, 1>;
 
 }  // namespace rigid_body_kinematics
 
-#endif  // RIGID_BODY_KINEMATICS__LIE_ALGEBRA_HPP_
+#endif  // RIGID_BODY_KINEMATICS_LIE_ALGEBRA_HPP_

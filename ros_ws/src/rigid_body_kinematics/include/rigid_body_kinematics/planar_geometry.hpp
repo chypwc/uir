@@ -1,5 +1,5 @@
-#ifndef RIGID_BODY_KINEMATICS__PLANAR_GEOMETRY_HPP_
-#define RIGID_BODY_KINEMATICS__PLANAR_GEOMETRY_HPP_
+#ifndef RIGID_BODY_KINEMATICS_PLANAR_GEOMETRY_HPP_
+#define RIGID_BODY_KINEMATICS_PLANAR_GEOMETRY_HPP_
 
 #include "rigid_body_kinematics/numerical_policy.hpp"
 #include "rigid_body_kinematics/transform3.hpp"
@@ -38,4 +38,4 @@ struct QuaternionXYZW
 
 }  // namespace rigid_body_kinematics
 
-#endif  // RIGID_BODY_KINEMATICS__PLANAR_GEOMETRY_HPP_
+#endif  // RIGID_BODY_KINEMATICS_PLANAR_GEOMETRY_HPP_

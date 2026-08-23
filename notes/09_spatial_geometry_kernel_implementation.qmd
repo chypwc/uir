@@ -62,6 +62,8 @@ This split also explains two common error families. A compiler error means that 
 ```cmake
 project(rigid_body_kinematics LANGUAGES CXX)
 
+set(CMAKE_CXX_EXTENSIONS OFF)
+
 find_package(ament_cmake REQUIRED)
 find_package(eigen3_cmake_module REQUIRED)
 find_package(Eigen3 REQUIRED)
@@ -87,7 +89,7 @@ The target's compilation and usage requirements are then attached to that same n
 
 ```cmake
 target_compile_features(${PROJECT_NAME}
-  PUBLIC cxx_std_17
+  PUBLIC cxx_std_20
 )
 
 target_compile_options(${PROJECT_NAME}
@@ -106,7 +108,7 @@ target_link_libraries(${PROJECT_NAME}
 )
 ```
 
-`PUBLIC` means that a setting is needed both to build this library and to compile a target that uses its public interface. C++17 is public, and the public headers expose Eigen types, so the Eigen imported target and the header search location must reach consumers. `PRIVATE` means that a setting applies only while building this library; the warning flags do not have to be imposed on every downstream package.
+`PUBLIC` means that a requirement is needed both to build this library and to compile a target that links against it. The `cxx_std_20` feature therefore propagates the minimum C++20 language requirement to downstream targets. The public headers expose Eigen types, so the Eigen imported target and the header search location must also reach consumers. `CMAKE_CXX_EXTENSIONS OFF` makes targets in this project use the ISO C++ language mode instead of compiler-specific GNU extensions; it does not set that option in a separate downstream project. `PRIVATE` means that a setting applies only while building this library, so the warning flags do not have to be imposed on every downstream package.
 
 The two include interfaces solve the same header-search problem in two locations. While the library is being built, the headers live under the source package's `include/` directory, so `BUILD_INTERFACE` supplies that path. After installation, a consumer must not depend on the original source checkout, so `INSTALL_INTERFACE` supplies the installed `include/` path instead.
 
@@ -230,7 +232,7 @@ target_link_libraries(example_consumer
 )
 ```
 
-`find_package` loads the installed configuration. Linking the namespaced target gives `example_consumer` the installed header path, the static library location, the C++17 requirement, and the public Eigen dependency recorded by the export. The consumer does not hard-code a source checkout path or search manually for `librigid_body_kinematics.a`.
+`find_package` loads the installed configuration. Linking the namespaced target gives `example_consumer` the installed header path, the static library location, the C++20 requirement, and the public Eigen dependency recorded by the export. The consumer does not hard-code a source checkout path or search manually for `librigid_body_kinematics.a`.
 
 Exporting does not upload or publish the library, and it does not copy the library into the downstream source tree. It creates installed CMake metadata that describes how another configured build should compile and link against the package. The complete mental model is therefore: **build creates compiled artifacts; install creates the reusable file layout; export publishes the target's usage information inside that installation**.
 
@@ -1363,18 +1365,15 @@ These members are added to the same policy that already contains the rotation, h
 
 ### Validation and overflow-safe angle calculation
 
-The factory validates the policy before inspecting the geometric input. The series threshold must be finite, strictly positive, and less than $\pi$; the maximum supported angle must be finite and at least $\pi$. The local `constexpr` value records the bound without creating a project-wide constants dependency:
+The factory validates the policy before inspecting the geometric input. The series threshold must be finite, strictly positive, and less than $\pi$; the maximum supported angle must be finite and at least $\pi$. The source includes the C++20 `<numbers>` header, whose `std::numbers::pi` constant supplies the standard double-precision value of $\pi$ without a handwritten project constant:
 
 ```cpp
-constexpr double kPi =
-  3.141592653589793238462643383279502884;
-
 const bool policy_is_valid =
   std::isfinite(policy.series_angle_threshold) &&
   std::isfinite(policy.maximum_exponential_angle) &&
   policy.series_angle_threshold > 0.0 &&
-  policy.series_angle_threshold < kPi &&
-  policy.maximum_exponential_angle >= kPi;
+  policy.series_angle_threshold < std::numbers::pi &&
+  policy.maximum_exponential_angle >= std::numbers::pi;
 ```
 
 After checking that every component is finite, the implementation calculates the angle with Eigen's scaled vector norm:
@@ -1477,7 +1476,7 @@ $$
 The corresponding call is
 
 ```cpp
-const double half_pi = 0.5 * std::acos(-1.0);
+const double half_pi = 0.5 * std::numbers::pi;
 const Eigen::Vector3d rotation_vector(half_pi, 0.0, 0.0);
 
 const Rotation3 rotation =
@@ -2673,7 +2672,7 @@ $$
 The corresponding calling code preserves the same linear-first order:
 
 ```cpp
-const double pi = std::acos(-1.0);
+const double pi = std::numbers::pi;
 
 Vector6LinearFirst coordinates;
 coordinates <<
@@ -2950,14 +2949,14 @@ where $\operatorname{fl}$ denotes rounding to the binary64 result of the subtrac
 
 ```cpp
 const double near_pi_boundary =
-  kPi - policy.near_pi_tolerance;
+  std::numbers::pi - policy.near_pi_tolerance;
 
 if (theta >= near_pi_boundary) {
   // Enter the near-pi branch.
 }
 ```
 
-In exact real arithmetic, testing $\theta\geq\pi-\theta_{\mathrm{near}\text{-}\pi}$ is equivalent to testing $\pi-\theta\leq\theta_{\mathrm{near}\text{-}\pi}$. In binary64 arithmetic, recomputing `kPi - theta` at the boundary introduces another rounded subtraction and can produce a value slightly greater than the stored tolerance. Comparing `theta` directly with the single named boundary implements the declared inclusive interval deterministically and keeps policy validation and formula selection aligned.
+In exact real arithmetic, testing $\theta\geq\pi-\theta_{\mathrm{near}\text{-}\pi}$ is equivalent to testing $\pi-\theta\leq\theta_{\mathrm{near}\text{-}\pi}$. In binary64 arithmetic, recomputing `std::numbers::pi - theta` at the boundary introduces another rounded subtraction and can produce a value slightly greater than the stored tolerance. Comparing `theta` directly with the single named boundary implements the declared inclusive interval deterministically and keeps policy validation and formula selection aligned.
 
 ### Finite-pitch quarter-turn example
 
@@ -4289,13 +4288,11 @@ if (std::abs(transform_matrix(2, 3)) > policy.planar_position_tolerance) {
     "Vertical translation exceeds the planar-position tolerance.");
 }
 
-constexpr double kPi = 3.141592653589793238462643383279502884;
-
 double yaw_radians =
   std::atan2(transform_matrix(1, 0), transform_matrix(0, 0));
 
-if (yaw_radians <= -kPi) {
-  yaw_radians = kPi;
+if (yaw_radians <= -std::numbers::pi) {
+  yaw_radians = std::numbers::pi;
 }
 
 return PlanarPose{

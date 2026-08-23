@@ -4,6 +4,7 @@
 #include <array>
 #include <cmath>
 #include <limits>
+#include <numbers>
 
 #include "rigid_body_kinematics/geometry_error.hpp"
 #include "rigid_body_kinematics/transform3.hpp"
@@ -53,7 +54,7 @@ TEST(Se3LogarithmTest, IdentityReturnsExactZeroAndIdentityBranch)
 
 TEST(Se3LogarithmTest, FinitePitchQuarterTurnRecoversNominalCoordinates)
 {
-  const double pi = std::acos(-1.0);
+  const double pi = std::numbers::pi;
   Eigen::Matrix4d matrix;
   // clang-format off
   matrix <<
@@ -135,7 +136,7 @@ TEST(
 
 TEST(Se3LogarithmTest, HalfTurnScrewRecoversCoordinatesAndUsesNearPiBranch)
 {
-  const double pi = std::acos(-1.0);
+  const double pi = std::numbers::pi;
 
   // Select rho and the canonical exact-pi rotation vector phi = pi * e_z.
   const Eigen::Vector3d rho(0.3, -0.2, 0.1);
@@ -361,7 +362,7 @@ TEST(Se3LogarithmTest, SeriesThresholdUsesInclusiveSmallAngleBranch)
 TEST(Se3LogarithmTest, NearPiThresholdUsesInclusiveNearPiBranch)
 {
   const rigid_body_kinematics::NumericalPolicy policy;
-  const double pi = std::acos(-1.0);
+  const double pi = std::numbers::pi;
   const double near_pi_boundary = pi - policy.near_pi_tolerance;
 
   struct BoundaryCase

@@ -2,6 +2,7 @@
 
 #include <Eigen/Core>
 #include <cmath>
+#include <numbers>
 
 #include "rigid_body_kinematics/geometry_error.hpp"
 #include "rigid_body_kinematics/rotation3.hpp"
@@ -22,7 +23,7 @@ TEST(So3LogarithmTest, IdentityReturnsExactZeroAndIdentityBranch)
 
 TEST(So3LogarithmTest, QuarterTurnAboutZUsesNominalBranch)
 {
-  const double half_pi = 0.5 * std::acos(-1.0);
+  const double half_pi = 0.5 * std::numbers::pi;
 
   Eigen::Matrix3d matrix;
 
@@ -96,7 +97,7 @@ TEST(So3LogarithmTest, HalfTurnAboutXUsesDeterministicNearPiBranch)
   const rigid_body_kinematics::RotationLogResult result =
     rotation.to_principal_rotation_vector();
 
-  const double pi = std::acos(-1.0);
+  const double pi = std::numbers::pi;
   const Eigen::Vector3d expected(pi, 0.0, 0.0);
   constexpr double tolerance = 1.0e-12;
 
@@ -108,7 +109,7 @@ TEST(So3LogarithmTest, HalfTurnAboutXUsesDeterministicNearPiBranch)
 TEST(So3LogarithmTest, NearPiRotationRecoversAxisSignFromSkewPart)
 {
   const rigid_body_kinematics::NumericalPolicy policy;
-  const double pi = std::acos(-1.0);
+  const double pi = std::numbers::pi;
   const double angle = pi - 0.5 * policy.near_pi_tolerance;
 
   // Unit axis with a negative dominant component.
@@ -133,7 +134,7 @@ TEST(So3LogarithmTest, NearPiRotationRecoversAxisSignFromSkewPart)
 
 TEST(So3LogarithmTest, RotationBeyondPiReturnsEquivalentPrincipalVector)
 {
-  const double pi = std::acos(-1.0);
+  const double pi = std::numbers::pi;
 
   // A +3pi/2 rotation about z is equivalent to -pi/2 about z.
   const Eigen::Vector3d input(0.0, 0.0, 1.5 * pi);
@@ -209,7 +210,7 @@ TEST(So3LogarithmTest, HalfTurnTieUsesLowestDominantAxisIndex)
 
   // Q(0, 0) and Q(1, 1) are both 1/2. The implementation resolves this
   // tie by selecting the lowest index, x, and making that component positive.
-  const double pi = std::acos(-1.0);  // theta = pi
+  const double pi = std::numbers::pi;  // theta = pi
   const double component = pi / std::sqrt(2.0);
   const Eigen::Vector3d expected(component, component, 0.0);  // phi
 

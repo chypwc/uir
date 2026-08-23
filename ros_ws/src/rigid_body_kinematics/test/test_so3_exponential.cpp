@@ -5,6 +5,7 @@
 #include <array>
 #include <cmath>
 #include <limits>
+#include <numbers>
 
 #include "rigid_body_kinematics/geometry_error.hpp"
 #include "rigid_body_kinematics/rotation3.hpp"
@@ -24,7 +25,7 @@ TEST(So3ExponentialTest, ZeroRotationVectorProducesExactIdentity)
 
 TEST(So3ExponentialTest, QuarterTurnAboutXMatchesAnalyticRotation)
 {
-  const double half_pi = 0.5 * std::acos(-1.0);
+  const double half_pi = 0.5 * std::numbers::pi;
   const Eigen::Vector3d rotation_vector(half_pi, 0.0, 0.0);
 
   const rigid_body_kinematics::Rotation3 rotation =
