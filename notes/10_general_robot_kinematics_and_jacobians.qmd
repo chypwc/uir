@@ -12,18 +12,7 @@ This chapter treats fixed-base open serial chains with ideal rigid links and ind
 
 Consider a simple arm consisting of a fixed base, a shoulder joint, an upper-arm link, an elbow joint, a forearm link, and a tool frame. Rotating the shoulder moves the upper arm and carries the elbow, forearm, and tool with it. Rotating the elbow changes the forearm and tool relative to their new placement after the shoulder motion, but it does not move the upper arm. The two joint effects therefore cannot be calculated as unrelated pose changes and added: each downstream motion starts from the placement produced by the joints before it.
 
-At one instant, suppose the kinematic model is given one signed coordinate for each of the robot's $n$ independent joints. Collect these values in the **joint-coordinate column**
-
-$$
-\mathbf q
-=
-\begin{bmatrix}
-q_1&\cdots&q_n
-\end{bmatrix}^{\mathsf T}
-\in\mathbb R^n,
-$$
-
-where a revolute entry is an angle in radians and a prismatic entry is a displacement in metres. The complete kinematic problem begins with three practical questions.
+At one instant, the kinematic model receives the robot's current joint values as an ordered column $\mathbf q$. This column is a compact input; it does not directly contain the poses of the links. The next section defines its entries, units, signs, and allowed values. Given this input, the complete kinematic problem begins with three practical questions.
 
 1. **Pose:** Where is the selected end-effector frame for the current value of $\mathbf q$? **Forward kinematics** answers this question by composing the link and joint geometry into an end-effector pose.
 
@@ -39,114 +28,93 @@ These questions form a dependency chain. Forward kinematics must first define ho
 
 The motivation above identified the robot-level forward problem: given one value for every joint coordinate, where is the selected end-effector frame or task point? This section first clarifies the coordinate input, then defines the forward output, and finally differentiates that input--output relationship. It does not yet choose a transform-chain or product-of-exponentials formula for evaluating the forward map; those constructions begin in @sec-serial-product-of-exponentials.
 
-### Configuration space and coordinate vectors
+### From joint values to a robot configuration
 
-The robot's configuration space $\mathcal C$ was defined in @sec-robot-configurations-joint-coordinates as the set of all complete material-point placements that satisfy the rigid-link and joint constraints. A numerical calculation cannot pass an entire placement map $\chi:\mathcal B\rightarrow\mathbb R^3$ as a convenient input. It instead uses the generalised-coordinate column
+Forward kinematics needs a compact description of the robot's current arrangement. The complete configuration $\chi\in\mathcal C$ from @sec-robot-configurations-joint-coordinates answers where every modelled material point is, but asking a user or program to supply all those point positions would be impractical. A fixed-base open chain instead needs one current value for each independent joint; the fixed link geometry then determines the rest of the arrangement.
+
+Let $n\in\mathbb N$ be the number of independent one-degree-of-freedom joints, and let $j\in\{1,\ldots,n\}$ identify one joint. The scalar $q_j$ is the current motion of joint $j$ measured from its declared zero value. For a revolute joint, $q_j$ is an angle in radians and positive rotation follows the right-hand rule about the declared positive joint axis. For a prismatic joint, $q_j$ is a displacement in metres and positive translation follows the declared positive joint axis.
+
+Collect the values in physical joint order:
 
 $$
+\boxed{
 \mathbf q
-=
+\mathrel{:=}
 \begin{bmatrix}
 q_1&\cdots&q_n
 \end{bmatrix}^{\mathsf T}
-\in\mathcal Q,
-$$
-
-where $n\in\mathbb N$ is the number of independent scalar coordinates and $\mathcal Q$ is their declared domain. The model geometry, joint definitions, and zero arrangements supply the rule $\mathbf q\mapsto\chi(\mathbf q)$; the entries of $\mathbf q$ do not themselves contain the poses of all the links.
-
-For example, consider a fixed-base two-joint chain whose first joint is revolute and whose second joint is prismatic. Its coordinate column may be
-
-$$
-\mathbf q
-=
-\begin{bmatrix}
-\theta_1\\d_2
-\end{bmatrix},
-$$
-
-where $\theta_1$ is measured in radians and $d_2$ is measured in metres. The column states one rotation amount and one translation amount. It becomes a complete robot configuration only after the kinematic model uses those values to place every link.
-
-The coordinate domain records the allowed value of each joint. For the independent one-degree-of-freedom joints considered here, it has a product form
-
-$$
-\boxed{
-\mathcal Q
-=
-\mathcal Q_1\times\cdots\times\mathcal Q_n
-},
-$$
-
-where $\mathcal Q_j$ is the domain associated with coordinate $q_j$. Before a numerical angle representative is chosen, an unrestricted revolute joint contributes the **circle**
-
-$$
-S^1
-\mathrel{:=}
-\left\{
-\begin{bmatrix}
-c\\s
-\end{bmatrix}
-\in\mathbb R^2
-\;\middle|\;
-c^2+s^2=1
-\right\}.
-$$
-
-The angle $\theta$ represents the point $[\cos\theta\;\sin\theta]^{\mathsf T}\in S^1$, so angles separated by $2\pi$ represent the same point on the circle and the same joint rotation. Software normally stores a real angle representative together with an explicit wrapping convention. A joint-limited revolute coordinate is represented on its declared angular interval, and a prismatic coordinate is represented on a declared interval in metres or on $\mathbb R$ in an ideal unbounded model. Thus the global domain $\mathcal Q$ need not be an ordinary subset of $\mathbb R^n$, even though every local numerical coordinate column belongs to a subset of $\mathbb R^n$. Collision constraints could remove combinations from this product, but collision is outside the present model.
-
-This distinction explains why a coordinate column is not the same object as a configuration. The three related objects are
-
-$$
-\boxed{
-\begin{aligned}
-\mathcal C
-&=\text{set of admissible complete robot placements},\\
-\mathcal Q
-&=\text{declared domain of the coordinate descriptions},\\
-\mathbf q
-&=\text{one coordinate description in }\mathcal Q.
-\end{aligned}
+\in\mathbb R^n.
 }
 $$
 
-Coordinates need only describe configurations **locally** without ambiguity. The reason is visible for one revolute joint: $\theta$ and $\theta+2\pi$ are different real-number representatives of the same physical rotation. No single real interval can represent the circle $S^1$ both continuously and without duplicating a boundary orientation.
+The column $\mathbf q$ is called the **joint-coordinate column**, or the **generalised-coordinate column**. The word *generalised* distinguishes these coordinates from the three spatial coordinates of one point: the entries describe allowed joint motions and may have different units. In a chain containing both joint types, $\mathbf q$ therefore has no single physical unit.
 
-To state the local relationship precisely, choose a set $\mathcal U\subseteq\mathcal C$ of nearby configurations that does not cross a coordinate wrap or another representation boundary, and choose a corresponding open coordinate set $\mathcal V\subseteq\mathbb R^n$. Here *open* means that every column in $\mathcal V$ has a sufficiently small neighbourhood that remains inside $\mathcal V$. A **coordinate chart** on $\mathcal U$ is a smooth one-to-one and onto map
+For a concrete two-joint example, let joint 1 be revolute and joint 2 be prismatic. The input
 
 $$
-\boxed{
-\boldsymbol\psi:\mathcal U\rightarrow\mathcal V,
-\qquad
-\chi\longmapsto
-\boldsymbol\psi(\chi)
-\mathrel{:=}
 \mathbf q
-}.
+=
+\begin{bmatrix}
+\pi/4\,\mathrm{rad}\\
+0.20\,\mathrm m
+\end{bmatrix}
 $$
 
-The word *chart* means that each configuration in this local set receives one coordinate column, each column in $\mathcal V$ describes one configuration in $\mathcal U$, and both directions vary smoothly. Here *smoothly* means that the coordinate formulas and their inverses have the continuous derivatives required by the calculation. The inverse map gives the local coordinate-to-configuration direction
+means that joint 1 is rotated by $\pi/4\,\mathrm{rad}$ in its positive direction and joint 2 is extended by $0.20\,\mathrm m$ in its positive direction, both measured from their declared zero values. These two numbers do not themselves contain any link pose.
+
+Each coordinate has an allowed set $\mathcal Q_j$. A revolute joint limit gives an angular interval; a prismatic joint limit gives a displacement interval. Because this chapter considers independent joints and excludes collision constraints, the set of all allowed input columns is the Cartesian product
 
 $$
 \boxed{
-\boldsymbol\psi^{-1}:\mathcal V\rightarrow\mathcal U,
-\qquad
-\mathbf q\longmapsto
-\boldsymbol\psi^{-1}(\mathbf q)
+\mathcal Q
+\mathrel{:=}
+\mathcal Q_1\times\cdots\times\mathcal Q_n
 =
-\chi(\mathbf q)
-}.
+\left\{
+\mathbf q
+\;\middle|\;
+q_j\in\mathcal Q_j\text{ for every }j\in\{1,\ldots,n\}
+\right\}.
+}
 $$
 
-The earlier shorthand $\mathbf q\mapsto\chi(\mathbf q)$ refers to this direction. A complete software model may use real-valued joint columns outside one chart and then apply explicit wrapping and joint-limit rules; those rules are part of the representation contract rather than new physical degrees of freedom.
+For the two-joint example, suppose
 
-When the robot moves, its coordinate column becomes a time-dependent curve
+$$
+\mathcal Q_1
+=
+[-\pi/2,\pi/2]\,\mathrm{rad},
+\qquad
+\mathcal Q_2
+=
+[0,0.40]\,\mathrm m.
+$$
+
+Then the example column belongs to $\mathcal Q=\mathcal Q_1\times\mathcal Q_2$. Thus $\mathcal Q$ means the set of every allowed numerical input, whereas $\mathbf q$ means one selected input from that set.
+
+An unrestricted revolute joint needs one additional representation rule. The angles $q_j$ and $q_j+2\pi$ produce the same relative joint orientation. Software must therefore declare whether it keeps an unwrapped real angle or wraps the angle into a chosen interval. This choice changes the numerical representatives in $\mathcal Q_j$ but does not create another physical degree of freedom.
+
+Once $\mathbf q$ is supplied, the fixed link geometry, joint axes, positive directions, and zero arrangement determine the complete configuration:
+
+$$
+\boxed{
+\mathbf q\in\mathcal Q
+\quad\xrightarrow{\text{robot model}}\quad
+\chi(\mathbf q)\in\mathcal C.
+}
+$$
+
+The three objects answer different questions: $\mathbf q$ gives the current joint values, $\mathcal Q$ lists which joint-value columns are allowed, and $\chi(\mathbf q)$ gives the resulting placement of every modelled robot point. Different angle representatives can describe the same physical placement, so the coordinate-to-configuration map need not be one-to-one over the complete numerical domain.
+
+When the robot moves, its joint-coordinate column varies with time. Let $I\subseteq\mathbb R$ be a time interval measured in seconds and write the motion as
 
 $$
 \mathbf q:I\rightarrow\mathcal Q,
 \qquad
-t\longmapsto\mathbf q(t),
+t\longmapsto\mathbf q(t).
 $$
 
-where $I\subseteq\mathbb R$ is a time interval measured in seconds. At a time $t$ where the coordinate curve is differentiable, its **generalised-rate column** is
+At a time $t$ where every coordinate is differentiable, the **generalised-rate column** is
 
 $$
 \boxed{
@@ -156,11 +124,11 @@ $$
 =
 \begin{bmatrix}
 \dot q_1(t)&\cdots&\dot q_n(t)
-\end{bmatrix}^{\mathsf T}
-}.
+\end{bmatrix}^{\mathsf T}.
+}
 $$
 
-A revolute entry of $\dot{\mathbf q}$ is measured in $\mathrm{rad\,s^{-1}}$, while a prismatic entry is measured in $\mathrm{m\,s^{-1}}$. Thus neither $\mathbf q$ nor $\dot{\mathbf q}$ should be assigned one common physical unit when the chain contains both joint types. The rate column describes how the chosen coordinates change; it is not yet the velocity of any material point or frame.
+A revolute entry of $\dot{\mathbf q}$ is measured in $\mathrm{rad\,s^{-1}}$, while a prismatic entry is measured in $\mathrm{m\,s^{-1}}$. The column $\dot{\mathbf q}$ describes how the joint coordinates change; it is not yet the velocity of any material point or frame. When differentiating an unrestricted revolute coordinate, use a locally continuous angle representative: an artificial jump caused only by wrapping $+\pi$ to $-\pi$ is not a physical joint velocity.
 
 ### Task variables and the forward map
 
@@ -179,7 +147,7 @@ $$
 }.
 $$
 
-The map $\mathbf F_e$ is the rule for all admissible coordinate inputs. Its value $\mathbf T_{se}(\mathbf q)$ is one homogeneous transformation matrix: it represents the pose of frame $\{e\}$ relative to frame $\{s\}$ at the selected coordinate column $\mathbf q$. Forward kinematics solves the direction from joint coordinates to pose; it does not solve which joint coordinates produce a requested pose.
+The map $\mathbf F_e$ is the rule for all admissible coordinate inputs. Its value $\mathbf T_{se}(\mathbf q)$ is one homogeneous transformation matrix: it represents the pose of frame $\{e\}$ relative to frame $\{s\}$ at the selected coordinate column $\mathbf q$. Forward kinematics calculates the end effector’s position and orientation from known joint values. It does not calculate the joint values needed to reach a requested position and orientation.
 
 A task may use only part of this pose. Define the position-extraction map
 
@@ -217,7 +185,7 @@ $$
 
 Every output column ${}^{s}\mathbf p_e(\mathbf q)$ is expressed in frame $\{s\}$ and measured in metres. The pose map and the position-task map answer different questions: $\mathbf F_e$ returns both orientation and position, whereas $\mathbf f_p$ discards orientation deliberately.
 
-More generally, let $m\in\mathbb N$ be the number of scalar task coordinates and let $\mathcal Y\subseteq\mathbb R^m$ be their declared coordinate domain. A **task-coordinate map** is a function
+The position map $\mathbf f_p$ selects one particular output from the robot configuration. More generally, a task may select a different collection of numerical outputs. To describe any such choice, let $m\in\mathbb N$ be the number of numerical components used to describe the selected task output, and let $\mathcal Y\subseteq\mathbb R^m$ be the set of their allowed columns. A **task-coordinate map** is a function
 
 $$
 \boxed{
@@ -230,7 +198,96 @@ $$
 }.
 $$
 
-Here $\mathbf y=[y_1\;\cdots\;y_m]^{\mathsf T}$ is one task-coordinate column. Each scalar component $y_i$ is a **task variable**, also called a **task coordinate**: it is one declared numerical component of the selected task output and depends on $\mathbf q$ through $y_i=f_i(\mathbf q)$. The task variables are outputs of the forward map, not additional independent robot coordinates. Their units, reference frames, and physical meanings must be declared. The dimension $m$ is chosen by the task and need not equal the number $n$ of generalised coordinates.
+The position map is the special case obtained by choosing $m=3$, $\mathcal Y=\mathbb R^3$, $\mathbf f=\mathbf f_p$, and
+
+$$
+\mathbf y
+=
+{}^s\mathbf p_e
+=
+\begin{bmatrix}
+x_e&y_e&z_e
+\end{bmatrix}^{\mathsf T}.
+$$
+
+The bold symbol $\mathbf y$ names the complete task-output column; it is not the scalar Cartesian coordinate $y_e$. In this special case the task output happens to be a position, so the same column is also denoted by the more specific position symbol ${}^s\mathbf p_e$.
+
+Here $\mathbf y=[y_1\;\cdots\;y_m]^{\mathsf T}$ is one task-coordinate column. Each entry $y_i$ is one number in that output column and is called a **task variable**, or **task coordinate**. For example, if the task output is a point's planar position, its two task variables can be its $x$- and $y$-coordinates. Each task variable depends on $\mathbf q$ through $y_i=f_i(\mathbf q)$. The task variables are outputs of the forward map, not additional independent robot coordinates. Their units, reference frames, and physical meanings must be declared. The dimension $m$ is chosen by the task and need not equal the number $n$ of generalised coordinates.
+
+The generic column $\mathbf y$ can also describe orientation. For example, consider one revolute joint whose angle $\theta$ rotates a tool in the $x_s$--$y_s$ plane. If the tool is aligned with the positive $x_s$-axis when $\theta=0$, its planar orientation angle relative to that axis is $\phi_e=\theta$. An orientation-only task can therefore use
+
+$$
+\boxed{
+\mathbf f_\phi:\mathcal Q\rightarrow\mathcal Y,
+\qquad
+\mathbf q
+=
+\begin{bmatrix}
+\theta
+\end{bmatrix}
+\longmapsto
+\mathbf y
+=
+\begin{bmatrix}
+\phi_e
+\end{bmatrix}
+=
+\begin{bmatrix}
+\theta
+\end{bmatrix}
+}.
+$$
+
+Here $m=1$, and both $\theta$ and $\phi_e$ are measured in radians with positive rotation about the positive $z_s$-axis. For example, $\mathbf q=[\pi/6\,\mathrm{rad}]$ produces the orientation output $\mathbf y=[\pi/6\,\mathrm{rad}]$. In this task, $\mathbf y$ contains orientation and no position.
+
+For a simple example with $m=2$, consider an $x$--$y$ positioning stage with two prismatic joints. Joint 1 moves the tool along the positive $x_s$-axis by $d_x$, and joint 2 moves it along the positive $y_s$-axis by $d_y$. At zero joint displacement, the tool position is $(x_0,y_0)=(0.50,0.30)\,\mathrm m$. The joint-coordinate input and planar-position task output are
+
+$$
+\boxed{
+\mathbf f_{xy}:\mathcal Q\rightarrow\mathcal Y,
+\qquad
+\mathbf q
+=
+\begin{bmatrix}
+d_x\\
+d_y
+\end{bmatrix}
+\longmapsto
+\mathbf y
+=
+\begin{bmatrix}
+x_e\\
+y_e
+\end{bmatrix}
+=
+\begin{bmatrix}
+x_0+d_x\\
+y_0+d_y
+\end{bmatrix}
+}.
+$$
+
+Suppose $d_x\in[0,0.40]\,\mathrm m$ and $d_y\in[0,0.20]\,\mathrm m$. Then $\mathcal Q=[0,0.40]\times[0,0.20]$ is the numerical domain of the joint-displacement column, with both entries measured in metres, and $\mathcal Y=[0.50,0.90]\times[0.30,0.50]$ is the numerical domain of the tool-position column, again in metres. For example,
+
+$$
+\mathbf q
+=
+\begin{bmatrix}
+0.20\\
+0.10
+\end{bmatrix}
+\,\mathrm m
+\quad\longmapsto\quad
+\mathbf y
+=
+\begin{bmatrix}
+0.70\\
+0.40
+\end{bmatrix}
+\,\mathrm m.
+$$
+
+The output has two task variables, $y_1=x_e$ and $y_2=y_e$, so $m=2$. Both values are calculated from the joint variables; they are not additional independently chosen robot coordinates.
 
 The full modelling chain is therefore
 

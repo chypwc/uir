@@ -33,6 +33,7 @@
 16. **Source formatting:** Keep each prose paragraph on one source line. Use line breaks only for headings, lists, tables, code blocks, and display mathematics.
 17. **Quarto structure and references:** Keep `number-sections: true` and `number-depth: 3`; let Quarto number chapter titles, `##` sections, and `###` subsections, and leave `####` headings unnumbered by depth. Do not hard-code section numbers or write numeric prefixes in headings. Mark purpose, prerequisites, dependency maps, quick tests and answers, cumulative tests, references, and supplemental checks with `{.unnumbered}`. Give referenced headings stable `{#sec-...}` labels and cite them with `@sec-...`.
 18. **Chapter registries:** After a chapter is complete, add only notation first introduced by that chapter to `notes/notation.qmd`, preserving chapter order and chapter cross-references. After the chapter is reviewed, add only its newly defined technical terms to `notes/glossary.qmd`, keeping entries alphabetical, concise, and linked to their first defining sections. Do not pre-populate unfinished chapters or duplicate entries between the two registries.
+19. **Abstract definitions:** After introducing an abstract definition, give the smallest concrete example that instantiates every new symbol and shows what the definition means in practice.
 
 ## Capability workflow
 
