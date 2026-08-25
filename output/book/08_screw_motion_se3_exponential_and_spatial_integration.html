@@ -534,7 +534,24 @@ P\longmapsto\chi(P).
 =
 d_i(P,Q),
 \]</span></p>
-<p>where <span class="math inline">\(d_i(P,Q)\in\mathbb R_{\geq0}\)</span> is the fixed reference distance between the two labelled material points, measured in metres. Joint constraints impose additional relationships between points or attached frames belonging to different links. The <strong>configuration space</strong> <span class="math inline">\(\mathcal C\)</span> is the set of all assignments that satisfy both the rigid-link conditions and the joint constraints.</p>
+<p>where <span class="math inline">\(d_i(P,Q)\in\mathbb R_{\geq0}\)</span> is the fixed reference distance between the two labelled material points, measured in metres. Joint constraints impose additional relationships between points or attached frames belonging to different links. The <strong>configuration space</strong> <span class="math inline">\(\mathcal C\)</span> is therefore</p>
+<p><span class="math display">\[
+\boxed{
+\mathcal C
+\mathrel{:=}
+\left\{
+\chi:\mathcal B\rightarrow\mathbb R^3
+\;\middle|\;
+\begin{gathered}
+\left\|\chi(P)-\chi(Q)\right\|_2=d_i(P,Q)
+\quad
+\text{for every }i\in I\text{ and every }P,Q\in\mathcal B_i,\\
+\chi\text{ satisfies every declared joint constraint}
+\end{gathered}
+\right\}.
+}
+\]</span></p>
+<p>The vertical bar means “such that.” The set begins with every complete placement map <span class="math inline">\(\chi:\mathcal B\rightarrow\mathbb R^3\)</span> and retains only the maps that preserve every rigid link and obey every declared joint constraint.</p>
 <p>The relationship among a configuration map, a pose, and a transformation matrix is clearest for one rigid link. Choose one link with material-point set <span class="math inline">\(\mathcal B_b\subseteq\mathcal B\)</span>, and attach frame <span class="math inline">\(\{b\}\)</span> rigidly to it. Before placing the link in the world, assign every material point its constant body-frame coordinate:</p>
 <p><span class="math display">\[
 \boxed{

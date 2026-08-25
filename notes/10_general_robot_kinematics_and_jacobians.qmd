@@ -214,7 +214,9 @@ The bold symbol $\mathbf y$ names the complete task-output column; it is not the
 
 Here $\mathbf y=[y_1\;\cdots\;y_m]^{\mathsf T}$ is one task-coordinate column. Each entry $y_i$ is one number in that output column and is called a **task variable**, or **task coordinate**. For example, if the task output is a point's planar position, its two task variables can be its $x$- and $y$-coordinates. Each task variable depends on $\mathbf q$ through $y_i=f_i(\mathbf q)$. The task variables are outputs of the forward map, not additional independent robot coordinates. Their units, reference frames, and physical meanings must be declared. The dimension $m$ is chosen by the task and need not equal the number $n$ of generalised coordinates.
 
-The generic column $\mathbf y$ can also describe orientation. For example, consider one revolute joint whose angle $\theta$ rotates a tool in the $x_s$--$y_s$ plane. If the tool is aligned with the positive $x_s$-axis when $\theta=0$, its planar orientation angle relative to that axis is $\phi_e=\theta$. An orientation-only task can therefore use
+::: {.callout-note title="Example: Orientation as a task output" appearance="simple" icon=false}
+
+The generic column $\mathbf y$ can also describe orientation. Consider one revolute joint whose angle $\theta$ rotates a tool in the $x_s$--$y_s$ plane. If the tool is aligned with the positive $x_s$-axis when $\theta=0$, its planar orientation angle relative to that axis is $\phi_e=\theta$. An orientation-only task can therefore use
 
 $$
 \boxed{
@@ -240,7 +242,11 @@ $$
 
 Here $m=1$, and both $\theta$ and $\phi_e$ are measured in radians with positive rotation about the positive $z_s$-axis. For example, $\mathbf q=[\pi/6\,\mathrm{rad}]$ produces the orientation output $\mathbf y=[\pi/6\,\mathrm{rad}]$. In this task, $\mathbf y$ contains orientation and no position.
 
-For a simple example with $m=2$, consider an $x$--$y$ positioning stage with two prismatic joints. Joint 1 moves the tool along the positive $x_s$-axis by $d_x$, and joint 2 moves it along the positive $y_s$-axis by $d_y$. At zero joint displacement, the tool position is $(x_0,y_0)=(0.50,0.30)\,\mathrm m$. The joint-coordinate input and planar-position task output are
+:::
+
+::: {.callout-note title="Example: Two-coordinate position task" appearance="simple" icon=false}
+
+Consider an $x$--$y$ positioning stage with two prismatic joints, so the selected task has $m=2$ output components. Joint 1 moves the tool along the positive $x_s$-axis by $d_x$, and joint 2 moves it along the positive $y_s$-axis by $d_y$. At zero joint displacement, the tool position is $(x_0,y_0)=(0.50,0.30)\,\mathrm m$. The joint-coordinate input and planar-position task output are
 
 $$
 \boxed{
@@ -289,6 +295,8 @@ $$
 
 The output has two task variables, $y_1=x_e$ and $y_2=y_e$, so $m=2$. Both values are calculated from the joint variables; they are not additional independently chosen robot coordinates.
 
+:::
+
 The full modelling chain is therefore
 
 $$
@@ -304,6 +312,8 @@ $$
 $$
 
 The last arrow is present only when the selected task is obtained from the end-effector pose. Some tasks depend on another link, several points, or the complete configuration instead. In every case, the final coordinate rule can still be written as $\mathbf y=\mathbf f(\mathbf q)$ after the physical quantity and its coordinate representation have been declared.
+
+::: {.callout-note title="Example: Planar 2R forward map" appearance="simple" icon=false}
 
 Consider a planar arm with two revolute joints, link lengths $L_1,L_2\in\mathbb R_{>0}$ measured in metres, and joint coordinates
 
@@ -369,11 +379,15 @@ and a separate planar pose-coordinate task could use $[x_e\;y_e\;\phi_e]^{\maths
 
 Different task choices preserve different information. Two joint configurations can produce the same end-effector position while giving different link placements or end-effector orientations. Therefore a task-coordinate map need not be one-to-one, and knowing $\mathbf y$ need not recover $\mathbf q$. This chapter first solves and differentiates the forward direction; inverse kinematics is developed later in the learning programme.
 
+:::
+
 ### The total derivative and multivariable chain rule
 
 The forward map answers where the task output is at one configuration. Velocity kinematics asks the local follow-up question: if every joint coordinate changes at a known rate, how does the selected task output change at that instant? The required mathematical object is the total derivative of the task-coordinate map.
 
-Let $\mathbf f:\mathcal V\rightarrow\mathbb R^m$ be a task-coordinate map on a local coordinate set $\mathcal V\subseteq\mathbb R^n$, and write its scalar component functions as
+#### Partial and total derivatives
+
+The earlier task-coordinate map $\mathbf f:\mathcal Q\rightarrow\mathcal Y$ accepts every declared joint-coordinate column in its domain. In the declared numerical representation, $\mathcal Q\subseteq\mathbb R^n$. Differentiation is a local calculation, so choose a smaller set $\mathcal V\subseteq\mathcal Q$ that contains nearby allowed columns without crossing a joint-limit or angle-wrap boundary. Thus $\mathcal V\subseteq\mathcal Q\subseteq\mathbb R^n$. Because $\mathcal Y\subseteq\mathbb R^m$, the restriction of the task map to this local set can be written as $\mathbf f:\mathcal V\rightarrow\mathbb R^m$. Write its component functions as
 
 $$
 \mathbf f(\mathbf q)
@@ -383,7 +397,7 @@ f_1(\mathbf q)&\cdots&f_m(\mathbf q)
 \end{bmatrix}^{\mathsf T}.
 $$
 
-Let $\mathbf q_0\in\mathcal V$ be an interior coordinate value, meaning that sufficiently small positive and negative changes of every coordinate remain inside $\mathcal V$. The **partial derivative** of output component $f_i$ with respect to input coordinate $q_j$ changes only $q_j$ while holding the other coordinates fixed:
+Let $\mathbf q_0\in\mathcal V$ be an interior coordinate value, meaning that sufficiently small positive and negative changes of every coordinate remain inside $\mathcal V$. The **partial derivative** of output component $f_i$ with respect to input coordinate $q_j$ measures the first-order change in $f_i$ when only $q_j$ changes:
 
 $$
 \boxed{
@@ -398,12 +412,26 @@ $$
 
 Here $i\in\{1,\ldots,m\}$ is an output index, $j\in\{1,\ldots,n\}$ is an input index, $\mathbf e_j\in\mathbb R^n$ is the dimensionless standard coordinate column with entry $1$ at index $j$ and zeros elsewhere, and the scalar increment $h$ has the physical unit of $q_j$. The derivative has the unit of $f_i$ divided by the unit of $q_j$.
 
-Partial derivatives describe one input direction at a time. The **total derivative** combines all first-order input effects into one linear map. Its matrix in the chosen input and output coordinates is
+Partial derivatives examine the input directions separately. Their existence alone does not guarantee that all small input changes are described by one consistent linear map. The task map $\mathbf f$ is **differentiable at $\mathbf q_0$** if there is a linear map, represented in the chosen coordinates by a matrix $\mathbf A\in\mathbb R^{m\times n}$, that separates every sufficiently small output increment into a first-order part and a smaller remainder. This means that
+
+$$
+\boxed{
+\mathbf f(\mathbf q_0+\Delta\mathbf q)
+-\mathbf f(\mathbf q_0)
+=
+\mathbf A\Delta\mathbf q
++\mathbf r(\Delta\mathbf q)
+}.
+$$ {#eq-total-derivative-first-order-model}
+
+The remainder $\mathbf r(\Delta\mathbf q)$ must decrease faster than the size of $\Delta\mathbf q$ as $\Delta\mathbf q\rightarrow\mathbf 0_n$.[^mixed-unit-derivative-norms] When such a linear map exists, it is unique and is called the **total derivative** of $\mathbf f$ at $\mathbf q_0$, denoted $\mathrm D\mathbf f(\mathbf q_0)\mathrel{:=}\mathbf A$. Thus $\mathrm D\mathbf f(\mathbf q_0)$ is the local linear model of the generally nonlinear forward map; it does not claim that $\mathbf f$ is globally linear.
+
+If $\mathbf f$ is differentiable at $\mathbf q_0$, the matrix of its total derivative in the chosen input and output coordinates contains the partial derivatives:
 
 $$
 \boxed{
 \mathrm D\mathbf f(\mathbf q_0)
-\mathrel{:=}
+=
 \left[
 \frac{\partial f_i}{\partial q_j}(\mathbf q_0)
 \right]_{
@@ -413,25 +441,99 @@ $$
 }.
 $$ {#eq-total-derivative-task-map}
 
-Row $i$ collects the first-order change of task component $y_i$ caused by every coordinate, while column $j$ collects the first-order change of every task component caused by coordinate $q_j$. Because different inputs and outputs may have different units, different entries of this matrix may also have different units.
+Row $i$ collects the first-order effect on task component $y_i$ from every input coordinate. Column $j$ collects the first-order effects on all task components from changing $q_j$ while holding the other input coordinates fixed. Because different inputs and outputs may have different units, different matrix entries may also have different units.
 
-The defining property of differentiability is that, for a sufficiently small coordinate increment $\Delta\mathbf q$, the output increment separates into a linear first-order part and a smaller remainder:
+[^mixed-unit-derivative-norms]: The formal limit must compare dimensionless numerical columns. Choose fixed positive input and output scales with the corresponding physical units, and divide each input increment and output remainder component by its scale. If $\widetilde{\Delta\mathbf q}$ and $\widetilde{\mathbf r}$ denote these dimensionless columns, the required condition is $\lVert\widetilde{\mathbf r}\rVert_2/\lVert\widetilde{\Delta\mathbf q}\rVert_2\rightarrow0$ as $\widetilde{\Delta\mathbf q}\rightarrow\mathbf 0_n$. This nondimensionalisation does not assign one physical unit or one unscaled physical norm to a mixed-unit column.
+
+::: {.callout-note title="Example: Partial and total derivatives of an x–y stage" appearance="simple" icon=false}
+
+Return to the two-prismatic-joint positioning stage, with every coordinate measured in metres. Suppose its complete numerical domain is $\mathcal Q=[0,0.40]\times[0,0.20]$ and the derivative is required at
+
+$$
+\mathbf q_0
+=
+\begin{bmatrix}
+0.20\\
+0.10
+\end{bmatrix}.
+$$
+
+One suitable local set is $\mathcal V=(0.10,0.30)\times(0.05,0.15)$, so $\mathbf q_0\in\mathcal V\subseteq\mathcal Q$. This set contains nearby values around $\mathbf q_0$ but does not reach either joint limit. The joint input and task output are
+
+$$
+\mathbf q
+=
+\begin{bmatrix}
+d_x\\
+d_y
+\end{bmatrix},
+\qquad
+\mathbf f_{xy}(\mathbf q)
+=
+\begin{bmatrix}
+x_0+d_x\\
+y_0+d_y
+\end{bmatrix}.
+$$
+
+Changing $d_x$ moves only $x_e$, while changing $d_y$ moves only $y_e$. Therefore
+
+$$
+\frac{\partial x_e}{\partial d_x}=1,
+\qquad
+\frac{\partial x_e}{\partial d_y}=0,
+\qquad
+\frac{\partial y_e}{\partial d_x}=0,
+\qquad
+\frac{\partial y_e}{\partial d_y}=1,
+$$
+
+and the total-derivative matrix is
 
 $$
 \boxed{
-\mathbf f(\mathbf q_0+\Delta\mathbf q)
--\mathbf f(\mathbf q_0)
+\mathrm D\mathbf f_{xy}(\mathbf q)
 =
-\mathrm D\mathbf f(\mathbf q_0)\Delta\mathbf q
-+\mathbf r(\Delta\mathbf q)
-},
-$$ {#eq-total-derivative-first-order-model}
+\begin{bmatrix}
+1&0\\
+0&1
+\end{bmatrix}
+}.
+$$
 
-where the remainder $\mathbf r(\Delta\mathbf q)$ decreases faster than the first-order increment as $\Delta\mathbf q\rightarrow\mathbf 0_n$.[^mixed-unit-derivative-norms] Thus $\mathrm D\mathbf f(\mathbf q_0)$ is the local linear model of the generally nonlinear forward map, not a claim that $\mathbf f$ is globally linear.
+For the joint increment
 
-[^mixed-unit-derivative-norms]: The formal limit compares dimensionless numerical columns. When coordinates have different physical units, choose fixed positive scales with the corresponding units and divide each coordinate increment and output remainder by its scale before applying Euclidean norms. This nondimensionalisation makes the mathematical limit well typed; it does not assign one physical unit or one unscaled physical norm to the mixed-unit column $\mathbf q$.
+$$
+\Delta\mathbf q
+=
+\begin{bmatrix}
+0.01\\
+-0.02
+\end{bmatrix}
+\,\mathrm m,
+$$
 
-Now let $\mathbf q(t)$ be a differentiable coordinate curve and define the time-dependent task output by
+the task increment is
+
+$$
+\Delta\mathbf y
+=
+\mathrm D\mathbf f_{xy}(\mathbf q)\Delta\mathbf q
+=
+\begin{bmatrix}
+0.01\\
+-0.02
+\end{bmatrix}
+\,\mathrm m.
+$$
+
+The first column says that the $x_s$ task coordinate changes by one metre per metre of positive $x$-joint motion and that the $y_s$ task coordinate does not change. The second column gives the corresponding effect of the $y$ joint. This map is affine, so its remainder is exactly zero for every increment that remains in the declared domain.
+
+:::
+
+#### From joint rates to task rates
+
+Assume that $\mathbf q(t)$ is a differentiable coordinate curve and that $\mathbf f$ is differentiable at every value $\mathbf q(t)$ considered. Define the time-dependent task output by
 
 $$
 \mathbf y(t)
@@ -486,28 +588,41 @@ $$
 
 This equation explains the word *total*: the rate of one task component is the sum of the contributions from all changing joint coordinates. At a fixed configuration $\mathbf q$, the relationship is linear in $\dot{\mathbf q}$; as the robot changes configuration, the derivative matrix generally changes as well.
 
-The same chain rule applies when one coordinate mapping feeds another. Let $p\in\mathbb N$ be the number of upstream coordinates, let $\mathbf r\in\mathbb R^p$ be an upstream coordinate column, let $\mathbf q=\mathbf g(\mathbf r)$, and let $\mathbf y=\mathbf f(\mathbf q)$. For example, $\mathbf r$ could contain actuator coordinates and $\mathbf g$ could describe a transmission that produces joint coordinates. Write $g_j$ for component $j$ of $\mathbf g$, and let $k\in\{1,\ldots,p\}$ be an upstream-coordinate index. The composed map is $\mathbf y=(\mathbf f\circ\mathbf g)(\mathbf r)$. For output index $i$ and upstream index $k$,
+::: {.callout-note title="Example: Task rate of the x–y stage" appearance="simple" icon=false}
+
+For the two-prismatic-joint stage, $\mathrm D\mathbf f_{xy}$ is the identity matrix. If
 
 $$
-\frac{\partial y_i}{\partial r_k}
+\dot{\mathbf q}
 =
-\sum_{j=1}^{n}
-\frac{\partial f_i}{\partial q_j}
-\frac{\partial g_j}{\partial r_k}.
+\begin{bmatrix}
+0.05\\
+-0.02
+\end{bmatrix}
+\,\mathrm{m\,s^{-1}},
 $$
 
-Collecting these scalar equations gives the matrix form
+then the chain rule gives
 
 $$
-\boxed{
-\mathrm D(\mathbf f\circ\mathbf g)(\mathbf r)
+\dot{\mathbf y}
 =
-\mathrm D\mathbf f(\mathbf g(\mathbf r))
-\mathrm D\mathbf g(\mathbf r)
-}.
-$$ {#eq-multivariable-map-composition-chain-rule}
+\mathrm D\mathbf f_{xy}(\mathbf q)\dot{\mathbf q}
+=
+\begin{bmatrix}
+0.05\\
+-0.02
+\end{bmatrix}
+\,\mathrm{m\,s^{-1}}.
+$$
 
-Here $\mathrm D\mathbf g(\mathbf r)\in\mathbb R^{n\times p}$ first maps an upstream increment into a joint-coordinate increment, and $\mathrm D\mathbf f(\mathbf g(\mathbf r))\in\mathbb R^{m\times n}$ then maps that joint-coordinate increment into a task increment. Their product belongs to $\mathbb R^{m\times p}$. The multiplication order therefore follows the information flow.
+The tool therefore moves at $0.05\,\mathrm{m\,s^{-1}}$ along positive $x_s$ and $0.02\,\mathrm{m\,s^{-1}}$ along negative $y_s$.
+
+:::
+
+#### Applying the task-rate rule to a nonlinear robot
+
+::: {.callout-note title="Example: Planar 2R task rate" appearance="simple" icon=false}
 
 For the planar 2R position map @eq-planar-2r-position-forward-map, differentiating each output with respect to each joint angle gives
 
@@ -613,6 +728,88 @@ $$
 
 The units show the role of the derivative: multiplying metres per radian by radians per second produces metres per second. The result is the velocity of the selected end-effector origin expressed along the $x_s$ and $y_s$ axes; it is not the velocity of every point on the end-effector link.
 
+:::
+
+#### Composition of coordinate maps
+
+The same chain rule applies when one coordinate mapping feeds another. Let $p\in\mathbb N$ be the number of upstream coordinates, let $\mathbf u\in\mathbb R^p$ be an upstream coordinate column, let $\mathbf q=\mathbf g(\mathbf u)$, and let $\mathbf y=\mathbf f(\mathbf q)$. The map $\mathbf g$ could, for example, describe a transmission that converts actuator coordinates $\mathbf u$ into joint coordinates $\mathbf q$. Assume that $\mathbf g$ is differentiable at $\mathbf u$ and that $\mathbf f$ is differentiable at $\mathbf g(\mathbf u)$. Write $g_j$ for component $j$ of $\mathbf g$, and let $k\in\{1,\ldots,p\}$ be an upstream-coordinate index. The composed map is $\mathbf y=(\mathbf f\circ\mathbf g)(\mathbf u)$. For output index $i$ and upstream index $k$,
+
+$$
+\frac{\partial y_i}{\partial u_k}(\mathbf u)
+=
+\sum_{j=1}^{n}
+\frac{\partial f_i}{\partial q_j}(\mathbf g(\mathbf u))
+\frac{\partial g_j}{\partial u_k}(\mathbf u).
+$$
+
+Collecting these scalar equations gives the matrix form
+
+$$
+\boxed{
+\mathrm D(\mathbf f\circ\mathbf g)(\mathbf u)
+=
+\mathrm D\mathbf f(\mathbf g(\mathbf u))
+\mathrm D\mathbf g(\mathbf u)
+}.
+$$ {#eq-multivariable-map-composition-chain-rule}
+
+Here $\mathrm D\mathbf g(\mathbf u)\in\mathbb R^{n\times p}$ first maps an upstream increment into a joint-coordinate increment, and $\mathrm D\mathbf f(\mathbf g(\mathbf u))\in\mathbb R^{m\times n}$ then maps that joint-coordinate increment into a task increment. Their product belongs to $\mathbb R^{m\times p}$. The multiplication order therefore follows the information flow.
+
+::: {.callout-note title="Example: A geared orientation task" appearance="simple" icon=false}
+
+Consider one motor with angle $u$ connected to one revolute joint by a reduction ratio $N\in\mathbb R_{>0}$. Both angles use the same positive direction, and the transmission gives
+
+$$
+q
+=
+g(u)
+=
+\frac{u}{N}.
+$$
+
+Suppose the tool's planar orientation is the selected task and its zero orientation agrees with the joint zero, so
+
+$$
+\phi_e
+=
+f(q)
+=
+q.
+$$
+
+This example has $p=n=m=1$. The two derivatives are
+
+$$
+\frac{\mathrm d g}{\mathrm d u}
+=
+\frac{1}{N},
+\qquad
+\frac{\mathrm d f}{\mathrm d q}
+=
+1.
+$$
+
+The composition rule therefore gives
+
+$$
+\boxed{
+\frac{\mathrm d\phi_e}{\mathrm d u}
+=
+\frac{\mathrm d f}{\mathrm d q}
+\frac{\mathrm d g}{\mathrm d u}
+=
+1\left(\frac{1}{N}\right)
+=
+\frac{1}{N}
+}.
+$$
+
+For $N=4$ and motor rate $\dot u=2\,\mathrm{rad\,s^{-1}}$, the tool orientation rate is $\dot\phi_e=(1/4)\dot u=0.5\,\mathrm{rad\,s^{-1}}$. In the derivative product, the rightmost factor $\mathrm dg/\mathrm du$ acts first and maps motor changes to joint changes; the factor $\mathrm df/\mathrm dq$ then maps joint changes to task-orientation changes.
+
+:::
+
+#### Pose-valued forward maps
+
 For a pose-valued forward map $\mathbf F_e:\mathcal Q\rightarrow SE(3)$, the output is constrained to $SE(3)$ rather than being an unconstrained Euclidean column. Differentiating its matrix entries produces $\dot{\mathbf T}_{se}$, but $\dot{\mathbf T}_{se}$ is not itself a six-component rigid velocity. The established relations
 
 $$
@@ -634,30 +831,672 @@ The derivative is local. It predicts first-order output change for a small coord
 1. **Recall:** Distinguish $\mathcal C$, $\mathcal Q$, and one coordinate column $\mathbf q$.
 2. **Explanation:** Why can two real angle values that differ by $2\pi$ describe the same revolute-joint configuration, and why does this make coordinates local?
 3. **Task choice:** For one forward-pose map $\mathbf F_e$, give two different task-coordinate maps and state what information each discards.
-4. **Derivation:** Starting from $\mathbf y(t)=\mathbf f(\mathbf q(t))$, write the scalar multivariable chain rule for $\dot y_i$ and its matrix form.
-5. **Application:** For the planar 2R example with $L_1=L_2=1\,\mathrm m$, $\theta_1=0$, $\theta_2=\pi/2$, and $\dot{\mathbf q}=[0.2\;-0.1]^{\mathsf T}\,\mathrm{rad\,s^{-1}}$, calculate $[\dot x_e\;\dot y_e]^{\mathsf T}$ and state its frame and units.
-6. **Composition:** If actuator coordinates $\mathbf r$ produce joint coordinates $\mathbf q=\mathbf g(\mathbf r)$ and the task is $\mathbf y=\mathbf f(\mathbf q)$, which derivative matrix multiplies an actuator-rate column $\dot{\mathbf r}$?
-7. **Limitation:** Why does the first-order approximation $\Delta\mathbf y\approx\mathrm D\mathbf f(\mathbf q)\Delta\mathbf q$ not provide an exact finite-motion formula or guarantee a local inverse?
+4. **Definition:** Partial derivatives examine one joint-coordinate direction at a time. Why is that not enough to conclude that $\mathbf f$ has a total derivative at $\mathbf q_0$? State the condition that makes $\mathrm D\mathbf f(\mathbf q_0)$ a valid first-order model for every sufficiently small combined increment $\Delta\mathbf q$.
+5. **Derivation:** Starting from $\mathbf y(t)=\mathbf f(\mathbf q(t))$, write the scalar multivariable chain rule for $\dot y_i$ and its matrix form.
+6. **Application:** For the planar 2R example with $L_1=1\,\mathrm m$, $L_2=0.5\,\mathrm m$, $\theta_1=\pi/2$, $\theta_2=-\pi/2$, and $\dot{\mathbf q}=[0.3\;-0.1]^{\mathsf T}\,\mathrm{rad\,s^{-1}}$, calculate $[\dot x_e\;\dot y_e]^{\mathsf T}$ and state its frame and units.
+7. **Composition:** If actuator coordinates $\mathbf u$ produce joint coordinates $\mathbf q=\mathbf g(\mathbf u)$ and the task is $\mathbf y=\mathbf f(\mathbf q)$, which derivative matrix multiplies an actuator-rate column $\dot{\mathbf u}$?
+8. **Limitation:** Why does the first-order approximation $\Delta\mathbf y\approx\mathrm D\mathbf f(\mathbf q)\Delta\mathbf q$ not provide an exact finite-motion formula or guarantee a local inverse?
 
 #### Answers and hints {.unnumbered}
 
 1. $\mathcal C$ is the set of complete admissible robot placements. $\mathcal Q$ is the declared domain of their generalised-coordinate descriptions. $\mathbf q$ is one coordinate column in $\mathcal Q$; together with the model it locally specifies one configuration.
 2. A complete turn returns a revolute joint to the same relative orientation, so $\theta$ and $\theta+2\pi$ are different numerical representatives of one physical arrangement. Any one-to-one real coordinate must select a local interval or a branch boundary; it cannot unwrap the whole circle globally without duplication.
 3. The position map $\mathbf f_p=\pi_p\circ\mathbf F_e$ returns ${}^{s}\mathbf p_e$ and discards orientation. A declared orientation-coordinate map would retain orientation and discard position. A full local pose-coordinate map can retain both, but its orientation coordinates require a declared representation and may have a representation boundary.
-4. For every output index $i$, $\dot y_i=\sum_{j=1}^{n}(\partial f_i/\partial q_j)\dot q_j$. Collecting the components gives $\dot{\mathbf y}=\mathrm D\mathbf f(\mathbf q)\dot{\mathbf q}$.
-5. The derivative matrix is $[[-1,-1],[1,0]]\,\mathrm{m\,rad^{-1}}$, so the position rate is $[-0.1\;0.2]^{\mathsf T}\,\mathrm{m\,s^{-1}}$. It is the velocity of the selected end-effector origin expressed along the $x_s$ and $y_s$ axes.
-6. Apply the composition chain rule: $\dot{\mathbf y}=\mathrm D\mathbf f(\mathbf g(\mathbf r))\mathrm D\mathbf g(\mathbf r)\dot{\mathbf r}$. The product $\mathrm D\mathbf f\,\mathrm D\mathbf g$ is the derivative of the actuator-to-task map.
-7. The derivative retains only the linear term at the current configuration; nonlinear higher-order terms accumulate over a finite coordinate change. A local inverse additionally requires suitable dimensions and full rank, and it may still be restricted by coordinate boundaries and the physical domain.
+4. Suppose $\mathbf q=[q_1\;q_2]^{\mathsf T}$. The partial derivative with respect to $q_1$ tests a small change $[h\;0]^{\mathsf T}$, and the partial derivative with respect to $q_2$ tests $[0\;h]^{\mathsf T}$, where in each test $h$ is a small scalar increment with the same unit as the selected coordinate. These tests show what happens when one coordinate changes alone. A general increment $\Delta\mathbf q=[\Delta q_1\;\Delta q_2]^{\mathsf T}$ can change both coordinates together, so the matrix of partial derivatives is a total derivative only if the same matrix predicts the output change for every sufficiently small $\Delta\mathbf q$. Specifically, $\mathbf f(\mathbf q_0+\Delta\mathbf q)-\mathbf f(\mathbf q_0)=\mathrm D\mathbf f(\mathbf q_0)\Delta\mathbf q+\mathbf r(\Delta\mathbf q)$ must hold with a remainder $\mathbf r(\Delta\mathbf q)$ that becomes negligible compared with $\Delta\mathbf q$ as $\Delta\mathbf q\rightarrow\mathbf 0_2$.
+5. For every output index $i$, $\dot y_i=\sum_{j=1}^{n}(\partial f_i/\partial q_j)\dot q_j$. Collecting the components gives $\dot{\mathbf y}=\mathrm D\mathbf f(\mathbf q)\dot{\mathbf q}$.
+6. At this configuration, $\theta_1+\theta_2=0$ and the derivative matrix is $[[-1,0],[0.5,0.5]]\,\mathrm{m\,rad^{-1}}$. Therefore the position rate is $[-0.3\;0.1]^{\mathsf T}\,\mathrm{m\,s^{-1}}$. It is the velocity of the selected end-effector origin expressed along the $x_s$ and $y_s$ axes.
+7. Apply the composition chain rule: $\dot{\mathbf y}=\mathrm D\mathbf f(\mathbf g(\mathbf u))\mathrm D\mathbf g(\mathbf u)\dot{\mathbf u}$. The rightmost matrix acts first, and the product $\mathrm D\mathbf f\,\mathrm D\mathbf g$ is the derivative of the actuator-to-task map.
+8. The derivative retains only the linear term at the current configuration; second- and higher-order terms can become significant over a finite coordinate change. A local inverse is a rule that recovers the unique nearby joint-coordinate column $\mathbf q$ from a nearby task output $\mathbf y=\mathbf f(\mathbf q)$. Such a two-sided local inverse requires equal input and output dimensions, $n=m$, and a full-rank derivative matrix $\mathrm D\mathbf f(\mathbf q)$ at the selected configuration. Even then, the inverse is valid only in a neighbourhood that does not cross a joint limit, an angle-wrap boundary, or another excluded part of the physical coordinate domain.
 
 ## Serial-chain pose through products of exponentials {#sec-serial-product-of-exponentials}
 
+The forward-pose map $\mathbf F_e$ states what the robot model must calculate, but it does not yet supply a formula for that calculation. A fixed-base serial chain needs a rule that combines the joint motions in their physical order while preserving their effects on every outward link. The product-of-exponentials construction answers this question from one declared zero arrangement, one end-effector pose in that arrangement, and one screw axis for each joint. This section first defines those stored geometric data, then constructs the space and body forms, and finally connects the exponential products to the familiar chain of relative link transformations.
+
 ### Home configuration and joint screw axes
+
+The reference data must describe the whole chain before any nonzero joint value is applied. Let
+
+$$
+\mathbf 0_n
+\mathrel{:=}
+\begin{bmatrix}
+0&\cdots&0
+\end{bmatrix}^{\mathsf T}
+\in\mathcal Q
+$$
+
+be the joint-coordinate column in which every joint has its declared zero value. The corresponding complete robot placement $\chi(\mathbf 0_n)$ is the **zero arrangement**. The zero arrangement is chosen by the modeller; it need not resemble a person’s resting posture, place every link along one straight line, or make the end-effector pose equal to the identity.
+
+The product-of-exponentials model first records the end-effector pose in this zero arrangement. Define the **home end-effector pose**, commonly called the **home configuration** in product-of-exponentials terminology, by
+
+$$
+\boxed{
+\mathbf M
+\mathrel{:=}
+\mathbf F_e(\mathbf 0_n)
+=
+\mathbf T_{se}(\mathbf 0_n)
+=
+\begin{bmatrix}
+\mathbf R_{se,0}&{}^{s}\mathbf p_{e,0}\\
+\mathbf 0_3^{\mathsf T}&1
+\end{bmatrix}
+\in SE(3)
+}.
+$$
+
+Here $\mathbf R_{se,0}\in SO(3)$ is the orientation of the end-effector frame $\{e\}$ relative to the fixed space frame $\{s\}$ in the zero arrangement, and ${}^{s}\mathbf p_{e,0}\in\mathbb R^3$ is the position of the end-effector origin $O_e$ relative to $O_s$, expressed along the axes of $\{s\}$ and measured in metres. The matrix $\mathbf M$ contains only the end-effector pose at zero; it is not the complete placement $\chi(\mathbf 0_n)$ of every robot link.
+
+The home pose alone cannot predict what happens when a joint leaves zero: the model must also describe the joint’s permitted motion. For a one-joint chain, let ${}^{s}\mathbf S_1$ be the joint’s normalised screw axis expressed in $\{s\}$. The $SE(3)$ exponential from @sec-se3-screw-exponential converts this axis and the signed joint coordinate $q_1$ into the active joint displacement
+
+$$
+\mathbf T_{\Delta,1}(q_1)
+=
+\exp\!\left(\widehat{{}^{s}\mathbf S_1}\,q_1\right).
+$$
+
+Applying that displacement to the home pose gives
+
+$$
+\boxed{
+\mathbf T_{se}(q_1)
+=
+\mathbf T_{\Delta,1}(q_1)\mathbf M
+=
+\exp\!\left(\widehat{{}^{s}\mathbf S_1}\,q_1\right)\mathbf M
+}.
+$$
+
+The displacement appears on the left of $\mathbf M$ because the two transformations answer successive questions about a point fixed to the end effector. Let $\bar{\mathbf p}_e=[\mathbf p_e^{\mathsf T}\;1]^{\mathsf T}$ be the homogeneous coordinates of any such point in $\{e\}$. In the zero arrangement, the home pose first places the point in the space frame:
+
+$$
+\bar{\mathbf p}_s(0)
+=
+\mathbf M\bar{\mathbf p}_e.
+$$
+
+The active displacement $\mathbf T_{\Delta,1}(q_1)$ is expressed in the fixed space frame, so it next moves that already placed point:
+
+$$
+\begin{aligned}
+\bar{\mathbf p}_s(q_1)
+&=
+\mathbf T_{\Delta,1}(q_1)\bar{\mathbf p}_s(0)\\
+&=
+\mathbf T_{\Delta,1}(q_1)\mathbf M\bar{\mathbf p}_e.
+\end{aligned}
+$$
+
+Because this relation holds for every point fixed to the end effector, the complete moved pose is $\mathbf T_{se}(q_1)=\mathbf T_{\Delta,1}(q_1)\mathbf M$. Matrix products act on a column from right to left: $\mathbf M$ places the home geometry first, and the space-frame joint displacement moves that geometry second. Reversing the factors would apply a different displacement interpretation and would not represent the stated motion about the fixed space screw axis.
+
+::: {.callout-note title="Example: Rotating a home position about the space origin" appearance="simple" icon=false}
+
+This example shows that changing the multiplication order changes the physical motion. Suppose the home pose has identity orientation and end-effector position ${}^{s}\mathbf p_{e,0}=[2\;0\;0]^{\mathsf T}\,\mathrm m$, and suppose the joint displacement is a rotation $\mathbf R_z(\pi/2)$ about the $z$-axis through $O_s$. Left multiplication gives
+
+$$
+\mathbf T_{\Delta,1}
+=
+\begin{bmatrix}
+\mathbf R_z(\pi/2)&\mathbf 0_3\\
+\mathbf 0_3^{\mathsf T}&1
+\end{bmatrix},
+\qquad
+\mathbf M
+=
+\begin{bmatrix}
+\mathbf I_3&
+\begin{bmatrix}
+2\\0\\0
+\end{bmatrix}\\
+\mathbf 0_3^{\mathsf T}&1
+\end{bmatrix},
+$$
+
+and therefore
+
+$$
+\mathbf T_{\Delta,1}\mathbf M
+=
+\begin{bmatrix}
+\mathbf R_z(\pi/2)&\mathbf 0_3\\
+\mathbf 0_3^{\mathsf T}&1
+\end{bmatrix}
+\begin{bmatrix}
+\mathbf I_3&
+\begin{bmatrix}
+2\\0\\0
+\end{bmatrix}\\
+\mathbf 0_3^{\mathsf T}&1
+\end{bmatrix}
+=
+\begin{bmatrix}
+\mathbf R_z(\pi/2)&
+\mathbf R_z(\pi/2)
+\begin{bmatrix}
+2\\0\\0
+\end{bmatrix}\\
+\mathbf 0_3^{\mathsf T}&1
+\end{bmatrix}
+=
+\begin{bmatrix}
+\mathbf R_z(\pi/2)&
+\begin{bmatrix}
+0\\2\\0
+\end{bmatrix}\\
+\mathbf 0_3^{\mathsf T}&1
+\end{bmatrix}.
+$$
+
+The end-effector origin therefore moves from $(2,0,0)\,\mathrm m$ to $(0,2,0)\,\mathrm m$ as it rotates about the fixed space axis. By contrast, the reversed product $\mathbf M\mathbf T_{\Delta,1}$ retains the translation $[2\;0\;0]^{\mathsf T}\,\mathrm m$ in this example, so it cannot describe the same motion about $O_s$.
+
+:::
+
+When $q_1=0$, the exponential is $\mathbf I_4$ and the result returns to $\mathbf T_{se}(0)=\mathbf M$. Thus $\mathbf M$ answers “where is the end effector when every joint is zero?”, whereas ${}^{s}\mathbf S_1$ answers “which rigid displacement does positive motion of this joint generate from that reference arrangement?”. Neither quantity determines the other; they are complementary model data tied to the same zero arrangement. An $n$-joint serial chain needs one such screw axis for every joint and must apply the resulting displacements in chain order. Before deriving that ordered product, define the required ${}^{s}\mathbf S_j$ precisely.
+
+The model must next record the motion permitted by each joint. First set the complete joint-coordinate column to $\mathbf q=\mathbf 0_n$. While the robot has this placement, identify the axis line and positive direction of every joint. For each joint index $j\in\{1,\ldots,n\}$, express its positive axis direction using the fixed space frame $\{s\}$ and denote the resulting dimensionless unit column by ${}^{s}\mathbf s_j\in\mathbb R^3$, so $\|{}^{s}\mathbf s_j\|_2=1$. If joint $j$ is revolute, also choose any point on its axis line at $\mathbf q=\mathbf 0_n$ and let ${}^{s}\mathbf p_{\ell,j}\in\mathbb R^3$ be that point’s position relative to $O_s$, expressed in $\{s\}$ and measured in metres. Reusing the normalised screw-axis definitions from @sec-screw-axis-joint-motion gives the joint’s **space screw axis at the zero arrangement** in the project’s linear-first order:
+
+$$
+\boxed{
+{}^{s}\mathbf S_j
+\mathrel{:=}
+\begin{cases}
+\begin{bmatrix}
+-{}^{s}\mathbf s_j\times{}^{s}\mathbf p_{\ell,j}\\
+{}^{s}\mathbf s_j
+\end{bmatrix},
+&\text{if joint $j$ is revolute},\\[1.2em]
+\begin{bmatrix}
+{}^{s}\mathbf s_j\\
+\mathbf 0_3
+\end{bmatrix},
+&\text{if joint $j$ is prismatic}.
+\end{cases}
+}
+$$ {#eq-serial-space-screw-axis}
+
+Every ${}^{s}\mathbf S_j$ in Equation @eq-serial-space-screw-axis is therefore constructed from joint $j$’s axis geometry when $\mathbf q=\mathbf 0_n$; it is not constructed from an axis measured at an arbitrary nonzero joint-coordinate column.
+
+For a revolute joint, the bottom block gives the positive rotation direction and the top block gives the spatial velocity-field coefficient at $O_s$ per unit angular rate. Multiplying ${}^{s}\mathbf S_j$ by the joint angle $q_j$ produces a linear exponential-coordinate block in metres and an angular block in radians. For a prismatic joint, the top block is the positive translation direction and multiplication by the joint displacement $q_j$ produces a translation in metres; the angular block remains zero. The two joint types therefore use different blockwise units and normalisation rules, so the complete six-entry column must not be normalised with one Euclidean norm.
+
+The revolute-axis point ${}^{s}\mathbf p_{\ell,j}$ is not unique, but the resulting screw-axis column is unique for the declared oriented line. If another selected point is ${}^{s}\mathbf p_{\ell,j}'={}^s\mathbf p_{\ell,j}+\lambda{}^s\mathbf s_j$ for some $\lambda\in\mathbb R$ measured in metres, then
+
+$$
+-{}^{s}\mathbf s_j\times{}^{s}\mathbf p_{\ell,j}'
+=
+-{}^{s}\mathbf s_j\times{}^{s}\mathbf p_{\ell,j}
+-
+\lambda\left({}^{s}\mathbf s_j\times{}^{s}\mathbf s_j\right)
+=
+-{}^{s}\mathbf s_j\times{}^{s}\mathbf p_{\ell,j}.
+$$
+
+Thus any point on the same axis line produces the same ${}^{s}\mathbf S_j$. Before using a numerical model, verify that $\mathbf M\in SE(3)$, every supplied component is finite, every declared axis direction has nonzero norm before normalisation, and every revolute axis includes a finite point. Measure every axis direction and axis point when $\mathbf q=\mathbf 0_n$, and express every resulting coordinate column using $\{s\}$. The declared positive direction must agree with the sign convention of $q_j$: the right-hand rule for a revolute joint and translation along ${}^{s}\mathbf s_j$ for a prismatic joint.
+
+The notation records two separate modelling choices. The superscript $s$ states that the screw-axis coordinates are expressed using the fixed space frame $\{s\}$. To obtain those coordinates, place the robot at $\mathbf q=\mathbf 0_n$, identify each joint’s axis line and positive direction at that placement, and express them using $\{s\}$. Thus every ${}^{s}\mathbf S_j$ uses one common coordinate frame and is constructed from the same zero arrangement. The next subsection will show how these fixed model data are combined when the joint coordinates are nonzero.
+
+::: {.callout-note title="Example: Home data for a planar revolute--prismatic chain" appearance="simple" icon=false}
+
+This example shows how one zero arrangement supplies $\mathbf M$ and both types of space screw axis. Let $n=2$, place $O_s$ on joint 1, and align the end-effector frame with $\{s\}$ when $\mathbf q=\mathbf 0_2$. In this zero arrangement, joint 1 revolves about positive $z_s$ through $O_s$, joint 2 translates along positive $x_s$, and $O_e$ is $L$ metres from $O_s$ along positive $x_s$, where $L>0$.
+
+The home end-effector pose is
+
+$$
+\mathbf M
+=
+\begin{bmatrix}
+\mathbf I_3&[L\;0\;0]^{\mathsf T}\\
+\mathbf 0_3^{\mathsf T}&1
+\end{bmatrix}.
+$$
+
+For joint 1, choose ${}^{s}\mathbf s_1=[0\;0\;1]^{\mathsf T}$ and ${}^{s}\mathbf p_{\ell,1}=\mathbf 0_3\,\mathrm m$. For joint 2, choose ${}^{s}\mathbf s_2=[1\;0\;0]^{\mathsf T}$. Equation @eq-serial-space-screw-axis then gives
+
+$$
+{}^{s}\mathbf S_1
+=
+\begin{bmatrix}
+0\\0\\0\\0\\0\\1
+\end{bmatrix},
+\qquad
+{}^{s}\mathbf S_2
+=
+\begin{bmatrix}
+1\\0\\0\\0\\0\\0
+\end{bmatrix}.
+$$
+
+The model has now recorded the end-effector pose at zero and the positive motion permitted by each joint. It has not yet evaluated the end-effector pose for nonzero joint coordinates; the next subsection will combine these data in the required order.
+
+:::
 
 ### Space-form product of exponentials
 
+The stored home pose and space screw axes now answer the forward-kinematics question. Number the joints from the fixed base toward the end effector, so joint $1$ is the most proximal joint and joint $n$ is the most distal. For each $j\in\{1,\ldots,n\}$, define the active rigid displacement generated by joint $j$ from its zero value as
+
+$$
+\boxed{
+\mathbf E_j(q_j)
+\mathrel{:=}
+\exp\!\left(
+\widehat{{}^{s}\mathbf S_j}\,q_j
+\right)
+\in SE(3)
+}.
+$$ {#eq-serial-space-joint-displacement}
+
+The hat operator gives the $4\times4$ matrix representation of the linear-first screw axis. If ${}^{s}\mathbf S_j=[({}^{s}\mathbf s_{v,j})^{\mathsf T}\;({}^{s}\mathbf s_{\omega,j})^{\mathsf T}]^{\mathsf T}$, then
+
+$$
+\widehat{{}^{s}\mathbf S_j}
+=
+\begin{bmatrix}
+[{}^{s}\mathbf s_{\omega,j}]_\times&{}^{s}\mathbf s_{v,j}\\
+\mathbf 0_3^{\mathsf T}&0
+\end{bmatrix}.
+$$
+
+For a revolute joint, $q_j$ is the signed angle in radians; for a prismatic joint, $q_j$ is the signed displacement in metres. In both cases, Equation @eq-serial-space-joint-displacement is the finite joint displacement established in @sec-se3-screw-exponential. In particular, $\mathbf E_j(0)=\mathbf I_4$.
+
+To derive the serial-chain product without changing any stored screw axis, begin with the robot at $\mathbf M$ and first move only the most distal joint $n$. This joint moves the end effector but cannot move any joint closer to the base, so its axis still has the geometry recorded at $\mathbf q=\mathbf 0_n$. The resulting end-effector pose is
+
+$$
+\mathbf T_{se}
+=
+\mathbf E_n(q_n)\mathbf M.
+$$
+
+Next move joint $n-1$. It carries joint $n$, the final link, and the end effector as one outward assembly, so its active displacement premultiplies the pose already obtained:
+
+$$
+\mathbf T_{se}
+=
+\mathbf E_{n-1}(q_{n-1})
+\mathbf E_n(q_n)
+\mathbf M.
+$$
+
+Continue toward the base. Each newly moved joint carries every link and joint outward from it, while none of the previously moved distal joints changes that more proximal joint’s axis. After joint $1$ is included, the **space-form product of exponentials** is
+
+$$
+\boxed{
+\mathbf F_e(\mathbf q)
+=
+\mathbf T_{se}(\mathbf q)
+=
+\mathbf E_1(q_1)\mathbf E_2(q_2)\cdots\mathbf E_n(q_n)\mathbf M
+=
+\left(
+\prod_{j=1}^{n}
+\exp\!\left(\widehat{{}^{s}\mathbf S_j}\,q_j\right)
+\right)
+\mathbf M
+}.
+$$ {#eq-serial-space-poe}
+
+In Equation @eq-serial-space-poe, the product symbol is defined to preserve the physical joint order:
+
+$$
+\prod_{j=1}^{n}\mathbf E_j(q_j)
+\mathrel{:=}
+\mathbf E_1(q_1)\mathbf E_2(q_2)\cdots\mathbf E_n(q_n).
+$$
+
+Matrix multiplication acts on the rightmost factor first. Thus the derivation begins with $\mathbf M$, applies joint $n$, then joint $n-1$, and finishes with joint $1$, even though the written joint indices increase from left to right. This distal-to-proximal construction is a way to derive and evaluate the final pose from the stored zero-arrangement axes; it is not a claim about the order in which the physical robot moved through time. Because rigid transformations generally do not commute, reversing any two joint factors usually produces a different pose and therefore a different kinematic model.
+
+The formula satisfies two immediate consistency checks. If $\mathbf q=\mathbf 0_n$, every joint exponential is $\mathbf I_4$ and $\mathbf T_{se}(\mathbf 0_n)=\mathbf M$. If only $q_k$ is nonzero, every other factor is the identity and $\mathbf T_{se}(\mathbf q)=\mathbf E_k(q_k)\mathbf M$. Moreover, every factor belongs to $SE(3)$, so closure of the group guarantees that the resulting pose also belongs to $SE(3)$.
+
+Equation @eq-serial-space-poe is evaluated for $\mathbf q\in\mathcal Q$. Before forming any numerical exponential, an implementation must verify that every $q_j$ is finite, belongs to its declared joint domain $\mathcal Q_j$, and follows the model’s declared wrapped or unwrapped representation for revolute angles. The matrix exponential converts valid joint coordinates into rigid displacements; it does not make an invalid coordinate column admissible.
+
+::: {.callout-note title="Example: Space-form pose of a planar 2R chain" appearance="simple" icon=false}
+
+This example shows that the space-form product reproduces the planar 2R position map derived earlier. Let both links point along positive $x_s$ when $\boldsymbol\theta=[\theta_1\;\theta_2]^{\mathsf T}=\mathbf 0_2$, let their lengths be $L_1,L_2>0$ metres, place joint 1 at $O_s$, and let both positive joint axes point along positive $z_s$. Attach $\{e\}$ to the distal end of link 2 with the same orientation as $\{s\}$ at zero. The home pose and linear-first space screw axes are
+
+$$
+\mathbf M
+=
+\begin{bmatrix}
+\mathbf I_3&[L_1+L_2\;0\;0]^{\mathsf T}\\
+\mathbf 0_3^{\mathsf T}&1
+\end{bmatrix},
+$$
+
+$$
+{}^{s}\mathbf S_1
+=
+\begin{bmatrix}
+0\\0\\0\\0\\0\\1
+\end{bmatrix},
+\qquad
+{}^{s}\mathbf S_2
+=
+\begin{bmatrix}
+0\\-L_1\\0\\0\\0\\1
+\end{bmatrix}.
+$$
+
+Let $\mathbf R_z(\alpha)$ denote active rotation through $\alpha$ about positive $z_s$. Joint 2 rotates about the line through $[L_1\;0\;0]^{\mathsf T}\,\mathrm m$, so applying its exponential to the home pose gives
+
+$$
+\mathbf E_2(\theta_2)\mathbf M
+=
+\begin{bmatrix}
+\mathbf R_z(\theta_2)&[L_1+L_2\cos\theta_2\;L_2\sin\theta_2\;0]^{\mathsf T}\\
+\mathbf 0_3^{\mathsf T}&1
+\end{bmatrix}.
+$$
+
+Joint 1 then rotates this whole outward assembly about $O_s$. Equation @eq-serial-space-poe therefore gives
+
+$$
+\mathbf T_{se}(\boldsymbol\theta)
+=
+\begin{bmatrix}
+\mathbf R_z(\theta_1+\theta_2)&{}^{s}\mathbf p_e(\boldsymbol\theta)\\
+\mathbf 0_3^{\mathsf T}&1
+\end{bmatrix},
+$$
+
+where
+
+$$
+{}^{s}\mathbf p_e(\boldsymbol\theta)
+=
+\begin{bmatrix}
+L_1\cos\theta_1+L_2\cos(\theta_1+\theta_2)\\
+L_1\sin\theta_1+L_2\sin(\theta_1+\theta_2)\\
+0
+\end{bmatrix}
+\mathrm m.
+$$
+
+The position block is exactly the planar 2R forward-position map already obtained from link geometry, while the rotation block also retains the end-effector orientation.
+
+:::
+
 ### Body-form product of exponentials
 
+The space form stores every joint screw axis using $\{s\}$. The same physical model can instead store the axes using the end-effector frame $\{e\}$ when the robot is at $\mathbf q=\mathbf 0_n$. This alternative is useful when geometric measurements or calculations are naturally referred to the tool frame, but it must produce the same $\mathbf T_{se}(\mathbf q)$.
+
+At the zero arrangement, $\mathbf M=\mathbf T_{se}(\mathbf 0_n)$ maps coordinates from $\{e\}$ to $\{s\}$, so $\mathbf M^{-1}$ maps them from $\{s\}$ to $\{e\}$. Use the linear-first adjoint from @sec-se3-adjoint-twist to define the **body screw axis** for joint $j$:
+
+$$
+\boxed{
+{}^{e}\mathbf B_j
+\mathrel{:=}
+\operatorname{Ad}_{\mathbf M^{-1}}
+{}^{s}\mathbf S_j
+\in\mathbb R^6
+}.
+$$ {#eq-serial-body-screw-axis}
+
+The superscript $e$ states that the six coordinates are expressed using the home end-effector frame. Equation @eq-serial-body-screw-axis changes only the coordinate representation of the joint screw; it does not change the physical joint, its positive direction, its coordinate $q_j$, or the zero arrangement.
+
+To obtain the body-form pose equation, apply the exponential conjugation identity. For any $\mathbf T\in SE(3)$ and linear-first six-column $\boldsymbol\eta\in\mathbb R^6$,
+
+$$
+\mathbf T^{-1}
+\exp\!\left(\widehat{\boldsymbol\eta}\right)
+\mathbf T
+=
+\exp\!\left(
+\widehat{
+\operatorname{Ad}_{\mathbf T^{-1}}\boldsymbol\eta
+}
+\right).
+$$
+
+Set $\mathbf T=\mathbf M$ and $\boldsymbol\eta={}^s\mathbf S_jq_j$. Then
+
+$$
+\mathbf M^{-1}\mathbf E_j(q_j)\mathbf M
+=
+\exp\!\left(
+\widehat{{}^{e}\mathbf B_j}\,q_j
+\right)
+\mathrel{:=}
+\mathbf G_j(q_j).
+$$ {#eq-serial-body-joint-displacement}
+
+Rearranging this relation gives $\mathbf E_j(q_j)\mathbf M=\mathbf M\mathbf G_j(q_j)$. Starting with the rightmost joint factor in the space form and applying this identity repeatedly moves $\mathbf M$ to the left:
+
+$$
+\begin{aligned}
+\mathbf E_1\cdots\mathbf E_{n-1}\mathbf E_n\mathbf M
+&=
+\mathbf E_1\cdots\mathbf E_{n-1}\mathbf M\mathbf G_n\\
+&=\cdots\\
+&=
+\mathbf M\mathbf G_1\mathbf G_2\cdots\mathbf G_n.
+\end{aligned}
+$$
+
+The arguments $q_j$ have been suppressed only in this intermediate line to keep the algebra readable. Restoring them gives the **body-form product of exponentials**:
+
+$$
+\boxed{
+\mathbf T_{se}(\mathbf q)
+=
+\mathbf M
+\exp\!\left(\widehat{{}^{e}\mathbf B_1}\,q_1\right)
+\exp\!\left(\widehat{{}^{e}\mathbf B_2}\,q_2\right)
+\cdots
+\exp\!\left(\widehat{{}^{e}\mathbf B_n}\,q_n\right)
+}.
+$$ {#eq-serial-body-poe}
+
+The joint indices have the same order in the space and body forms; they are not reversed. A convenient matrix-building interpretation differs: the space form may start from $\mathbf M$ and premultiply $\mathbf E_n,\ldots,\mathbf E_1$, whereas the body form may start from $\mathbf M$ and postmultiply $\mathbf G_1,\ldots,\mathbf G_n$. Both procedures evaluate the same pose because Equation @eq-serial-body-screw-axis and the conjugation identity connect every pair of factors.
+
+::: {.callout-note title="Example: Body axes for the planar 2R chain" appearance="simple" icon=false}
+
+This example converts the preceding planar 2R space model into body coordinates. Its home orientation is $\mathbf I_3$, and its home end-effector origin is $L_1+L_2$ metres along positive $x_s$. Applying $\operatorname{Ad}_{\mathbf M^{-1}}$ to the two space screw axes gives
+
+$$
+{}^{e}\mathbf B_1
+=
+\begin{bmatrix}
+0\\L_1+L_2\\0\\0\\0\\1
+\end{bmatrix},
+\qquad
+{}^{e}\mathbf B_2
+=
+\begin{bmatrix}
+0\\L_2\\0\\0\\0\\1
+\end{bmatrix}.
+$$
+
+The positive $y_e$ linear coefficients encode the offsets from the home end-effector origin back to joints 1 and 2. Substituting these columns into Equation @eq-serial-body-poe gives
+
+$$
+\mathbf T_{se}(\boldsymbol\theta)
+=
+\mathbf M
+\exp\!\left(\widehat{{}^{e}\mathbf B_1}\,\theta_1\right)
+\exp\!\left(\widehat{{}^{e}\mathbf B_2}\,\theta_2\right),
+$$
+
+which equals the space-form pose for every allowed $\boldsymbol\theta$ even though the stored six-columns are different.
+
+:::
+
 ### Equivalence with a transform chain
+
+A product of exponentials is not a different physical model from a chain of parent--child transformations. The two descriptions store the same joint and link geometry in different forms. This subsection starts with a relative-transform chain and derives its space-form product, thereby showing exactly how their constants correspond.
+
+Let $\{0\}=\{s\}$ be the fixed base frame, let $\{i\}$ be a frame rigidly attached to link $i$ for each $i\in\{1,\ldots,n\}$, and let $\{e\}$ be the selected end-effector frame rigidly attached to link $n$. Define
+
+$$
+\mathbf A_i(q_i)
+\mathrel{:=}
+\mathbf T_{i-1,i}(q_i)
+\in SE(3)
+$$
+
+as the pose of link frame $\{i\}$ relative to its parent frame $\{i-1\}$, and let $\mathbf A_e:=\mathbf T_{ne}\in SE(3)$ be the constant pose of $\{e\}$ relative to $\{n\}$. Because joint $i$ is independent and has one degree of freedom, only $q_i$ appears in $\mathbf A_i$. Coordinate transformations compose along the chain as
+
+$$
+\boxed{
+\mathbf T_{se}(\mathbf q)
+=
+\mathbf A_1(q_1)
+\mathbf A_2(q_2)
+\cdots
+\mathbf A_n(q_n)
+\mathbf A_e
+}.
+$$ {#eq-serial-relative-transform-chain}
+
+The rightmost factor first maps coordinates from $\{e\}$ to $\{n\}$; the remaining factors successively map them through the parent frames until the result is expressed in $\{s\}$. This meaning differs from the active-displacement interpretation of each $\mathbf E_j$, even though the final homogeneous matrix represents the same end-effector pose.
+
+To expose the one-joint motion inside each relative transform, compare $\mathbf A_i(q_i)$ with its zero value $\mathbf A_i(0)$. Define
+
+$$
+\mathbf D_i(q_i)
+\mathrel{:=}
+\mathbf A_i(q_i)\mathbf A_i(0)^{-1},
+$$
+
+so that $\mathbf A_i(q_i)=\mathbf D_i(q_i)\mathbf A_i(0)$. The matrix $\mathbf D_i(q_i)$ is the active displacement from the zero pose of link $i$ to its pose at $q_i$, expressed using the parent frame $\{i-1\}$. For an ideal revolute or prismatic joint, the screw exponential gives
+
+$$
+\mathbf D_i(q_i)
+=
+\exp\!\left(
+\widehat{{}^{i-1}\mathbf S_i}\,q_i
+\right),
+$$
+
+where ${}^{i-1}\mathbf S_i$ is the joint’s normalised linear-first screw axis expressed using its parent frame when $q_i=0$.
+
+Next collect the zero relative transforms from the base through link $k$:
+
+$$
+\boxed{
+\mathbf H_k
+\mathrel{:=}
+\mathbf A_1(0)\mathbf A_2(0)\cdots\mathbf A_k(0)
+=
+\mathbf T_{sk}(\mathbf 0_n),
+\qquad
+\mathbf H_0\mathrel{:=}\mathbf I_4
+}.
+$$
+
+The matrix $\mathbf H_{i-1}$ maps coordinates from joint $i$’s parent frame to $\{s\}$ when the complete robot is at $\mathbf q=\mathbf 0_n$. Therefore the parent-frame screw axis and the stored space screw axis are related by
+
+$$
+\boxed{
+{}^{s}\mathbf S_i
+=
+\operatorname{Ad}_{\mathbf H_{i-1}}
+{}^{i-1}\mathbf S_i
+}.
+$$ {#eq-serial-local-to-space-axis}
+
+The exponential conjugation identity now gives
+
+$$
+\mathbf H_{i-1}\mathbf D_i(q_i)\mathbf H_{i-1}^{-1}
+=
+\exp\!\left(
+\widehat{{}^{s}\mathbf S_i}\,q_i
+\right)
+=
+\mathbf E_i(q_i).
+$$ {#eq-serial-relative-to-space-displacement}
+
+These relations are sufficient to prove that the two complete products agree. For any $k\in\{1,\ldots,n\}$, the first $k$ relative transforms satisfy
+
+$$
+\boxed{
+\mathbf A_1(q_1)\cdots\mathbf A_k(q_k)
+=
+\mathbf E_1(q_1)\cdots\mathbf E_k(q_k)\mathbf H_k
+}.
+$$ {#eq-serial-chain-induction-claim}
+
+For $k=1$, $\mathbf H_0=\mathbf I_4$, so $\mathbf A_1(q_1)=\mathbf D_1(q_1)\mathbf A_1(0)=\mathbf E_1(q_1)\mathbf H_1$. Suppose Equation @eq-serial-chain-induction-claim holds through $k-1$. Multiplying by $\mathbf A_k(q_k)=\mathbf D_k(q_k)\mathbf A_k(0)$ and inserting $\mathbf H_{k-1}^{-1}\mathbf H_{k-1}=\mathbf I_4$ gives
+
+$$
+\begin{aligned}
+\mathbf A_1(q_1)\cdots\mathbf A_k(q_k)
+&=
+\mathbf E_1(q_1)\cdots\mathbf E_{k-1}(q_{k-1})
+\mathbf H_{k-1}\mathbf D_k(q_k)\mathbf A_k(0)\\
+&=
+\mathbf E_1(q_1)\cdots\mathbf E_{k-1}(q_{k-1})
+\left(
+\mathbf H_{k-1}\mathbf D_k(q_k)\mathbf H_{k-1}^{-1}
+\right)
+\mathbf H_{k-1}\mathbf A_k(0)\\
+&=
+\mathbf E_1(q_1)\cdots\mathbf E_{k-1}(q_{k-1})\mathbf E_k(q_k)\mathbf H_k.
+\end{aligned}
+$$
+
+This proves the claim for every $k$. Taking $k=n$, multiplying by the fixed tool transform $\mathbf A_e$, and observing that
+
+$$
+\mathbf H_n\mathbf A_e
+=
+\mathbf T_{se}(\mathbf 0_n)
+=
+\mathbf M
+$$
+
+produces
+
+$$
+\boxed{
+\underbrace{
+\mathbf A_1(q_1)\cdots\mathbf A_n(q_n)\mathbf A_e
+}_{\text{relative-transform chain}}
+=
+\underbrace{
+\mathbf E_1(q_1)\cdots\mathbf E_n(q_n)\mathbf M
+}_{\text{space-form product of exponentials}}
+}.
+$$ {#eq-serial-chain-poe-equivalence}
+
+The conversion also works in the reverse representational direction once the intermediate link frames and their zero transforms have been selected. Equation @eq-serial-local-to-space-axis gives
+
+$$
+{}^{i-1}\mathbf S_i
+=
+\operatorname{Ad}_{\mathbf H_{i-1}^{-1}}
+{}^{s}\mathbf S_i,
+$$
+
+after which $\mathbf A_i(q_i)=\exp(\widehat{{}^{i-1}\mathbf S_i}q_i)\mathbf A_i(0)$ reconstructs each relative joint transform. The selected intermediate link frames are not unique, so one space-form model can correspond to several equally valid transform-chain parameterisations. The end-effector map remains the same when all constants follow one consistent choice.
+
+The representations therefore answer different implementation questions. A relative-transform chain makes every parent--child frame relationship explicit and naturally supplies intermediate link poses. The space form needs only $\mathbf M$ and the home screw axes to calculate the selected end-effector pose. The body form stores those same physical axes in home end-effector coordinates. None is inherently more accurate; disagreement between their evaluated poses indicates inconsistent frames, zero values, signs, joint order, or multiplication direction.
+
+A deterministic cross-check should evaluate all available representations at the same joint-coordinate columns. For two results $\mathbf T_a=[\mathbf R_a\;\mathbf p_a;\mathbf 0_3^{\mathsf T}\;1]$ and $\mathbf T_b=[\mathbf R_b\;\mathbf p_b;\mathbf 0_3^{\mathsf T}\;1]$, compare translation and rotation separately. The translation error $\|\mathbf p_a-\mathbf p_b\|_2$ is measured in metres. For rotation, form $\mathbf R_\Delta=\mathbf R_a^{\mathsf T}\mathbf R_b\in SO(3)$, recover its principal rotation vector $\boldsymbol\phi_\Delta$, and use $\|\boldsymbol\phi_\Delta\|_2$ as the angular error in radians. Compare each error with a tolerance having the same unit. Include $\mathbf q=\mathbf 0_n$, single-joint motions, mixed revolute--prismatic motions, and configurations in which changing the factor order produces a detectable difference.
+
+### Quick test B: serial-chain products of exponentials {.unnumbered}
+
+1. **Recall:** What fixed model data and current input are required by the space-form product of exponentials?
+2. **Contrast:** What is the difference between the zero arrangement $\chi(\mathbf 0_n)$ and the home end-effector pose $\mathbf M$?
+3. **Application:** At $\mathbf q=\mathbf 0_n$, a revolute joint points along positive $z_s$ and passes through $[2\;0\;0]^{\mathsf T}\,\mathrm m$, while a prismatic joint translates along negative $y_s$. Find both linear-first space screw axes.
+4. **Explanation:** For a three-joint chain, write the space-form product and explain why its derivation applies the distal joint displacement to $\mathbf M$ first even though the written factors are ordered $1,2,3$ from left to right.
+5. **Application:** In the planar 2R example, let $L_1=2\,\mathrm m$, $L_2=1\,\mathrm m$, $\theta_1=\pi/2$, and $\theta_2=-\pi/2$. Find the end-effector orientation and position relative to $\{s\}$.
+6. **Derivation:** Starting from the space axes and $\mathbf M$, derive ${}^{e}\mathbf B_j$ and the body-form product. Why are the joint indices not reversed?
+7. **Proof:** Starting from the relative-transform chain, state the induction claim that leads to Equation @eq-serial-chain-poe-equivalence and identify the conjugation step used in its proof.
+8. **Boundary:** What do the space form, body form, and relative-transform chain return at $\mathbf q=\mathbf 0_n$? Why may the joint factors not generally be reordered?
+9. **Verification:** How should two independently evaluated pose matrices be compared without mixing translation and rotation units?
+10. **Domain:** Which properties of $\mathbf q$ must a numerical evaluator check before forming the joint exponentials?
+
+#### Answers and hints {.unnumbered}
+
+1. Store the home end-effector pose $\mathbf M$ and one normalised space screw axis ${}^{s}\mathbf S_j$ for every joint, all constructed from the same zero arrangement and expressed in $\{s\}$. Supply the current joint-coordinate column $\mathbf q$ when evaluating the map.
+2. The zero arrangement $\chi(\mathbf 0_n)$ places every modelled robot point when all joint coordinates are zero. The matrix $\mathbf M=\mathbf T_{se}(\mathbf 0_n)$ retains only the pose of the selected end-effector frame at that arrangement.
+3. For the revolute joint, $-{}^{s}\mathbf s\times{}^{s}\mathbf p_{\ell}=[0\;-2\;0]^{\mathsf T}$, so ${}^{s}\mathbf S_R=[0\;-2\;0\;0\;0\;1]^{\mathsf T}$. For the prismatic joint, ${}^{s}\mathbf S_P=[0\;-1\;0\;0\;0\;0]^{\mathsf T}$.
+4. The product is $\mathbf T_{se}=\mathbf E_1(q_1)\mathbf E_2(q_2)\mathbf E_3(q_3)\mathbf M$. Matrix multiplication acts on the rightmost factor first, so joint 3 first moves the home end effector, joint 2 then carries joint 3 and the end effector, and joint 1 finally carries the whole outward assembly. Distal motion does not move a more proximal axis, allowing every factor to use its stored zero-arrangement screw axis. This construction calculates the final pose; it does not prescribe a time history for the physical joints.
+5. The total orientation is $\mathbf R_z(\theta_1+\theta_2)=\mathbf R_z(0)=\mathbf I_3$. The position is $[2\cos(\pi/2)+\cos(0)\;2\sin(\pi/2)+\sin(0)\;0]^{\mathsf T}=[1\;2\;0]^{\mathsf T}\,\mathrm m$.
+6. Use ${}^{e}\mathbf B_j=\operatorname{Ad}_{\mathbf M^{-1}}{}^{s}\mathbf S_j$ and the identity $\mathbf M^{-1}\mathbf E_j(q_j)\mathbf M=\exp(\widehat{{}^{e}\mathbf B_j}q_j)$. Repeatedly substitute $\mathbf E_j\mathbf M=\mathbf M\mathbf G_j$ into the space product to obtain $\mathbf T_{se}=\mathbf M\mathbf G_1\cdots\mathbf G_n$. Conjugation changes each factor’s coordinate representation but does not change its joint index, so the index order remains $1,\ldots,n$.
+7. The claim is $\mathbf A_1(q_1)\cdots\mathbf A_k(q_k)=\mathbf E_1(q_1)\cdots\mathbf E_k(q_k)\mathbf H_k$. The induction step inserts $\mathbf H_{k-1}^{-1}\mathbf H_{k-1}$ around $\mathbf D_k$ and uses $\mathbf H_{k-1}\mathbf D_k\mathbf H_{k-1}^{-1}=\mathbf E_k$.
+8. Every exponential becomes $\mathbf I_4$, while every relative transform becomes its zero value, so all three forms return $\mathbf M$. Joint factors generally cannot be reordered because rigid rotations and translations do not commute; changing their order changes which outward geometry each joint carries.
+9. Compare $\|\mathbf p_a-\mathbf p_b\|_2$ with a length tolerance in metres. Form $\mathbf R_\Delta=\mathbf R_a^{\mathsf T}\mathbf R_b$, recover its principal rotation vector $\boldsymbol\phi_\Delta$, and compare $\|\boldsymbol\phi_\Delta\|_2$ with an angular tolerance in radians. Do not combine metre-valued and radian-valued residuals in one unscaled Euclidean norm.
+10. Verify that every $q_j$ is finite, belongs to its declared domain $\mathcal Q_j$, has the correct joint-dependent unit, and follows the declared wrapped or unwrapped angle representation when joint $j$ is revolute.
 
 ## Velocity kinematics and robot Jacobians {#sec-general-robot-jacobians}
 
@@ -691,6 +1530,6 @@ The derivative is local. It predicts first-order output change for a small coord
 
 ## References {.unnumbered}
 
-- Kevin M. Lynch and Frank C. Park, *Modern Robotics: Mechanics, Planning, and Control*, Chapter 2 on robot configuration, Chapter 4 on forward kinematics as a mapping from joint values to the end-effector frame, and the opening of Chapter 5 on task-coordinate forward maps, the multivariable chain rule, and the derivative mapping from joint rates to task rates.
-- John J. Craig, *Introduction to Robotics: Mechanics and Control*, Chapter 3 on joint space and the end-link pose as a function of the joint variables, and Chapter 5, especially Section 5.7, on the Jacobian as a multidimensional derivative and the velocity form of the chain rule.
-- Peter Corke, *Robotics, Vision and Control: Fundamental Algorithms in Python*, Chapter 7 on configuration coordinates and forward kinematics, and Chapter 8, especially Section 8.1, on task-space derivatives and computational Jacobian evaluation.
+- Kevin M. Lynch and Frank C. Park, *Modern Robotics: Mechanics, Planning, and Control*, Chapter 2 on robot configuration, Chapter 4 on relative-transform forward kinematics and the space and body forms of the product of exponentials, and the opening of Chapter 5 on task-coordinate forward maps, the multivariable chain rule, and the derivative mapping from joint rates to task rates.
+- John J. Craig, *Introduction to Robotics: Mechanics and Control*, Chapter 3 on joint space, link-frame assignment, parent--child transform chains, and the end-link pose as a function of the joint variables, and Chapter 5, especially Section 5.7, on the Jacobian as a multidimensional derivative and the velocity form of the chain rule.
+- Peter Corke, *Robotics, Vision and Control: Fundamental Algorithms in Python*, Chapter 7 on configuration coordinates, elementary transform sequences, parent--child link products, and forward kinematics, and Chapter 8, especially Section 8.1, on task-space derivatives and computational Jacobian evaluation.

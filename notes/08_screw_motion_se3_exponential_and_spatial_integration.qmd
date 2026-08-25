@@ -64,7 +64,26 @@ $$
 d_i(P,Q),
 $$
 
-where $d_i(P,Q)\in\mathbb R_{\geq0}$ is the fixed reference distance between the two labelled material points, measured in metres. Joint constraints impose additional relationships between points or attached frames belonging to different links. The **configuration space** $\mathcal C$ is the set of all assignments that satisfy both the rigid-link conditions and the joint constraints.
+where $d_i(P,Q)\in\mathbb R_{\geq0}$ is the fixed reference distance between the two labelled material points, measured in metres. Joint constraints impose additional relationships between points or attached frames belonging to different links. The **configuration space** $\mathcal C$ is therefore
+
+$$
+\boxed{
+\mathcal C
+\mathrel{:=}
+\left\{
+\chi:\mathcal B\rightarrow\mathbb R^3
+\;\middle|\;
+\begin{gathered}
+\left\|\chi(P)-\chi(Q)\right\|_2=d_i(P,Q)
+\quad
+\text{for every }i\in I\text{ and every }P,Q\in\mathcal B_i,\\
+\chi\text{ satisfies every declared joint constraint}
+\end{gathered}
+\right\}.
+}
+$$
+
+The vertical bar means “such that.” The set begins with every complete placement map $\chi:\mathcal B\rightarrow\mathbb R^3$ and retains only the maps that preserve every rigid link and obey every declared joint constraint.
 
 The relationship among a configuration map, a pose, and a transformation matrix is clearest for one rigid link. Choose one link with material-point set $\mathcal B_b\subseteq\mathcal B$, and attach frame $\{b\}$ rigidly to it. Before placing the link in the world, assign every material point its constant body-frame coordinate:
 

@@ -34,6 +34,17 @@
 17. **Quarto structure and references:** Keep `number-sections: true` and `number-depth: 3`; let Quarto number chapter titles, `##` sections, and `###` subsections, and leave `####` headings unnumbered by depth. Do not hard-code section numbers or write numeric prefixes in headings. Mark purpose, prerequisites, dependency maps, quick tests and answers, cumulative tests, references, and supplemental checks with `{.unnumbered}`. Give referenced headings stable `{#sec-...}` labels and cite them with `@sec-...`.
 18. **Chapter registries:** After a chapter is complete, add only notation first introduced by that chapter to `notes/notation.qmd`, preserving chapter order and chapter cross-references. After the chapter is reviewed, add only its newly defined technical terms to `notes/glossary.qmd`, keeping entries alphabetical, concise, and linked to their first defining sections. Do not pre-populate unfinished chapters or duplicate entries between the two registries.
 19. **Abstract definitions:** After introducing an abstract definition, give the smallest concrete example that instantiates every new symbol and shows what the definition means in practice.
+20. **Supporting example callouts:** Put a complementary example that supports an already-defined concept in a Quarto callout using this template:
+
+    ```markdown
+    ::: {.callout-note title="Example: <descriptive title>" appearance="simple" icon=false}
+
+    <State what the example demonstrates, then give its setup, calculation, and interpretation.>
+
+    :::
+    ```
+
+    If the example is the main learning content of an entire section or subsection, write it as ordinary section prose and do not wrap the whole section in a callout.
 
 ## Capability workflow
 
