@@ -1276,9 +1276,26 @@ q.
 }.
 \]</span></p>
 <p>Here <span class="math inline">\(\mathbf R_{se,0}\in SO(3)\)</span> is the orientation of the end-effector frame <span class="math inline">\(\{e\}\)</span> relative to the fixed space frame <span class="math inline">\(\{s\}\)</span> in the zero arrangement, and <span class="math inline">\({}^{s}\mathbf p_{e,0}\in\mathbb R^3\)</span> is the position of the end-effector origin <span class="math inline">\(O_e\)</span> relative to <span class="math inline">\(O_s\)</span>, expressed along the axes of <span class="math inline">\(\{s\}\)</span> and measured in metres. The matrix <span class="math inline">\(\mathbf M\)</span> contains only the end-effector pose at zero; it is not the complete placement <span class="math inline">\(\chi(\mathbf 0_n)\)</span> of every robot link.</p>
-<p>The home pose alone cannot predict what happens when a joint leaves zero: the model must also describe the joint’s permitted motion. For a one-joint chain, let <span class="math inline">\({}^{s}\mathbf S_1\)</span> be the joint’s normalised screw axis expressed in <span class="math inline">\(\{s\}\)</span>. The <span class="math inline">\(SE(3)\)</span> exponential from <a href="08_screw_motion_se3_exponential_and_spatial_integration.html#sec-se3-screw-exponential" class="quarto-xref"><span>Section 8.3</span></a> converts this axis and the signed joint coordinate <span class="math inline">\(q_1\)</span> into the active joint displacement</p>
+<p>The home pose <span class="math inline">\(\mathbf M\)</span> records where the end effector is when <span class="math inline">\(q_1=0\)</span>, but it does not record the motion permitted by the joint. For a one-joint chain, let <span class="math inline">\({}^{s}\mathbf S_1\)</span> be the joint’s normalised screw axis expressed using the space frame <span class="math inline">\(\{s\}\)</span>. This fixed screw-axis column is not an instantaneous twist. If the joint coordinate follows <span class="math inline">\(q_1(t)\)</span>, then its rate produces the space twist</p>
+<p><span class="math display">\[
+\boxed{
+\boldsymbol\xi_{s,1}
+=
+{}^{s}\mathbf S_1\dot q_1
+}.
+\]</span></p>
+<p>Thus <span class="math inline">\({}^{s}\mathbf S_1\)</span> describes the permitted motion per unit joint motion, whereas <span class="math inline">\(\boldsymbol\xi_{s,1}\)</span> describes the instantaneous velocity produced by the current rate <span class="math inline">\(\dot q_1\)</span>. When the joint stops, <span class="math inline">\(\dot q_1=0\)</span> and the twist is zero, but the stored screw axis remains unchanged.</p>
+<p>Forward kinematics requires the finite displacement produced by the coordinate <span class="math inline">\(q_1\)</span>, rather than the instantaneous velocity produced by <span class="math inline">\(\dot q_1\)</span>. Define the corresponding finite exponential-coordinate column by</p>
+<p><span class="math display">\[
+{}^{s}\boldsymbol\eta_1
+\mathrel{:=}
+{}^{s}\mathbf S_1q_1.
+\]</span></p>
+<p>The <span class="math inline">\(SE(3)\)</span> exponential from <a href="08_screw_motion_se3_exponential_and_spatial_integration.html#sec-se3-screw-exponential" class="quarto-xref"><span>Section 8.3</span></a> converts this finite column into the active joint displacement</p>
 <p><span class="math display">\[
 \mathbf T_{\Delta,1}(q_1)
+=
+\exp\!\left(\widehat{{}^{s}\boldsymbol\eta_1}\right)
 =
 \exp\!\left(\widehat{{}^{s}\mathbf S_1}\,q_1\right).
 \]</span></p>
@@ -1532,51 +1549,315 @@ q.
 =
 \begin{bmatrix}
 0\\0\\0\\0\\0\\1
+\end{bmatrix}.
+\]</span></p>
+<p>Joint 1 passes through <span class="math inline">\(O_s\)</span>, so its linear block is zero. Joint 2 also rotates about positive <span class="math inline">\(z_s\)</span>, but its axis does not pass through <span class="math inline">\(O_s\)</span>. Its positive unit direction and one point on its axis in the zero arrangement are</p>
+<p><span class="math display">\[
+{}^{s}\mathbf s_2
+=
+\begin{bmatrix}
+0\\0\\1
 \end{bmatrix},
 \qquad
+{}^{s}\mathbf p_{\ell,2}
+=
+\begin{bmatrix}
+L_1\\0\\0
+\end{bmatrix}\,\mathrm m.
+\]</span></p>
+<p>For a revolute joint, <a href="#eq-serial-space-screw-axis" class="quarto-xref">Equation&nbsp;<span>10.7</span></a> defines the linear block as <span class="math inline">\(-{}^{s}\mathbf s_2\times{}^{s}\mathbf p_{\ell,2}\)</span>. The required cross product is</p>
+<p><span class="math display">\[
+-{}^{s}\mathbf s_2\times{}^{s}\mathbf p_{\ell,2}
+=-
+\begin{bmatrix}
+0\\0\\1
+\end{bmatrix}
+\times
+\begin{bmatrix}
+L_1\\0\\0
+\end{bmatrix}
+=-
+\begin{bmatrix}
+0\\L_1\\0
+\end{bmatrix}.
+\]</span></p>
+<p>Combining this linear block with the angular column <span class="math inline">\([0\;0\;1]^{\mathsf T}\)</span> gives</p>
+<p><span class="math display">\[
 {}^{s}\mathbf S_2
 =
 \begin{bmatrix}
 0\\-L_1\\0\\0\\0\\1
 \end{bmatrix}.
 \]</span></p>
-<p>Let <span class="math inline">\(\mathbf R_z(\alpha)\)</span> denote active rotation through <span class="math inline">\(\alpha\)</span> about positive <span class="math inline">\(z_s\)</span>. Joint 2 rotates about the line through <span class="math inline">\([L_1\;0\;0]^{\mathsf T}\,\mathrm m\)</span>, so applying its exponential to the home pose gives</p>
+<p>The entry <span class="math inline">\(-L_1\)</span> does not mean that joint 2 translates. It records that the revolute axis is displaced <span class="math inline">\(L_1\)</span> metres from <span class="math inline">\(O_s\)</span>; together with the angular block, it makes every point on that axis have zero instantaneous velocity.</p>
+<p>Let <span class="math inline">\(\mathbf R_z(\alpha)\)</span> denote active rotation through <span class="math inline">\(\alpha\)</span> about positive <span class="math inline">\(z_s\)</span>. To calculate the joint displacement using the general <span class="math inline">\(SE(3)\)</span> exponential from <a href="08_screw_motion_se3_exponential_and_spatial_integration.html#sec-se3-screw-exponential" class="quarto-xref"><span>Section 8.3</span></a>, first multiply the stored screw axis by the joint angle and separate the resulting finite linear and rotation-vector blocks:</p>
 <p><span class="math display">\[
-\mathbf E_2(\theta_2)\mathbf M
+{}^{s}\boldsymbol\eta_2
+=
+{}^{s}\mathbf S_2\theta_2
 =
 \begin{bmatrix}
-\mathbf R_z(\theta_2)&amp;[L_1+L_2\cos\theta_2\;L_2\sin\theta_2\;0]^{\mathsf T}\\
-\mathbf 0_3^{\mathsf T}&amp;1
-\end{bmatrix}.
-\]</span></p>
-<p>Joint 1 then rotates this whole outward assembly about <span class="math inline">\(O_s\)</span>. Equation <a href="#eq-serial-space-poe" class="quarto-xref">Equation&nbsp;<span>10.9</span></a> therefore gives</p>
-<p><span class="math display">\[
-\mathbf T_{se}(\boldsymbol\theta)
-=
-\begin{bmatrix}
-\mathbf R_z(\theta_1+\theta_2)&amp;{}^{s}\mathbf p_e(\boldsymbol\theta)\\
-\mathbf 0_3^{\mathsf T}&amp;1
+{}^{s}\boldsymbol\rho_2\\
+{}^{s}\boldsymbol\phi_2
 \end{bmatrix},
 \]</span></p>
 <p>where</p>
 <p><span class="math display">\[
-{}^{s}\mathbf p_e(\boldsymbol\theta)
+{}^{s}\boldsymbol\rho_2
 =
+\begin{bmatrix}
+0\\-L_1\theta_2\\0
+\end{bmatrix},
+\qquad
+{}^{s}\boldsymbol\phi_2
+=
+\begin{bmatrix}
+0\\0\\\theta_2
+\end{bmatrix}.
+\]</span></p>
+<p>Equation <a href="08_screw_motion_se3_exponential_and_spatial_integration.html#eq-se3-stable-exponential-coordinate-form" class="quarto-xref">Equation&nbsp;<span>8.24</span></a> then gives</p>
+<p><span id="eq-planar-2r-joint2-exponential-block-form"><span class="math display">\[
+\mathbf E_2(\theta_2)
+=
+\exp\!\left(
+\widehat{{}^{s}\boldsymbol\eta_2}
+\right)
+=
+\begin{bmatrix}
+\mathbf R({}^{s}\boldsymbol\phi_2)&amp;
+\mathbf J({}^{s}\boldsymbol\phi_2)\,{}^{s}\boldsymbol\rho_2\\
+\mathbf 0_3^{\mathsf T}&amp;1
+\end{bmatrix}.
+\tag{10.10}\]</span></span></p>
+<p>Here <span class="math inline">\(\mathbf J\)</span> is the <span class="math inline">\(SO(3)\)</span> left Jacobian from the earlier <span class="math inline">\(SE(3)\)</span> exponential derivation, not a robot manipulator Jacobian. It maps the finite linear exponential-coordinate block to the translation accumulated while the rotation develops. For the rotation vector above and <span class="math inline">\(\theta_2\ne0\)</span>, it is</p>
+<p><span class="math display">\[
+\mathbf J({}^{s}\boldsymbol\phi_2)
+=
+\begin{bmatrix}
+\dfrac{\sin\theta_2}{\theta_2}&amp;
+-\dfrac{1-\cos\theta_2}{\theta_2}&amp;0\\[0.8em]
+\dfrac{1-\cos\theta_2}{\theta_2}&amp;
+\dfrac{\sin\theta_2}{\theta_2}&amp;0\\
+0&amp;0&amp;1
+\end{bmatrix}.
+\]</span></p>
+<p>At <span class="math inline">\(\theta_2=0\)</span>, the continuous value is <span class="math inline">\(\mathbf J(\mathbf 0_3)=\mathbf I_3\)</span>. For a nonzero angle, multiplying the displayed matrix by the finite linear block gives</p>
+<p><span class="math display">\[
+\begin{aligned}
+\mathbf J({}^{s}\boldsymbol\phi_2)\,{}^{s}\boldsymbol\rho_2
+&amp;=
+\begin{bmatrix}
+\dfrac{\sin\theta_2}{\theta_2}&amp;
+-\dfrac{1-\cos\theta_2}{\theta_2}&amp;0\\[0.8em]
+\dfrac{1-\cos\theta_2}{\theta_2}&amp;
+\dfrac{\sin\theta_2}{\theta_2}&amp;0\\
+0&amp;0&amp;1
+\end{bmatrix}
+\begin{bmatrix}
+0\\-L_1\theta_2\\0
+\end{bmatrix}\\[0.8em]
+&amp;=
+\begin{bmatrix}
+L_1(1-\cos\theta_2)\\
+-L_1\sin\theta_2\\
+0
+\end{bmatrix}.
+\end{aligned}
+\]</span></p>
+<p>The same translation has a direct geometric interpretation as rotation about an axis that does not pass through the space origin.<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></p>
+<p>The rotation block is</p>
+<p><span class="math display">\[
+\mathbf R({}^{s}\boldsymbol\phi_2)
+=
+\mathbf R_z(\theta_2).
+\]</span></p>
+<p>Therefore</p>
+<p><span class="math display">\[
+\mathbf E_2(\theta_2)
+=
+\begin{bmatrix}
+\cos\theta_2&amp;-\sin\theta_2&amp;0&amp;L_1(1-\cos\theta_2)\\
+\sin\theta_2&amp;\cos\theta_2&amp;0&amp;-L_1\sin\theta_2\\
+0&amp;0&amp;1&amp;0\\
+0&amp;0&amp;0&amp;1
+\end{bmatrix},
+\qquad
+\mathbf M
+=
+\begin{bmatrix}
+1&amp;0&amp;0&amp;L_1+L_2\\
+0&amp;1&amp;0&amp;0\\
+0&amp;0&amp;1&amp;0\\
+0&amp;0&amp;0&amp;1
+\end{bmatrix}.
+\]</span></p>
+<p>Multiplying these matrices explicitly gives</p>
+<p><span class="math display">\[
+\begin{aligned}
+\mathbf E_2(\theta_2)\mathbf M
+&amp;=
+\begin{bmatrix}
+\cos\theta_2&amp;-\sin\theta_2&amp;0&amp;L_1(1-\cos\theta_2)\\
+\sin\theta_2&amp;\cos\theta_2&amp;0&amp;-L_1\sin\theta_2\\
+0&amp;0&amp;1&amp;0\\
+0&amp;0&amp;0&amp;1
+\end{bmatrix}
+\begin{bmatrix}
+1&amp;0&amp;0&amp;L_1+L_2\\
+0&amp;1&amp;0&amp;0\\
+0&amp;0&amp;1&amp;0\\
+0&amp;0&amp;0&amp;1
+\end{bmatrix}\\[0.8em]
+&amp;=
+\begin{bmatrix}
+\cos\theta_2&amp;-\sin\theta_2&amp;0&amp;
+(L_1+L_2)\cos\theta_2+L_1(1-\cos\theta_2)\\
+\sin\theta_2&amp;\cos\theta_2&amp;0&amp;
+(L_1+L_2)\sin\theta_2-L_1\sin\theta_2\\
+0&amp;0&amp;1&amp;0\\
+0&amp;0&amp;0&amp;1
+\end{bmatrix}\\[0.8em]
+&amp;=
+\begin{bmatrix}
+\cos\theta_2&amp;-\sin\theta_2&amp;0&amp;L_1+L_2\cos\theta_2\\
+\sin\theta_2&amp;\cos\theta_2&amp;0&amp;L_2\sin\theta_2\\
+0&amp;0&amp;1&amp;0\\
+0&amp;0&amp;0&amp;1
+\end{bmatrix}.
+\end{aligned}
+\]</span></p>
+<p>Joint 1 has zero linear screw-axis block because its axis passes through <span class="math inline">\(O_s\)</span>. Its exponential is therefore</p>
+<p><span class="math display">\[
+\mathbf E_1(\theta_1)
+=
+\begin{bmatrix}
+\mathbf R_z(\theta_1)&amp;\mathbf 0_3\\
+\mathbf 0_3^{\mathsf T}&amp;1
+\end{bmatrix}.
+\]</span></p>
+<p>This displacement rotates the complete outward assembly already represented by <span class="math inline">\(\mathbf E_2(\theta_2)\mathbf M\)</span>. Premultiplication gives</p>
+<p><span class="math display">\[
+\begin{aligned}
+\mathbf T_{se}(\boldsymbol\theta)
+&amp;=
+\mathbf E_1(\theta_1)
+\mathbf E_2(\theta_2)
+\mathbf M\\[0.4em]
+&amp;=
+\begin{bmatrix}
+\mathbf R_z(\theta_1)&amp;\mathbf 0_3\\
+\mathbf 0_3^{\mathsf T}&amp;1
+\end{bmatrix}
+\begin{bmatrix}
+\mathbf R_z(\theta_2)&amp;
+\begin{bmatrix}
+L_1+L_2\cos\theta_2\\
+L_2\sin\theta_2\\
+0
+\end{bmatrix}\\
+\mathbf 0_3^{\mathsf T}&amp;1
+\end{bmatrix}\\[0.8em]
+&amp;=
+\begin{bmatrix}
+\mathbf R_z(\theta_1)\mathbf R_z(\theta_2)&amp;
+\mathbf R_z(\theta_1)
+\begin{bmatrix}
+L_1+L_2\cos\theta_2\\
+L_2\sin\theta_2\\
+0
+\end{bmatrix}\\
+\mathbf 0_3^{\mathsf T}&amp;1
+\end{bmatrix}.
+\end{aligned}
+\]</span></p>
+<p>Both rotation factors act about the same positive <span class="math inline">\(z_s\)</span>-axis, so their angles add:</p>
+<p><span class="math display">\[
+\mathbf R_z(\theta_1)\mathbf R_z(\theta_2)
+=
+\mathbf R_z(\theta_1+\theta_2).
+\]</span></p>
+<p>The position block is</p>
+<p><span class="math display">\[
+\begin{aligned}
+{}^{s}\mathbf p_e(\boldsymbol\theta)
+&amp;=
+\mathbf R_z(\theta_1)
+\begin{bmatrix}
+L_1+L_2\cos\theta_2\\
+L_2\sin\theta_2\\
+0
+\end{bmatrix}\\[0.8em]
+&amp;=
+\begin{bmatrix}
+L_1\cos\theta_1+
+L_2(\cos\theta_1\cos\theta_2-\sin\theta_1\sin\theta_2)\\
+L_1\sin\theta_1+
+L_2(\sin\theta_1\cos\theta_2+\cos\theta_1\sin\theta_2)\\
+0
+\end{bmatrix}\\[0.8em]
+&amp;=
 \begin{bmatrix}
 L_1\cos\theta_1+L_2\cos(\theta_1+\theta_2)\\
 L_1\sin\theta_1+L_2\sin(\theta_1+\theta_2)\\
 0
 \end{bmatrix}
 \mathrm m.
+\end{aligned}
 \]</span></p>
-<p>The position block is exactly the planar 2R forward-position map already obtained from link geometry, while the rotation block also retains the end-effector orientation.</p>
+<p>Combining the two blocks gives</p>
+<p><span class="math display">\[
+\boxed{
+\mathbf T_{se}(\boldsymbol\theta)
+=
+\begin{bmatrix}
+\mathbf R_z(\theta_1+\theta_2)&amp;{}^{s}\mathbf p_e(\boldsymbol\theta)\\
+\mathbf 0_3^{\mathsf T}&amp;1
+\end{bmatrix}
+}.
+\]</span></p>
+<p>The position block is exactly the planar 2R forward-position map already obtained from link geometry: link 1 points at angle <span class="math inline">\(\theta_1\)</span>, while link 2 has the absolute angle <span class="math inline">\(\theta_1+\theta_2\)</span>. The rotation block additionally retains the end-effector orientation.</p>
 </div>
 </div>
 </section>
 <section id="body-form-product-of-exponentials" class="level3" data-number="10.2.3">
 <h3 data-number="10.2.3" class="anchored" data-anchor-id="body-form-product-of-exponentials"><span class="header-section-number">10.2.3</span> Body-form product of exponentials</h3>
 <p>The space form stores every joint screw axis using <span class="math inline">\(\{s\}\)</span>. The same physical model can instead store the axes using the end-effector frame <span class="math inline">\(\{e\}\)</span> when the robot is at <span class="math inline">\(\mathbf q=\mathbf 0_n\)</span>. This alternative is useful when geometric measurements or calculations are naturally referred to the tool frame, but it must produce the same <span class="math inline">\(\mathbf T_{se}(\mathbf q)\)</span>.</p>
-<p>At the zero arrangement, <span class="math inline">\(\mathbf M=\mathbf T_{se}(\mathbf 0_n)\)</span> maps coordinates from <span class="math inline">\(\{e\}\)</span> to <span class="math inline">\(\{s\}\)</span>, so <span class="math inline">\(\mathbf M^{-1}\)</span> maps them from <span class="math inline">\(\{s\}\)</span> to <span class="math inline">\(\{e\}\)</span>. Use the linear-first adjoint from <a href="07_degrees_of_freedom_and_spatial_motion_so3_se3.html#sec-se3-adjoint-twist" class="quarto-xref"><span>Section 7.9.4</span></a> to define the <strong>body screw axis</strong> for joint <span class="math inline">\(j\)</span>:</p>
+<p>The adjoint rule recalled from <a href="07_degrees_of_freedom_and_spatial_motion_so3_se3.html#sec-se3-adjoint-twist" class="quarto-xref"><span>Section 7.9.4</span></a> is stated first for an instantaneous twist. If <span class="math inline">\(\mathbf T_{ab}\)</span> maps coordinates from frame <span class="math inline">\(\{b\}\)</span> to frame <span class="math inline">\(\{a\}\)</span>, then the two coordinate columns of the same physical instantaneous rigid-body velocity satisfy</p>
+<p><span class="math display">\[
+\boxed{
+{}^{a}\boldsymbol\xi_j
+=
+\operatorname{Ad}_{\mathbf T_{ab}}
+{}^{b}\boldsymbol\xi_j
+}.
+\]</span></p>
+<p>Here <span class="math inline">\({}^{a}\boldsymbol\xi_j\)</span> and <span class="math inline">\({}^{b}\boldsymbol\xi_j\)</span> describe the same joint-induced velocity; only the frame used for their coordinates differs. In each frame, the corresponding screw-axis column maps the same scalar joint rate <span class="math inline">\(\dot q_j\)</span> to that twist:</p>
+<p><span class="math display">\[
+{}^{a}\boldsymbol\xi_j
+=
+{}^{a}\mathbf S_j\dot q_j,
+\qquad
+{}^{b}\boldsymbol\xi_j
+=
+{}^{b}\mathbf S_j\dot q_j.
+\]</span></p>
+<p>Substituting these two expressions into the twist transformation gives</p>
+<p><span class="math display">\[
+{}^{a}\mathbf S_j\dot q_j
+=
+\operatorname{Ad}_{\mathbf T_{ab}}
+{}^{b}\mathbf S_j\dot q_j.
+\]</span></p>
+<p>This equality must hold for every possible value of the same joint rate. Therefore, the columns multiplying <span class="math inline">\(\dot q_j\)</span> must be equal:</p>
+<p><span class="math display">\[
+\boxed{
+{}^{a}\mathbf S_j
+=
+\operatorname{Ad}_{\mathbf T_{ab}}
+{}^{b}\mathbf S_j
+}.
+\]</span></p>
+<p>The required conversion here is from the space-frame column <span class="math inline">\({}^{s}\mathbf S_j\)</span> to a column expressed using the home end-effector frame <span class="math inline">\(\{e\}\)</span>. At the zero arrangement, <span class="math inline">\(\mathbf M=\mathbf T_{se}(\mathbf 0_n)\)</span> maps coordinates from <span class="math inline">\(\{e\}\)</span> to <span class="math inline">\(\{s\}\)</span>, so <span class="math inline">\(\mathbf T_{es}=\mathbf M^{-1}\)</span> maps them from <span class="math inline">\(\{s\}\)</span> to <span class="math inline">\(\{e\}\)</span>. Substituting <span class="math inline">\(a=e\)</span>, <span class="math inline">\(b=s\)</span>, and <span class="math inline">\(\mathbf T_{ab}=\mathbf T_{es}=\mathbf M^{-1}\)</span> into the screw-axis transformation defines the <strong>body screw axis</strong> for joint <span class="math inline">\(j\)</span>:</p>
 <p><span id="eq-serial-body-screw-axis"><span class="math display">\[
 \boxed{
 {}^{e}\mathbf B_j
@@ -1585,10 +1866,88 @@ L_1\sin\theta_1+L_2\sin(\theta_1+\theta_2)\\
 {}^{s}\mathbf S_j
 \in\mathbb R^6
 }.
-\tag{10.10}\]</span></span></p>
-<p>The superscript <span class="math inline">\(e\)</span> states that the six coordinates are expressed using the home end-effector frame. Equation <a href="#eq-serial-body-screw-axis" class="quarto-xref">Equation&nbsp;<span>10.10</span></a> changes only the coordinate representation of the joint screw; it does not change the physical joint, its positive direction, its coordinate <span class="math inline">\(q_j\)</span>, or the zero arrangement.</p>
-<p>To obtain the body-form pose equation, apply the exponential conjugation identity. For any <span class="math inline">\(\mathbf T\in SE(3)\)</span> and linear-first six-column <span class="math inline">\(\boldsymbol\eta\in\mathbb R^6\)</span>,</p>
+\tag{10.11}\]</span></span></p>
+<p>The columns <span class="math inline">\({}^{s}\mathbf S_j\)</span> and <span class="math inline">\({}^{e}\mathbf B_j\)</span> represent the same joint screw using different frames. When the robot is in the zero arrangement and only that joint moves, they are related by</p>
 <p><span class="math display">\[
+\boxed{
+\boldsymbol\xi_{e,j}
+=
+{}^{e}\mathbf B_j\dot q_j
+}.
+\]</span></p>
+<p>The body screw axis <span class="math inline">\({}^{e}\mathbf B_j\)</span> is fixed home-configuration model data, whereas <span class="math inline">\(\boldsymbol\xi_{e,j}\)</span> is an instantaneous velocity that depends on the current joint rate. Multiplication by the joint coordinate instead gives the finite exponential-coordinate column <span class="math inline">\({}^{e}\boldsymbol\eta_j={}^{e}\mathbf B_jq_j\)</span> used inside the body-form joint factor. At a general nonzero configuration, the complete end-effector twist combines all joint rates through the robot Jacobian developed later; it is not obtained by treating every stored home-axis column as an unmodified current twist.</p>
+<p>To make the linear-first conversion explicit, write</p>
+<p><span class="math display">\[
+\mathbf M^{-1}
+=
+\begin{bmatrix}
+\mathbf R_{es}&amp;{}^{e}\mathbf p_s\\
+\mathbf 0_3^{\mathsf T}&amp;1
+\end{bmatrix},
+\qquad
+{}^{s}\mathbf S_j
+=
+\begin{bmatrix}
+{}^{s}\mathbf s_{v,j}\\
+{}^{s}\mathbf s_{\omega,j}
+\end{bmatrix}.
+\]</span></p>
+<p>Here <span class="math inline">\(\mathbf R_{es}\)</span> maps vector-coordinate columns from <span class="math inline">\(\{s\}\)</span> to <span class="math inline">\(\{e\}\)</span>, and <span class="math inline">\({}^{e}\mathbf p_s\)</span> is the position of <span class="math inline">\(O_s\)</span> relative to <span class="math inline">\(O_e\)</span>, expressed in <span class="math inline">\(\{e\}\)</span> at the zero arrangement. The linear-first adjoint and the resulting body-axis blocks are</p>
+<p><span class="math display">\[
+\operatorname{Ad}_{\mathbf M^{-1}}
+=
+\begin{bmatrix}
+\mathbf R_{es}&amp;[{}^{e}\mathbf p_s]_{\times}\mathbf R_{es}\\
+\mathbf 0_{3\times3}&amp;\mathbf R_{es}
+\end{bmatrix},
+\qquad
+{}^{e}\mathbf B_j
+=
+\begin{bmatrix}
+\mathbf R_{es}{}^{s}\mathbf s_{v,j}
++{}^{e}\mathbf p_s\times
+\left(\mathbf R_{es}{}^{s}\mathbf s_{\omega,j}\right)\\
+\mathbf R_{es}{}^{s}\mathbf s_{\omega,j}
+\end{bmatrix}.
+\]</span></p>
+<p>The superscript <span class="math inline">\(e\)</span> states that both three-entry blocks are expressed using the home end-effector frame. The rotation <span class="math inline">\(\mathbf R_{es}\)</span> re-expresses the linear and angular components along the home end-effector axes, while the cross-product term accounts for changing the reference origin from <span class="math inline">\(O_s\)</span> to <span class="math inline">\(O_e\)</span>. Equation <a href="#eq-serial-body-screw-axis" class="quarto-xref">Equation&nbsp;<span>10.11</span></a> changes only the coordinate representation of the joint screw; it does not change the physical joint, its positive direction, its coordinate <span class="math inline">\(q_j\)</span>, or the zero arrangement.</p>
+<p>To obtain the body-form pose equation, the finite joint displacement must undergo the same change of coordinates. For any <span class="math inline">\(\mathbf T\in SE(3)\)</span> and linear-first six-column <span class="math inline">\(\boldsymbol\eta\in\mathbb R^6\)</span>, the definition of the adjoint gives the hat-matrix relation</p>
+<p><span class="math display">\[
+\widehat{
+\operatorname{Ad}_{\mathbf T^{-1}}\boldsymbol\eta
+}
+=
+\mathbf T^{-1}\widehat{\boldsymbol\eta}\mathbf T.
+\]</span></p>
+<p>The matrix exponential preserves this similarity transformation. Indeed, <span class="math inline">\((\mathbf T^{-1}\widehat{\boldsymbol\eta}\mathbf T)^k=\mathbf T^{-1}\widehat{\boldsymbol\eta}^{\,k}\mathbf T\)</span> because the adjacent factors <span class="math inline">\(\mathbf T\mathbf T^{-1}\)</span> cancel. Applying the power-series definition of the exponential therefore gives</p>
+<p><span class="math display">\[
+\begin{aligned}
+\exp\!\left(
+\widehat{
+\operatorname{Ad}_{\mathbf T^{-1}}\boldsymbol\eta
+}
+\right)
+&amp;=
+\sum_{k=0}^{\infty}
+\frac{
+(\mathbf T^{-1}\widehat{\boldsymbol\eta}\mathbf T)^k
+}{k!}\\
+&amp;=
+\mathbf T^{-1}
+\left(
+\sum_{k=0}^{\infty}
+\frac{\widehat{\boldsymbol\eta}^{\,k}}{k!}
+\right)
+\mathbf T\\
+&amp;=
+\mathbf T^{-1}
+\exp\!\left(\widehat{\boldsymbol\eta}\right)
+\mathbf T.
+\end{aligned}
+\]</span></p>
+<p>Reading this equality in the opposite direction gives the <strong>exponential conjugation identity</strong></p>
+<p><span class="math display">\[
+\boxed{
 \mathbf T^{-1}
 \exp\!\left(\widehat{\boldsymbol\eta}\right)
 \mathbf T
@@ -1597,19 +1956,68 @@ L_1\sin\theta_1+L_2\sin(\theta_1+\theta_2)\\
 \widehat{
 \operatorname{Ad}_{\mathbf T^{-1}}\boldsymbol\eta
 }
-\right).
+\right)
+}.
 \]</span></p>
-<p>Set <span class="math inline">\(\mathbf T=\mathbf M\)</span> and <span class="math inline">\(\boldsymbol\eta={}^s\mathbf S_jq_j\)</span>. Then</p>
+<p>The left side first forms the finite displacement <span class="math inline">\(\exp(\widehat{\boldsymbol\eta})\)</span> and then changes its coordinate representation using <span class="math inline">\(\mathbf T^{-1}\)</span> and <span class="math inline">\(\mathbf T\)</span>. The right side first changes the generator coordinates using the adjoint and then exponentiates them. The identity states that these two orders produce the same rigid displacement matrix; conjugation changes its coordinates, not the physical displacement it represents.</p>
+<p>Set <span class="math inline">\(\mathbf T=\mathbf M\)</span> and <span class="math inline">\(\boldsymbol\eta={}^s\mathbf S_jq_j\)</span>. Using the definition of <span class="math inline">\(\mathbf E_j\)</span>, the conjugation identity, and the definition of <span class="math inline">\({}^{e}\mathbf B_j\)</span> gives the bridge one equality at a time:</p>
 <p><span id="eq-serial-body-joint-displacement"><span class="math display">\[
+\begin{aligned}
 \mathbf M^{-1}\mathbf E_j(q_j)\mathbf M
-=
+&amp;=
+\mathbf M^{-1}
+\exp\!\left(
+\widehat{{}^{s}\mathbf S_jq_j}
+\right)
+\mathbf M\\
+&amp;=
+\exp\!\left(
+\widehat{
+\operatorname{Ad}_{\mathbf M^{-1}}
+\left({}^{s}\mathbf S_jq_j\right)
+}
+\right)\\
+&amp;=
+\exp\!\left(
+\widehat{
+\left(
+\operatorname{Ad}_{\mathbf M^{-1}}
+{}^{s}\mathbf S_j
+\right)q_j
+}
+\right)\\
+&amp;=
+\exp\!\left(
+\widehat{{}^{e}\mathbf B_jq_j}
+\right)\\
+&amp;=
 \exp\!\left(
 \widehat{{}^{e}\mathbf B_j}\,q_j
 \right)
-\mathrel{:=}
+\mathrel{=:}
 \mathbf G_j(q_j).
-\tag{10.11}\]</span></span></p>
-<p>Rearranging this relation gives <span class="math inline">\(\mathbf E_j(q_j)\mathbf M=\mathbf M\mathbf G_j(q_j)\)</span>. Starting with the rightmost joint factor in the space form and applying this identity repeatedly moves <span class="math inline">\(\mathbf M\)</span> to the left:</p>
+\end{aligned}
+\tag{10.12}\]</span></span></p>
+<p>The first equality substitutes <span class="math inline">\(\mathbf E_j(q_j)=\exp(\widehat{{}^{s}\mathbf S_jq_j})\)</span>. The second applies exponential conjugation. The third uses linearity of the adjoint with respect to the scalar <span class="math inline">\(q_j\)</span>. The fourth substitutes <span class="math inline">\({}^{e}\mathbf B_j=\operatorname{Ad}_{\mathbf M^{-1}}{}^{s}\mathbf S_j\)</span>, and the fifth uses linearity of the hat operator, <span class="math inline">\(\widehat{{}^{e}\mathbf B_jq_j}=\widehat{{}^{e}\mathbf B_j}\,q_j\)</span>. The final relation defines the body-represented joint displacement <span class="math inline">\(\mathbf G_j(q_j)\)</span>.</p>
+<p>Equivalently,</p>
+<p><span class="math display">\[
+\boxed{
+\mathbf G_j(q_j)
+=
+\mathbf M^{-1}\mathbf E_j(q_j)\mathbf M,
+\qquad
+\mathbf E_j(q_j)
+=
+\mathbf M\mathbf G_j(q_j)\mathbf M^{-1}
+}.
+\]</span></p>
+<p>These equations separate the physical displacement from its coordinate representation:</p>
+<ol type="1">
+<li><span class="math inline">\(\mathbf G_j(q_j)\)</span> represents joint <span class="math inline">\(j\)</span>’s displacement using the home end-effector frame.</li>
+<li><span class="math inline">\(\mathbf E_j(q_j)\)</span> represents the same physical displacement using the space frame.</li>
+<li>Conjugation by <span class="math inline">\(\mathbf M\)</span> and <span class="math inline">\(\mathbf M^{-1}\)</span> changes between those two coordinate representations.</li>
+</ol>
+<p>Right-multiplying <span class="math inline">\(\mathbf E_j(q_j)=\mathbf M\mathbf G_j(q_j)\mathbf M^{-1}\)</span> by <span class="math inline">\(\mathbf M\)</span> gives <span class="math inline">\(\mathbf E_j(q_j)\mathbf M=\mathbf M\mathbf G_j(q_j)\)</span>. Starting with the rightmost joint factor in the space form and applying this identity repeatedly moves <span class="math inline">\(\mathbf M\)</span> to the left:</p>
 <p><span class="math display">\[
 \begin{aligned}
 \mathbf E_1\cdots\mathbf E_{n-1}\mathbf E_n\mathbf M
@@ -1631,8 +2039,14 @@ L_1\sin\theta_1+L_2\sin(\theta_1+\theta_2)\\
 \cdots
 \exp\!\left(\widehat{{}^{e}\mathbf B_n}\,q_n\right)
 }.
-\tag{10.12}\]</span></span></p>
-<p>The joint indices have the same order in the space and body forms; they are not reversed. A convenient matrix-building interpretation differs: the space form may start from <span class="math inline">\(\mathbf M\)</span> and premultiply <span class="math inline">\(\mathbf E_n,\ldots,\mathbf E_1\)</span>, whereas the body form may start from <span class="math inline">\(\mathbf M\)</span> and postmultiply <span class="math inline">\(\mathbf G_1,\ldots,\mathbf G_n\)</span>. Both procedures evaluate the same pose because Equation <a href="#eq-serial-body-screw-axis" class="quarto-xref">Equation&nbsp;<span>10.10</span></a> and the conjugation identity connect every pair of factors.</p>
+\tag{10.13}\]</span></span></p>
+<p>Equation <a href="#eq-serial-body-poe" class="quarto-xref">Equation&nbsp;<span>10.13</span></a> should be read as follows:</p>
+<ol type="1">
+<li>Every exponential uses a screw-axis column <span class="math inline">\({}^{e}\mathbf B_j\)</span> expressed using the end-effector frame in the zero arrangement; these are fixed home-frame coordinates, not screw axes recomputed at the current <span class="math inline">\(\mathbf q\)</span>.</li>
+<li><span class="math inline">\(\mathbf M=\mathbf T_{se}(\mathbf 0_n)\)</span> is the home transformation that maps coordinates from <span class="math inline">\(\{e\}\)</span> to <span class="math inline">\(\{s\}\)</span> at the zero arrangement.</li>
+<li>The complete product <span class="math inline">\(\mathbf M\mathbf G_1(q_1)\cdots\mathbf G_n(q_n)\)</span>, not <span class="math inline">\(\mathbf M\)</span> alone, is the current end-effector pose <span class="math inline">\(\mathbf T_{se}(\mathbf q)\)</span>.</li>
+</ol>
+<p>The joint indices have the same order in the space and body forms; they are not reversed. A convenient matrix-building interpretation differs: the space form may start from <span class="math inline">\(\mathbf M\)</span> and premultiply <span class="math inline">\(\mathbf E_n,\ldots,\mathbf E_1\)</span>, whereas the body form may start from <span class="math inline">\(\mathbf M\)</span> and postmultiply <span class="math inline">\(\mathbf G_1,\ldots,\mathbf G_n\)</span>. Both procedures evaluate the same pose because Equation <a href="#eq-serial-body-screw-axis" class="quarto-xref">Equation&nbsp;<span>10.11</span></a> and the conjugation identity connect every pair of factors.</p>
 <div class="callout callout-style-simple callout-note no-icon callout-titled" title="Example: Body axes for the planar 2R chain">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -1643,21 +2057,226 @@ L_1\sin\theta_1+L_2\sin(\theta_1+\theta_2)\\
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>This example converts the preceding planar 2R space model into body coordinates. Its home orientation is <span class="math inline">\(\mathbf I_3\)</span>, and its home end-effector origin is <span class="math inline">\(L_1+L_2\)</span> metres along positive <span class="math inline">\(x_s\)</span>. Applying <span class="math inline">\(\operatorname{Ad}_{\mathbf M^{-1}}\)</span> to the two space screw axes gives</p>
+<p>This example converts the preceding planar 2R space model into body coordinates. Its home orientation is <span class="math inline">\(\mathbf I_3\)</span>, and its home end-effector origin is <span class="math inline">\(L_1+L_2\)</span> metres along positive <span class="math inline">\(x_s\)</span>. Therefore, the home pose and its inverse are</p>
+<p><span class="math display">\[
+\mathbf M
+=
+\begin{bmatrix}
+\mathbf I_3&amp;
+\begin{bmatrix}
+L_1+L_2\\0\\0
+\end{bmatrix}\\
+\mathbf 0_3^{\mathsf T}&amp;1
+\end{bmatrix},
+\qquad
+\mathbf M^{-1}
+=
+\begin{bmatrix}
+\mathbf I_3&amp;
+\begin{bmatrix}
+-(L_1+L_2)\\0\\0
+\end{bmatrix}\\
+\mathbf 0_3^{\mathsf T}&amp;1
+\end{bmatrix}.
+\]</span></p>
+<p>The inverse pose maps coordinates from <span class="math inline">\(\{s\}\)</span> to the home end-effector frame <span class="math inline">\(\{e\}\)</span>. Its translation column is the position of <span class="math inline">\(O_s\)</span> relative to <span class="math inline">\(O_e\)</span>, expressed in <span class="math inline">\(\{e\}\)</span>:</p>
+<p><span class="math display">\[
+{}^{e}\mathbf p_s
+=
+\begin{bmatrix}
+-(L_1+L_2)\\0\\0
+\end{bmatrix}.
+\]</span></p>
+<p>Because <span class="math inline">\(\mathbf R_{es}=\mathbf I_3\)</span>, applying the linear-first adjoint to a screw axis <span class="math inline">\({}^{s}\mathbf S_j=[({}^{s}\mathbf s_{v,j})^{\mathsf T}\;({}^{s}\mathbf s_{\omega,j})^{\mathsf T}]^{\mathsf T}\)</span> gives</p>
+<p><span class="math display">\[
+{}^{e}\mathbf B_j
+=
+\operatorname{Ad}_{\mathbf M^{-1}}{}^{s}\mathbf S_j
+=
+\begin{bmatrix}
+\mathbf I_3{}^{s}\mathbf s_{v,j}
++{}^{e}\mathbf p_s\times
+\left(\mathbf I_3{}^{s}\mathbf s_{\omega,j}\right)\\
+\mathbf I_3{}^{s}\mathbf s_{\omega,j}
+\end{bmatrix}.
+\]</span></p>
+<p>Both joints rotate about positive <span class="math inline">\(z_s\)</span>, so their angular blocks are <span class="math inline">\([0\;0\;1]^{\mathsf T}\)</span>. The origin shift contributes the same cross product to both transformed linear blocks:</p>
+<p><span class="math display">\[
+{}^{e}\mathbf p_s
+\times
+\begin{bmatrix}
+0\\0\\1
+\end{bmatrix}
+=
+\begin{bmatrix}
+-(L_1+L_2)\\0\\0
+\end{bmatrix}
+\times
+\begin{bmatrix}
+0\\0\\1
+\end{bmatrix}
+=
+\begin{bmatrix}
+0\\L_1+L_2\\0
+\end{bmatrix}.
+\]</span></p>
+<p>The preceding space model has</p>
+<p><span class="math display">\[
+{}^{s}\mathbf S_1
+=
+\begin{bmatrix}
+0\\0\\0\\0\\0\\1
+\end{bmatrix},
+\qquad
+{}^{s}\mathbf S_2
+=
+\begin{bmatrix}
+0\\-L_1\\0\\0\\0\\1
+\end{bmatrix}.
+\]</span></p>
+<p>For joint 1, the space-axis linear block is zero. Adding the origin-shift contribution gives its body-axis linear block, while the identity home rotation leaves its angular block unchanged:</p>
+<p><span class="math display">\[
+\begin{aligned}
+{}^{e}\mathbf b_{v,1}
+&amp;=
+\mathbf I_3
+\begin{bmatrix}
+0\\0\\0
+\end{bmatrix}
++
+\begin{bmatrix}
+0\\L_1+L_2\\0
+\end{bmatrix}
+=
+\begin{bmatrix}
+0\\L_1+L_2\\0
+\end{bmatrix},\\[0.6em]
+{}^{e}\mathbf b_{\omega,1}
+&amp;=
+\mathbf I_3
+\begin{bmatrix}
+0\\0\\1
+\end{bmatrix}
+=
+\begin{bmatrix}
+0\\0\\1
+\end{bmatrix}.
+\end{aligned}
+\]</span></p>
+<p>Stacking the linear block above the angular block in the project’s linear-first order gives</p>
 <p><span class="math display">\[
 {}^{e}\mathbf B_1
 =
 \begin{bmatrix}
+{}^{e}\mathbf b_{v,1}\\
+{}^{e}\mathbf b_{\omega,1}
+\end{bmatrix}
+=
+\begin{bmatrix}
 0\\L_1+L_2\\0\\0\\0\\1
-\end{bmatrix},
-\qquad
+\end{bmatrix}.
+\]</span></p>
+<p>For joint 2, the <span class="math inline">\(-L_1\)</span> entry in its space-axis linear block combines with <span class="math inline">\(L_1+L_2\)</span> from the origin shift, and its angular block is again unchanged:</p>
+<p><span class="math display">\[
+\begin{aligned}
+{}^{e}\mathbf b_{v,2}
+&amp;=
+\begin{bmatrix}
+0\\-L_1\\0
+\end{bmatrix}
++
+\begin{bmatrix}
+0\\L_1+L_2\\0
+\end{bmatrix}
+=
+\begin{bmatrix}
+0\\L_2\\0
+\end{bmatrix},\\[0.6em]
+{}^{e}\mathbf b_{\omega,2}
+&amp;=
+\begin{bmatrix}
+0\\0\\1
+\end{bmatrix}.
+\end{aligned}
+\]</span></p>
+<p>Therefore,</p>
+<p><span class="math display">\[
 {}^{e}\mathbf B_2
+=
+\begin{bmatrix}
+{}^{e}\mathbf b_{v,2}\\
+{}^{e}\mathbf b_{\omega,2}
+\end{bmatrix}
 =
 \begin{bmatrix}
 0\\L_2\\0\\0\\0\\1
 \end{bmatrix}.
 \]</span></p>
-<p>The positive <span class="math inline">\(y_e\)</span> linear coefficients encode the offsets from the home end-effector origin back to joints 1 and 2. Substituting these columns into Equation <a href="#eq-serial-body-poe" class="quarto-xref">Equation&nbsp;<span>10.12</span></a> gives</p>
+<p>The signs have a direct velocity-field interpretation. Joint 1 is <span class="math inline">\(L_1+L_2\)</span> metres behind the home end-effector origin along negative <span class="math inline">\(x_e\)</span>, whereas joint 2 is <span class="math inline">\(L_2\)</span> metres behind it. Define their positive offset magnitudes and axis-point positions by</p>
+<p><span class="math display">\[
+d_1
+\mathrel{:=}
+L_1+L_2,
+\qquad
+d_2
+\mathrel{:=}
+L_2,
+\qquad
+{}^{e}\mathbf p_{\ell,j}
+=
+\begin{bmatrix}
+-d_j\\0\\0
+\end{bmatrix}.
+\]</span></p>
+<p>For joint <span class="math inline">\(j\)</span> rotating at rate <span class="math inline">\(\dot\theta_j\)</span>, the velocity of the selected axis point is</p>
+<p><span class="math display">\[
+{}^{e}\mathbf v_{\ell,j}
+=
+\left(
+{}^{e}\mathbf b_{v,j}
++
+{}^{e}\mathbf s_{\omega,j}
+\times
+{}^{e}\mathbf p_{\ell,j}
+\right)
+\dot\theta_j.
+\]</span></p>
+<p>The selected point lies on the rotation axis, so it must remain fixed and <span class="math inline">\({}^{e}\mathbf v_{\ell,j}=\mathbf 0_3\)</span> for every joint rate. The positive-<span class="math inline">\(z_e\)</span> angular direction produces the rotational velocity-field contribution</p>
+<p><span class="math display">\[
+\begin{aligned}
+{}^{e}\mathbf s_{\omega,j}
+\times{}^{e}\mathbf p_{\ell,j}
+&amp;=
+\begin{bmatrix}
+0\\0\\1
+\end{bmatrix}
+\times
+\begin{bmatrix}
+-d_j\\0\\0
+\end{bmatrix}\\
+&amp;=
+\begin{bmatrix}
+0\\-d_j\\0
+\end{bmatrix}.
+\end{aligned}
+\]</span></p>
+<p>This contribution points along negative <span class="math inline">\(y_e\)</span>. To make the total velocity at the axis point zero, the linear coefficient must point along positive <span class="math inline">\(y_e\)</span> with the same magnitude:</p>
+<p><span class="math display">\[
+\mathbf 0_3
+=
+{}^{e}\mathbf b_{v,j}
++
+\begin{bmatrix}
+0\\-d_j\\0
+\end{bmatrix}
+\quad\Longrightarrow\quad
+{}^{e}\mathbf b_{v,j}
+=
+\begin{bmatrix}
+0\\d_j\\0
+\end{bmatrix}.
+\]</span></p>
+<p>Substituting <span class="math inline">\(d_1=L_1+L_2\)</span> and <span class="math inline">\(d_2=L_2\)</span> recovers the two linear blocks calculated above. For joint 1, the fixed axis point may be chosen as <span class="math inline">\(O_s\)</span> because its axis passes through the space origin. For joint 2, the fixed point is instead a point on joint 2’s axis; <span class="math inline">\(O_s\)</span> does not lie on that axis. Substituting the two body screw axes into Equation <a href="#eq-serial-body-poe" class="quarto-xref">Equation&nbsp;<span>10.13</span></a> gives</p>
 <p><span class="math display">\[
 \mathbf T_{se}(\boldsymbol\theta)
 =
@@ -1672,100 +2291,274 @@ L_1\sin\theta_1+L_2\sin(\theta_1+\theta_2)\\
 <section id="equivalence-with-a-transform-chain" class="level3" data-number="10.2.4">
 <h3 data-number="10.2.4" class="anchored" data-anchor-id="equivalence-with-a-transform-chain"><span class="header-section-number">10.2.4</span> Equivalence with a transform chain</h3>
 <p>A product of exponentials is not a different physical model from a chain of parent–child transformations. The two descriptions store the same joint and link geometry in different forms. This subsection starts with a relative-transform chain and derives its space-form product, thereby showing exactly how their constants correspond.</p>
-<p>Let <span class="math inline">\(\{0\}=\{s\}\)</span> be the fixed base frame, let <span class="math inline">\(\{i\}\)</span> be a frame rigidly attached to link <span class="math inline">\(i\)</span> for each <span class="math inline">\(i\in\{1,\ldots,n\}\)</span>, and let <span class="math inline">\(\{e\}\)</span> be the selected end-effector frame rigidly attached to link <span class="math inline">\(n\)</span>. Define</p>
+<p>Let <span class="math inline">\(\{0\}=\{s\}\)</span> be the fixed base frame, let <span class="math inline">\(\{i\}\)</span> be a frame rigidly attached to link <span class="math inline">\(i\)</span> for each <span class="math inline">\(i\in\{1,\ldots,n\}\)</span>, and let <span class="math inline">\(\{e\}\)</span> be the selected end-effector frame rigidly attached to link <span class="math inline">\(n\)</span>. For each joint <span class="math inline">\(i\)</span>, let</p>
 <p><span class="math display">\[
-\mathbf A_i(q_i)
-\mathrel{:=}
 \mathbf T_{i-1,i}(q_i)
 \in SE(3)
 \]</span></p>
-<p>as the pose of link frame <span class="math inline">\(\{i\}\)</span> relative to its parent frame <span class="math inline">\(\{i-1\}\)</span>, and let <span class="math inline">\(\mathbf A_e:=\mathbf T_{ne}\in SE(3)\)</span> be the constant pose of <span class="math inline">\(\{e\}\)</span> relative to <span class="math inline">\(\{n\}\)</span>. Because joint <span class="math inline">\(i\)</span> is independent and has one degree of freedom, only <span class="math inline">\(q_i\)</span> appears in <span class="math inline">\(\mathbf A_i\)</span>. Coordinate transformations compose along the chain as</p>
+<p>be the pose of link frame <span class="math inline">\(\{i\}\)</span> relative to its parent frame <span class="math inline">\(\{i-1\}\)</span>. This matrix maps coordinate columns from <span class="math inline">\(\{i\}\)</span> to <span class="math inline">\(\{i-1\}\)</span>. Because joint <span class="math inline">\(i\)</span> is independent and has one degree of freedom, only <span class="math inline">\(q_i\)</span> appears in <span class="math inline">\(\mathbf T_{i-1,i}(q_i)\)</span>.</p>
+<p>Let <span class="math inline">\(\mathbf T_{ne}\in SE(3)\)</span> be the pose of the end-effector frame <span class="math inline">\(\{e\}\)</span> relative to the final link frame <span class="math inline">\(\{n\}\)</span>. This matrix maps end-effector coordinates to final-link coordinates:</p>
+<p><span class="math display">\[
+\bar{\mathbf p}_n
+=
+\mathbf T_{ne}\bar{\mathbf p}_e.
+\]</span></p>
+<p>Both frames are rigidly attached to link <span class="math inline">\(n\)</span>, and there is no joint between them, so <span class="math inline">\(\mathbf T_{ne}\)</span> is constant and does not depend on <span class="math inline">\(\mathbf q\)</span>. If <span class="math inline">\(\{e\}\)</span> is chosen to coincide with <span class="math inline">\(\{n\}\)</span>, then <span class="math inline">\(\mathbf T_{ne}=\mathbf I_4\)</span>.</p>
+<p>Let <span class="math inline">\(\mathbf T_{sn}(\mathbf q)\)</span> denote the pose of the final link frame relative to <span class="math inline">\(\{s\}\)</span> at joint-coordinate column <span class="math inline">\(\mathbf q\)</span>. If <span class="math inline">\(\bar{\mathbf p}_e\)</span>, <span class="math inline">\(\bar{\mathbf p}_n\)</span>, and <span class="math inline">\(\bar{\mathbf p}_s\)</span> are homogeneous coordinate columns of the same physical point, expressed in <span class="math inline">\(\{e\}\)</span>, <span class="math inline">\(\{n\}\)</span>, and <span class="math inline">\(\{s\}\)</span>, respectively, then</p>
+<p><span class="math display">\[
+\begin{aligned}
+\bar{\mathbf p}_s
+&amp;=
+\mathbf T_{sn}(\mathbf q)\bar{\mathbf p}_n\\
+&amp;=
+\mathbf T_{sn}(\mathbf q)
+\mathbf T_{ne}\bar{\mathbf p}_e.
+\end{aligned}
+\]</span></p>
+<p>Because this relation holds for every end-effector point,</p>
+<p><span class="math display">\[
+\boxed{
+\mathbf T_{se}(\mathbf q)
+=
+\mathbf T_{sn}(\mathbf q)\mathbf T_{ne}
+}.
+\]</span></p>
+<p>Expanding <span class="math inline">\(\mathbf T_{sn}(\mathbf q)\)</span> through the relative transforms gives the complete chain:</p>
 <p><span id="eq-serial-relative-transform-chain"><span class="math display">\[
 \boxed{
 \mathbf T_{se}(\mathbf q)
 =
-\mathbf A_1(q_1)
-\mathbf A_2(q_2)
+\mathbf T_{01}(q_1)
+\mathbf T_{12}(q_2)
 \cdots
-\mathbf A_n(q_n)
-\mathbf A_e
+\mathbf T_{n-1,n}(q_n)
+\mathbf T_{ne}
 }.
-\tag{10.13}\]</span></span></p>
+\tag{10.14}\]</span></span></p>
 <p>The rightmost factor first maps coordinates from <span class="math inline">\(\{e\}\)</span> to <span class="math inline">\(\{n\}\)</span>; the remaining factors successively map them through the parent frames until the result is expressed in <span class="math inline">\(\{s\}\)</span>. This meaning differs from the active-displacement interpretation of each <span class="math inline">\(\mathbf E_j\)</span>, even though the final homogeneous matrix represents the same end-effector pose.</p>
-<p>To expose the one-joint motion inside each relative transform, compare <span class="math inline">\(\mathbf A_i(q_i)\)</span> with its zero value <span class="math inline">\(\mathbf A_i(0)\)</span>. Define</p>
+<p>To expose the one-joint motion inside each relative transform, write the relative pose directly as</p>
 <p><span class="math display">\[
-\mathbf D_i(q_i)
-\mathrel{:=}
-\mathbf A_i(q_i)\mathbf A_i(0)^{-1},
-\]</span></p>
-<p>so that <span class="math inline">\(\mathbf A_i(q_i)=\mathbf D_i(q_i)\mathbf A_i(0)\)</span>. The matrix <span class="math inline">\(\mathbf D_i(q_i)\)</span> is the active displacement from the zero pose of link <span class="math inline">\(i\)</span> to its pose at <span class="math inline">\(q_i\)</span>, expressed using the parent frame <span class="math inline">\(\{i-1\}\)</span>. For an ideal revolute or prismatic joint, the screw exponential gives</p>
-<p><span class="math display">\[
-\mathbf D_i(q_i)
+\boxed{
+\mathbf T_{i-1,i}(q_i)
 =
 \exp\!\left(
 \widehat{{}^{i-1}\mathbf S_i}\,q_i
-\right),
-\]</span></p>
-<p>where <span class="math inline">\({}^{i-1}\mathbf S_i\)</span> is the joint’s normalised linear-first screw axis expressed using its parent frame when <span class="math inline">\(q_i=0\)</span>.</p>
-<p>Next collect the zero relative transforms from the base through link <span class="math inline">\(k\)</span>:</p>
-<p><span class="math display">\[
-\boxed{
-\mathbf H_k
-\mathrel{:=}
-\mathbf A_1(0)\mathbf A_2(0)\cdots\mathbf A_k(0)
-=
-\mathbf T_{sk}(\mathbf 0_n),
-\qquad
-\mathbf H_0\mathrel{:=}\mathbf I_4
+\right)
+\mathbf T_{i-1,i}(0)
 }.
 \]</span></p>
-<p>The matrix <span class="math inline">\(\mathbf H_{i-1}\)</span> maps coordinates from joint <span class="math inline">\(i\)</span>’s parent frame to <span class="math inline">\(\{s\}\)</span> when the complete robot is at <span class="math inline">\(\mathbf q=\mathbf 0_n\)</span>. Therefore the parent-frame screw axis and the stored space screw axis are related by</p>
+<p>Here <span class="math inline">\({}^{i-1}\mathbf S_i\)</span> is joint <span class="math inline">\(i\)</span>’s normalised linear-first screw axis expressed using its parent frame <span class="math inline">\(\{i-1\}\)</span> in the zero arrangement. The exponential is the active displacement generated by joint <span class="math inline">\(i\)</span> from its zero value, represented using the parent frame; left multiplication applies that displacement to the zero relative pose <span class="math inline">\(\mathbf T_{i-1,i}(0)\)</span>.</p>
+<p>The transform from link frame <span class="math inline">\(\{k\}\)</span> to <span class="math inline">\(\{s\}\)</span> in the zero arrangement is obtained by composing the zero relative poses:</p>
+<p><span class="math display">\[
+\boxed{
+\mathbf T_{sk}(\mathbf 0_n)
+=
+\mathbf T_{01}(0)
+\mathbf T_{12}(0)
+\cdots
+\mathbf T_{k-1,k}(0),
+\qquad
+\mathbf T_{s0}(\mathbf 0_n)
+=
+\mathbf I_4
+}.
+\]</span></p>
+<p>In particular, <span class="math inline">\(\mathbf T_{s,i-1}(\mathbf 0_n)\)</span> maps coordinates from joint <span class="math inline">\(i\)</span>’s parent frame <span class="math inline">\(\{i-1\}\)</span> to the space frame <span class="math inline">\(\{s\}\)</span>. If <span class="math inline">\(\bar{\mathbf p}_{i-1}\)</span> and <span class="math inline">\(\bar{\mathbf p}_s\)</span> are homogeneous coordinate columns of the same physical point expressed in those two frames, then</p>
+<p><span class="math display">\[
+\bar{\mathbf p}_s
+=
+\mathbf T_{s,i-1}(\mathbf 0_n)
+\bar{\mathbf p}_{i-1}.
+\]</span></p>
+<p>The adjoint associated with the same transform converts an instantaneous twist from parent-frame coordinates to space-frame coordinates. If only joint <span class="math inline">\(i\)</span> moves at rate <span class="math inline">\(\dot q_i\)</span> while the robot is in the zero arrangement, the same joint-induced physical velocity satisfies</p>
+<p><span class="math display">\[
+{}^{s}\boldsymbol\xi_i
+=
+\operatorname{Ad}_{
+\mathbf T_{s,i-1}(\mathbf 0_n)
+}
+{}^{i-1}\boldsymbol\xi_i.
+\]</span></p>
+<p>In the two frames, the corresponding screw-axis columns map the same scalar joint rate to that twist:</p>
+<p><span class="math display">\[
+{}^{s}\boldsymbol\xi_i
+=
+{}^{s}\mathbf S_i\dot q_i,
+\qquad
+{}^{i-1}\boldsymbol\xi_i
+=
+{}^{i-1}\mathbf S_i\dot q_i.
+\]</span></p>
+<p>Substituting these expressions into the twist transformation and using linearity of the adjoint gives</p>
+<p><span class="math display">\[
+{}^{s}\mathbf S_i\dot q_i
+=
+\left(
+\operatorname{Ad}_{
+\mathbf T_{s,i-1}(\mathbf 0_n)
+}
+{}^{i-1}\mathbf S_i
+\right)
+\dot q_i.
+\]</span></p>
+<p>This equality must hold for every possible value of the same joint rate <span class="math inline">\(\dot q_i\)</span>. Therefore, the columns multiplying <span class="math inline">\(\dot q_i\)</span> must be equal:</p>
 <p><span id="eq-serial-local-to-space-axis"><span class="math display">\[
 \boxed{
 {}^{s}\mathbf S_i
 =
-\operatorname{Ad}_{\mathbf H_{i-1}}
+\operatorname{Ad}_{
+\mathbf T_{s,i-1}(\mathbf 0_n)
+}
 {}^{i-1}\mathbf S_i
 }.
-\tag{10.14}\]</span></span></p>
-<p>The exponential conjugation identity now gives</p>
+\tag{10.15}\]</span></span></p>
+<p>The exponential conjugation identity now expresses the parent-frame joint displacement using the space frame:</p>
 <p><span id="eq-serial-relative-to-space-displacement"><span class="math display">\[
-\mathbf H_{i-1}\mathbf D_i(q_i)\mathbf H_{i-1}^{-1}
-=
+\begin{aligned}
+&amp;\mathbf T_{s,i-1}(\mathbf 0_n)
+\exp\!\left(
+\widehat{{}^{i-1}\mathbf S_i}\,q_i
+\right)
+\left[
+\mathbf T_{s,i-1}(\mathbf 0_n)
+\right]^{-1}\\
+&amp;\quad=
+\exp\!\left(
+\mathbf T_{s,i-1}(\mathbf 0_n)
+\widehat{{}^{i-1}\mathbf S_i}
+\left[
+\mathbf T_{s,i-1}(\mathbf 0_n)
+\right]^{-1}
+\,q_i
+\right)\\
+&amp;\quad=
+\exp\!\left(
+\widehat{
+\operatorname{Ad}_{
+\mathbf T_{s,i-1}(\mathbf 0_n)
+}
+{}^{i-1}\mathbf S_i
+}\,q_i
+\right)\\
+&amp;\quad=
 \exp\!\left(
 \widehat{{}^{s}\mathbf S_i}\,q_i
-\right)
-=
+\right)\\
+&amp;\quad=
 \mathbf E_i(q_i).
-\tag{10.15}\]</span></span></p>
+\end{aligned}
+\tag{10.16}\]</span></span></p>
+<p>The first equality uses similarity of the matrix exponential. The second uses the hat–adjoint relation, the third substitutes Equation <a href="#eq-serial-local-to-space-axis" class="quarto-xref">Equation&nbsp;<span>10.15</span></a>, and the final equality uses the definition of <span class="math inline">\(\mathbf E_i(q_i)\)</span>. Thus the exponential represented using <span class="math inline">\(\{i-1\}\)</span> and <span class="math inline">\(\mathbf E_i(q_i)\)</span> represented using <span class="math inline">\(\{s\}\)</span> describe the same active joint displacement.</p>
 <p>These relations are sufficient to prove that the two complete products agree. For any <span class="math inline">\(k\in\{1,\ldots,n\}\)</span>, the first <span class="math inline">\(k\)</span> relative transforms satisfy</p>
 <p><span id="eq-serial-chain-induction-claim"><span class="math display">\[
 \boxed{
-\mathbf A_1(q_1)\cdots\mathbf A_k(q_k)
+\mathbf T_{01}(q_1)
+\mathbf T_{12}(q_2)
+\cdots
+\mathbf T_{k-1,k}(q_k)
 =
-\mathbf E_1(q_1)\cdots\mathbf E_k(q_k)\mathbf H_k
+\mathbf E_1(q_1)
+\mathbf E_2(q_2)
+\cdots
+\mathbf E_k(q_k)
+\mathbf T_{sk}(\mathbf 0_n)
 }.
-\tag{10.16}\]</span></span></p>
-<p>For <span class="math inline">\(k=1\)</span>, <span class="math inline">\(\mathbf H_0=\mathbf I_4\)</span>, so <span class="math inline">\(\mathbf A_1(q_1)=\mathbf D_1(q_1)\mathbf A_1(0)=\mathbf E_1(q_1)\mathbf H_1\)</span>. Suppose Equation <a href="#eq-serial-chain-induction-claim" class="quarto-xref">Equation&nbsp;<span>10.16</span></a> holds through <span class="math inline">\(k-1\)</span>. Multiplying by <span class="math inline">\(\mathbf A_k(q_k)=\mathbf D_k(q_k)\mathbf A_k(0)\)</span> and inserting <span class="math inline">\(\mathbf H_{k-1}^{-1}\mathbf H_{k-1}=\mathbf I_4\)</span> gives</p>
+\tag{10.17}\]</span></span></p>
+<p>For <span class="math inline">\(k=1\)</span>, frame <span class="math inline">\(\{0\}\)</span> is <span class="math inline">\(\{s\}\)</span>, so <span class="math inline">\({}^{0}\mathbf S_1={}^s\mathbf S_1\)</span>. Expanding the direct relative-pose formula gives</p>
 <p><span class="math display">\[
 \begin{aligned}
-\mathbf A_1(q_1)\cdots\mathbf A_k(q_k)
+\mathbf T_{01}(q_1)
 &amp;=
-\mathbf E_1(q_1)\cdots\mathbf E_{k-1}(q_{k-1})
-\mathbf H_{k-1}\mathbf D_k(q_k)\mathbf A_k(0)\\
-&amp;=
-\mathbf E_1(q_1)\cdots\mathbf E_{k-1}(q_{k-1})
-\left(
-\mathbf H_{k-1}\mathbf D_k(q_k)\mathbf H_{k-1}^{-1}
+\exp\!\left(
+\widehat{{}^{0}\mathbf S_1}\,q_1
 \right)
-\mathbf H_{k-1}\mathbf A_k(0)\\
+\mathbf T_{01}(0)\\
 &amp;=
-\mathbf E_1(q_1)\cdots\mathbf E_{k-1}(q_{k-1})\mathbf E_k(q_k)\mathbf H_k.
+\exp\!\left(
+\widehat{{}^{s}\mathbf S_1}\,q_1
+\right)
+\mathbf T_{01}(0)\\
+&amp;=
+\mathbf E_1(q_1)
+\mathbf T_{01}(0)\\
+&amp;=
+\mathbf E_1(q_1)
+\mathbf T_{s1}(\mathbf 0_n).
 \end{aligned}
 \]</span></p>
-<p>This proves the claim for every <span class="math inline">\(k\)</span>. Taking <span class="math inline">\(k=n\)</span>, multiplying by the fixed tool transform <span class="math inline">\(\mathbf A_e\)</span>, and observing that</p>
+<p>The first equality uses the one-joint relative-pose formula. The second uses <span class="math inline">\(\{0\}=\{s\}\)</span>, the third uses the definition of <span class="math inline">\(\mathbf E_1(q_1)\)</span>, and the fourth uses <span class="math inline">\(\mathbf T_{01}(0)=\mathbf T_{s1}(\mathbf 0_n)\)</span>. This proves the claim for <span class="math inline">\(k=1\)</span>.</p>
+<p>Now suppose Equation <a href="#eq-serial-chain-induction-claim" class="quarto-xref">Equation&nbsp;<span>10.17</span></a> holds through <span class="math inline">\(k-1\)</span>. First separate the final relative transform, then apply the induction assumption to the preceding <span class="math inline">\(k-1\)</span> transforms, and finally substitute the direct relative-pose formula for joint <span class="math inline">\(k\)</span>:</p>
 <p><span class="math display">\[
-\mathbf H_n\mathbf A_e
+\begin{aligned}
+&amp;\mathbf T_{01}(q_1)
+\mathbf T_{12}(q_2)
+\cdots
+\mathbf T_{k-1,k}(q_k)\\
+&amp;\quad=
+\left(
+\mathbf T_{01}(q_1)
+\cdots
+\mathbf T_{k-2,k-1}(q_{k-1})
+\right)
+\mathbf T_{k-1,k}(q_k)\\
+&amp;\quad=
+\left(
+\mathbf E_1(q_1)
+\cdots
+\mathbf E_{k-1}(q_{k-1})
+\mathbf T_{s,k-1}(\mathbf 0_n)
+\right)
+\mathbf T_{k-1,k}(q_k)\\
+&amp;\quad=
+\mathbf E_1(q_1)
+\cdots
+\mathbf E_{k-1}(q_{k-1})
+\mathbf T_{s,k-1}(\mathbf 0_n)
+\left[
+\exp\!\left(
+\widehat{{}^{k-1}\mathbf S_k}\,q_k
+\right)
+\mathbf T_{k-1,k}(0)
+\right].
+\end{aligned}
+\]</span></p>
+<p>Insert the identity <span class="math inline">\([\mathbf T_{s,k-1}(\mathbf 0_n)]^{-1}\mathbf T_{s,k-1}(\mathbf 0_n)=\mathbf I_4\)</span> between the local exponential and <span class="math inline">\(\mathbf T_{k-1,k}(0)\)</span>. Regrouping the factors gives</p>
+<p><span class="math display">\[
+\begin{aligned}
+&amp;\mathbf T_{01}(q_1)
+\mathbf T_{12}(q_2)
+\cdots
+\mathbf T_{k-1,k}(q_k)\\
+&amp;\quad=
+\mathbf E_1(q_1)
+\cdots
+\mathbf E_{k-1}(q_{k-1})\\
+&amp;\qquad{}\times
+\underbrace{
+\mathbf T_{s,k-1}(\mathbf 0_n)
+\exp\!\left(
+\widehat{{}^{k-1}\mathbf S_k}\,q_k
+\right)
+\left[
+\mathbf T_{s,k-1}(\mathbf 0_n)
+\right]^{-1}
+}_{\mathbf E_k(q_k)}\\
+&amp;\qquad{}\times
+\underbrace{
+\mathbf T_{s,k-1}(\mathbf 0_n)
+\mathbf T_{k-1,k}(0)
+}_{\mathbf T_{sk}(\mathbf 0_n)}\\
+&amp;\quad=
+\mathbf E_1(q_1)
+\cdots
+\mathbf E_k(q_k)
+\mathbf T_{sk}(\mathbf 0_n).
+\end{aligned}
+\]</span></p>
+<p>This proves the claim for every <span class="math inline">\(k\)</span>. Taking <span class="math inline">\(k=n\)</span>, multiplying by the fixed tool transform <span class="math inline">\(\mathbf T_{ne}\)</span>, and using</p>
+<p><span class="math display">\[
+\mathbf T_{sn}(\mathbf 0_n)
+\mathbf T_{ne}
 =
 \mathbf T_{se}(\mathbf 0_n)
 =
@@ -1775,24 +2568,124 @@ L_1\sin\theta_1+L_2\sin(\theta_1+\theta_2)\\
 <p><span id="eq-serial-chain-poe-equivalence"><span class="math display">\[
 \boxed{
 \underbrace{
-\mathbf A_1(q_1)\cdots\mathbf A_n(q_n)\mathbf A_e
+\mathbf T_{01}(q_1)
+\mathbf T_{12}(q_2)
+\cdots
+\mathbf T_{n-1,n}(q_n)
+\mathbf T_{ne}
 }_{\text{relative-transform chain}}
 =
 \underbrace{
-\mathbf E_1(q_1)\cdots\mathbf E_n(q_n)\mathbf M
+\mathbf E_1(q_1)
+\mathbf E_2(q_2)
+\cdots
+\mathbf E_n(q_n)
+\mathbf M
 }_{\text{space-form product of exponentials}}
 }.
-\tag{10.17}\]</span></span></p>
-<p>The conversion also works in the reverse representational direction once the intermediate link frames and their zero transforms have been selected. Equation <a href="#eq-serial-local-to-space-axis" class="quarto-xref">Equation&nbsp;<span>10.14</span></a> gives</p>
+\tag{10.18}\]</span></span></p>
+<p>The proof above starts with selected intermediate link frames and converts their relative-transform chain into a space-form product of exponentials. Conversion in the opposite direction requires additional choices because the space-form data <span class="math inline">\(\mathbf M\)</span> and <span class="math inline">\({}^{s}\mathbf S_1,\ldots,{}^{s}\mathbf S_n\)</span> do not specify where the intermediate link frames are attached. First select those frames and their zero relative transforms so that</p>
 <p><span class="math display">\[
+\boxed{
+\mathbf T_{01}(0)
+\mathbf T_{12}(0)
+\cdots
+\mathbf T_{n-1,n}(0)
+\mathbf T_{ne}
+=
+\mathbf M
+}.
+\]</span></p>
+<p>For joint <span class="math inline">\(i\)</span>, these zero transforms determine the pose of its parent frame relative to <span class="math inline">\(\{s\}\)</span>:</p>
+<p><span class="math display">\[
+\mathbf T_{s,i-1}(\mathbf 0_n)
+=
+\mathbf T_{01}(0)
+\cdots
+\mathbf T_{i-2,i-1}(0),
+\]</span></p>
+<p>where the product is empty and equals <span class="math inline">\(\mathbf I_4\)</span> when <span class="math inline">\(i=1\)</span>. Equation <a href="#eq-serial-local-to-space-axis" class="quarto-xref">Equation&nbsp;<span>10.15</span></a> can then be inverted because <span class="math inline">\(\operatorname{Ad}_{\mathbf T}^{-1}=\operatorname{Ad}_{\mathbf T^{-1}}\)</span>:</p>
+<p><span class="math display">\[
+\boxed{
 {}^{i-1}\mathbf S_i
 =
-\operatorname{Ad}_{\mathbf H_{i-1}^{-1}}
-{}^{s}\mathbf S_i,
+\operatorname{Ad}_{
+\left[
+\mathbf T_{s,i-1}(\mathbf 0_n)
+\right]^{-1}
+}
+{}^{s}\mathbf S_i
+}.
 \]</span></p>
-<p>after which <span class="math inline">\(\mathbf A_i(q_i)=\exp(\widehat{{}^{i-1}\mathbf S_i}q_i)\mathbf A_i(0)\)</span> reconstructs each relative joint transform. The selected intermediate link frames are not unique, so one space-form model can correspond to several equally valid transform-chain parameterisations. The end-effector map remains the same when all constants follow one consistent choice.</p>
+<p>This equation re-expresses the same physical joint screw using the selected parent frame. The parent-frame screw axis and the selected zero relative pose then reconstruct joint <span class="math inline">\(i\)</span>’s relative transform:</p>
+<p><span class="math display">\[
+\boxed{
+\mathbf T_{i-1,i}(q_i)
+=
+\exp\!\left(
+\widehat{{}^{i-1}\mathbf S_i}\,q_i
+\right)
+\mathbf T_{i-1,i}(0)
+}.
+\]</span></p>
+<p>The intermediate link frames are not unique: a modeller may choose different fixed origins or orientations for a frame attached to a link. Such a choice changes the neighbouring zero relative transforms and the numerical parent-frame screw axes, but a consistent set still satisfies the home-pose product above and produces the same end-effector map <span class="math inline">\(\mathbf T_{se}(\mathbf q)\)</span>.</p>
 <p>The representations therefore answer different implementation questions. A relative-transform chain makes every parent–child frame relationship explicit and naturally supplies intermediate link poses. The space form needs only <span class="math inline">\(\mathbf M\)</span> and the home screw axes to calculate the selected end-effector pose. The body form stores those same physical axes in home end-effector coordinates. None is inherently more accurate; disagreement between their evaluated poses indicates inconsistent frames, zero values, signs, joint order, or multiplication direction.</p>
-<p>A deterministic cross-check should evaluate all available representations at the same joint-coordinate columns. For two results <span class="math inline">\(\mathbf T_a=[\mathbf R_a\;\mathbf p_a;\mathbf 0_3^{\mathsf T}\;1]\)</span> and <span class="math inline">\(\mathbf T_b=[\mathbf R_b\;\mathbf p_b;\mathbf 0_3^{\mathsf T}\;1]\)</span>, compare translation and rotation separately. The translation error <span class="math inline">\(\|\mathbf p_a-\mathbf p_b\|_2\)</span> is measured in metres. For rotation, form <span class="math inline">\(\mathbf R_\Delta=\mathbf R_a^{\mathsf T}\mathbf R_b\in SO(3)\)</span>, recover its principal rotation vector <span class="math inline">\(\boldsymbol\phi_\Delta\)</span>, and use <span class="math inline">\(\|\boldsymbol\phi_\Delta\|_2\)</span> as the angular error in radians. Compare each error with a tolerance having the same unit. Include <span class="math inline">\(\mathbf q=\mathbf 0_n\)</span>, single-joint motions, mixed revolute–prismatic motions, and configurations in which changing the factor order produces a detectable difference.</p>
+<p>A deterministic cross-check begins by choosing one joint-coordinate column <span class="math inline">\(\mathbf q\)</span> and evaluating it with two different calculations. For example, calculation <span class="math inline">\(a\)</span> may use the relative-transform chain, while calculation <span class="math inline">\(b\)</span> uses the space-form product of exponentials. Denote their resulting pose matrices by <span class="math inline">\(\mathbf T_a(\mathbf q)\)</span> and <span class="math inline">\(\mathbf T_b(\mathbf q)\)</span>, respectively. Both matrices must describe the pose of the same end-effector frame relative to the same space frame, with the same units, signs, joint order, and active-transformation convention:</p>
+<p><span class="math display">\[
+\mathbf T_a(\mathbf q)
+=
+\begin{bmatrix}
+\mathbf R_a&amp;\mathbf p_a\\
+\mathbf 0_3^{\mathsf T}&amp;1
+\end{bmatrix},
+\qquad
+\mathbf T_b(\mathbf q)
+=
+\begin{bmatrix}
+\mathbf R_b&amp;\mathbf p_b\\
+\mathbf 0_3^{\mathsf T}&amp;1
+\end{bmatrix}.
+\]</span></p>
+<p>Compare their translation blocks with the length residual</p>
+<p><span class="math display">\[
+\boxed{
+e_p
+\mathrel{:=}
+\left\|
+\mathbf p_a-\mathbf p_b
+\right\|_2
+},
+\]</span></p>
+<p>which is measured in metres. Compare their rotation blocks by forming the relative rotation</p>
+<p><span class="math display">\[
+\mathbf R_\Delta
+\mathrel{:=}
+\mathbf R_a^{\mathsf T}\mathbf R_b
+\in SO(3).
+\]</span></p>
+<p>Let <span class="math inline">\(\boldsymbol\phi_\Delta\)</span> be the principal rotation vector satisfying <span class="math inline">\(\mathbf R_\Delta=\exp([\boldsymbol\phi_\Delta]_\times)\)</span> and <span class="math inline">\(\|\boldsymbol\phi_\Delta\|_2\leq\pi\)</span>. The angular residual is</p>
+<p><span class="math display">\[
+\boxed{
+e_R
+\mathrel{:=}
+\left\|
+\boldsymbol\phi_\Delta
+\right\|_2
+},
+\]</span></p>
+<p>measured in radians. Choose a translation tolerance <span class="math inline">\(\varepsilon_p\)</span> in metres and an angular tolerance <span class="math inline">\(\varepsilon_R\)</span> in radians, and accept agreement only when</p>
+<p><span class="math display">\[
+\boxed{
+e_p
+\leq
+\varepsilon_p,
+\qquad
+e_R
+\leq
+\varepsilon_R
+}.
+\]</span></p>
+<p>Do not combine the metre-valued and radian-valued residuals in one unscaled norm. Repeat the comparison at <span class="math inline">\(\mathbf q=\mathbf 0_n\)</span>, with each joint moved individually, with several joints moved together, and for mixed revolute–prismatic chains when supported. Also include a negative control in which the joint-factor order is deliberately changed at a configuration where noncommutativity makes the incorrect result detectable.</p>
 </section>
 <section id="quick-test-b-serial-chain-products-of-exponentials" class="level3 unnumbered">
 <h3 class="unnumbered anchored" data-anchor-id="quick-test-b-serial-chain-products-of-exponentials">Quick test B: serial-chain products of exponentials</h3>
@@ -1803,7 +2696,7 @@ L_1\sin\theta_1+L_2\sin(\theta_1+\theta_2)\\
 <li><strong>Explanation:</strong> For a three-joint chain, write the space-form product and explain why its derivation applies the distal joint displacement to <span class="math inline">\(\mathbf M\)</span> first even though the written factors are ordered <span class="math inline">\(1,2,3\)</span> from left to right.</li>
 <li><strong>Application:</strong> In the planar 2R example, let <span class="math inline">\(L_1=2\,\mathrm m\)</span>, <span class="math inline">\(L_2=1\,\mathrm m\)</span>, <span class="math inline">\(\theta_1=\pi/2\)</span>, and <span class="math inline">\(\theta_2=-\pi/2\)</span>. Find the end-effector orientation and position relative to <span class="math inline">\(\{s\}\)</span>.</li>
 <li><strong>Derivation:</strong> Starting from the space axes and <span class="math inline">\(\mathbf M\)</span>, derive <span class="math inline">\({}^{e}\mathbf B_j\)</span> and the body-form product. Why are the joint indices not reversed?</li>
-<li><strong>Proof:</strong> Starting from the relative-transform chain, state the induction claim that leads to Equation <a href="#eq-serial-chain-poe-equivalence" class="quarto-xref">Equation&nbsp;<span>10.17</span></a> and identify the conjugation step used in its proof.</li>
+<li><strong>Proof:</strong> Starting from the relative-transform chain, state the induction claim that leads to Equation <a href="#eq-serial-chain-poe-equivalence" class="quarto-xref">Equation&nbsp;<span>10.18</span></a> and identify the conjugation step used in its proof.</li>
 <li><strong>Boundary:</strong> What do the space form, body form, and relative-transform chain return at <span class="math inline">\(\mathbf q=\mathbf 0_n\)</span>? Why may the joint factors not generally be reordered?</li>
 <li><strong>Verification:</strong> How should two independently evaluated pose matrices be compared without mixing translation and rotation units?</li>
 <li><strong>Domain:</strong> Which properties of <span class="math inline">\(\mathbf q\)</span> must a numerical evaluator check before forming the joint exponentials?</li>
@@ -1811,16 +2704,88 @@ L_1\sin\theta_1+L_2\sin(\theta_1+\theta_2)\\
 <section id="answers-and-hints-1" class="level4 unnumbered">
 <h4 class="unnumbered anchored" data-anchor-id="answers-and-hints-1">Answers and hints</h4>
 <ol type="1">
-<li>Store the home end-effector pose <span class="math inline">\(\mathbf M\)</span> and one normalised space screw axis <span class="math inline">\({}^{s}\mathbf S_j\)</span> for every joint, all constructed from the same zero arrangement and expressed in <span class="math inline">\(\{s\}\)</span>. Supply the current joint-coordinate column <span class="math inline">\(\mathbf q\)</span> when evaluating the map.</li>
-<li>The zero arrangement <span class="math inline">\(\chi(\mathbf 0_n)\)</span> places every modelled robot point when all joint coordinates are zero. The matrix <span class="math inline">\(\mathbf M=\mathbf T_{se}(\mathbf 0_n)\)</span> retains only the pose of the selected end-effector frame at that arrangement.</li>
-<li>For the revolute joint, <span class="math inline">\(-{}^{s}\mathbf s\times{}^{s}\mathbf p_{\ell}=[0\;-2\;0]^{\mathsf T}\)</span>, so <span class="math inline">\({}^{s}\mathbf S_R=[0\;-2\;0\;0\;0\;1]^{\mathsf T}\)</span>. For the prismatic joint, <span class="math inline">\({}^{s}\mathbf S_P=[0\;-1\;0\;0\;0\;0]^{\mathsf T}\)</span>.</li>
-<li>The product is <span class="math inline">\(\mathbf T_{se}=\mathbf E_1(q_1)\mathbf E_2(q_2)\mathbf E_3(q_3)\mathbf M\)</span>. Matrix multiplication acts on the rightmost factor first, so joint 3 first moves the home end effector, joint 2 then carries joint 3 and the end effector, and joint 1 finally carries the whole outward assembly. Distal motion does not move a more proximal axis, allowing every factor to use its stored zero-arrangement screw axis. This construction calculates the final pose; it does not prescribe a time history for the physical joints.</li>
-<li>The total orientation is <span class="math inline">\(\mathbf R_z(\theta_1+\theta_2)=\mathbf R_z(0)=\mathbf I_3\)</span>. The position is <span class="math inline">\([2\cos(\pi/2)+\cos(0)\;2\sin(\pi/2)+\sin(0)\;0]^{\mathsf T}=[1\;2\;0]^{\mathsf T}\,\mathrm m\)</span>.</li>
-<li>Use <span class="math inline">\({}^{e}\mathbf B_j=\operatorname{Ad}_{\mathbf M^{-1}}{}^{s}\mathbf S_j\)</span> and the identity <span class="math inline">\(\mathbf M^{-1}\mathbf E_j(q_j)\mathbf M=\exp(\widehat{{}^{e}\mathbf B_j}q_j)\)</span>. Repeatedly substitute <span class="math inline">\(\mathbf E_j\mathbf M=\mathbf M\mathbf G_j\)</span> into the space product to obtain <span class="math inline">\(\mathbf T_{se}=\mathbf M\mathbf G_1\cdots\mathbf G_n\)</span>. Conjugation changes each factor’s coordinate representation but does not change its joint index, so the index order remains <span class="math inline">\(1,\ldots,n\)</span>.</li>
-<li>The claim is <span class="math inline">\(\mathbf A_1(q_1)\cdots\mathbf A_k(q_k)=\mathbf E_1(q_1)\cdots\mathbf E_k(q_k)\mathbf H_k\)</span>. The induction step inserts <span class="math inline">\(\mathbf H_{k-1}^{-1}\mathbf H_{k-1}\)</span> around <span class="math inline">\(\mathbf D_k\)</span> and uses <span class="math inline">\(\mathbf H_{k-1}\mathbf D_k\mathbf H_{k-1}^{-1}=\mathbf E_k\)</span>.</li>
-<li>Every exponential becomes <span class="math inline">\(\mathbf I_4\)</span>, while every relative transform becomes its zero value, so all three forms return <span class="math inline">\(\mathbf M\)</span>. Joint factors generally cannot be reordered because rigid rotations and translations do not commute; changing their order changes which outward geometry each joint carries.</li>
-<li>Compare <span class="math inline">\(\|\mathbf p_a-\mathbf p_b\|_2\)</span> with a length tolerance in metres. Form <span class="math inline">\(\mathbf R_\Delta=\mathbf R_a^{\mathsf T}\mathbf R_b\)</span>, recover its principal rotation vector <span class="math inline">\(\boldsymbol\phi_\Delta\)</span>, and compare <span class="math inline">\(\|\boldsymbol\phi_\Delta\|_2\)</span> with an angular tolerance in radians. Do not combine metre-valued and radian-valued residuals in one unscaled Euclidean norm.</li>
-<li>Verify that every <span class="math inline">\(q_j\)</span> is finite, belongs to its declared domain <span class="math inline">\(\mathcal Q_j\)</span>, has the correct joint-dependent unit, and follows the declared wrapped or unwrapped angle representation when joint <span class="math inline">\(j\)</span> is revolute.</li>
+<li><p>Store the home end-effector pose <span class="math inline">\(\mathbf M\)</span> and one normalised space screw axis <span class="math inline">\({}^{s}\mathbf S_j\)</span> for every joint, all constructed from the same zero arrangement and expressed in <span class="math inline">\(\{s\}\)</span>. Supply the current joint-coordinate column <span class="math inline">\(\mathbf q\)</span> when evaluating the map.</p></li>
+<li><p>The zero arrangement <span class="math inline">\(\chi(\mathbf 0_n)\)</span> places every modelled robot point when all joint coordinates are zero. The matrix <span class="math inline">\(\mathbf M=\mathbf T_{se}(\mathbf 0_n)\)</span> retains only the pose of the selected end-effector frame at that arrangement.</p></li>
+<li><p>For the revolute joint, <span class="math inline">\(-{}^{s}\mathbf s\times{}^{s}\mathbf p_{\ell}=[0\;-2\;0]^{\mathsf T}\)</span>, so <span class="math inline">\({}^{s}\mathbf S_R=[0\;-2\;0\;0\;0\;1]^{\mathsf T}\)</span>. For the prismatic joint, <span class="math inline">\({}^{s}\mathbf S_P=[0\;-1\;0\;0\;0\;0]^{\mathsf T}\)</span>.</p></li>
+<li><p>The product is <span class="math inline">\(\mathbf T_{se}=\mathbf E_1(q_1)\mathbf E_2(q_2)\mathbf E_3(q_3)\mathbf M\)</span>. Matrix multiplication acts on the rightmost factor first, so joint 3 first moves the home end effector, joint 2 then carries joint 3 and the end effector, and joint 1 finally carries the whole outward assembly. Distal motion does not move a more proximal axis, allowing every factor to use its stored zero-arrangement screw axis. This construction calculates the final pose; it does not prescribe a time history for the physical joints.</p></li>
+<li><p>The end-effector angle relative to <span class="math inline">\(\{s\}\)</span> is the sum of the two joint angles:</p>
+<p><span class="math display">\[
+\theta_e
+=
+\theta_1+\theta_2
+=
+\frac{\pi}{2}
+-
+\frac{\pi}{2}
+=
+0.
+\]</span></p>
+<p>Therefore, the end-effector orientation is</p>
+<p><span class="math display">\[
+\mathbf R_{se}
+=
+\mathbf R_z(\theta_e)
+=
+\mathbf R_z(0)
+=
+\mathbf I_3.
+\]</span></p>
+<p>Substitute the given lengths and angles into the planar 2R position formula:</p>
+<p><span class="math display">\[
+\begin{aligned}
+x_e
+&amp;=
+L_1\cos\theta_1
++
+L_2\cos(\theta_1+\theta_2)\\
+&amp;=
+(2\,\mathrm m)\cos\!\left(\frac{\pi}{2}\right)
++
+(1\,\mathrm m)\cos(0)\\
+&amp;=
+0\,\mathrm m+1\,\mathrm m
+=
+1\,\mathrm m,\\[0.6em]
+y_e
+&amp;=
+L_1\sin\theta_1
++
+L_2\sin(\theta_1+\theta_2)\\
+&amp;=
+(2\,\mathrm m)\sin\!\left(\frac{\pi}{2}\right)
++
+(1\,\mathrm m)\sin(0)\\
+&amp;=
+2\,\mathrm m+0\,\mathrm m
+=
+2\,\mathrm m.
+\end{aligned}
+\]</span></p>
+<p>Hence,</p>
+<p><span class="math display">\[
+{}^{s}\mathbf p_e
+=
+\begin{bmatrix}
+1\\2\\0
+\end{bmatrix}
+\mathrm m,
+\qquad
+\mathbf T_{se}
+=
+\begin{bmatrix}
+\mathbf I_3&amp;
+\begin{bmatrix}
+1\\2\\0
+\end{bmatrix}
+\mathrm m\\
+\mathbf 0_3^{\mathsf T}&amp;1
+\end{bmatrix}.
+\]</span></p></li>
+<li><p>Use <span class="math inline">\({}^{e}\mathbf B_j=\operatorname{Ad}_{\mathbf M^{-1}}{}^{s}\mathbf S_j\)</span> and the identity <span class="math inline">\(\mathbf M^{-1}\mathbf E_j(q_j)\mathbf M=\exp(\widehat{{}^{e}\mathbf B_j}q_j)\)</span>. Repeatedly substitute <span class="math inline">\(\mathbf E_j\mathbf M=\mathbf M\mathbf G_j\)</span> into the space product to obtain <span class="math inline">\(\mathbf T_{se}=\mathbf M\mathbf G_1\cdots\mathbf G_n\)</span>. Conjugation changes each factor’s coordinate representation but does not change its joint index, so the index order remains <span class="math inline">\(1,\ldots,n\)</span>.</p></li>
+<li><p>The claim is <span class="math inline">\(\mathbf T_{01}(q_1)\cdots\mathbf T_{k-1,k}(q_k)=\mathbf E_1(q_1)\cdots\mathbf E_k(q_k)\mathbf T_{sk}(\mathbf 0_n)\)</span>. In the induction step, substitute <span class="math inline">\(\mathbf T_{k-1,k}(q_k)=\exp(\widehat{{}^{k-1}\mathbf S_k}\,q_k)\mathbf T_{k-1,k}(0)\)</span>, insert <span class="math inline">\([\mathbf T_{s,k-1}(\mathbf 0_n)]^{-1}\mathbf T_{s,k-1}(\mathbf 0_n)=\mathbf I_4\)</span>, and use Equation <a href="#eq-serial-relative-to-space-displacement" class="quarto-xref">Equation&nbsp;<span>10.16</span></a> to identify the conjugated local exponential as <span class="math inline">\(\mathbf E_k(q_k)\)</span>.</p></li>
+<li><p>Every exponential becomes <span class="math inline">\(\mathbf I_4\)</span>, while every relative transform becomes its zero value, so all three forms return <span class="math inline">\(\mathbf M\)</span>. Joint factors generally cannot be reordered because rigid rotations and translations do not commute; changing their order changes which outward geometry each joint carries.</p></li>
+<li><p>First verify that both matrices describe the same end-effector frame relative to the same space frame and use the same conventions. Compare <span class="math inline">\(e_p=\|\mathbf p_a-\mathbf p_b\|_2\)</span> with a length tolerance <span class="math inline">\(\varepsilon_p\)</span> in metres. Form <span class="math inline">\(\mathbf R_\Delta=\mathbf R_a^{\mathsf T}\mathbf R_b\)</span>, recover its principal rotation vector <span class="math inline">\(\boldsymbol\phi_\Delta\)</span>, and compare <span class="math inline">\(e_R=\|\boldsymbol\phi_\Delta\|_2\)</span> with an angular tolerance <span class="math inline">\(\varepsilon_R\)</span> in radians. Accept agreement only when both residual tests pass; do not combine metre-valued and radian-valued residuals in one unscaled Euclidean norm.</p></li>
+<li><p>Verify that every <span class="math inline">\(q_j\)</span> is finite, belongs to its declared domain <span class="math inline">\(\mathcal Q_j\)</span>, has the correct joint-dependent unit, and follows the declared wrapped or unwrapped angle representation when joint <span class="math inline">\(j\)</span> is revolute.</p></li>
 </ol>
 </section>
 </section>
@@ -1884,6 +2849,95 @@ L_1\sin\theta_1+L_2\sin(\theta_1+\theta_2)\\
 <hr>
 <ol>
 <li id="fn1"><p>The formal limit must compare dimensionless numerical columns. Choose fixed positive input and output scales with the corresponding physical units, and divide each input increment and output remainder component by its scale. If <span class="math inline">\(\widetilde{\Delta\mathbf q}\)</span> and <span class="math inline">\(\widetilde{\mathbf r}\)</span> denote these dimensionless columns, the required condition is <span class="math inline">\(\lVert\widetilde{\mathbf r}\rVert_2/\lVert\widetilde{\Delta\mathbf q}\rVert_2\rightarrow0\)</span> as <span class="math inline">\(\widetilde{\Delta\mathbf q}\rightarrow\mathbf 0_n\)</span>. This nondimensionalisation does not assign one physical unit or one unscaled physical norm to a mixed-unit column.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p><strong>Rotation about a point away from the origin.</strong> The point</p>
+<p><span class="math display">\[
+{}^{s}\mathbf p_{\ell,2}
+=
+\begin{bmatrix}
+L_1\\0\\0
+\end{bmatrix}
+\]</span></p>
+<p>lies on joint 2’s rotation axis. To rotate an arbitrary point <span class="math inline">\(\mathbf p\)</span> about the axis through this point:</p>
+<ol type="1">
+<li><p>Subtract the axis point, temporarily moving the rotation centre to the origin:</p>
+<p><span class="math display">\[
+\mathbf p-{}^{s}\mathbf p_{\ell,2}.
+\]</span></p></li>
+<li><p>Rotate the resulting relative vector:</p>
+<p><span class="math display">\[
+\mathbf R_z(\theta_2)
+\left(
+\mathbf p-{}^{s}\mathbf p_{\ell,2}
+\right).
+\]</span></p></li>
+<li><p>Add the axis point to restore the original rotation centre:</p>
+<p><span class="math display">\[
+\mathbf p'
+=
+{}^{s}\mathbf p_{\ell,2}
++
+\mathbf R_z(\theta_2)
+\left(
+\mathbf p-{}^{s}\mathbf p_{\ell,2}
+\right).
+\]</span></p></li>
+</ol>
+<p>Expanding the geometric construction gives</p>
+<p><span class="math display">\[
+\begin{aligned}
+\mathbf p'
+&amp;=
+{}^{s}\mathbf p_{\ell,2}
++
+\mathbf R_z(\theta_2)\mathbf p
+-
+\mathbf R_z(\theta_2){}^{s}\mathbf p_{\ell,2}\\
+&amp;=
+\mathbf R_z(\theta_2)\mathbf p
++
+\left(
+\mathbf I_3-\mathbf R_z(\theta_2)
+\right)
+{}^{s}\mathbf p_{\ell,2}.
+\end{aligned}
+\]</span></p>
+<p>Now let <span class="math inline">\(\bar{\mathbf p}=[\mathbf p^{\mathsf T}\;1]^{\mathsf T}\)</span> be the homogeneous column for the same point. In the main text, <a href="#eq-planar-2r-joint2-exponential-block-form" class="quarto-xref">Equation&nbsp;<span>10.10</span></a> makes the joint-2 transformation act as</p>
+<p><span class="math display">\[
+\begin{aligned}
+\bar{\mathbf p}'
+&amp;=
+\mathbf E_2(\theta_2)\bar{\mathbf p}\\
+&amp;=
+\begin{bmatrix}
+\mathbf R_z(\theta_2)&amp;
+\mathbf J({}^{s}\boldsymbol\phi_2)\,{}^{s}\boldsymbol\rho_2\\
+\mathbf 0_3^{\mathsf T}&amp;1
+\end{bmatrix}
+\begin{bmatrix}
+\mathbf p\\1
+\end{bmatrix}.
+\end{aligned}
+\]</span></p>
+<p>Reading the upper three entries gives</p>
+<p><span class="math display">\[
+\mathbf p'
+=
+\mathbf R_z(\theta_2)\mathbf p
++
+\mathbf J({}^{s}\boldsymbol\phi_2)\,{}^{s}\boldsymbol\rho_2.
+\]</span></p>
+<p>The geometric construction and the homogeneous-matrix calculation describe the same moved point and already contain the same rotation term <span class="math inline">\(\mathbf R_z(\theta_2)\mathbf p\)</span>. Their remaining translation terms must therefore agree:</p>
+<p><span class="math display">\[
+\boxed{
+\mathbf J({}^{s}\boldsymbol\phi_2)\,{}^{s}\boldsymbol\rho_2
+=
+\left(
+\mathbf I_3-\mathbf R_z(\theta_2)
+\right)
+{}^{s}\mathbf p_{\ell,2}
+}.
+\]</span></p>
+<p>Both sides evaluate to <span class="math inline">\([L_1(1-\cos\theta_2)\;-L_1\sin\theta_2\;0]^{\mathsf T}\)</span>, the translation column used by the explicit <span class="math inline">\(\mathbf E_2(\theta_2)\)</span> matrix in the main text.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section>
 

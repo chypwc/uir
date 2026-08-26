@@ -38,8 +38,8 @@ All phases belong to the learning programme. Phase 7 is the intermediate epistem
 - **Phase:** Phase 1 — Geometry, mechanics, and control.
 - **Capability:** `P1.3` — General robot kinematics and Jacobians.
 - **Cycle:** Cycle 1 — Space-form product-of-exponentials forward kinematics.
-- **Active stage:** Review and quiz.
-- **Active task:** Review the prerequisite opening block of Chapter 10 and complete its retrieval test.
+- **Active stage:** Specification.
+- **Active task:** Create the shared serial-chain contract and specify the space-form forward-kinematics operation.
 - **Next capability:** `P1.4` — General inverse-kinematics foundations and planar manipulator laboratory.
 - **Blockers:** None.
 
@@ -95,7 +95,7 @@ Phase 1 closes when its shared mathematical references and two bounded learning 
 |---|---|---|---|
 | `P1.1` — Ideal planar motion kernel | Close Chapters 2–3 and preserve Chapters 4 and 6 | Existing `differential_drive_motion_model`, Python and `pytest` | Complete |
 | `P1.2` — Spatial geometry kernel | Complete Chapter 8 and its Chapter 9 implementation companion | `rigid_body_kinematics`, modern C++, CMake, Eigen, and GTest | Complete |
-| `P1.3` — General kinematics and Jacobians | Complete Chapter 10 and its Chapter 11 implementation companion | Extend `rigid_body_kinematics` with bounded forward and velocity kinematics | Active: review the drafted opening theory block |
+| `P1.3` — General kinematics and Jacobians | Complete Chapter 10 and its Chapter 11 implementation companion | Extend `rigid_body_kinematics` with bounded forward and velocity kinematics | Active: specify the space-form forward-kinematics operation |
 | `P1.4` — General inverse-kinematics foundations and planar manipulator laboratory | Chapter 12 and its Chapter 13 implementation companion | Begin `planar_manipulator_lab` with 2R/3R inverse kinematics, modern C++, Eigen, GTest, and offline visualisation | Queued |
 | `P1.5` — Wheel-odometry pipeline | Chapter 14 and its Chapter 15 implementation companion | `differential_drive_odometry`, modern C++ core and thin ROS 2 adapter, with the accepted Python kernel as an independent reference | Queued |
 | `P1.6` — Differential-drive dynamics laboratory | Chapter 16 and its Chapter 17 implementation companion | `differential_drive_planar_plant`, modern C++ and deterministic numerical tests | Queued |
@@ -192,10 +192,10 @@ The outcome is a bounded reusable implementation of general forward and velocity
 #### Cycle 1 — Space-form product-of-exponentials forward kinematics
 
 - [x] Draft the prerequisite opening block of `notes/10_general_robot_kinematics_and_jacobians.qmd` on configuration space versus coordinate vector, task variables, the forward map $T(\mathbf q)$, the total derivative, and the multivariable chain rule.
-- [ ] **Active:** Review the prerequisite opening block and complete its retrieval test before continuing the Cycle 1 learning stage.
-- [ ] Learn and write the home configuration, validated revolute and prismatic space screw axes, transform-chain equivalence, multiplication order, and space-form product of exponentials; route the block through *Modern Robotics*, Chapter 4, compare it with Craig, Chapter 3, and use Corke, Chapter 7, as an independent numerical viewpoint.
-- [ ] Review the space-form block and complete its retrieval questions on notation, frames, units, product order, application, and supported serial-chain assumptions.
-- [ ] Create `docs/02_spatial_kinematics/general_kinematics_and_jacobians.md` with the shared serial-chain contract and the space-form operation's inputs, outputs, validation, exclusions, and independent analytic acceptance cases.
+- [x] Review the prerequisite opening block and complete its retrieval test before continuing the Cycle 1 learning stage.
+- [x] Learn and write the home configuration, validated revolute and prismatic space screw axes, transform-chain equivalence, multiplication order, and space-form product of exponentials; route the block through *Modern Robotics*, Chapter 4, compare it with Craig, Chapter 3, and use Corke, Chapter 7, as an independent numerical viewpoint.
+- [x] Review the space-form block and complete its retrieval questions on notation, frames, units, product order, application, and supported serial-chain assumptions.
+- [ ] **Active:** Create `docs/02_spatial_kinematics/general_kinematics_and_jacobians.md` with the shared serial-chain contract and the space-form operation's inputs, outputs, validation, exclusions, and independent analytic acceptance cases.
 - [ ] Implement space-form forward kinematics in `rigid_body_kinematics` with focused tests for zero joint displacement, single revolute and prismatic joints, invalid models, and a planar 2R chain checked against independent trigonometric kinematics.
 - [ ] After the implementation and focused tests work, create the first substantive section of `notes/11_general_robot_kinematics_and_jacobians_implementation.qmd` and review its serial-chain representation, equation-to-code mapping, multiplication order, public interface, validation, and test meaning.
 - [ ] Run the focused package build and acceptance cases, inspect the affected artifacts, link the evidence, and close the space-form cycle.
