@@ -1256,16 +1256,14 @@ q.
 \begin{bmatrix}
 0&amp;\cdots&amp;0
 \end{bmatrix}^{\mathsf T}
-\in\mathcal Q
+\in\mathbb R^n
 \]</span></p>
-<p>be the joint-coordinate column in which every joint has its declared zero value. The corresponding complete robot placement <span class="math inline">\(\chi(\mathbf 0_n)\)</span> is the <strong>zero arrangement</strong>. The zero arrangement is chosen by the modeller; it need not resemble a person’s resting posture, place every link along one straight line, or make the end-effector pose equal to the identity.</p>
+<p>be the reference column in which every joint coordinate has its declared zero value. The rigid-link geometry assigned to this column is the <strong>zero reference arrangement</strong>, shortened below to the <strong>zero arrangement</strong>. This reference is chosen by the modeller; it need not resemble a person’s resting posture, place every link along one straight line, or make the end-effector pose equal to the identity. A physical joint stop or a deliberately tighter operating interval may make <span class="math inline">\(\mathbf 0_n\notin\mathcal Q\)</span>. In that case the zero reference arrangement still defines the product-of-exponentials geometry, but it is not an admissible robot command. We write <span class="math inline">\(\mathbf T_{se}(\mathbf 0_n)\)</span> for this reference value even in that case; the forward map <span class="math inline">\(\mathbf F_e:\mathcal Q\rightarrow SE(3)\)</span> remains restricted to admissible coordinate columns.</p>
 <p>The product-of-exponentials model first records the end-effector pose in this zero arrangement. Define the <strong>home end-effector pose</strong>, commonly called the <strong>home configuration</strong> in product-of-exponentials terminology, by</p>
 <p><span class="math display">\[
 \boxed{
 \mathbf M
 \mathrel{:=}
-\mathbf F_e(\mathbf 0_n)
-=
 \mathbf T_{se}(\mathbf 0_n)
 =
 \begin{bmatrix}
@@ -1275,7 +1273,7 @@ q.
 \in SE(3)
 }.
 \]</span></p>
-<p>Here <span class="math inline">\(\mathbf R_{se,0}\in SO(3)\)</span> is the orientation of the end-effector frame <span class="math inline">\(\{e\}\)</span> relative to the fixed space frame <span class="math inline">\(\{s\}\)</span> in the zero arrangement, and <span class="math inline">\({}^{s}\mathbf p_{e,0}\in\mathbb R^3\)</span> is the position of the end-effector origin <span class="math inline">\(O_e\)</span> relative to <span class="math inline">\(O_s\)</span>, expressed along the axes of <span class="math inline">\(\{s\}\)</span> and measured in metres. The matrix <span class="math inline">\(\mathbf M\)</span> contains only the end-effector pose at zero; it is not the complete placement <span class="math inline">\(\chi(\mathbf 0_n)\)</span> of every robot link.</p>
+<p>Here <span class="math inline">\(\mathbf R_{se,0}\in SO(3)\)</span> is the orientation of the end-effector frame <span class="math inline">\(\{e\}\)</span> relative to the fixed space frame <span class="math inline">\(\{s\}\)</span> in the zero arrangement, and <span class="math inline">\({}^{s}\mathbf p_{e,0}\in\mathbb R^3\)</span> is the position of the end-effector origin <span class="math inline">\(O_e\)</span> relative to <span class="math inline">\(O_s\)</span>, expressed along the axes of <span class="math inline">\(\{s\}\)</span> and measured in metres. The matrix <span class="math inline">\(\mathbf M\)</span> contains only the end-effector pose at the reference column; it does not contain the reference placement of every robot link.</p>
 <p>The home pose <span class="math inline">\(\mathbf M\)</span> records where the end effector is when <span class="math inline">\(q_1=0\)</span>, but it does not record the motion permitted by the joint. For a one-joint chain, let <span class="math inline">\({}^{s}\mathbf S_1\)</span> be the joint’s normalised screw axis expressed using the space frame <span class="math inline">\(\{s\}\)</span>. This fixed screw-axis column is not an instantaneous twist. If the joint coordinate follows <span class="math inline">\(q_1(t)\)</span>, then its rate produces the space twist</p>
 <p><span class="math display">\[
 \boxed{
@@ -1378,7 +1376,11 @@ q.
 2\\0\\0
 \end{bmatrix}\\
 \mathbf 0_3^{\mathsf T}&amp;1
-\end{bmatrix}
+\end{bmatrix}.
+\]</span></p>
+<p>Since <span class="math inline">\(\mathbf R_z(\pi/2)[2\;0\;0]^{\mathsf T}=[0\;2\;0]^{\mathsf T}\)</span>, the product becomes</p>
+<p><span class="math display">\[
+\mathbf T_{\Delta,1}\mathbf M
 =
 \begin{bmatrix}
 \mathbf R_z(\pi/2)&amp;

@@ -27,6 +27,7 @@ add_library(${PROJECT_NAME}
   src/transform3.cpp
   src/lie_algebra.cpp
   src/planar_geometry.cpp
+  src/joint_limits.cpp
 )
 
 
@@ -165,6 +166,14 @@ if(BUILD_TESTING)
   )
 
   target_link_libraries(test_planar_geometry
+    ${PROJECT_NAME}
+  )
+
+  ament_add_gtest(test_joint_limits
+    test/test_joint_limits.cpp
+  )
+
+  target_link_libraries(test_joint_limits
     ${PROJECT_NAME}
   )
 
