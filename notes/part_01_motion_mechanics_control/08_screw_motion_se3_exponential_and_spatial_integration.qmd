@@ -468,7 +468,7 @@ $$
 
 Figure @fig-revolute-spatial-velocity-field fixes one instant with ${}^{a}\mathbf s=[0\;0\;1]^{\mathsf T}$, $\theta_j=\pi/6$ measured from the illustrated $+x_a$ ray, and $\dot\theta_j>0$. The cross-section is perpendicular to the joint axis. The copy of ${}^{a}\boldsymbol\nu$ that begins at $P$ and the rotational contribution ${}^{a}\boldsymbol\omega\times{}^{a}\mathbf p_P$ are placed head to tail; their sum is ${}^{a}\mathbf v_P$, which is tangent to the circular path about the axis. The same velocity field evaluates to ${}^{a}\boldsymbol\nu$ at $O_a$ and to $\mathbf 0_3$ at the selected axis point ${}^{a}\mathbf p_{\ell}$.
 
-![Velocity-field construction for pure revolute motion about an axis line offset from the fixed-frame origin.](figures/revolute_spatial_velocity_field.svg){#fig-revolute-spatial-velocity-field width=100% fig-pos="H"}
+![Velocity-field construction for pure revolute motion about an axis line offset from the fixed-frame origin.](../figures/revolute_spatial_velocity_field.svg){#fig-revolute-spatial-velocity-field width=100% fig-pos="H"}
 
 Define the joint-induced spatial twist, referred to frame $\{a\}$, by ${}^{a}\boldsymbol\xi:=[({}^{a}\boldsymbol\nu)^{\mathsf T}\;({}^{a}\boldsymbol\omega)^{\mathsf T}]^{\mathsf T}\in\mathbb R^6$. The **normalised revolute screw-axis coordinate column** ${}^{a}\mathbf S_R\in\mathbb R^6$ is the column that maps the revolute joint rate to this spatial twist:
 
@@ -580,7 +580,7 @@ The first term is the rotational velocity about the axis line and is tangent to 
 
 Figure @fig-helical-motion-fixed-angle fixes one instant with $\theta_j=\pi/2$, $\dot\theta_j>0$, and positive pitch $h>0$. The body-fixed point $P$ has rotated through one quarter-turn and advanced by $h\theta_j$ along the oriented axis. Its rotational velocity about the line and its axial velocity are placed head to tail to produce the tangent velocity ${}^{a}\mathbf v_P$. A body-fixed point currently on the axis has no circular velocity contribution, but it retains the axial velocity $h{}^{a}\mathbf s\dot\theta_j$ and is therefore not stationary.
 
-![Helical motion at a fixed joint angle, showing axial displacement and the instantaneous velocity components.](figures/helical_motion_fixed_angle.svg){#fig-helical-motion-fixed-angle width=100% fig-pos="H"}
+![Helical motion at a fixed joint angle, showing axial displacement and the instantaneous velocity components.](../figures/helical_motion_fixed_angle.svg){#fig-helical-motion-fixed-angle width=100% fig-pos="H"}
 
 Hence the normalised helical screw-axis coordinates are
 
@@ -1923,7 +1923,7 @@ $$
 
 The construction in @fig-linear-screw-coefficient-decomposition uses ${}^{a}\mathbf s_\omega=\mathbf e_z$, ${}^{a}\mathbf p_\ell=3\mathbf e_x\,\mathrm m$, $h=1\,\mathrm{m\,rad^{-1}}$, and a $58^\circ$ oblique view to show the vector sum and its cancellation at the axis point.
 
-![Decomposition of the linear screw coefficient into the offset-axis and pitch contributions, with their cancellation at a point on the screw axis.](figures/linear_screw_coefficient_decomposition.svg){#fig-linear-screw-coefficient-decomposition width=100% fig-pos="H"}
+![Decomposition of the linear screw coefficient into the offset-axis and pitch contributions, with their cancellation at a point on the screw axis.](../figures/linear_screw_coefficient_decomposition.svg){#fig-linear-screw-coefficient-decomposition width=100% fig-pos="H"}
 
 The first term is perpendicular to the axis: it accounts for rotation about a line that is offset from $O_a$ and contributes no motion along that line. The second term is parallel to the axis and has signed magnitude $h$ because ${}^{a}\mathbf s_\omega$ is a unit column. Therefore projecting ${}^{a}\mathbf s_v$ onto the axis removes the perpendicular offset contribution and retains only the signed axial displacement per radian:
 

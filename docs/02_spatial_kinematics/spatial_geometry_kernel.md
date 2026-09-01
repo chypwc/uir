@@ -4,7 +4,7 @@
 
 The active capability is a deterministic, library-independent spatial geometry kernel. It answers the Phase 1 question: given frame-labelled rotations, rigid transformations, twists, or planar poses, what geometrically valid result follows from the reviewed $SO(3)$ and $SE(3)$ model, and when must the calculation fail rather than return a plausible-looking value?
 
-The prerequisite theory is documented and reviewed in [Degrees of Freedom and Spatial Motion: $SO(3)$ and $SE(3)$](../../notes/07_degrees_of_freedom_and_spatial_motion_so3_se3.qmd) and [Screw Motion, the $SE(3)$ Exponential, and Spatial Integration](../../notes/08_screw_motion_se3_exponential_and_spatial_integration.qmd). Those chapters own the derivations; this specification freezes the minimum implementation contract and its independent acceptance evidence.
+The prerequisite theory is documented and reviewed in [Degrees of Freedom and Spatial Motion: $SO(3)$ and $SE(3)$](../../notes/part_01_motion_mechanics_control/07_degrees_of_freedom_and_spatial_motion_so3_se3.qmd) and [Screw Motion, the $SE(3)$ Exponential, and Spatial Integration](../../notes/part_01_motion_mechanics_control/08_screw_motion_se3_exponential_and_spatial_integration.qmd). Those chapters own the derivations; this specification freezes the minimum implementation contract and its independent acceptance evidence.
 
 ## Intended behaviour
 
@@ -572,4 +572,4 @@ These concerns belong to later capability cycles or explicit interoperability la
 
 ## Gate to implementation
 
-Implementation may begin after the user reviews and approves this minimum specification. At that point, create and review the first substantive block of `notes/09_spatial_geometry_kernel_implementation.qmd` alongside the first manageable C++ package block; do not treat an empty placeholder as implementation evidence.
+Implementation may begin after the user reviews and approves this minimum specification. At that point, create and review the first substantive block of `notes/part_01_motion_mechanics_control/09_spatial_geometry_kernel_implementation.qmd` alongside the first manageable C++ package block; do not treat an empty placeholder as implementation evidence.

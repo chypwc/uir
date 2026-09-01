@@ -1260,7 +1260,7 @@ $$
 
 For the drawing, place the tail of these direction vectors at a common coordinate origin $O$ and call the tip of $\mathbf r_i$ point $P_i$. The point $P_i$ is a graphical endpoint, not necessarily a material point on the body. Let $C_i$ be the tip of $\mathbf r_{i,\parallel}$. The segment from $C_i$ to $P_i$ represents $\mathbf r_{i,\perp}$ and is perpendicular to the angular-velocity direction.
 
-![Angular velocity and the motion of one orientation-matrix column. The solid vector $\mathbf r_1$ is the first column of $\mathbf R_{wb}$; the dashed vectors $\mathbf r_2$ and $\mathbf r_3$ are its other columns.](figures/spatial_angular_velocity_geometry.svg){#fig-so3-body-axis-angular-velocity width=88%}
+![Angular velocity and the motion of one orientation-matrix column. The solid vector $\mathbf r_1$ is the first column of $\mathbf R_{wb}$; the dashed vectors $\mathbf r_2$ and $\mathbf r_3$ are its other columns.](../figures/spatial_angular_velocity_geometry.svg){#fig-so3-body-axis-angular-velocity width=88%}
 
 The figure is a two-dimensional projection of three-dimensional geometry. The orange radius vector $\mathbf r_{1,\perp}$, whose length is $\rho_1$, is perpendicular to $\boldsymbol\omega_w$, and $\dot{\mathbf r}_1$ is perpendicular to $\mathbf r_{1,\perp}$ in three dimensions. The right-angle marker at $P_1$ therefore appears skewed in the projection even though it denotes a true three-dimensional right angle.
 
@@ -2339,7 +2339,7 @@ $$
 
 @fig-so3-rodrigues-vector-decomposition illustrates this decomposition for $\mathbf a_w=\mathbf e_z$. The parallel component remains unchanged. In the plane perpendicular to $\mathbf a_w$, the vectors $\mathbf y_{\perp}$ and $\mathbf a_w\times\mathbf y_{\perp}$ are perpendicular and have equal length, so the coefficients $\cos\alpha$ and $\sin\alpha$ rotate $\mathbf y_{\perp}$ through angle $\alpha$ according to the right-hand rule.
 
-![Geometric interpretation of Rodrigues' formula for the example axis $\mathbf a_w=\mathbf e_z$. The vector's parallel component remains fixed while its perpendicular component rotates through $\alpha$.](figures/rodrigues_vector_decomposition.svg){#fig-so3-rodrigues-vector-decomposition width=90%}
+![Geometric interpretation of Rodrigues' formula for the example axis $\mathbf a_w=\mathbf e_z$. The vector's parallel component remains fixed while its perpendicular component rotates through $\alpha$.](../figures/rodrigues_vector_decomposition.svg){#fig-so3-rodrigues-vector-decomposition width=90%}
 
 ### Euler's rotation theorem: every spatial rotation has an axis {#sec-so3-euler-rotation-theorem}
 

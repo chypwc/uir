@@ -4,7 +4,7 @@
 
 The complete capability will provide reusable forward and velocity kinematics for fixed-base open serial chains. This first specification increment owns only Cycle 1: validated space-form product-of-exponentials forward kinematics. Given one fixed serial-chain model and one allowed joint-coordinate column, the operation shall return the pose of the selected end-effector frame relative to the fixed space frame or fail explicitly without returning a plausible-looking pose.
 
-The reviewed theory is documented in [General Robot Kinematics and Jacobians](../../notes/10_general_robot_kinematics_and_jacobians.qmd), especially the section on serial-chain pose through products of exponentials. The existing [Spatial Geometry Kernel Capability Specification](spatial_geometry_kernel.md) owns validated $SO(3)$ and $SE(3)$ representations, the linear-first hat map, the $SE(3)$ exponential, transformation composition, numerical policy, and unit-aware pose comparison. This specification reuses those operations rather than redefining them.
+The reviewed theory is documented in [General Robot Kinematics and Jacobians](../../notes/part_01_motion_mechanics_control/10_general_robot_kinematics_and_jacobians.qmd), especially the section on serial-chain pose through products of exponentials. The existing [Spatial Geometry Kernel Capability Specification](spatial_geometry_kernel.md) owns validated $SO(3)$ and $SE(3)$ representations, the linear-first hat map, the $SE(3)$ exponential, transformation composition, numerical policy, and unit-aware pose comparison. This specification reuses those operations rather than redefining them.
 
 ## Intended behaviour
 

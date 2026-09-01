@@ -213,7 +213,7 @@ The implementation avoids evaluating $v/\omega$, which would be undefined when $
 @dataclass(frozen=True, slots=True)
 class PlanarPose:
     """Pose of the robot's axle midpoint in the world frame.
-    
+
     Attributes:
         position_x_m: World-frame x-coordinate in metres.
         position_y_m: World-frame y-coordinate in metres.
@@ -224,7 +224,7 @@ class PlanarPose:
     position_x_m: float
     position_y_m: float
     heading_rad: float
-    
+
 
 def _sinc(value: float) -> float:
     """Return the unnormalised sinc function, including its value at zero."""

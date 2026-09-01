@@ -1,0 +1,2197 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-AU" xml:lang="en-AU"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>2&nbsp; Geometry and Coordinate Frames – Understanding Intelligence Through Robotics</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../part_01_motion_mechanics_control/03_kinematics_and_numerical_integration.html" rel="next">
+<link href="../part_01_motion_mechanics_control/01_linear_algebra_foundations.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-0a6b7249c26820e032cb0bd839ff02b1.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-6b4ca53971d8dc7d9276afc35a4f526f.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-12ba8748c5d8fcf0bac24d3d70cd9353.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-6b4ca53971d8dc7d9276afc35a4f526f.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Understanding Intelligence Through Robotics</span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools tools-end">
+    <a href="../Understanding-Intelligence-Through-Robotics.pdf" title="Download PDF" class="quarto-navigation-tool px-1" aria-label="Download PDF"><i class="bi bi-file-pdf"></i></a>
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part_01_motion_mechanics_control/01_linear_algebra_foundations.html"><span>Part I:</span> Motion, Mechanics, and Control</a></li><li class="breadcrumb-item"><a href="../part_01_motion_mechanics_control/02_geometry_and_coordinate_frames.html"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Geometry and Coordinate Frames</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../notation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Unified Notation and Conventions</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text"><span>Part I:</span> Motion, Mechanics, and Control</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part_01_motion_mechanics_control/01_linear_algebra_foundations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Linear Algebra Foundations</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part_01_motion_mechanics_control/02_geometry_and_coordinate_frames.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Geometry and Coordinate Frames</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part_01_motion_mechanics_control/03_kinematics_and_numerical_integration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Differential-Drive Kinematics and Numerical Integration: Model and Derivation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part_01_motion_mechanics_control/04_kinematics_and_numerical_integration_implementation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Differential-Drive Kinematics and Numerical Integration: Implementation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part_01_motion_mechanics_control/05_ros2_packages_and_development_workflow.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">ROS 2 Package Development Workflow</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part_01_motion_mechanics_control/06_planar_rigid_body_motion_se2_and_twists.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Planar Rigid-Body Motion: <span class="math inline">\(SE(2)\)</span> and Twists</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part_01_motion_mechanics_control/07_degrees_of_freedom_and_spatial_motion_so3_se3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Degrees of Freedom and Spatial Motion: <span class="math inline">\(SO(3)\)</span> and <span class="math inline">\(SE(3)\)</span></span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part_01_motion_mechanics_control/08_screw_motion_se3_exponential_and_spatial_integration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Screw Motion, the <span class="math inline">\(SE(3)\)</span> Exponential, and Spatial Pose Integration</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part_01_motion_mechanics_control/09_spatial_geometry_kernel_implementation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Spatial Geometry Kernel Implementation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part_01_motion_mechanics_control/10_general_robot_kinematics_and_jacobians.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">General Robot Kinematics and Jacobians</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text"><span>Part II:</span> Probability and Estimation</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part_02_probability_estimation/finite_markov_chains.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Finite Markov Chains</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#why-coordinate-frames-matter" id="toc-why-coordinate-frames-matter" class="nav-link active" data-scroll-target="#why-coordinate-frames-matter">Why coordinate frames matter</a></li>
+  <li><a href="#prerequisites-and-assumptions" id="toc-prerequisites-and-assumptions" class="nav-link" data-scroll-target="#prerequisites-and-assumptions">Prerequisites and assumptions</a>
+  <ul class="collapse">
+  <li><a href="#prerequisites" id="toc-prerequisites" class="nav-link" data-scroll-target="#prerequisites">Prerequisites</a></li>
+  <li><a href="#assumptions" id="toc-assumptions" class="nav-link" data-scroll-target="#assumptions">Assumptions</a></li>
+  </ul></li>
+  <li><a href="#dependency-map" id="toc-dependency-map" class="nav-link" data-scroll-target="#dependency-map">Dependency map</a></li>
+  <li><a href="#cross-product-and-rigid-body-velocity" id="toc-cross-product-and-rigid-body-velocity" class="nav-link" data-scroll-target="#cross-product-and-rigid-body-velocity"><span class="header-section-number">2.1</span> Cross product and rigid-body velocity</a>
+  <ul class="collapse">
+  <li><a href="#example-velocity-of-a-point-on-a-rotating-rigid-body" id="toc-example-velocity-of-a-point-on-a-rotating-rigid-body" class="nav-link" data-scroll-target="#example-velocity-of-a-point-on-a-rotating-rigid-body"><span class="header-section-number">2.1.1</span> Example: velocity of a point on a rotating rigid body</a></li>
+  </ul></li>
+  <li><a href="#quick-test-a-cross-products-and-rigid-body-velocity" id="toc-quick-test-a-cross-products-and-rigid-body-velocity" class="nav-link" data-scroll-target="#quick-test-a-cross-products-and-rigid-body-velocity">Quick test A: cross products and rigid-body velocity</a>
+  <ul class="collapse">
+  <li><a href="#answers-and-hints" id="toc-answers-and-hints" class="nav-link" data-scroll-target="#answers-and-hints">Answers and hints</a></li>
+  </ul></li>
+  <li><a href="#coordinate-frames" id="toc-coordinate-frames" class="nav-link" data-scroll-target="#coordinate-frames"><span class="header-section-number">2.2</span> Coordinate frames</a>
+  <ul class="collapse">
+  <li><a href="#what-defines-a-frame" id="toc-what-defines-a-frame" class="nav-link" data-scroll-target="#what-defines-a-frame"><span class="header-section-number">2.2.1</span> What defines a frame?</a></li>
+  <li><a href="#orientation-convention" id="toc-orientation-convention" class="nav-link" data-scroll-target="#orientation-convention"><span class="header-section-number">2.2.2</span> Orientation convention</a></li>
+  <li><a href="#points-require-translation" id="toc-points-require-translation" class="nav-link" data-scroll-target="#points-require-translation"><span class="header-section-number">2.2.3</span> Points require translation</a></li>
+  </ul></li>
+  <li><a href="#worked-frame-change-example" id="toc-worked-frame-change-example" class="nav-link" data-scroll-target="#worked-frame-change-example"><span class="header-section-number">2.3</span> Worked frame-change example</a>
+  <ul class="collapse">
+  <li><a href="#interactive-frame-rotation-graph" id="toc-interactive-frame-rotation-graph" class="nav-link" data-scroll-target="#interactive-frame-rotation-graph"><span class="header-section-number">2.3.1</span> Interactive frame-rotation graph</a></li>
+  </ul></li>
+  <li><a href="#differential-drive-interpretation" id="toc-differential-drive-interpretation" class="nav-link" data-scroll-target="#differential-drive-interpretation"><span class="header-section-number">2.4</span> Differential-drive interpretation</a></li>
+  <li><a href="#failure-modes-and-engineering-checks" id="toc-failure-modes-and-engineering-checks" class="nav-link" data-scroll-target="#failure-modes-and-engineering-checks"><span class="header-section-number">2.5</span> Failure modes and engineering checks</a>
+  <ul class="collapse">
+  <li><a href="#missing-frame-labels" id="toc-missing-frame-labels" class="nav-link" data-scroll-target="#missing-frame-labels"><span class="header-section-number">2.5.1</span> Missing frame labels</a></li>
+  <li><a href="#reversed-transformation" id="toc-reversed-transformation" class="nav-link" data-scroll-target="#reversed-transformation"><span class="header-section-number">2.5.2</span> Reversed transformation</a></li>
+  <li><a href="#mixed-units" id="toc-mixed-units" class="nav-link" data-scroll-target="#mixed-units"><span class="header-section-number">2.5.3</span> Mixed units</a></li>
+  <li><a href="#point-vector-confusion" id="toc-point-vector-confusion" class="nav-link" data-scroll-target="#point-vector-confusion"><span class="header-section-number">2.5.4</span> Point-vector confusion</a></li>
+  <li><a href="#invalid-numerical-rotation" id="toc-invalid-numerical-rotation" class="nav-link" data-scroll-target="#invalid-numerical-rotation"><span class="header-section-number">2.5.5</span> Invalid numerical rotation</a></li>
+  </ul></li>
+  <li><a href="#quick-test-b-coordinate-frames-and-rotations" id="toc-quick-test-b-coordinate-frames-and-rotations" class="nav-link" data-scroll-target="#quick-test-b-coordinate-frames-and-rotations">Quick test B: coordinate frames and rotations</a>
+  <ul class="collapse">
+  <li><a href="#answers-and-hints-1" id="toc-answers-and-hints-1" class="nav-link" data-scroll-target="#answers-and-hints-1">Answers and hints</a></li>
+  </ul></li>
+  <li><a href="#cumulative-chapter-test" id="toc-cumulative-chapter-test" class="nav-link" data-scroll-target="#cumulative-chapter-test">Cumulative chapter test</a>
+  <ul class="collapse">
+  <li><a href="#cumulative-answers-and-hints" id="toc-cumulative-answers-and-hints" class="nav-link" data-scroll-target="#cumulative-answers-and-hints">Cumulative answers and hints</a></li>
+  </ul></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part_01_motion_mechanics_control/01_linear_algebra_foundations.html"><span>Part I:</span> Motion, Mechanics, and Control</a></li><li class="breadcrumb-item"><a href="../part_01_motion_mechanics_control/02_geometry_and_coordinate_frames.html"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Geometry and Coordinate Frames</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span id="sec-geometry-coordinate-frames" class="quarto-section-identifier"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Geometry and Coordinate Frames</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="why-coordinate-frames-matter" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="why-coordinate-frames-matter">Why coordinate frames matter</h2>
+<p>A robot represents positions, directions, velocities, measurements, and commands with numbers. Those numbers acquire physical meaning only when their coordinate frame and units are known. A controller that combines quantities expressed in incompatible frames can perform a mathematically valid calculation and produce a physically incorrect command.</p>
+<p>Coordinate-frame methods allow us to:</p>
+<ul>
+<li>represent a robot’s pose relative to a world frame;</li>
+<li>distinguish world-frame and body-frame quantities;</li>
+<li>transform sensor measurements into a shared frame;</li>
+<li>express target and tracking errors consistently;</li>
+<li>convert body-relative motion into world-relative motion; and</li>
+<li>detect invalid transformations before they reach a controller.</li>
+</ul>
+<p>The central rule is simple: interpret every coordinate column together with the frame in which it is expressed.</p>
+</section>
+<section id="prerequisites-and-assumptions" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="prerequisites-and-assumptions">Prerequisites and assumptions</h2>
+<section id="prerequisites" class="level3 unnumbered">
+<h3 class="unnumbered anchored" data-anchor-id="prerequisites">Prerequisites</h3>
+<p>The reader should understand the material in <a href="01_linear_algebra_foundations.html" class="quarto-xref"><span>Chapter 1</span></a>, especially:</p>
+<ul>
+<li>geometric vectors and coordinate columns;</li>
+<li>dot products, norms, and orthogonality;</li>
+<li>matrices as linear maps and compositions;</li>
+<li>linear independence, rank, and inverses;</li>
+<li>determinants and signed orientation; and</li>
+<li>orthogonal matrices.</li>
+</ul>
+<p>The reader should also be comfortable with sine, cosine, and angles measured in radians.</p>
+</section>
+<section id="assumptions" class="level3 unnumbered">
+<h3 class="unnumbered anchored" data-anchor-id="assumptions">Assumptions</h3>
+<ul>
+<li>Physical space is modelled as Euclidean space.</li>
+<li>Robot links and sensor mounts are treated as rigid bodies.</li>
+<li>Coordinate frames are right-handed and use orthonormal basis vectors.</li>
+<li>Length is measured in metres, time in seconds, and angles in radians.</li>
+<li>Coordinate vectors are written as columns.</li>
+<li>Numerical examples ignore measurement noise unless stated otherwise.</li>
+</ul>
+<p>These idealisations isolate the geometry. A physical robot also introduces measurement noise, calibration error, structural compliance, and model mismatch.</p>
+</section>
+</section>
+<section id="dependency-map" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="dependency-map">Dependency map</h2>
+<pre class="text"><code>Linear algebra foundations
+        |
+        v
+Cross products and rigid-body velocity
+        |
+        v
+Coordinate frames and units
+        |
+        v
+Rotation matrices
+        |
+        v
+Point transformations
+        |
+        v
+Differential-drive motion and feedback control</code></pre>
+</section>
+<section id="cross-product-and-rigid-body-velocity" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="cross-product-and-rigid-body-velocity"><span class="header-section-number">2.1</span> Cross product and rigid-body velocity</h2>
+<p>Let <span class="math inline">\(\mathbf u\)</span> and <span class="math inline">\(\mathbf v\)</span> be geometric vectors with coordinate columns <span class="math inline">\({}^{a}\mathbf u,{}^{a}\mathbf v\in\mathbb R^3\)</span> expressed in the same right-handed orthonormal frame <span class="math inline">\(\{a\}\)</span>. Their cross product, expressed in frame <span class="math inline">\(\{a\}\)</span>, is defined by</p>
+<p><span class="math display">\[
+{}^{a}\mathbf{u}\times{}^{a}\mathbf{v}
+=
+\begin{bmatrix}
+u_yv_z-u_zv_y \\
+u_zv_x-u_xv_z \\
+u_xv_y-u_yv_x
+\end{bmatrix}
+\in\mathbb R^3.
+\]</span></p>
+<p>Its direction follows the right-hand rule. If both vectors are nonzero, let <span class="math inline">\(\theta\in[0,\pi]\)</span> be the smaller angle between them. The cross-product magnitude is</p>
+<p><span class="math display">\[
+\left\|{}^{a}\mathbf{u}\times{}^{a}\mathbf{v}\right\|_2
+=
+\|\mathbf{u}\|_2\|\mathbf{v}\|_2\sin\theta.
+\]</span></p>
+<p>The cross product is perpendicular to both input vectors because</p>
+<p><span class="math display">\[
+{}^{a}\mathbf{u}^\mathsf{T}
+\left({}^{a}\mathbf{u}\times{}^{a}\mathbf{v}\right)=0,
+\qquad
+{}^{a}\mathbf{v}^\mathsf{T}
+\left({}^{a}\mathbf{u}\times{}^{a}\mathbf{v}\right)=0.
+\]</span></p>
+<section id="example-velocity-of-a-point-on-a-rotating-rigid-body" class="level3" data-number="2.1.1">
+<h3 data-number="2.1.1" class="anchored" data-anchor-id="example-velocity-of-a-point-on-a-rotating-rigid-body"><span class="header-section-number">2.1.1</span> Example: velocity of a point on a rotating rigid body</h3>
+<p>Let <span class="math inline">\(O\)</span> and <span class="math inline">\(P\)</span> be two points fixed to the same rigid body. Point <span class="math inline">\(O\)</span> is the chosen reference point; it need not be stationary, and it need not be the body’s centre. The vector <span class="math inline">\({}^{a}\mathbf{r}_{OP}\)</span> runs from <span class="math inline">\(O\)</span> to <span class="math inline">\(P\)</span>. Although this vector is fixed relative to the body, its coordinates generally change as the body rotates. Express every quantity in the same orthonormal frame <span class="math inline">\(\{a\}\)</span>:</p>
+<ul>
+<li><span class="math inline">\({}^{a}\boldsymbol{\omega}\)</span> as the body’s angular-velocity vector, measured in <span class="math inline">\(\mathrm{rad\,s^{-1}}\)</span>;</li>
+<li><span class="math inline">\({}^{a}\mathbf{r}_{OP}\)</span> as the position of <span class="math inline">\(P\)</span> relative to <span class="math inline">\(O\)</span>, measured in <span class="math inline">\(\mathrm{m}\)</span>;</li>
+<li><span class="math inline">\({}^{a}\mathbf{v}_O\)</span> as the linear velocity of <span class="math inline">\(O\)</span>, measured in <span class="math inline">\(\mathrm{m\,s^{-1}}\)</span>; and</li>
+<li><span class="math inline">\({}^{a}\mathbf{v}_P\)</span> as the linear velocity of <span class="math inline">\(P\)</span>, measured in <span class="math inline">\(\mathrm{m\,s^{-1}}\)</span>.</li>
+</ul>
+<p>At any instant, the motion of <span class="math inline">\(P\)</span> can be understood as the sum of two simultaneous contributions:</p>
+<ol type="1">
+<li><strong>Translation with <span class="math inline">\(O\)</span>.</strong> If the body were not rotating, <span class="math inline">\(P\)</span> would share the reference-point velocity <span class="math inline">\({}^{a}\mathbf v_O\)</span>.</li>
+<li><strong>Motion relative to <span class="math inline">\(O\)</span> caused by rotation.</strong> Rotation adds a velocity whose direction and magnitude depend on <span class="math inline">\({}^{a}\boldsymbol{\omega}\)</span> and <span class="math inline">\({}^{a}\mathbf r_{OP}\)</span>.</li>
+</ol>
+<p>The angular-velocity vector points along the instantaneous rotation axis according to the right-hand rule, and its magnitude is the angular speed. Define the rotational contribution to the velocity of <span class="math inline">\(P\)</span> by</p>
+<p><span class="math display">\[
+{}^{a}\mathbf{v}_{P/O}
+\mathrel{:=}
+{}^{a}\boldsymbol{\omega}\times{}^{a}\mathbf{r}_{OP}.
+\]</span></p>
+<p>The cross product determines both the direction and the magnitude of this contribution. In particular,</p>
+<p><span class="math display">\[
+{}^{a}\boldsymbol{\omega}^{\mathsf T}{}^{a}\mathbf{v}_{P/O}=0,
+\qquad
+{}^{a}\mathbf{r}_{OP}^{\mathsf T}{}^{a}\mathbf{v}_{P/O}=0.
+\]</span></p>
+<p>Therefore, <span class="math inline">\({}^{a}\mathbf{v}_{P/O}\)</span> is perpendicular to the rotation axis and to <span class="math inline">\({}^{a}\mathbf r_{OP}\)</span>. It points tangent to the instantaneous circular path generated by the rotation. Adding the translational and rotational contributions gives the rigid-body velocity relation</p>
+<p><span class="math display">\[
+\boxed{
+{}^{a}\mathbf{v}_P
+=
+{}^{a}\mathbf{v}_O
++{}^{a}\boldsymbol{\omega}\times{}^{a}\mathbf{r}_{OP}
+}.
+\]</span></p>
+<section id="velocity-vector-construction" class="level4">
+<h4 class="anchored" data-anchor-id="velocity-vector-construction">Velocity-vector construction</h4>
+<p>The construction in <a href="#fig-rigid-body-point-velocity" class="quarto-xref">Figure&nbsp;<span>2.1</span></a> shows this addition for one instant:</p>
+<ul>
+<li>The green arrow <span class="math inline">\({}^{a}\mathbf r_{OP}\)</span> locates <span class="math inline">\(P\)</span> relative to <span class="math inline">\(O\)</span>.</li>
+<li>The magenta arrow is the reference-point velocity <span class="math inline">\({}^{a}\mathbf v_O\)</span>. It is deliberately not parallel to <span class="math inline">\({}^{a}\mathbf r_{OP}\)</span>.</li>
+<li>The orange arrow is the rotational contribution <span class="math inline">\({}^{a}\boldsymbol{\omega}\times{}^{a}\mathbf r_{OP}={}^{a}\mathbf v_{P/O}\)</span>. The right-angle marker shows that it is perpendicular to <span class="math inline">\({}^{a}\mathbf r_{OP}\)</span>.</li>
+<li>The dashed arrows are translated copies of the two velocity contributions. Moving a vector without rotating or resizing it does not change the vector, so the copies can be arranged head to tail.</li>
+<li>The blue arrow joins the beginning of the first contribution to the end of the second. It is therefore the resultant velocity <span class="math inline">\({}^{a}\mathbf v_P\)</span>.</li>
+</ul>
+<p>In this planar view, <span class="math inline">\({}^{a}\boldsymbol{\omega}\)</span> points along <span class="math inline">\(+z_a\)</span>, out of the page. The right-hand rule then gives the displayed tangential direction for <span class="math inline">\({}^{a}\boldsymbol{\omega}\times{}^{a}\mathbf r_{OP}\)</span>. Notice that only the rotational contribution must be perpendicular to <span class="math inline">\({}^{a}\mathbf r_{OP}\)</span>. The total velocity <span class="math inline">\({}^{a}\mathbf v_P\)</span> generally is not, because <span class="math inline">\({}^{a}\mathbf v_O\)</span> may point in any direction.</p>
+<div id="fig-rigid-body-point-velocity" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-pos="H">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-rigid-body-point-velocity-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../figures/rigid_body_point_velocity.svg" class="img-fluid figure-img" style="width:100.0%" data-fig-pos="H">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-rigid-body-point-velocity-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2.1: Velocity construction for two points on a rigid body. The rotational contribution is perpendicular to the position vector, while the reference-point velocity is independent of that perpendicular relationship.
+</figcaption>
+</figure>
+</div>
+<p>For pure rotation about a fixed axis through <span class="math inline">\(O\)</span>, the reference point is stationary, so <span class="math inline">\({}^{a}\mathbf{v}_O=\mathbf{0}\)</span>. Therefore,</p>
+<p><span class="math display">\[
+\boxed{{}^{a}\mathbf{v}_P
+=
+{}^{a}\boldsymbol{\omega}\times{}^{a}\mathbf{r}_{OP}}.
+\]</span></p>
+<p>If <span class="math inline">\(\phi\)</span> is the angle between <span class="math inline">\({}^{a}\boldsymbol{\omega}\)</span> and <span class="math inline">\({}^{a}\mathbf{r}_{OP}\)</span>, then the relative speed caused by rotation is</p>
+<p><span class="math display">\[
+\left\|{}^{a}\mathbf{v}_{P/O}\right\|_2
+=
+\left\|{}^{a}\boldsymbol{\omega}\right\|_2
+\left\|{}^{a}\mathbf{r}_{OP}\right\|_2
+\sin\phi
+=
+\omega r_\perp,
+\]</span></p>
+<p>where <span class="math inline">\(r_\perp\)</span> is the perpendicular distance from <span class="math inline">\(P\)</span> to the rotation axis. A point on the axis has <span class="math inline">\(r_\perp=0\)</span> and therefore has no relative linear velocity due to rotation. Under the pure-rotation assumption, <span class="math inline">\({}^{a}\mathbf{v}_P={}^{a}\mathbf{v}_{P/O}\)</span>.</p>
+<p>For planar counter-clockwise rotation about the positive <span class="math inline">\(z\)</span>-axis,</p>
+<p><span class="math display">\[
+{}^{a}\boldsymbol{\omega}
+=
+\begin{bmatrix}
+0\\0\\\omega
+\end{bmatrix},
+\qquad
+{}^{a}\mathbf{r}_{OP}
+=
+\begin{bmatrix}
+x\\y\\0
+\end{bmatrix}.
+\]</span></p>
+<p>The point velocity is</p>
+<p><span class="math display">\[
+{}^{a}\mathbf{v}_P
+=
+{}^{a}\boldsymbol{\omega}\times{}^{a}\mathbf{r}_{OP}
+=
+\begin{bmatrix}
+-\omega y\\
+\omega x\\
+0
+\end{bmatrix}.
+\]</span></p>
+<p>For example, if <span class="math inline">\(\omega=2\,\mathrm{rad\,s^{-1}}\)</span> and <span class="math inline">\({}^{a}\mathbf{r}_{OP}=[0.5\;\;0\;\;0]^\mathsf{T}\,\mathrm{m}\)</span>, then</p>
+<p><span class="math display">\[
+{}^{a}\mathbf{v}_P
+=
+\begin{bmatrix}
+0\\1\\0
+\end{bmatrix}
+\mathrm{m\,s^{-1}}.
+\]</span></p>
+<p>The point lies on the positive <span class="math inline">\(x\)</span>-axis, while its instantaneous velocity points along the positive <span class="math inline">\(y\)</span>-axis, tangent to its circular path.</p>
+</section>
+</section>
+</section>
+<section id="quick-test-a-cross-products-and-rigid-body-velocity" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="quick-test-a-cross-products-and-rigid-body-velocity">Quick test A: cross products and rigid-body velocity</h2>
+<ol type="1">
+<li><strong>Recall:</strong> What rule determines the direction of <span class="math inline">\(\mathbf u\times\mathbf v\)</span>?</li>
+<li><strong>Explanation:</strong> Why is <span class="math inline">\(\mathbf u\times\mathbf v\)</span> perpendicular to both input vectors?</li>
+<li><strong>Derivation:</strong> Substitute the component formula for <span class="math inline">\({}^{a}\mathbf u\times{}^{a}\mathbf v\)</span> into <span class="math inline">\({}^{a}\mathbf u^{\mathsf T}({}^{a}\mathbf u\times{}^{a}\mathbf v)\)</span> and show that the terms cancel.</li>
+<li><strong>Application:</strong> Compute <span class="math inline">\([1\;\;2\;\;0]^\mathsf T\times[0\;\;1\;\;0]^\mathsf T\)</span>.</li>
+<li><strong>Limitations:</strong> What happens to the cross product when the input vectors are parallel, and why does that prevent it from defining a unique normal direction?</li>
+<li><strong>Transfer:</strong> At one instant, a rigid body has <span class="math inline">\({}^{a}\boldsymbol{\omega}=[0\;\;0\;\;2]^\mathsf{T}\,\mathrm{rad\,s^{-1}}\)</span>, <span class="math inline">\({}^{a}\mathbf r_{OP}=[1\;\;0\;\;0]^\mathsf{T}\,\mathrm{m}\)</span>, and <span class="math inline">\({}^{a}\mathbf v_O=[0.5\;\;0.5\;\;0]^\mathsf{T}\,\mathrm{m\,s^{-1}}\)</span>. Find <span class="math inline">\({}^{a}\mathbf v_{P/O}\)</span> and <span class="math inline">\({}^{a}\mathbf v_P\)</span>. Which velocity is perpendicular to <span class="math inline">\({}^{a}\mathbf r_{OP}\)</span>?</li>
+</ol>
+<section id="answers-and-hints" class="level3 unnumbered">
+<h3 class="unnumbered anchored" data-anchor-id="answers-and-hints">Answers and hints</h3>
+<ol type="1">
+<li>The right-hand rule, applied in the order from <span class="math inline">\(\mathbf u\)</span> to <span class="math inline">\(\mathbf v\)</span>.</li>
+<li>Its dot product with either input is zero.</li>
+<li>Expanding gives <span class="math inline">\(u_x(u_yv_z-u_zv_y)+u_y(u_zv_x-u_xv_z)+u_z(u_xv_y-u_yv_x)=0\)</span> after pairwise cancellation.</li>
+<li>The result is <span class="math inline">\([0\;\;0\;\;1]^\mathsf T\)</span>.</li>
+<li>Parallel vectors have <span class="math inline">\(\sin\theta=0\)</span>, so their cross product is the zero vector. A zero vector has no direction and therefore cannot specify a unique normal.</li>
+<li><span class="math inline">\({}^{a}\mathbf v_{P/O}=[0\;\;2\;\;0]^\mathsf T\,\mathrm{m\,s^{-1}}\)</span> and <span class="math inline">\({}^{a}\mathbf v_P=[0.5\;\;2.5\;\;0]^\mathsf T\,\mathrm{m\,s^{-1}}\)</span>. The rotational contribution is perpendicular to <span class="math inline">\({}^{a}\mathbf r_{OP}\)</span>; the total velocity is not.</li>
+</ol>
+</section>
+</section>
+<section id="coordinate-frames" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="coordinate-frames"><span class="header-section-number">2.2</span> Coordinate frames</h2>
+<section id="what-defines-a-frame" class="level3" data-number="2.2.1">
+<h3 data-number="2.2.1" class="anchored" data-anchor-id="what-defines-a-frame"><span class="header-section-number">2.2.1</span> What defines a frame?</h3>
+<p>A three-dimensional coordinate frame <span class="math inline">\(\{a\}\)</span> consists of:</p>
+<ol type="1">
+<li>an origin <span class="math inline">\(O_a\)</span>, which is the physical point from which positions in frame <span class="math inline">\(\{a\}\)</span> are measured; and</li>
+<li>three right-handed orthonormal basis vectors <span class="math inline">\(\mathbf e_{x,a}\)</span>, <span class="math inline">\(\mathbf e_{y,a}\)</span>, and <span class="math inline">\(\mathbf e_{z,a}\)</span>, which define the positive <span class="math inline">\(x_a\)</span>-, <span class="math inline">\(y_a\)</span>-, and <span class="math inline">\(z_a\)</span>-axis directions.</li>
+</ol>
+<p>The subscript <span class="math inline">\(a\)</span> associates the origin and basis vectors with frame <span class="math inline">\(\{a\}\)</span>. Orthonormal means that each basis vector has unit length and that distinct basis vectors are perpendicular. Right-handed means that <span class="math inline">\(\mathbf e_{x,a}\times\mathbf e_{y,a}=\mathbf e_{z,a}\)</span>.</p>
+<p>A free vector depends only on the basis orientation used to describe it. A point also depends on the frame origin. This distinction explains why changing the coordinate frame of a free vector requires only a rotation, whereas changing the coordinates of a point generally requires a rotation and a translation.</p>
+</section>
+<section id="orientation-convention" class="level3" data-number="2.2.2">
+<h3 data-number="2.2.2" class="anchored" data-anchor-id="orientation-convention"><span class="header-section-number">2.2.2</span> Orientation convention</h3>
+<p>Let <span class="math inline">\(\{a\}\)</span> and <span class="math inline">\(\{b\}\)</span> be three-dimensional right-handed orthonormal frames. Define <span class="math inline">\(\mathbf R_{ab}\in\mathbb R^{3\times3}\)</span> as the rotation matrix that maps coordinate columns from frame <span class="math inline">\(\{b\}\)</span> to frame <span class="math inline">\(\{a\}\)</span>. Its columns are the basis vectors of <span class="math inline">\(\{b\}\)</span> expressed in frame <span class="math inline">\(\{a\}\)</span>:</p>
+<p><span class="math display">\[
+\mathbf{R}_{ab}
+=
+\begin{bmatrix}
+{}^{a}\mathbf{e}_{x,b} &amp;
+{}^{a}\mathbf{e}_{y,b} &amp;
+{}^{a}\mathbf{e}_{z,b}
+\end{bmatrix},
+\]</span></p>
+<p>where each column <span class="math inline">\({}^{a}\mathbf e_{i,b}\in\mathbb R^3\)</span> is an axis of frame <span class="math inline">\(\{b\}\)</span> written using the basis of frame <span class="math inline">\(\{a\}\)</span>, for <span class="math inline">\(i\in\{x,y,z\}\)</span>.</p>
+<p>The following notation distinguishes a geometric vector from its coordinate representations:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Symbol</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(\mathbf v\)</span></td>
+<td>A geometric vector, independent of the coordinate frame used to describe it.</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\mathbf e_{x,b}\)</span></td>
+<td>The geometric unit vector along the positive <span class="math inline">\(x_b\)</span>-axis of frame <span class="math inline">\(\{b\}\)</span>.</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\([\mathbf v]_b={}^{b}\mathbf v\in\mathbb R^3\)</span></td>
+<td>The numerical coordinate column of <span class="math inline">\(\mathbf v\)</span> in frame <span class="math inline">\(\{b\}\)</span>.</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\([\mathbf v]_a={}^{a}\mathbf v\in\mathbb R^3\)</span></td>
+<td>The numerical coordinate column of <span class="math inline">\(\mathbf v\)</span> in frame <span class="math inline">\(\{a\}\)</span>.</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\([\mathbf e_{x,b}]_a={}^{a}\mathbf e_{x,b}\in\mathbb R^3\)</span></td>
+<td>The coordinate column of frame <span class="math inline">\(\{b\}\)</span>’s geometric <span class="math inline">\(x\)</span>-axis, expressed in frame <span class="math inline">\(\{a\}\)</span>.</td>
+</tr>
+</tbody>
+</table>
+<p>The bracket operator <span class="math inline">\([\,\cdot\,]_a\)</span> means “take the coordinate column of the enclosed geometric vector in frame <span class="math inline">\(\{a\}\)</span>.” The geometric vector <span class="math inline">\(\mathbf v\)</span> can be expanded using either frame’s basis:</p>
+<p><span class="math display">\[
+\boxed{
+\mathbf v
+=
+v_x^{(b)}\mathbf e_{x,b}
++
+v_y^{(b)}\mathbf e_{y,b}
++
+v_z^{(b)}\mathbf e_{z,b}
+=
+v_x^{(a)}\mathbf e_{x,a}
++
+v_y^{(a)}\mathbf e_{y,a}
++
+v_z^{(a)}\mathbf e_{z,a}
+}.
+\]</span></p>
+<p>Here, <span class="math inline">\(v_i^{(b)}\in\mathbb R\)</span> and <span class="math inline">\(v_i^{(a)}\in\mathbb R\)</span> are the scalar components of <span class="math inline">\(\mathbf v\)</span> along axis <span class="math inline">\(i\in\{x,y,z\}\)</span> of frames <span class="math inline">\(\{b\}\)</span> and <span class="math inline">\(\{a\}\)</span>, respectively. The corresponding coordinate columns are</p>
+<p><span class="math display">\[
+{}^{b}\mathbf v
+=
+[\mathbf v]_b
+=
+\begin{bmatrix}
+v_x^{(b)}\\
+v_y^{(b)}\\
+v_z^{(b)}
+\end{bmatrix},
+\qquad
+{}^{a}\mathbf v
+=
+[\mathbf v]_a
+=
+\begin{bmatrix}
+v_x^{(a)}\\
+v_y^{(a)}\\
+v_z^{(a)}
+\end{bmatrix}.
+\]</span></p>
+<p>Apply the coordinate operator <span class="math inline">\([\,\cdot\,]_a\)</span> to the expansion of <span class="math inline">\(\mathbf v\)</span> in the frame-<span class="math inline">\(\{b\}\)</span> basis. Because taking coordinates is a linear operation,</p>
+<p><span class="math display">\[
+[\mathbf v]_a
+=
+v_x^{(b)}[\mathbf e_{x,b}]_a
++
+v_y^{(b)}[\mathbf e_{y,b}]_a
++
+v_z^{(b)}[\mathbf e_{z,b}]_a.
+\]</span></p>
+<p>Using the equivalent superscript notation gives</p>
+<p><span class="math display">\[
+{}^{a}\mathbf v
+=
+v_x^{(b)}\,{}^{a}\mathbf e_{x,b}
++
+v_y^{(b)}\,{}^{a}\mathbf e_{y,b}
++
+v_z^{(b)}\,{}^{a}\mathbf e_{z,b}.
+\]</span></p>
+<p>Writing this linear combination as matrix-vector multiplication gives</p>
+<p><span class="math display">\[
+{}^{a}\mathbf v
+=
+\underbrace{
+\begin{bmatrix}
+{}^{a}\mathbf e_{x,b} &amp;
+{}^{a}\mathbf e_{y,b} &amp;
+{}^{a}\mathbf e_{z,b}
+\end{bmatrix}
+}_{\mathbf R_{ab}}
+\underbrace{
+\begin{bmatrix}
+v_x^{(b)}\\
+v_y^{(b)}\\
+v_z^{(b)}
+\end{bmatrix}
+}_{{}^{b}\mathbf v}.
+\]</span></p>
+<p>Therefore,</p>
+<p><span class="math display">\[
+\boxed{{}^{a}\mathbf v=\mathbf R_{ab}\,{}^{b}\mathbf v}.
+\]</span></p>
+<p>The subscript order can be read as:</p>
+<blockquote class="blockquote">
+<p><span class="math inline">\(\mathbf{R}_{ab}\)</span> maps coordinates <strong>from frame <span class="math inline">\(\{b\}\)</span> to frame <span class="math inline">\(\{a\}\)</span></strong>.</p>
+</blockquote>
+<p>The <a href="../part_01_motion_mechanics_control/01_linear_algebra_foundations.html">linear algebra foundations chapter</a> develops orthogonal matrices, determinants, and inverses in general. Applying those results to the orthonormal, right-handed columns of <span class="math inline">\(\mathbf R_{ab}\)</span> gives:</p>
+<p><span class="math display">\[
+\boxed{
+\mathbf{R}_{ab}^\mathsf{T}\mathbf{R}_{ab}=\mathbf{I}_3,
+\qquad
+\det(\mathbf{R}_{ab})=1,
+\qquad
+\mathbf{R}_{ab}^{-1}=\mathbf{R}_{ab}^\mathsf{T}=\mathbf{R}_{ba}
+}.
+\]</span></p>
+<p>The following derivations explain each property.</p>
+<section id="orthonormal-columns" class="level4">
+<h4 class="anchored" data-anchor-id="orthonormal-columns">Orthonormal columns</h4>
+<p>Let <span class="math inline">\(\mathbf r_1,\mathbf r_2,\mathbf r_3\in\mathbb R^3\)</span> denote the columns of <span class="math inline">\(\mathbf R_{ab}\)</span>:</p>
+<p><span class="math display">\[
+\mathbf R_{ab}
+=
+\begin{bmatrix}
+\mathbf r_1 &amp; \mathbf r_2 &amp; \mathbf r_3
+\end{bmatrix},
+\]</span></p>
+<p>where <span class="math inline">\(\mathbf r_1={}^{a}\mathbf e_{x,b}\)</span>, <span class="math inline">\(\mathbf r_2={}^{a}\mathbf e_{y,b}\)</span>, and <span class="math inline">\(\mathbf r_3={}^{a}\mathbf e_{z,b}\)</span>. Multiplying the transpose by the original matrix forms every pairwise dot product between these columns:</p>
+<p><span class="math display">\[
+\mathbf R_{ab}^{\mathsf T}\mathbf R_{ab}
+=
+\begin{bmatrix}
+\mathbf r_1^{\mathsf T}\mathbf r_1 &amp; \mathbf r_1^{\mathsf T}\mathbf r_2 &amp; \mathbf r_1^{\mathsf T}\mathbf r_3\\
+\mathbf r_2^{\mathsf T}\mathbf r_1 &amp; \mathbf r_2^{\mathsf T}\mathbf r_2 &amp; \mathbf r_2^{\mathsf T}\mathbf r_3\\
+\mathbf r_3^{\mathsf T}\mathbf r_1 &amp; \mathbf r_3^{\mathsf T}\mathbf r_2 &amp; \mathbf r_3^{\mathsf T}\mathbf r_3
+\end{bmatrix}.
+\]</span></p>
+<p>Because the frame axes are orthonormal, every column has unit length,</p>
+<p><span class="math display">\[
+\mathbf r_i^{\mathsf T}\mathbf r_i=1,
+\]</span></p>
+<p>and distinct columns are perpendicular,</p>
+<p><span class="math display">\[
+\mathbf r_i^{\mathsf T}\mathbf r_j=0
+\qquad\text{for }i\neq j,
+\]</span></p>
+<p>where <span class="math inline">\(i,j\in\{1,2,3\}\)</span> are column indices. Therefore,</p>
+<p><span class="math display">\[
+\boxed{
+\mathbf R_{ab}^{\mathsf T}\mathbf R_{ab}
+=
+\begin{bmatrix}
+1&amp;0&amp;0\\
+0&amp;1&amp;0\\
+0&amp;0&amp;1
+\end{bmatrix}
+=
+\mathbf I_3
+}.
+\]</span></p>
+<p>This identity means that <span class="math inline">\(\mathbf R_{ab}\)</span> preserves dot products and therefore preserves vector lengths and angles.</p>
+</section>
+<section id="inverse-and-reverse-coordinate-mapping" class="level4">
+<h4 class="anchored" data-anchor-id="inverse-and-reverse-coordinate-mapping">Inverse and reverse coordinate mapping</h4>
+<p>The inverse <span class="math inline">\(\mathbf R_{ab}^{-1}\in\mathbb R^{3\times3}\)</span> is defined by</p>
+<p><span class="math display">\[
+\mathbf R_{ab}^{-1}\mathbf R_{ab}=\mathbf I_3.
+\]</span></p>
+<p>Because <span class="math inline">\(\mathbf R_{ab}^{\mathsf T}\mathbf R_{ab}=\mathbf I_3\)</span>, the transpose satisfies the defining property of the inverse. Hence,</p>
+<p><span class="math display">\[
+\boxed{\mathbf R_{ab}^{-1}=\mathbf R_{ab}^{\mathsf T}}.
+\]</span></p>
+<p>The coordinate transformation from frame <span class="math inline">\(\{b\}\)</span> to frame <span class="math inline">\(\{a\}\)</span> is</p>
+<p><span class="math display">\[
+{}^{a}\mathbf v=\mathbf R_{ab}\,{}^{b}\mathbf v.
+\]</span></p>
+<p>Multiplying by the inverse gives</p>
+<p><span class="math display">\[
+{}^{b}\mathbf v=\mathbf R_{ab}^{-1}\,{}^{a}\mathbf v.
+\]</span></p>
+<p>Define <span class="math inline">\(\mathbf R_{ba}\in\mathbb R^{3\times3}\)</span> as the matrix that maps coordinates in the reverse direction, from frame <span class="math inline">\(\{a\}\)</span> to frame <span class="math inline">\(\{b\}\)</span>. By definition,</p>
+<p><span class="math display">\[
+{}^{b}\mathbf v=\mathbf R_{ba}\,{}^{a}\mathbf v.
+\]</span></p>
+<p>The two reverse mappings must be the same, so</p>
+<p><span class="math display">\[
+\boxed{
+\mathbf R_{ba}
+=
+\mathbf R_{ab}^{-1}
+=
+\mathbf R_{ab}^{\mathsf T}
+}.
+\]</span></p>
+</section>
+<section id="determinant-and-orientation" class="level4">
+<h4 class="anchored" data-anchor-id="determinant-and-orientation">Determinant and orientation</h4>
+<p>The notation <span class="math inline">\(\det(\mathbf R)\)</span> denotes the <strong>determinant</strong> of a square matrix <span class="math inline">\(\mathbf R\)</span>. Geometrically, <span class="math inline">\(|\det(\mathbf R)|\)</span> is the volume-scaling factor of the corresponding linear transformation. For an orthogonal matrix <span class="math inline">\(\mathbf R\)</span>, taking determinants of <span class="math inline">\(\mathbf R^{\mathsf T}\mathbf R=\mathbf I_3\)</span> gives</p>
+<p><span class="math display">\[
+\det(\mathbf R^{\mathsf T}\mathbf R)
+=
+\det(\mathbf I_3),
+\]</span></p>
+<p>and therefore by <span class="math inline">\(\det(\mathbf R^{\mathsf T}\mathbf R) = \det(\mathbf R^{\mathsf T})\det(\mathbf R)\)</span> and <span class="math inline">\(\det(R^{\mathsf T})=\det(\mathbf R)\)</span> gives</p>
+<p><span class="math display">\[
+\det(\mathbf R)^2=1.
+\]</span></p>
+<p>Thus, an orthogonal matrix can have determinant <span class="math inline">\(+1\)</span> or <span class="math inline">\(-1\)</span>. Here, <strong>orientation</strong> means the handedness of the ordered coordinate axes. A right-handed frame satisfies</p>
+<p><span class="math display">\[
+\mathbf e_x\times\mathbf e_y=\mathbf e_z.
+\]</span></p>
+<p>The determinant sign has the following interpretation:</p>
+<ul>
+<li><span class="math inline">\(\det(\mathbf R)=+1\)</span> preserves handedness, so a right-handed ordered basis remains right-handed.</li>
+<li><span class="math inline">\(\det(\mathbf R)=-1\)</span> reverses handedness, so the transformation contains a reflection and produces a left-handed ordered basis from a right-handed one.</li>
+</ul>
+<p>For example, consider</p>
+<p><span class="math display">\[
+\mathbf M
+=
+\begin{bmatrix}
+-1&amp;0&amp;0\\
+0&amp;1&amp;0\\
+0&amp;0&amp;1
+\end{bmatrix}.
+\]</span></p>
+<p>The matrix <span class="math inline">\(\mathbf M\in\mathbb R^{3\times3}\)</span> reflects the <span class="math inline">\(x\)</span>-coordinate. Its columns remain orthonormal, so <span class="math inline">\(\mathbf M^{\mathsf T}\mathbf M=\mathbf I_3\)</span>, but <span class="math inline">\(\det(\mathbf M)=-1\)</span>. It reverses handedness and is therefore a reflection rather than a rigid-body rotation.</p>
+<p>Because frames <span class="math inline">\(\{a\}\)</span> and <span class="math inline">\(\{b\}\)</span> are both right-handed, their rotation matrix must satisfy</p>
+<p><span class="math display">\[
+\boxed{
+\mathbf R_{ab}^{\mathsf T}\mathbf R_{ab}=\mathbf I_3
+\quad\text{and}\quad
+\det(\mathbf R_{ab})=1
+}.
+\]</span></p>
+<p>The determinant sign does not indicate whether a rotation is clockwise or counter-clockwise. It indicates whether the transformation preserves or reverses the handedness of space.</p>
+</section>
+</section>
+<section id="points-require-translation" class="level3" data-number="2.2.3">
+<h3 data-number="2.2.3" class="anchored" data-anchor-id="points-require-translation"><span class="header-section-number">2.2.3</span> Points require translation</h3>
+<p>Let <span class="math inline">\(O_a\)</span> and <span class="math inline">\(O_b\)</span> be the origins of frames <span class="math inline">\(\{a\}\)</span> and <span class="math inline">\(\{b\}\)</span>. Define <span class="math inline">\({}^{a}\mathbf p_b\in\mathbb R^3\)</span> as the position of <span class="math inline">\(O_b\)</span> relative to <span class="math inline">\(O_a\)</span>, expressed in frame <span class="math inline">\(\{a\}\)</span> and measured in metres.</p>
+<p>For a physical point <span class="math inline">\(P\)</span>, let <span class="math inline">\({}^{b}\mathbf p_P\in\mathbb R^3\)</span> be the position of <span class="math inline">\(P\)</span> relative to <span class="math inline">\(O_b\)</span>, expressed in frame <span class="math inline">\(\{b\}\)</span>, and let <span class="math inline">\({}^{a}\mathbf p_P\in\mathbb R^3\)</span> be the position of <span class="math inline">\(P\)</span> relative to <span class="math inline">\(O_a\)</span>, expressed in frame <span class="math inline">\(\{a\}\)</span>. Both position columns are measured in metres. Their relationship is</p>
+<p><span class="math display">\[
+{}^{a}\mathbf{p}_P
+=
+\mathbf{R}_{ab}\,{}^{b}\mathbf{p}_P
++{}^{a}\mathbf{p}_b.
+\]</span></p>
+<p>The rotation <span class="math inline">\(\mathbf R_{ab}\,{}^{b}\mathbf p_P\)</span> changes the basis used to express the displacement from <span class="math inline">\(O_b\)</span> to <span class="math inline">\(P\)</span>. The translation <span class="math inline">\({}^{a}\mathbf p_b\)</span> then accounts for the displacement from <span class="math inline">\(O_a\)</span> to <span class="math inline">\(O_b\)</span>. A homogeneous transformation combines these two operations into one matrix equation.</p>
+</section>
+</section>
+<section id="worked-frame-change-example" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="worked-frame-change-example"><span class="header-section-number">2.3</span> Worked frame-change example</h2>
+<p>Consider two planar frames <span class="math inline">\(\{a\}\)</span> and <span class="math inline">\(\{b\}\)</span> whose axes differ by an angle <span class="math inline">\(\theta\in\mathbb R\)</span>, measured in radians. A positive <span class="math inline">\(\theta\)</span> means that frame <span class="math inline">\(\{b\}\)</span> is rotated counter-clockwise relative to frame <span class="math inline">\(\{a\}\)</span>. Define <span class="math inline">\(\mathbf R_{ab}(\theta)\in\mathbb R^{2\times2}\)</span> as the rotation matrix that maps two-dimensional coordinate columns from frame <span class="math inline">\(\{b\}\)</span> to frame <span class="math inline">\(\{a\}\)</span>:</p>
+<p><span class="math display">\[
+{}^{a}\mathbf v
+=
+\mathbf R_{ab}(\theta)\,{}^{b}\mathbf v,
+\]</span></p>
+<p>where <span class="math inline">\(\mathbf v\)</span> is a geometric free vector and <span class="math inline">\({}^{a}\mathbf v,{}^{b}\mathbf v\in\mathbb R^2\)</span> are its coordinate columns in frames <span class="math inline">\(\{a\}\)</span> and <span class="math inline">\(\{b\}\)</span>.</p>
+<p>Let <span class="math inline">\(\mathbf e_{x,a}\)</span> and <span class="math inline">\(\mathbf e_{y,a}\)</span> be the geometric unit axes of frame <span class="math inline">\(\{a\}\)</span>, and let <span class="math inline">\(\mathbf e_{x,b}\)</span> and <span class="math inline">\(\mathbf e_{y,b}\)</span> be the geometric unit axes of frame <span class="math inline">\(\{b\}\)</span>. By definition, the columns of <span class="math inline">\(\mathbf R_{ab}\)</span> are the axes of frame <span class="math inline">\(\{b\}\)</span> expressed in frame <span class="math inline">\(\{a\}\)</span>:</p>
+<p><span class="math display">\[
+\mathbf R_{ab}
+=
+\begin{bmatrix}
+{}^{a}\mathbf e_{x,b}&amp;{}^{a}\mathbf e_{y,b}
+\end{bmatrix}.
+\]</span></p>
+<p>The <span class="math inline">\(x_b\)</span>-axis makes angle <span class="math inline">\(\theta\)</span> with the <span class="math inline">\(x_a\)</span>-axis. Its projection onto <span class="math inline">\(\mathbf e_{x,a}\)</span> is <span class="math inline">\(\cos\theta\)</span>, and its projection onto <span class="math inline">\(\mathbf e_{y,a}\)</span> is <span class="math inline">\(\sin\theta\)</span>. Therefore,</p>
+<p><span class="math display">\[
+{}^{a}\mathbf e_{x,b}
+=
+\begin{bmatrix}
+\cos\theta\\
+\sin\theta
+\end{bmatrix}.
+\]</span></p>
+<p>Because the planar frames are right-handed and orthonormal, the <span class="math inline">\(y_b\)</span>-axis is obtained by rotating the <span class="math inline">\(x_b\)</span>-axis counter-clockwise by <span class="math inline">\(\pi/2\)</span>. Its angle measured from the <span class="math inline">\(x_a\)</span>-axis is therefore <span class="math inline">\(\theta+\pi/2\)</span>, so</p>
+<p><span class="math display">\[
+{}^{a}\mathbf e_{y,b}
+=
+\begin{bmatrix}
+\cos(\theta+\pi/2)\\
+\sin(\theta+\pi/2)
+\end{bmatrix}.
+\]</span></p>
+<p>Using</p>
+<p><span class="math display">\[
+\cos(\theta+\pi/2)=-\sin\theta,
+\qquad
+\sin(\theta+\pi/2)=\cos\theta,
+\]</span></p>
+<p>gives</p>
+<p><span class="math display">\[
+{}^{a}\mathbf e_{y,b}
+=
+\begin{bmatrix}
+-\sin\theta\\
+\cos\theta
+\end{bmatrix}.
+\]</span></p>
+<p>Placing these two coordinate columns side by side produces</p>
+<p><span class="math display">\[
+\boxed{
+\mathbf R_{ab}(\theta)
+=
+\begin{bmatrix}
+\cos\theta&amp;-\sin\theta\\
+\sin\theta&amp;\cos\theta
+\end{bmatrix}
+}.
+\]</span></p>
+<p>The column construction also explains why this matrix maps coordinates from frame <span class="math inline">\(\{b\}\)</span> to frame <span class="math inline">\(\{a\}\)</span>. If</p>
+<p><span class="math display">\[
+{}^{b}\mathbf v
+=
+\begin{bmatrix}
+v_x^{(b)}\\
+v_y^{(b)}
+\end{bmatrix},
+\]</span></p>
+<p>where <span class="math inline">\(v_x^{(b)},v_y^{(b)}\in\mathbb R\)</span> are the components of <span class="math inline">\(\mathbf v\)</span> along the <span class="math inline">\(x_b\)</span>- and <span class="math inline">\(y_b\)</span>-axes, then</p>
+<p><span class="math display">\[
+\begin{aligned}
+{}^{a}\mathbf v
+&amp;=v_x^{(b)}\,{}^{a}\mathbf e_{x,b}
++v_y^{(b)}\,{}^{a}\mathbf e_{y,b}\\
+&amp;=
+\begin{bmatrix}
+{}^{a}\mathbf e_{x,b}&amp;{}^{a}\mathbf e_{y,b}
+\end{bmatrix}
+\begin{bmatrix}
+v_x^{(b)}\\
+v_y^{(b)}
+\end{bmatrix}\\
+&amp;=\mathbf R_{ab}(\theta)\,{}^{b}\mathbf v.
+\end{aligned}
+\]</span></p>
+<p>For the worked example, <span class="math inline">\(\theta=\pi/2\,\mathrm{rad}\)</span>. Substitution gives</p>
+<p><span class="math display">\[
+\mathbf R_{ab}(\pi/2)
+=
+\begin{bmatrix}
+0&amp;-1\\
+1&amp;0
+\end{bmatrix}.
+\]</span></p>
+<p>The first column <span class="math inline">\([0\;1]^{\mathsf T}\)</span> says that the positive <span class="math inline">\(x_b\)</span>-axis points along the positive <span class="math inline">\(y_a\)</span>-axis. The second column <span class="math inline">\([-1\;0]^{\mathsf T}\)</span> says that the positive <span class="math inline">\(y_b\)</span>-axis points along the negative <span class="math inline">\(x_a\)</span>-axis.</p>
+<p>Let <span class="math inline">\({}^{b}\mathbf v\in\mathbb R^2\)</span> be the coordinate column of a free vector <span class="math inline">\(\mathbf v\)</span>, expressed in frame <span class="math inline">\(\{b\}\)</span> and measured in metres:</p>
+<p><span class="math display">\[
+{}^{b}\mathbf{v}
+=
+\begin{bmatrix}
+2\\
+1
+\end{bmatrix}
+\mathrm{m}.
+\]</span></p>
+<p>The coordinate column of the same geometric vector in frame <span class="math inline">\(\{a\}\)</span> is <span class="math inline">\({}^{a}\mathbf v\in\mathbb R^2\)</span>:</p>
+<p><span class="math display">\[
+{}^{a}\mathbf{v}
+=
+\mathbf{R}_{ab}(\theta)\,{}^{b}\mathbf{v}
+=
+\begin{bmatrix}
+0 &amp; -1\\
+1 &amp; 0
+\end{bmatrix}
+\begin{bmatrix}
+2\\
+1
+\end{bmatrix}
+=
+\begin{bmatrix}
+-1\\
+2
+\end{bmatrix}
+\mathrm{m}.
+\]</span></p>
+<p>The coordinates changed, but the physical length did not:</p>
+<p><span class="math display">\[
+\left\|{}^{b}\mathbf{v}\right\|_2
+=
+\sqrt{2^2+1^2}
+=
+\sqrt{5}
+=
+\sqrt{(-1)^2+2^2}
+=
+\left\|{}^{a}\mathbf{v}\right\|_2.
+\]</span></p>
+<section id="interactive-frame-rotation-graph" class="level3" data-number="2.3.1">
+<h3 data-number="2.3.1" class="anchored" data-anchor-id="interactive-frame-rotation-graph"><span class="header-section-number">2.3.1</span> Interactive frame-rotation graph</h3>
+<p>Fix the frame-<span class="math inline">\(\{b\}\)</span> coordinate column</p>
+<p><span class="math display">\[
+{}^{b}\mathbf v
+=
+\begin{bmatrix}
+2\\
+1
+\end{bmatrix}.
+\]</span></p>
+<p>For each angle <span class="math inline">\(\theta\in[-\pi,\pi]\)</span>, the corresponding frame-<span class="math inline">\(\{a\}\)</span> coordinate column is</p>
+<p><span class="math display">\[
+{}^{a}\mathbf v(\theta)
+=
+\mathbf R_{ab}(\theta)\,{}^{b}\mathbf v
+=
+\begin{bmatrix}
+2\cos\theta-\sin\theta\\
+2\sin\theta+\cos\theta
+\end{bmatrix}.
+\]</span></p>
+<p>In the HTML book, move the angle slider to rotate frame <span class="math inline">\(\{b\}\)</span> relative to frame <span class="math inline">\(\{a\}\)</span>. The graph keeps <span class="math inline">\({}^{b}\mathbf v=[2\;1]^{\mathsf T}\)</span> fixed, so the geometric vector rotates with frame <span class="math inline">\(\{b\}\)</span> and its coordinates <span class="math inline">\({}^{a}\mathbf v(\theta)\)</span> update continuously.</p>
+<div id="frame-rotation-demo">
+  <label class="form-label" for="frame-rotation-theta">Rotation angle <span aria-hidden="true">θ</span>: <output id="frame-rotation-theta-value" for="frame-rotation-theta"></output></label>
+  <input id="frame-rotation-theta" class="form-range" type="range" min="-180" max="180" step="5" value="90" aria-describedby="frame-rotation-values">
+  <svg id="frame-rotation-svg" class="rotation-plot" viewbox="0 0 720 460" role="img" aria-label="Interactive planar frame rotation">
+    <defs>
+      <marker id="frame-rotation-arrow" viewbox="0 0 10 10" refx="9" refy="5" markerwidth="7" markerheight="7" orient="auto-start-reverse">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="context-stroke"></path>
+      </marker>
+    </defs>
+    <g class="rotation-grid" aria-hidden="true">
+      <line x1="150" y1="230" x2="570" y2="230"></line>
+      <line x1="360" y1="440" x2="360" y2="20"></line>
+      <circle cx="360" cy="230" r="70"></circle>
+      <circle cx="360" cy="230" r="140"></circle>
+      <circle cx="360" cy="230" r="210"></circle>
+    </g>
+    <g aria-hidden="true">
+      <line class="rotation-axis-a" x1="150" y1="230" x2="570" y2="230" marker-end="url(#frame-rotation-arrow)"></line>
+      <line class="rotation-axis-a" x1="360" y1="440" x2="360" y2="20" marker-end="url(#frame-rotation-arrow)"></line>
+      <text class="rotation-label" x="580" y="225">xₐ</text>
+      <text class="rotation-label" x="368" y="24">yₐ</text>
+      <line id="frame-rotation-xb" class="rotation-axis-b" marker-end="url(#frame-rotation-arrow)"></line>
+      <line id="frame-rotation-yb" class="rotation-axis-b" marker-end="url(#frame-rotation-arrow)"></line>
+      <text id="frame-rotation-xb-label" class="rotation-label">xᵦ</text>
+      <text id="frame-rotation-yb-label" class="rotation-label">yᵦ</text>
+      <line id="frame-rotation-component-x" class="rotation-component-x" marker-end="url(#frame-rotation-arrow)"></line>
+      <line id="frame-rotation-component-y" class="rotation-component-y" marker-end="url(#frame-rotation-arrow)"></line>
+      <text id="frame-rotation-component-x-label" class="rotation-label">2eₓ,ᵦ</text>
+      <text id="frame-rotation-component-y-label" class="rotation-label">1eᵧ,ᵦ</text>
+      <line id="frame-rotation-vector" class="rotation-vector" marker-end="url(#frame-rotation-arrow)"></line>
+      <text id="frame-rotation-vector-label" class="rotation-label">ᵃv</text>
+      <circle class="rotation-origin" cx="360" cy="230" r="5"></circle>
+      <text class="rotation-label" x="346" y="250">O</text>
+    </g>
+  </svg>
+  <div id="frame-rotation-values" class="rotation-values font-monospace" aria-live="polite"></div>
+</div>
+<style>
+#frame-rotation-demo { color: var(--bs-body-color); }
+#frame-rotation-demo .rotation-plot { display: block; width: 100%; height: auto; }
+#frame-rotation-demo .rotation-grid line,
+#frame-rotation-demo .rotation-grid circle { fill: none; stroke: currentColor; stroke-width: 1; opacity: 0.1; }
+#frame-rotation-demo .rotation-axis-a { stroke: currentColor; stroke-width: 2; opacity: 0.55; }
+#frame-rotation-demo .rotation-axis-b { stroke: var(--bs-primary); stroke-width: 3; }
+#frame-rotation-demo .rotation-component-x { stroke: var(--bs-primary); stroke-width: 2; stroke-dasharray: 7 5; opacity: 0.72; }
+#frame-rotation-demo .rotation-component-y { stroke: var(--bs-success); stroke-width: 2; stroke-dasharray: 7 5; opacity: 0.8; }
+#frame-rotation-demo .rotation-vector { stroke: var(--bs-danger); stroke-width: 4; }
+#frame-rotation-demo .rotation-origin { fill: currentColor; }
+#frame-rotation-demo .rotation-label { fill: var(--bs-body-color); font-size: 16px; font-weight: 500; }
+#frame-rotation-demo .rotation-values { white-space: normal; overflow-wrap: anywhere; }
+</style>
+<script>
+(() => {
+  const root = document.getElementById("frame-rotation-demo");
+  if (!root || root.dataset.initialized === "true") return;
+  root.dataset.initialized = "true";
+
+  const slider = document.getElementById("frame-rotation-theta");
+  const angleOutput = document.getElementById("frame-rotation-theta-value");
+  const valuesOutput = document.getElementById("frame-rotation-values");
+  const svg = document.getElementById("frame-rotation-svg");
+  const centreX = 360;
+  const centreY = 230;
+  const scale = 70;
+
+  const screenPoint = ([x, y]) => [centreX + scale * x, centreY - scale * y];
+  const add = ([x1, y1], [x2, y2]) => [x1 + x2, y1 + y2];
+  const multiply = (scalar, [x, y]) => [scalar * x, scalar * y];
+  const format = value => Math.abs(value) < 0.0005 ? "0.000" : value.toFixed(3);
+
+  const setLine = (id, start, end) => {
+    const line = document.getElementById(id);
+    const [x1, y1] = screenPoint(start);
+    const [x2, y2] = screenPoint(end);
+    line.setAttribute("x1", x1);
+    line.setAttribute("y1", y1);
+    line.setAttribute("x2", x2);
+    line.setAttribute("y2", y2);
+  };
+
+  const setLabel = (id, point, offsetX, offsetY) => {
+    const label = document.getElementById(id);
+    const [x, y] = screenPoint(point);
+    label.setAttribute("x", x + offsetX);
+    label.setAttribute("y", y + offsetY);
+  };
+
+  const update = () => {
+    const degrees = Number(slider.value);
+    const theta = degrees * Math.PI / 180;
+    const cosine = Math.cos(theta);
+    const sine = Math.sin(theta);
+    const xBasisB = [cosine, sine];
+    const yBasisB = [-sine, cosine];
+    const xComponent = multiply(2, xBasisB);
+    const vectorA = add(xComponent, yBasisB);
+    const origin = [0, 0];
+
+    setLine("frame-rotation-xb", origin, multiply(2.8, xBasisB));
+    setLine("frame-rotation-yb", origin, multiply(2.8, yBasisB));
+    setLine("frame-rotation-component-x", origin, xComponent);
+    setLine("frame-rotation-component-y", xComponent, vectorA);
+    setLine("frame-rotation-vector", origin, vectorA);
+
+    setLabel("frame-rotation-xb-label", multiply(2.45, xBasisB), 4, -4);
+    setLabel("frame-rotation-yb-label", multiply(2.45, yBasisB), 4, -4);
+    setLabel("frame-rotation-component-x-label", multiply(1.05, xBasisB), 6, -8);
+    setLabel("frame-rotation-component-y-label", add(xComponent, multiply(0.55, yBasisB)), 6, -8);
+    setLabel("frame-rotation-vector-label", vectorA, 8, -10);
+
+    angleOutput.value = `${degrees}° (${theta.toFixed(3)} rad)`;
+    valuesOutput.textContent = `R_ab = [[${format(cosine)}, ${format(-sine)}], [${format(sine)}, ${format(cosine)}]]   ·   v_b = [2.000, 1.000]ᵀ   ·   v_a = [${format(vectorA[0])}, ${format(vectorA[1])}]ᵀ`;
+    svg.setAttribute("aria-label", `Frame b rotated ${degrees} degrees. The fixed frame-b coordinates 2, 1 map to frame-a coordinates ${format(vectorA[0])}, ${format(vectorA[1])}.`);
+  };
+
+  slider.addEventListener("input", update);
+  update();
+})();
+</script>
+<section id="equivalent-numpy-calculation" class="level4">
+<h4 class="anchored" data-anchor-id="equivalent-numpy-calculation">Equivalent NumPy calculation</h4>
+<p>The following NumPy snippet is the direct software translation of <span class="math inline">\({}^{a}\mathbf v=\mathbf R_{ab}(\theta){}^{b}\mathbf v\)</span>. The scalar <code>theta</code> stores <span class="math inline">\(\theta\)</span> in radians; <code>R_ab</code> is a NumPy array with shape <code>(2, 2)</code> representing <span class="math inline">\(\mathbf R_{ab}(\theta)\in\mathbb R^{2\times2}\)</span>; <code>v_b</code> is a NumPy array with shape <code>(2,)</code> representing the fixed coordinate column <span class="math inline">\({}^{b}\mathbf v=[2\;1]^{\mathsf T}\)</span>; and <code>v_a</code> is a NumPy array with shape <code>(2,)</code> representing <span class="math inline">\({}^{a}\mathbf v\in\mathbb R^2\)</span>. The operator <code>@</code> performs matrix-vector multiplication.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>theta <span class="op">=</span> np.pi <span class="op">/</span> <span class="dv">2</span>  <span class="co"># radians; replace this value with the selected angle</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>R_ab <span class="op">=</span> np.array([</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    [np.cos(theta), <span class="op">-</span>np.sin(theta)],</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    [np.sin(theta),  np.cos(theta)],</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>])</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>v_b <span class="op">=</span> np.array([<span class="fl">2.0</span>, <span class="fl">1.0</span>])</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>v_a <span class="op">=</span> R_ab <span class="op">@</span> v_b</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>For <span class="math inline">\(\theta=\pi/2\,\mathrm{rad}\)</span>, the calculation gives <code>v_a</code> approximately equal to <code>[-1.0, 2.0]</code>. Changing <code>theta</code> recomputes the same values displayed by the interactive graph while <code>v_b</code> remains fixed.</p>
+</section>
+</section>
+</section>
+<section id="differential-drive-interpretation" class="level2" data-number="2.4">
+<h2 data-number="2.4" class="anchored" data-anchor-id="differential-drive-interpretation"><span class="header-section-number">2.4</span> Differential-drive interpretation</h2>
+<p>For a planar mobile robot, let frame <span class="math inline">\(\{w\}\)</span> be fixed to the world and frame <span class="math inline">\(\{b\}\)</span> be attached to the robot. Let <span class="math inline">\(\theta\in\mathbb R\)</span> be the robot’s heading angle, measured counter-clockwise in radians from the positive <span class="math inline">\(x_w\)</span>-axis to the positive <span class="math inline">\(x_b\)</span>-axis. Let <span class="math inline">\(v\in\mathbb R\)</span> be the signed forward speed, measured in <span class="math inline">\(\mathrm{m\,s^{-1}}\)</span>; positive <span class="math inline">\(v\)</span> means motion along the positive <span class="math inline">\(x_b\)</span>-axis.</p>
+<p>The body-frame velocity <span class="math inline">\({}^{b}\mathbf v\in\mathbb R^2\)</span> is</p>
+<p><span class="math display">\[
+{}^{b}\mathbf{v}
+=
+\begin{bmatrix}
+v\\
+0
+\end{bmatrix}
+\mathrm{m\,s^{-1}}.
+\]</span></p>
+<p>Define <span class="math inline">\(\mathbf R_{wb}(\theta)\in\mathbb R^{2\times2}\)</span> as the rotation matrix that maps planar coordinates from the robot frame <span class="math inline">\(\{b\}\)</span> to the world frame <span class="math inline">\(\{w\}\)</span>. The world-frame velocity <span class="math inline">\({}^{w}\mathbf v\in\mathbb R^2\)</span> is therefore</p>
+<p><span class="math display">\[
+{}^{w}\mathbf{v}
+=
+\mathbf{R}_{wb}(\theta)\,{}^{b}\mathbf{v}
+=
+\begin{bmatrix}
+\cos\theta &amp; -\sin\theta\\
+\sin\theta &amp; \cos\theta
+\end{bmatrix}
+\begin{bmatrix}
+v\\
+0
+\end{bmatrix}
+=
+\begin{bmatrix}
+v\cos\theta\\
+v\sin\theta
+\end{bmatrix}
+\mathrm{m\,s^{-1}}.
+\]</span></p>
+<p>This equation is the coordinate-frame foundation of the differential-drive kinematic model. It shows why a controller must distinguish a forward command in the robot frame from motion observed in the world frame.</p>
+</section>
+<section id="failure-modes-and-engineering-checks" class="level2" data-number="2.5">
+<h2 data-number="2.5" class="anchored" data-anchor-id="failure-modes-and-engineering-checks"><span class="header-section-number">2.5</span> Failure modes and engineering checks</h2>
+<section id="missing-frame-labels" class="level3" data-number="2.5.1">
+<h3 data-number="2.5.1" class="anchored" data-anchor-id="missing-frame-labels"><span class="header-section-number">2.5.1</span> Missing frame labels</h3>
+<p>Two identical columns can describe different physical directions when they are expressed in different frames. Interfaces should name the frame explicitly.</p>
+</section>
+<section id="reversed-transformation" class="level3" data-number="2.5.2">
+<h3 data-number="2.5.2" class="anchored" data-anchor-id="reversed-transformation"><span class="header-section-number">2.5.2</span> Reversed transformation</h3>
+<p>Using <span class="math inline">\(\mathbf{R}_{ba}\)</span> where <span class="math inline">\(\mathbf{R}_{ab}\)</span> is required rotates coordinates in the opposite direction. Check the subscript rule before multiplying.</p>
+</section>
+<section id="mixed-units" class="level3" data-number="2.5.3">
+<h3 data-number="2.5.3" class="anchored" data-anchor-id="mixed-units"><span class="header-section-number">2.5.3</span> Mixed units</h3>
+<p>Degrees passed to a function expecting radians produce valid-looking but wrong numbers. Convert at the system boundary and use radians internally.</p>
+</section>
+<section id="point-vector-confusion" class="level3" data-number="2.5.4">
+<h3 data-number="2.5.4" class="anchored" data-anchor-id="point-vector-confusion"><span class="header-section-number">2.5.4</span> Point-vector confusion</h3>
+<p>A point changes under translation; a free vector does not. Applying a translation to velocity or direction data is a modelling error.</p>
+</section>
+<section id="invalid-numerical-rotation" class="level3" data-number="2.5.5">
+<h3 data-number="2.5.5" class="anchored" data-anchor-id="invalid-numerical-rotation"><span class="header-section-number">2.5.5</span> Invalid numerical rotation</h3>
+<p>Let <span class="math inline">\(\mathbf R\in\mathbb R^{n\times n}\)</span> be a numerically stored matrix intended to represent a rotation, and let <span class="math inline">\(\mathbf I_n\in\mathbb R^{n\times n}\)</span> be the identity matrix. Rounding, integration drift, or corrupted data can make <span class="math inline">\(\mathbf R\)</span> non-orthonormal.</p>
+<p>For a matrix <span class="math inline">\(\mathbf M\in\mathbb R^{n\times n}\)</span> with entries <span class="math inline">\(m_{ij}\)</span>, define the Frobenius norm by</p>
+<p><span class="math display">\[
+\lVert\mathbf M\rVert_F
+\mathrel{:=}
+\sqrt{\sum_{i=1}^{n}\sum_{j=1}^{n}m_{ij}^2}.
+\]</span></p>
+<p>Let <span class="math inline">\(\varepsilon_{\mathrm{orth}}&gt;0\)</span> and <span class="math inline">\(\varepsilon_{\det}&gt;0\)</span> be declared numerical tolerances. A robust interface checks</p>
+<p><span class="math display">\[
+\left\lVert\mathbf{R}^\mathsf{T}\mathbf{R}-\mathbf{I}_n\right\rVert_F
+\leq
+\varepsilon_{\mathrm{orth}}
+\]</span></p>
+<p>and</p>
+<p><span class="math display">\[
+\left|\det(\mathbf R)-1\right|
+\leq
+\varepsilon_{\det}.
+\]</span></p>
+<p>The first condition tests approximate orthonormality; the second tests approximate preservation of right-handed orientation.</p>
+</section>
+</section>
+<section id="quick-test-b-coordinate-frames-and-rotations" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="quick-test-b-coordinate-frames-and-rotations">Quick test B: coordinate frames and rotations</h2>
+<ol type="1">
+<li><strong>Recall:</strong> What do the columns of <span class="math inline">\(\mathbf{R}_{ab}\)</span> represent?</li>
+<li><strong>Explanation:</strong> Explain in words why <span class="math inline">\(\mathbf{R}_{ab}^{-1}=\mathbf{R}_{ba}\)</span>.</li>
+<li><strong>Derivation:</strong> Starting with <span class="math inline">\({}^{a}\mathbf{v}=\mathbf{R}_{ab}{}^{b}\mathbf{v}\)</span>, solve for <span class="math inline">\({}^{b}\mathbf{v}\)</span>.</li>
+<li><strong>Application:</strong> A robot has heading <span class="math inline">\(\theta=\pi/2\)</span> and forward speed <span class="math inline">\(v=0.5\,\mathrm{m\,s^{-1}}\)</span>. Find its world-frame velocity.</li>
+<li><strong>Limitations:</strong> Give two ways a numerically stored matrix intended to be a rotation matrix can become invalid.</li>
+<li><strong>Derivation:</strong> Let <span class="math inline">\(\{a\}\)</span> and <span class="math inline">\(\{b\}\)</span> be right-handed orthonormal planar frames. Frame <span class="math inline">\(\{b\}\)</span> is rotated counter-clockwise by <span class="math inline">\(\theta\,\mathrm{rad}\)</span> relative to frame <span class="math inline">\(\{a\}\)</span>, and <span class="math inline">\(\mathbf R_{ab}(\theta)\in\mathbb R^{2\times2}\)</span> maps coordinate columns from frame <span class="math inline">\(\{b\}\)</span> to frame <span class="math inline">\(\{a\}\)</span>. First express the <span class="math inline">\(x_b\)</span>-axis and <span class="math inline">\(y_b\)</span>-axis as coordinate columns <span class="math inline">\({}^{a}\mathbf e_{x,b},{}^{a}\mathbf e_{y,b}\in\mathbb R^2\)</span>; then place those columns side by side to derive <span class="math inline">\(\mathbf R_{ab}(\theta)\)</span>.</li>
+</ol>
+<section id="answers-and-hints-1" class="level3 unnumbered">
+<h3 class="unnumbered anchored" data-anchor-id="answers-and-hints-1">Answers and hints</h3>
+<ol type="1">
+<li><p>The axes of frame <span class="math inline">\(\{b\}\)</span> expressed in coordinates of frame <span class="math inline">\(\{a\}\)</span>.</p></li>
+<li><p>Reversing the frame change undoes the original change; for an orthonormal rotation matrix, the inverse is its transpose.</p></li>
+<li><p>Premultiply by <span class="math inline">\(\mathbf{R}_{ab}^{-1}=\mathbf{R}_{ba}\)</span>: <span class="math inline">\({}^{b}\mathbf{v}=\mathbf{R}_{ba}{}^{a}\mathbf{v}\)</span>.</p></li>
+<li><p><span class="math inline">\([0\;\;0.5]^\mathsf{T}\,\mathrm{m\,s^{-1}}\)</span>, up to floating-point rounding.</p></li>
+<li><p>Examples include accumulated integration error, rounded entries, malformed input, unit mistakes in angle construction, and data corruption.</p></li>
+<li><p>Since the <span class="math inline">\(x_b\)</span>-axis makes angle <span class="math inline">\(\theta\)</span> with the <span class="math inline">\(x_a\)</span>-axis, its frame-<span class="math inline">\(\{a\}\)</span> coordinate column is <span class="math inline">\({}^{a}\mathbf e_{x,b}=[\cos\theta\;\sin\theta]^{\mathsf T}\)</span>. Right-handed orthonormality places the <span class="math inline">\(y_b\)</span>-axis at angle <span class="math inline">\(\theta+\pi/2\)</span>, so <span class="math inline">\({}^{a}\mathbf e_{y,b}=[\cos(\theta+\pi/2)\;\sin(\theta+\pi/2)]^{\mathsf T}=[-\sin\theta\;\cos\theta]^{\mathsf T}\)</span>. Because these two coordinate columns are the columns of <span class="math inline">\(\mathbf R_{ab}(\theta)\)</span>,</p>
+<p><span class="math display">\[
+\mathbf R_{ab}(\theta)
+=
+\begin{bmatrix}
+\cos\theta&amp;-\sin\theta\\
+\sin\theta&amp;\cos\theta
+\end{bmatrix}.
+\]</span></p></li>
+</ol>
+</section>
+</section>
+<section id="cumulative-chapter-test" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="cumulative-chapter-test">Cumulative chapter test</h2>
+<ol type="1">
+<li><p><strong>Recall and meaning:</strong> Define a three-dimensional coordinate frame <span class="math inline">\(\{a\}\)</span>. Then state what the columns of <span class="math inline">\(\mathbf R_{ab}\in\mathbb R^{3\times3}\)</span> represent and the direction in which this matrix maps coordinate columns.</p></li>
+<li><p><strong>Derivation, application, and explanation:</strong> Frame <span class="math inline">\(\{b\}\)</span> is rotated counter-clockwise by <span class="math inline">\(\theta=\pi/2\,\mathrm{rad}\)</span> relative to frame <span class="math inline">\(\{a\}\)</span>. Derive <span class="math inline">\(\mathbf R_{ab}(\pi/2)\)</span> by expressing the three axes of frame <span class="math inline">\(\{b\}\)</span> in frame <span class="math inline">\(\{a\}\)</span>. Then let</p>
+<p><span class="math display">\[
+{}^{b}\mathbf v
+=
+\begin{bmatrix}
+2\\1\\0
+\end{bmatrix}
+\mathrm{m}.
+\]</span></p>
+<p>Compute <span class="math inline">\({}^{a}\mathbf v\)</span>. Which physical property of the geometric free vector is unchanged, and why?</p></li>
+<li><p><strong>Point–vector contrast:</strong> Continue from Question 2: use the same frames, with frame <span class="math inline">\(\{b\}\)</span> rotated counter-clockwise by <span class="math inline">\(\theta=\pi/2\,\mathrm{rad}\)</span> relative to frame <span class="math inline">\(\{a\}\)</span>, and use the rotation matrix <span class="math inline">\(\mathbf R_{ab}(\pi/2)\)</span> derived there. Now let the position of <span class="math inline">\(O_b\)</span> relative to <span class="math inline">\(O_a\)</span>, expressed in frame <span class="math inline">\(\{a\}\)</span>, be</p>
+<p><span class="math display">\[
+{}^{a}\mathbf p_b
+=
+\begin{bmatrix}
+3\\-1\\0
+\end{bmatrix}
+\mathrm{m},
+\]</span></p>
+<p>and let a physical point <span class="math inline">\(P\)</span> have <span class="math inline">\({}^{b}\mathbf p_P=[2\;1\;0]^{\mathsf T}\,\mathrm{m}\)</span>. Compute <span class="math inline">\({}^{a}\mathbf p_P\)</span>. Then compute the frame-<span class="math inline">\(\{a\}\)</span> coordinates of a free displacement vector whose frame-<span class="math inline">\(\{b\}\)</span> coordinates are also <span class="math inline">\([2\;1\;0]^{\mathsf T}\,\mathrm{m}\)</span>. Explain why the two calculations differ.</p></li>
+<li><p><strong>Derivation:</strong> Starting from <span class="math inline">\(\mathbf R_{ab}^{\mathsf T}\mathbf R_{ab}=\mathbf I_3\)</span>, derive <span class="math inline">\(\mathbf R_{ba}=\mathbf R_{ab}^{\mathsf T}\)</span>. Then prove that changing the coordinate representation of a free vector preserves its Euclidean norm. Finally, show that applying the same point transformation to two physical points <span class="math inline">\(P\)</span> and <span class="math inline">\(Q\)</span> preserves the distance between them.</p></li>
+<li><p><strong>Judgement:</strong> Consider</p>
+<p><span class="math display">\[
+\mathbf M
+=
+\begin{bmatrix}
+-1&amp;0&amp;0\\
+0&amp;1&amp;0\\
+0&amp;0&amp;1
+\end{bmatrix}.
+\]</span></p>
+<p>Determine whether <span class="math inline">\(\mathbf M\)</span> is a valid rotation matrix. State which numerical rotation checks it passes or fails and explain the physical meaning of the failure.</p></li>
+<li><p><strong>Rigid-body application:</strong> At one instant, all of the following coordinate columns are expressed in the same frame <span class="math inline">\(\{a\}\)</span>:</p>
+<p><span class="math display">\[
+{}^{a}\boldsymbol\omega
+=
+\begin{bmatrix}
+0\\0\\2
+\end{bmatrix}
+\mathrm{rad\,s^{-1}},
+\qquad
+{}^{a}\mathbf r_{OP}
+=
+\begin{bmatrix}
+0.5\\-0.25\\0
+\end{bmatrix}
+\mathrm{m},
+\qquad
+{}^{a}\mathbf v_O
+=
+\begin{bmatrix}
+0.2\\-0.1\\0
+\end{bmatrix}
+\mathrm{m\,s^{-1}}.
+\]</span></p>
+<p>Compute <span class="math inline">\({}^{a}\mathbf v_{P/O}\)</span> and <span class="math inline">\({}^{a}\mathbf v_P\)</span>. Verify by a dot product which velocity contribution must be perpendicular to <span class="math inline">\({}^{a}\mathbf r_{OP}\)</span>, and state why the same conclusion need not hold for the total velocity.</p></li>
+<li><p><strong>Transfer to differential drive:</strong> A planar robot has heading <span class="math inline">\(\theta=-\pi/2\,\mathrm{rad}\)</span> and signed forward speed <span class="math inline">\(v=0.6\,\mathrm{m\,s^{-1}}\)</span>. Compute its world-frame velocity <span class="math inline">\({}^{w}\mathbf v\)</span>. Then use the reverse transformation to recover the original body-frame velocity.</p></li>
+<li><p><strong>Failure diagnosis:</strong> A software interface documents <span class="math inline">\(\mathbf R_{ab}\)</span> as mapping coordinate columns from frame <span class="math inline">\(\{b\}\)</span> to frame <span class="math inline">\(\{a\}\)</span>, but its implementation computes <code>R_ab.transpose() * v_b</code> and labels the result as frame <span class="math inline">\(\{a\}\)</span>. Explain the semantic error. Give one simple basis-axis test that would expose it.</p></li>
+<li><p><strong>Contrast two situations:</strong> Explain the difference between these statements: (a) one unchanged geometric vector is represented by <span class="math inline">\({}^{b}\mathbf v\)</span> and <span class="math inline">\({}^{a}\mathbf v=\mathbf R_{ab}{}^{b}\mathbf v\)</span>; and (b) the coordinate column <span class="math inline">\({}^{b}\mathbf v\)</span> is held fixed while frame <span class="math inline">\(\{b\}\)</span> physically rotates relative to frame <span class="math inline">\(\{a\}\)</span>. What changes physically in each situation?</p></li>
+<li><p><strong>Limitations and engineering checks:</strong> Name at least four declarations or validation checks required at a coordinate-transformation interface. Then name one real-world source of error that valid frame algebra alone cannot remove.</p></li>
+</ol>
+<section id="cumulative-answers-and-hints" class="level3 unnumbered">
+<h3 class="unnumbered anchored" data-anchor-id="cumulative-answers-and-hints">Cumulative answers and hints</h3>
+<ol type="1">
+<li><p>A frame <span class="math inline">\(\{a\}\)</span> consists of an origin <span class="math inline">\(O_a\)</span> and three right-handed orthonormal basis vectors <span class="math inline">\(\mathbf e_{x,a}\)</span>, <span class="math inline">\(\mathbf e_{y,a}\)</span>, and <span class="math inline">\(\mathbf e_{z,a}\)</span>. The columns of <span class="math inline">\(\mathbf R_{ab}\)</span> are the axes of frame <span class="math inline">\(\{b\}\)</span> expressed in frame <span class="math inline">\(\{a\}\)</span>, and <span class="math inline">\(\mathbf R_{ab}\)</span> maps coordinate columns from frame <span class="math inline">\(\{b\}\)</span> to frame <span class="math inline">\(\{a\}\)</span>.</p></li>
+<li><p>At <span class="math inline">\(\theta=\pi/2\)</span>, the frame-<span class="math inline">\(\{b\}\)</span> axes expressed in frame <span class="math inline">\(\{a\}\)</span> are</p>
+<p><span class="math display">\[
+{}^{a}\mathbf e_{x,b}
+=
+\begin{bmatrix}
+0\\1\\0
+\end{bmatrix},
+\qquad
+{}^{a}\mathbf e_{y,b}
+=
+\begin{bmatrix}
+-1\\0\\0
+\end{bmatrix},
+\qquad
+{}^{a}\mathbf e_{z,b}
+=
+\begin{bmatrix}
+0\\0\\1
+\end{bmatrix}.
+\]</span></p>
+<p>Placing these axes in the columns gives</p>
+<p><span class="math display">\[
+\mathbf R_{ab}(\pi/2)
+=
+\begin{bmatrix}
+0&amp;-1&amp;0\\
+1&amp;0&amp;0\\
+0&amp;0&amp;1
+\end{bmatrix}.
+\]</span></p>
+<p>The coordinate change is</p>
+<p><span class="math display">\[
+{}^{a}\mathbf v
+=
+\mathbf R_{ab}{}^{b}\mathbf v
+=
+\begin{bmatrix}
+-1\\2\\0
+\end{bmatrix}
+\mathrm{m}.
+\]</span></p>
+<p>The geometric vector and its length are unchanged; only its coordinate representation changes. Its norm remains <span class="math inline">\(\sqrt{5}\,\mathrm{m}\)</span> because a rotation matrix is orthogonal.</p></li>
+<li><p>A point requires both rotation and translation:</p>
+<p><span class="math display">\[
+{}^{a}\mathbf p_P
+=
+\mathbf R_{ab}{}^{b}\mathbf p_P+{}^{a}\mathbf p_b
+=
+\begin{bmatrix}
+-1\\2\\0
+\end{bmatrix}
++
+\begin{bmatrix}
+3\\-1\\0
+\end{bmatrix}
+=
+\begin{bmatrix}
+2\\1\\0
+\end{bmatrix}
+\mathrm{m}.
+\]</span></p>
+<p>A free displacement vector is unaffected by the origin separation, so</p>
+<p><span class="math display">\[
+{}^{a}\mathbf v
+=
+\mathbf R_{ab}{}^{b}\mathbf v
+=
+\begin{bmatrix}
+-1\\2\\0
+\end{bmatrix}
+\mathrm{m}.
+\]</span></p>
+<p>A point is located relative to a frame origin, whereas a free vector has direction and magnitude but no fixed origin.</p></li>
+<li><p>Since <span class="math inline">\(\mathbf R_{ab}^{\mathsf T}\mathbf R_{ab}=\mathbf I_3\)</span>, the transpose satisfies the defining equation for the inverse, so <span class="math inline">\(\mathbf R_{ab}^{-1}=\mathbf R_{ab}^{\mathsf T}\)</span>. The reverse coordinate map is the inverse of the forward map, hence <span class="math inline">\(\mathbf R_{ba}=\mathbf R_{ab}^{-1}=\mathbf R_{ab}^{\mathsf T}\)</span>. For <span class="math inline">\({}^{a}\mathbf v=\mathbf R_{ab}{}^{b}\mathbf v\)</span>,</p>
+<p><span class="math display">\[
+\begin{aligned}
+\left\|{}^{a}\mathbf v\right\|_2^2
+&amp;=({}^{a}\mathbf v)^{\mathsf T}{}^{a}\mathbf v\\
+&amp;=({}^{b}\mathbf v)^{\mathsf T}\mathbf R_{ab}^{\mathsf T}\mathbf R_{ab}{}^{b}\mathbf v\\
+&amp;=({}^{b}\mathbf v)^{\mathsf T}{}^{b}\mathbf v\\
+&amp;=\left\|{}^{b}\mathbf v\right\|_2^2.
+\end{aligned}
+\]</span></p>
+<p>Norms are nonnegative, so equality of the squared norms implies equality of the norms. For two points transformed using the same <span class="math inline">\(\mathbf R_{ab}\)</span> and <span class="math inline">\({}^{a}\mathbf p_b\)</span>, subtracting their frame-<span class="math inline">\(\{a\}\)</span> coordinates cancels the translation:</p>
+<p><span class="math display">\[
+\begin{aligned}
+{}^{a}\mathbf p_P-{}^{a}\mathbf p_Q
+&amp;=\left(\mathbf R_{ab}{}^{b}\mathbf p_P+{}^{a}\mathbf p_b\right)
+-\left(\mathbf R_{ab}{}^{b}\mathbf p_Q+{}^{a}\mathbf p_b\right)\\
+&amp;=\mathbf R_{ab}\left({}^{b}\mathbf p_P-{}^{b}\mathbf p_Q\right).
+\end{aligned}
+\]</span></p>
+<p>This difference is a free displacement vector, so the norm-preservation result gives</p>
+<p><span class="math display">\[
+\left\|{}^{a}\mathbf p_P-{}^{a}\mathbf p_Q\right\|_2
+=
+\left\|{}^{b}\mathbf p_P-{}^{b}\mathbf p_Q\right\|_2.
+\]</span></p></li>
+<li><p>The matrix passes the orthonormality check because <span class="math inline">\(\mathbf M^{\mathsf T}\mathbf M=\mathbf I_3\)</span>, but it fails the orientation check because <span class="math inline">\(\det(\mathbf M)=-1\)</span>. It is a reflection across the <span class="math inline">\(yz\)</span>-plane, not a right-handed rigid-body rotation. This is why an orthonormality check alone is insufficient.</p></li>
+<li><p>The rotational contribution is</p>
+<p><span class="math display">\[
+{}^{a}\mathbf v_{P/O}
+=
+{}^{a}\boldsymbol\omega\times{}^{a}\mathbf r_{OP}
+=
+\begin{bmatrix}
+0.5\\1.0\\0
+\end{bmatrix}
+\mathrm{m\,s^{-1}}.
+\]</span></p>
+<p>Therefore,</p>
+<p><span class="math display">\[
+{}^{a}\mathbf v_P
+=
+{}^{a}\mathbf v_O+{}^{a}\mathbf v_{P/O}
+=
+\begin{bmatrix}
+0.7\\0.9\\0
+\end{bmatrix}
+\mathrm{m\,s^{-1}}.
+\]</span></p>
+<p>The required orthogonality check is</p>
+<p><span class="math display">\[
+({}^{a}\mathbf r_{OP})^{\mathsf T}{}^{a}\mathbf v_{P/O}
+=0.5(0.5)-0.25(1.0)
+=0.
+\]</span></p>
+<p>The total velocity also contains the independent translation <span class="math inline">\({}^{a}\mathbf v_O\)</span>, so it need not be perpendicular to <span class="math inline">\({}^{a}\mathbf r_{OP}\)</span>; here their dot product is <span class="math inline">\(0.125\,\mathrm{m^2\,s^{-1}}\)</span>.</p></li>
+<li><p>Since</p>
+<p><span class="math display">\[
+\mathbf R_{wb}(-\pi/2)
+=
+\begin{bmatrix}
+0&amp;1\\
+-1&amp;0
+\end{bmatrix},
+\]</span></p>
+<p>the world-frame velocity is</p>
+<p><span class="math display">\[
+{}^{w}\mathbf v
+=
+\mathbf R_{wb}{}^{b}\mathbf v
+=
+\begin{bmatrix}
+0\\-0.6
+\end{bmatrix}
+\mathrm{m\,s^{-1}}.
+\]</span></p>
+<p>The reverse map is <span class="math inline">\(\mathbf R_{bw}=\mathbf R_{wb}^{\mathsf T}\)</span>, and</p>
+<p><span class="math display">\[
+{}^{b}\mathbf v
+=
+\mathbf R_{bw}{}^{w}\mathbf v
+=
+\begin{bmatrix}
+0.6\\0
+\end{bmatrix}
+\mathrm{m\,s^{-1}}.
+\]</span></p></li>
+<li><p>The transpose is <span class="math inline">\(\mathbf R_{ab}^{\mathsf T}=\mathbf R_{ba}\)</span>, whose declared input is a frame-<span class="math inline">\(\{a\}\)</span> coordinate column and whose output is a frame-<span class="math inline">\(\{b\}\)</span> coordinate column. Applying it to <span class="math inline">\({}^{b}\mathbf v\)</span> violates the frame contract, even though the matrix dimensions agree, and the result cannot validly be labelled <span class="math inline">\({}^{a}\mathbf v\)</span>. A basis-axis test can provide <span class="math inline">\({}^{b}\mathbf e_{x,b}=[1\;0\;0]^{\mathsf T}\)</span> and require the output to equal the first column of <span class="math inline">\(\mathbf R_{ab}\)</span>; the transposed implementation generally fails this test.</p></li>
+<li><p>In situation (a), the geometric vector is unchanged and only its numerical description changes with the coordinate basis. In situation (b), the components relative to frame <span class="math inline">\(\{b\}\)</span> stay fixed while the basis vectors of <span class="math inline">\(\{b\}\)</span> turn relative to frame <span class="math inline">\(\{a\}\)</span>, so the geometric vector constructed from those fixed components rotates physically with frame <span class="math inline">\(\{b\}\)</span>. The same matrix entries can participate in both calculations, but the physical operation and the meanings of the input and output are different.</p></li>
+<li><p>Suitable declarations and checks include source and destination frame identifiers, point-versus-free-vector semantics, SI units and angle units, matrix and vector dimensions, finite inputs, the intended multiplication direction, approximate orthonormality, determinant near <span class="math inline">\(+1\)</span>, and declared numerical tolerances. Valid algebra cannot remove effects such as sensor noise, calibration error, structural compliance, timing error, or model mismatch.</p></li>
+</ol>
+</section>
+</section>
+<section id="references" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="references">References</h2>
+<ul>
+<li>Kevin M. Lynch and Frank C. Park, <em>Modern Robotics</em>, Chapter 3, especially Sections 3.1 and 3.2.1 on free vectors, frames, rotation matrices, and rigid-body motions.</li>
+<li>Steven M. LaValle, <em>Planning Algorithms</em>, Chapters 3 and 4 on geometric representations, transformations, and configuration spaces.</li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const toolbar = document.querySelector(".navbar .quarto-navbar-tools");
+
+  if (!toolbar || document.getElementById("left-sidebar-button")) {
+    return;
+  }
+
+  const controls = [
+    {
+      id: "left-sidebar-button",
+      className: "left-sidebar-hidden",
+      storageKey: "quarto-left-sidebar-hidden",
+      targetId: "quarto-sidebar",
+      noun: "chapter navigation",
+      icon: "bi-layout-sidebar"
+    },
+    {
+      id: "right-sidebar-button",
+      className: "right-sidebar-hidden",
+      storageKey: "quarto-right-sidebar-hidden",
+      targetId: "quarto-margin-sidebar",
+      noun: "table of contents",
+      icon: "bi-layout-sidebar-reverse"
+    }
+  ];
+
+  const storedState = (key) => {
+    try {
+      return window.localStorage.getItem(key) === "true";
+    } catch {
+      return false;
+    }
+  };
+
+  const storeState = (key, hidden) => {
+    try {
+      window.localStorage.setItem(key, String(hidden));
+    } catch {
+      // The controls still work when browser storage is unavailable.
+    }
+  };
+
+  controls.forEach((control) => {
+    document.body.classList.toggle(
+      control.className,
+      storedState(control.storageKey)
+    );
+
+    const button = document.createElement("button");
+    button.id = control.id;
+    button.type = "button";
+    button.className = "sidebar-toggle-button quarto-navigation-tool";
+    button.setAttribute("aria-controls", control.targetId);
+    button.innerHTML = `<i class="bi ${control.icon}" aria-hidden="true"></i>`;
+
+    const updateButton = () => {
+      const hidden = document.body.classList.contains(control.className);
+      const label = `${hidden ? "Show" : "Hide"} ${control.noun}`;
+
+      button.title = label;
+      button.setAttribute("aria-label", label);
+      button.setAttribute("aria-expanded", String(!hidden));
+    };
+
+    button.addEventListener("click", () => {
+      const hidden = document.body.classList.toggle(control.className);
+      storeState(control.storageKey, hidden);
+      updateButton();
+    });
+
+    toolbar.appendChild(button);
+    updateButton();
+  });
+});
+</script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../part_01_motion_mechanics_control/01_linear_algebra_foundations.html" class="pagination-link" aria-label="Linear Algebra Foundations">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Linear Algebra Foundations</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../part_01_motion_mechanics_control/03_kinematics_and_numerical_integration.html" class="pagination-link" aria-label="Differential-Drive Kinematics and Numerical Integration: Model and Derivation">
+        <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Differential-Drive Kinematics and Numerical Integration: Model and Derivation</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

@@ -4,9 +4,11 @@ This directory is the single source for the project's theory book. Its chapters 
 
 ## Organisation
 
-- Keep every source chapter directly in this directory.
-- Order chapter filenames numerically, such as `01_linear_algebra_foundations.qmd`, `02_geometry_and_coordinate_frames.qmd`, and `03_kinematics_and_numerical_integration.qmd`.
-- Use the headings below as book parts, not as subdirectories.
+- Organise source chapters into the phase-aligned part folders defined by `PLAN.md`, with `notes/intelligence_engine_laboratory` as the cross-phase synthetic-engine laboratory.
+- A phase may own more than one coherent book part, and an integration-only phase may own a laboratory or results part rather than a new theory survey.
+- Keep filenames descriptive within each part. Quarto order, not a global filename number, determines the rendered chapter number.
+- Keep the migrated Phase 1 chapters under `notes/part_01_motion_mechanics_control`. Migrate later reviewed chapters only through a deliberate batch that updates cross-references and `_quarto.yml` together.
+- Write each just-in-time prerequisite block and early intelligence-foundations chapter directly in its final main-book part. When the main robotics track reaches it, review and extend that file in place rather than creating a parallel note.
 - Use [the textbook index](../textbooks/INDEX.md) to find relevant sources.
 - Add a chapter to this table of contents only when its note file exists.
 - Keep generated HTML and PDF output outside this source directory.
@@ -17,7 +19,7 @@ This directory is the single source for the project's theory book. Its chapters 
 
 - Purpose, prerequisites, notation, units, and conventions
 
-### Part I — Motion, mechanics, and control
+### Part I — Phase 1: Motion, mechanics, and control
 
 - Linear algebra foundations
 - Geometry and coordinate frames
@@ -25,30 +27,79 @@ This directory is the single source for the project's theory book. Its chapters 
 - Dynamics, forces, torque, friction, and actuator limits
 - Feedback, stability, PID control, and constraint handling
 
-### Part II — Uncertainty and state estimation
+### Part II — Phase 2: Probability and state estimation
 
 - Probability and stochastic models
 - Bayesian inference and filtering
 - Observability, Kalman filtering, and sensor fusion
 
-### Part III — Perception and world representation
+### Part III — Phase 3: Perception and semantic observations
 
 - Image formation and camera geometry
 - Features, recognition, depth, and motion
-- Mapping, SLAM, semantic representation, and memory
 
-### Part IV — Planning, learning, and prediction
+### Part IV — Phase 4: Mapping, SLAM, and memory
 
-- Search and geometric motion planning
-- Planning under dynamics and uncertainty
-- Markov decision processes and reinforcement learning
-- Model-predictive control, learned dynamics, and world models
+- Registration and factor graphs
+- Spatial-semantic world state
+- Episodic memory, retrieval, provenance, and invalidation
 
-### Part V — Safe embodied intelligence
+### Part V — Phase 5: Optimisation, planning, and decisions
 
-- Multirotor dynamics and UAV transfer
-- Safety supervision, uncertainty awareness, and failure handling
-- Integrated autonomous inspection mission
+- Optimisation foundations and optimal control
+- Finite MDPs and exact dynamic programming
+- Search, motion planning, POMDPs, and risk-aware decisions
+
+### Part VI — Phase 6: Learning foundations
+
+- Tabular and deep reinforcement learning
+- Policy gradients, PPO, TD3, and SAC
+- Attention, Transformers, diffusion, and score models
+- Reproducible learning, data, checkpoint, and evaluation contracts
+
+### Synthetic intelligence-engine laboratory — Phase 7
+
+- Tiny autoregressive language modelling
+- Bounded episodic memory and predictively grounded latent state
+- World-model imagination and learned reasoning control
+- Capstone implementation companion, ablations, and results
+
+### Part VIII — Phase 8: Classical manipulation and contact
+
+- Spatial arm modelling, grasping, collision, and contact
+- Manipulation planning, control, recovery, and benchmark design
+
+### Part IX — Phase 9: Imitation, offline RL, and manipulation learning
+
+- Behavioural cloning, IQL, and Decision Transformer
+- Diffusion Policy and manipulation-specific learning evidence
+
+### Part X — Phase 10: Generalization and adaptation
+
+- Embodiment, environment, task, learner, and adaptation contracts
+- Held-out transfer, target readiness, and negative transfer
+
+### Part XI — Phase 11: World models and dynamic agents
+
+- Analytical, learned, hybrid, latent, and Transformer world models
+- Model-based RL, CEM, Diffuser, manipulation, and road-agent evidence
+
+### Part XII — Phase 12: Classical UAV systems
+
+- Multirotor dynamics, estimation, planning, control, and energy
+- Flight envelopes, inspection-and-return missions, and failsafes
+
+### Part XIII — Phase 13: UAV intelligence transfer
+
+- Flight-specific learned dynamics, adaptation, uncertainty, and planning
+- Policy and cross-embodiment transfer evidence
+
+### Part XIV — Phase 14: Multi-embodiment release and research results
+
+- Experimental design, benchmark definitions, and capstone conclusions
+- Cross-embodiment evidence, ablations, limitations, and negative results
+
+An optional epistemic-autonomy capstone receives a clearly labelled supplemental part only if it is later admitted. It is not reserved in advance and does not block the main book.
 
 ## Chapter structure
 

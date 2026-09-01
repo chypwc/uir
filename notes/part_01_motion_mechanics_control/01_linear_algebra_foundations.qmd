@@ -1216,9 +1216,9 @@ $$
 \mathbf A\mathbf x^{(1)}=\mathbf A\mathbf x^{(2)}.
 $$
 
-The statement does not mean that every pair of inputs has the same output; it means that at least one distinct pair cannot be distinguished from the output. 
+The statement does not mean that every pair of inputs has the same output; it means that at least one distinct pair cannot be distinguished from the output.
 
-If $\mathbf A$ is singular, then there exists $\mathbf z \in \mathcal N(\mathbf A)$ such that $\mathbf A \mathbf z = \mathbf 0$. This implies $\mathbf A(\mathbf x+\mathbf z) = \mathbf A\mathbf x$ for all $\mathbf x \in \mathbb R^n$. Hence, a singular matrix is not injective and different inputs can produce the same output. 
+If $\mathbf A$ is singular, then there exists $\mathbf z \in \mathcal N(\mathbf A)$ such that $\mathbf A \mathbf z = \mathbf 0$. This implies $\mathbf A(\mathbf x+\mathbf z) = \mathbf A\mathbf x$ for all $\mathbf x \in \mathbb R^n$. Hence, a singular matrix is not injective and different inputs can produce the same output.
 
 For a square matrix $\mathbf A\in\mathbb R^{n\times n}$, the general equivalences are
 

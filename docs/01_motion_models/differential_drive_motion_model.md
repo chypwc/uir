@@ -4,7 +4,7 @@
 
 The active capability is a deterministic, ideal differential-drive motion model. It answers the Phase 1 question: given the robot geometry, wheel angular speeds, current planar pose, and elapsed time, what body velocity and next pose does the reviewed kinematic model predict?
 
-The prerequisite theory is documented and reviewed in [Linear Algebra Foundations](../../notes/01_linear_algebra_foundations.qmd), [Geometry and Coordinate Frames](../../notes/02_geometry_and_coordinate_frames.qmd), and [Differential-Drive Kinematics and Numerical Integration: Model and Derivation](../../notes/03_kinematics_and_numerical_integration.qmd).
+The prerequisite theory is documented and reviewed in [Linear Algebra Foundations](../../notes/part_01_motion_mechanics_control/01_linear_algebra_foundations.qmd), [Geometry and Coordinate Frames](../../notes/part_01_motion_mechanics_control/02_geometry_and_coordinate_frames.qmd), and [Differential-Drive Kinematics and Numerical Integration: Model and Derivation](../../notes/part_01_motion_mechanics_control/03_kinematics_and_numerical_integration.qmd).
 
 ## Intended behaviour
 
@@ -203,4 +203,4 @@ These concerns require later capability cycles and must not expand the first imp
 
 ## Gate to implementation
 
-Implementation may begin after the user reviews this minimum specification and confirms completion of the applicable retrieval and cumulative test in Chapter 3. When implementation begins, create `notes/04_kinematics_and_numerical_integration_implementation.qmd` alongside the first manageable code block; do not create it as an empty placeholder.
+Implementation may begin after the user reviews this minimum specification and confirms completion of the applicable retrieval and cumulative test in Chapter 3. When implementation begins, create `notes/part_01_motion_mechanics_control/04_kinematics_and_numerical_integration_implementation.qmd` alongside the first manageable code block; do not create it as an empty placeholder.

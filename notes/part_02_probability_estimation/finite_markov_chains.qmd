@@ -1,0 +1,370 @@
+# Finite Markov Chains {#sec-finite-markov-chains}
+
+## Prerequisites {.unnumbered}
+
+This chapter assumes familiarity with finite sets, conditional probability, the product rule, the law of total probability, finite sums, and matrix multiplication.
+
+## Why model an uncontrolled state sequence? {#sec-markov-chain-purpose .unnumbered}
+
+An intelligence system often needs to answer a prediction question before it chooses an action: if the current situation is known only probabilistically, what situations may occur next, and with what probabilities? A **finite Markov chain** answers this question for an uncontrolled process whose state takes one of finitely many values at each discrete time step.
+
+The known inputs are a finite set of possible states, an initial probability distribution over those states, and one-step transition probabilities. The required outputs are the distribution at the next time step, the probability of a declared state trajectory, and the recognition of states that cannot be left.
+
+The dependency chain for this chapter is
+
+$$
+\begin{aligned}
+\text{random state sequence}
+&\longrightarrow
+\text{Markov property}\\
+&\longrightarrow
+\text{transition matrix}
+\longrightarrow
+\text{distribution and trajectory predictions}.
+\end{aligned}
+$$
+
+The first two objects say what information the model retains. The matrix records the resulting one-step law. Matrix multiplication and the probability product rule then produce predictions over multiple possible paths.
+
+## A finite stochastic state sequence {#sec-finite-stochastic-state-sequence}
+
+Consider a process observed at discrete times $t\in\mathbb N_0=\{0,1,2,\ldots\}$. At time $t$, the process occupies exactly one state from the finite **state set**
+
+$$
+\boxed{
+\mathcal S
+\mathrel{:=}
+\{s_1,s_2,\ldots,s_n\},
+}
+$$
+
+where $n\in\mathbb N$ is the number of states and $s_i$ is the state with index $i\in\{1,\ldots,n\}$. A state is a modelled summary of the current situation. The modeller chooses what information that summary contains; the Markov property below tests whether the choice is sufficient for the intended prediction.
+
+Let $\Omega$ be the sample space whose elements $\omega\in\Omega$ represent complete possible realisations of the process. At each time $t$, define the mapping
+
+$$
+S_t:\Omega\rightarrow\mathcal S,
+\qquad
+\omega\longmapsto S_t(\omega).
+$$
+
+Assume that, for every state $s_i$, the set of realisations mapped to $s_i$ is an event with a defined probability. Under this assumption, $S_t$ is a **discrete random variable** whose possible values belong to the finite state set $\mathcal S$. In this model, $S_t$ is called the **random state** at time $t$: *random variable* names its mathematical type, while *random state* names its role. Before a realisation is observed, $S_t$ may equal any member of $\mathcal S$ with a declared probability. The notation $S_t=s_i$ abbreviates the event that the realised state at time $t$ is $s_i$. The ordered collection
+
+$$
+\boxed{
+(S_0,S_1,S_2,\ldots)
+}
+$$
+
+is a **stochastic state sequence**: a time-ordered sequence of random states. Upper-case $S_t$ denotes the random quantity, while a lower-case symbol denotes one possible state value. To avoid confusing a time position with the fixed enumeration $(s_1,\ldots,s_n)$, write a realised finite history through time $t$ as
+
+$$
+(S_0=x_0,S_1=x_1,\ldots,S_t=x_t),
+$$
+
+where each $x_k\in\mathcal S$ is the state value realised at time $k$.
+
+For every state value $s\in\mathcal S$, define its probability at time $t$ by
+
+$$
+\boxed{
+p_t:\mathcal S\rightarrow[0,1],
+\qquad
+s\longmapsto
+p_t(s)
+\mathrel{:=}
+\Pr(S_t=s).
+}
+$$
+
+Because the states are mutually exclusive and exhaustive, exactly one state occurs at time $t$. Therefore
+
+$$
+\sum_{s\in\mathcal S}p_t(s)=1.
+$$
+
+Indices enter when these probabilities are stored using the declared state order. Define the **state-distribution row vector**
+
+$$
+\mathbf p_t
+\mathrel{:=}
+\begin{bmatrix}
+p_t(s_1)&p_t(s_2)&\cdots&p_t(s_n)
+\end{bmatrix}
+\in[0,1]^{1\times n},
+\qquad
+[\mathbf p_t]_i=p_t(s_i).
+$$
+
+The function $p_t$ and vector $\mathbf p_t$ describe uncertainty about the current state; neither is itself a state from $\mathcal S$. If the current state is known to be $s_k$, then $p_t(s_k)=1$ and every other state has probability zero.
+
+## The first-order Markov property {#sec-first-order-markov-property}
+
+A general stochastic sequence may need its entire history to predict the next state. A first-order Markov model makes a more specific claim: once the current state is known, earlier states provide no additional information about the next-state distribution.
+
+Formally, the sequence $(S_0,S_1,\ldots)$ has the **first-order Markov property** when, for every time $t\in\mathbb N_0$, realised history $x_0,\ldots,x_t\in\mathcal S$, and possible next state $s'\in\mathcal S$ satisfying
+
+$$
+\Pr(S_0=x_0,S_1=x_1,\ldots,S_t=x_t)>0,
+$$
+
+the following equality holds:
+
+$$
+\boxed{
+\Pr\!\left(
+S_{t+1}=s'
+\mid
+S_t=x_t,S_{t-1}=x_{t-1},\ldots,S_0=x_0
+\right)
+=
+\Pr(S_{t+1}=s'\mid S_t=x_t).
+}
+$$
+
+The displayed positive-probability condition ensures that the conditional probabilities are defined. The left-hand side uses the complete observed history. The right-hand side uses only the current state. Their equality states that the current state retains all history relevant to this one-step prediction.
+
+The word *first-order* refers to dependence on one immediately preceding state. It does not mean that the physical process has no memory. Instead, it means that the modelled state already contains the memory needed for prediction. For example, a position alone is generally not a Markov state for inertial motion because the next position also depends on velocity. The pair consisting of position and velocity can be Markov under a suitable motion model because the missing predictive information has been added to the state.
+
+The Markov property belongs to the chosen state representation and transition model, not to a name assigned to the physical system. If two histories produce the same state label but imply different next-state distributions, that label is not a Markov state for the model. One remedy is to enlarge the state so that the histories with different predictive consequences no longer collapse into the same state.
+
+## Time-homogeneous transition probabilities {#sec-time-homogeneous-transition-matrix}
+
+The Markov property removes unnecessary dependence on earlier states. A second assumption removes explicit dependence on time. A Markov chain is **time-homogeneous** when the probability of moving from any current state $s\in\mathcal S$ to any next state $s'\in\mathcal S$ is the same at every time step. Define the one-step **transition kernel**
+
+$$
+\boxed{
+p(s'\mid s)
+\mathrel{:=}
+\Pr(S_{t+1}=s'\mid S_t=s).
+}
+$$
+
+The notation $\Pr(\,\cdot\,)$ denotes the probability of an event, lowercase $p$ denotes the probability mass assigned to particular state values, and bold $\mathbf P$ denotes the matrix representation. The argument $s$ is the supplied current state, while $s'$ is the possible next state. Time homogeneity means that $p(s'\mid s)$ does not depend on $t$.
+
+For each current state $s$, the function $p(\,\cdot\mid s):\mathcal S\to[0,1]$ is a probability mass function. Therefore
+
+$$
+\begin{aligned}
+p(s'\mid s)&\geq0
+&&\text{for every }s'\in\mathcal S,\\
+\sum_{s'\in\mathcal S}p(s'\mid s)&=1.
+\end{aligned}
+$$
+
+Indices enter only when the kernel is stored using the declared state order. Define the **transition matrix** by
+
+$$
+\boxed{
+\left[\mathbf P\right]_{ij}
+\mathrel{:=}
+p(s_j\mid s_i),
+\qquad
+\mathbf P\in[0,1]^{n\times n}.
+}
+$$
+
+Row $i$ contains the complete next-state distribution $p(\,\cdot\mid s_i)$. Thus every entry is non-negative and every row sums to one. A matrix satisfying these two conditions is **row-stochastic**. Row stochasticity is not a numerical convenience; it expresses that, from each current state, the process must enter exactly one of the declared next states. A negative entry cannot be a probability, and a row sum different from one leaves probability missing or assigns probability more than once.
+
+This book deliberately stores state distributions as row vectors and current states along matrix rows. Under this convention, distributions propagate by right multiplication. A column-vector convention would instead use a transposed matrix or reverse the multiplication order. Either convention can be correct, but mixing them changes the model.
+
+## Propagating the state distribution {#sec-markov-distribution-propagation}
+
+Suppose the state distribution $p_t$ and transition kernel $p(s'\mid s)$ are known. To find the probability of a possible next state $s'\in\mathcal S$, partition the possibilities according to the current state. The finite law of total probability gives
+
+$$
+p_{t+1}(s')
+=
+\sum_{s\in\mathcal S}
+p_t(s)p(s'\mid s).
+$$
+
+This equation is semantic: it sums over possible current-state values rather than matrix indices. When the states are stored in their declared order, the same calculation for next state $s_j$ becomes
+
+$$
+\left[\mathbf p_{t+1}\right]_j
+=
+\sum_{i=1}^{n}
+\left[\mathbf p_t\right]_i
+\left[\mathbf P\right]_{ij}.
+$$
+
+This is component $j$ of a row-vector--matrix product. Therefore the complete one-step distribution update is
+$$
+\boxed{
+\mathbf p_{t+1}
+=
+\mathbf p_t\mathbf P.
+}
+$$
+
+The update preserves the defining properties of a probability distribution. Each term $p_t(s)p(s'\mid s)$ is non-negative, so every value $p_{t+1}(s')$ is non-negative. Summing over all next states gives
+
+$$
+\begin{aligned}
+\sum_{s'\in\mathcal S}p_{t+1}(s')
+&=
+\sum_{s'\in\mathcal S}\sum_{s\in\mathcal S}
+p_t(s)p(s'\mid s)\\
+&=
+\sum_{s\in\mathcal S}
+p_t(s)
+\left(
+\sum_{s'\in\mathcal S}p(s'\mid s)
+\right)\\
+&=
+\sum_{s\in\mathcal S}p_t(s)\\
+&=1.
+\end{aligned}
+$$
+
+The reduction to $\sum_{s\in\mathcal S}p_t(s)$ uses the normalization of every conditional distribution $p(\,\cdot\mid s)$. Thus a valid distribution and a valid transition kernel produce another valid distribution.
+
+Applying the same update repeatedly gives a prediction $k\in\mathbb N$ steps into the future:
+
+$$
+\boxed{
+\mathbf p_{t+k}
+=
+\mathbf p_t\mathbf P^k,
+}
+$$
+
+where $\mathbf P^k$ is the product of $k$ copies of $\mathbf P$. The formula follows by repeated substitution: $\mathbf p_{t+2}=(\mathbf p_t\mathbf P)\mathbf P=\mathbf p_t\mathbf P^2$, and the same argument continues for later steps.
+
+## Trajectory probabilities and absorbing states {#sec-markov-trajectories-absorbing}
+
+A distribution prediction sums over all paths that can reach a future state. Sometimes the required output is instead the probability of one declared path. Let $T\in\mathbb N$ be a finite final time, and choose realised state values $x_0,x_1,\ldots,x_T\in\mathcal S$. The corresponding trajectory event is
+
+$$
+S_0=x_0,S_1=x_1,\ldots,S_T=x_T.
+$$
+
+The probability product rule first factors the joint probability into an initial probability and successive conditional probabilities. The Markov property then removes all history before the immediately preceding state, and time homogeneity replaces each remaining conditional probability by the transition kernel:
+
+$$
+\begin{aligned}
+&\Pr(S_0=x_0,S_1=x_1,\ldots,S_T=x_T)\\
+&\quad=
+\Pr(S_0=x_0)
+\prod_{t=0}^{T-1}
+\Pr(S_{t+1}=x_{t+1}\mid S_t=x_t,\ldots,S_0=x_0)\\
+&\quad=
+\Pr(S_0=x_0)
+\prod_{t=0}^{T-1}
+\Pr(S_{t+1}=x_{t+1}\mid S_t=x_t)\\
+&\quad=
+\boxed{
+p_0(x_0)
+\prod_{t=0}^{T-1}p(x_{t+1}\mid x_t).
+}
+\end{aligned}
+$$
+
+The trajectory probability multiplies probabilities along one path. In contrast, the distribution $\mathbf p_T=\mathbf p_0\mathbf P^T$ adds the probabilities of every path ending in each state at time $T$.
+
+A state $s\in\mathcal S$ is an **absorbing state** when
+
+$$
+\boxed{
+p(s\mid s)=1.
+}
+$$
+
+Because $p(\,\cdot\mid s)$ must sum to one and every probability is non-negative, this condition forces $p(s'\mid s)=0$ for every $s'\neq s$. Once the chain enters $s$, it remains there at every later time with probability one. If $s=s_k$ in the declared state order, the matrix form of the absorbing condition is $[\mathbf P]_{kk}=1$.
+
+::: {.callout-note title="Example: A three-state reasoning process" appearance="simple" icon=false}
+
+This example demonstrates the state, transition, propagation, trajectory, and absorption definitions in one finite chain. Let an engine be in exactly one mode at each step:
+
+$$
+\mathcal S=\{s_1,s_2,s_3\}=\{\text{searching},\text{clue held},\text{answered}\}.
+$$
+
+Assume the declared mode contains all information needed for the next-mode prediction, and let
+
+$$
+\mathbf P
+=
+\begin{bmatrix}
+0.5&0.5&0\\
+0.1&0.4&0.5\\
+0&0&1
+\end{bmatrix}.
+$$
+
+For example, $p(s_3\mid s_2)=0.5$ means that the next mode is answered with probability $0.5$ when the current mode is clue held. In the declared state order, this probability is stored as $[\mathbf P]_{23}=0.5$. Every row is non-negative and sums to one, so $\mathbf P$ is row-stochastic. State $s_3$ is absorbing because $p(s_3\mid s_3)=1$, equivalently $[\mathbf P]_{33}=1$.
+
+Suppose the engine begins in searching with certainty:
+
+$$
+\mathbf p_0
+=
+\begin{bmatrix}
+1&0&0
+\end{bmatrix}.
+$$
+
+One-step propagation gives
+
+$$
+\mathbf p_1
+=
+\mathbf p_0\mathbf P
+=
+\begin{bmatrix}
+0.5&0.5&0
+\end{bmatrix},
+$$
+
+and a second update gives
+
+$$
+\mathbf p_2
+=
+\mathbf p_1\mathbf P
+=
+\begin{bmatrix}
+0.30&0.45&0.25
+\end{bmatrix}.
+$$
+
+The particular two-step trajectory searching $\rightarrow$ clue held $\rightarrow$ answered has probability
+
+$$
+p_0(s_1)
+p(s_2\mid s_1)
+p(s_3\mid s_2)
+=
+1\times0.5\times0.5
+=
+0.25.
+$$
+
+Here the value $0.25$ also equals the total probability of being answered at time $2$ because no other two-step path from searching reaches answered. At later times, several different paths may reach answered, so its marginal probability must add all such path probabilities rather than select only one.
+
+:::
+
+## Quick test: finite Markov chains {.unnumbered}
+
+1. **Recall:** What equality defines the first-order Markov property, and why must the conditioning history have positive probability?
+2. **Explanation:** Why is the statement “the future ignores the past” less accurate than “the present retains the past information relevant to predicting the next state”?
+3. **Representation:** What does $p(s'\mid s)$ mean, and how is it related to matrix entry $[\mathbf P]_{ij}$? State the two row-stochastic conditions.
+4. **Derivation:** Starting from the law of total probability, derive $p_{t+1}(s')=\sum_{s\in\mathcal S}p_t(s)p(s'\mid s)$, then obtain $\mathbf p_{t+1}=\mathbf p_t\mathbf P$.
+5. **Application:** For the example chain, calculate the probability of searching $\rightarrow$ searching $\rightarrow$ clue held. Is this probability the same object as $\Pr(S_2=\text{clue held})$?
+6. **Model diagnosis:** Suppose the next-mode probability from a state labelled working differs depending on whether the previous hidden mode was searching or clue held. Does working satisfy the Markov property? State one repair.
+
+### Answers and hints {.unnumbered}
+
+1. Let $H_t:=\{S_0=x_0,\ldots,S_t=x_t\}$. When $\Pr(H_t)>0$, the Markov property requires $\Pr(S_{t+1}=s'\mid H_t)=\Pr(S_{t+1}=s'\mid S_t=x_t)$ for every $s'\in\mathcal S$. If $\Pr(H_t)=0$, then $\Pr(\{S_{t+1}=s'\}\cap H_t)=0$, so the defining ratio $\Pr(\{S_{t+1}=s'\}\cap H_t)/\Pr(H_t)=0/0$ is undefined.
+2. Earlier events may have affected the current state. The Markov claim is that, after the current state is known, those earlier events add no further one-step predictive information.
+3. The value $p(s'\mid s)$ is the probability of next state $s'$ conditional on current state $s$. Once the states are placed in their declared order, $[\mathbf P]_{ij}=p(s_j\mid s_i)$. Every entry is non-negative and every row sums to one.
+4. For each $s'\in\mathcal S$, the law of total probability gives $p_{t+1}(s')=\sum_{s\in\mathcal S}p_t(s)p(s'\mid s)$. Setting $s'=s_j$ and replacing semantic probabilities by their stored entries gives $[\mathbf p_{t+1}]_j=\sum_i[\mathbf p_t]_i[\mathbf P]_{ij}$, which is component $j$ of $\mathbf p_t\mathbf P$.
+5. The path probability is $p_0(s_1)p(s_1\mid s_1)p(s_2\mid s_1)=1\times0.5\times0.5=0.25$. It is only one contribution to $\Pr(S_2=\text{clue held})=0.45$; the other contribution comes from searching $\rightarrow$ clue held $\rightarrow$ clue held.
+6. No. The current label working loses history that changes the next-state distribution. Split working into predictive substates or augment it with the missing information.
+
+## References {.unnumbered}
+
+- Richard S. Sutton and Andrew G. Barto, *Reinforcement Learning: An Introduction*, second-edition draft, Chapter 3, especially Sections 3.5 and 3.6 on the Markov property and finite Markov decision processes.
+- Dimitri P. Bertsekas, *Reinforcement Learning and Optimal Control*, second edition, Chapter 1, especially Sections 1.3 and 1.4 on stochastic state evolution, policies, and time-homogeneous infinite-horizon models.
+- Sebastian Thrun, Wolfram Burgard, and Dieter Fox, *Probabilistic Robotics*, Chapter 2, especially Section 2.2 on conditional probability, the probability product rule, and the law of total probability.

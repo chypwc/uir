@@ -1363,7 +1363,7 @@ The first term is the translational velocity shared with the body origin. The se
 
 The two panels in @fig-planar-rigid-body-point-velocity separate the position-vector identity from the velocity-vector addition. In the left panel, the two solid vectors add head to tail to produce the dashed world-position vector of $P$. In the right panel, translated copies of the two velocity contributions form a parallelogram whose diagonal is ${}^{w}\mathbf v_P$; the right-angle marker applies specifically to the rotational contribution and ${}^{w}\mathbf r_{O_bP}$.
 
-![Position and velocity relations for a point fixed to a planar rigid body.](figures/planar_rigid_body_point_velocity.svg){#fig-planar-rigid-body-point-velocity width=100% fig-pos="H"}
+![Position and velocity relations for a point fixed to a planar rigid body.](../figures/planar_rigid_body_point_velocity.svg){#fig-planar-rigid-body-point-velocity width=100% fig-pos="H"}
 
 The same result can be written with the three-dimensional cross product by embedding the planar quantities in $\mathbb R^3$:
 

@@ -29,7 +29,7 @@ Together, these assumptions define an ideal planar kinematic model rather than a
 
 Figure @fig-differential-drive-geometry summarizes the frames, wheel dimensions, rolling condition, and lateral-velocity constraint used by the model.
 
-![Differential-drive robot geometry and ideal rolling constraints.](figures/differential_drive_geometry.svg){#fig-differential-drive-geometry width=95%}
+![Differential-drive robot geometry and ideal rolling constraints.](../figures/differential_drive_geometry.svg){#fig-differential-drive-geometry width=95%}
 
 As a preview of the pure-rolling relation, $v_i=r\dot\phi_i$ for $i\in\{L,R\}$, where $v_i$ is the signed longitudinal ground speed of wheel $i$ and $\dot\phi_i$ is its signed angular speed. @sec-wheel-speeds-body-motion derives how the individual wheel speeds determine the body-forward speed $v$ and yaw rate $\omega$.
 
@@ -580,7 +580,7 @@ $$
 
 The unit vector ${}^{w}\mathbf e_{y,b}$ points along the robot lateral $+y_b$-axis and is expressed in world coordinates. Multiplying it by $R>0$ places $C$ to the left of $O_b$, while multiplying it by $R<0$ reverses the direction and places $C$ to the right. Figure @fig-signed-turning-radius shows both cases. The forward velocity is tangent to the circular path and therefore perpendicular to the radius direction.
 
-![Relationship among the body origin, body axes, instantaneous centre of curvature, tangent velocity, and signed turning radius.](figures/signed_turning_radius.svg){#fig-signed-turning-radius width=95%}
+![Relationship among the body origin, body axes, instantaneous centre of curvature, tangent velocity, and signed turning radius.](../figures/signed_turning_radius.svg){#fig-signed-turning-radius width=95%}
 
 To derive the relationship among $R$, $v$, and $\omega$, consider a short interval $\Delta t>0$ during which the instantaneous values are treated as constant. Define the signed heading change by
 
@@ -674,7 +674,7 @@ The sampling interval $\Delta t$ is measured in seconds. Define $\mathbf q_k\mat
 
 ### Exact straight motion
 
-If $\omega=0$, the heading remains constant. Recall that 
+If $\omega=0$, the heading remains constant. Recall that
 
 $$
 \begin{bmatrix}

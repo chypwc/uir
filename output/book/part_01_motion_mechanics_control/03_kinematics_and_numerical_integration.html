@@ -1,0 +1,1912 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-AU" xml:lang="en-AU"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>3&nbsp; Differential-Drive Kinematics and Numerical Integration: Model and Derivation – Understanding Intelligence Through Robotics</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../part_01_motion_mechanics_control/04_kinematics_and_numerical_integration_implementation.html" rel="next">
+<link href="../part_01_motion_mechanics_control/02_geometry_and_coordinate_frames.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-0a6b7249c26820e032cb0bd839ff02b1.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-6b4ca53971d8dc7d9276afc35a4f526f.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-12ba8748c5d8fcf0bac24d3d70cd9353.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-6b4ca53971d8dc7d9276afc35a4f526f.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Understanding Intelligence Through Robotics</span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools tools-end">
+    <a href="../Understanding-Intelligence-Through-Robotics.pdf" title="Download PDF" class="quarto-navigation-tool px-1" aria-label="Download PDF"><i class="bi bi-file-pdf"></i></a>
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part_01_motion_mechanics_control/01_linear_algebra_foundations.html"><span>Part I:</span> Motion, Mechanics, and Control</a></li><li class="breadcrumb-item"><a href="../part_01_motion_mechanics_control/03_kinematics_and_numerical_integration.html"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Differential-Drive Kinematics and Numerical Integration: Model and Derivation</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../notation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Unified Notation and Conventions</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text"><span>Part I:</span> Motion, Mechanics, and Control</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part_01_motion_mechanics_control/01_linear_algebra_foundations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Linear Algebra Foundations</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part_01_motion_mechanics_control/02_geometry_and_coordinate_frames.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Geometry and Coordinate Frames</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part_01_motion_mechanics_control/03_kinematics_and_numerical_integration.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Differential-Drive Kinematics and Numerical Integration: Model and Derivation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part_01_motion_mechanics_control/04_kinematics_and_numerical_integration_implementation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Differential-Drive Kinematics and Numerical Integration: Implementation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part_01_motion_mechanics_control/05_ros2_packages_and_development_workflow.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">ROS 2 Package Development Workflow</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part_01_motion_mechanics_control/06_planar_rigid_body_motion_se2_and_twists.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Planar Rigid-Body Motion: <span class="math inline">\(SE(2)\)</span> and Twists</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part_01_motion_mechanics_control/07_degrees_of_freedom_and_spatial_motion_so3_se3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Degrees of Freedom and Spatial Motion: <span class="math inline">\(SO(3)\)</span> and <span class="math inline">\(SE(3)\)</span></span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part_01_motion_mechanics_control/08_screw_motion_se3_exponential_and_spatial_integration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Screw Motion, the <span class="math inline">\(SE(3)\)</span> Exponential, and Spatial Pose Integration</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part_01_motion_mechanics_control/09_spatial_geometry_kernel_implementation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Spatial Geometry Kernel Implementation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part_01_motion_mechanics_control/10_general_robot_kinematics_and_jacobians.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">General Robot Kinematics and Jacobians</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text"><span>Part II:</span> Probability and Estimation</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part_02_probability_estimation/finite_markov_chains.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Finite Markov Chains</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#why-this-chapter-matters" id="toc-why-this-chapter-matters" class="nav-link active" data-scroll-target="#why-this-chapter-matters">Why this chapter matters</a></li>
+  <li><a href="#prerequisites-and-assumptions" id="toc-prerequisites-and-assumptions" class="nav-link" data-scroll-target="#prerequisites-and-assumptions">Prerequisites and assumptions</a></li>
+  <li><a href="#planar-pose-and-its-derivative" id="toc-planar-pose-and-its-derivative" class="nav-link" data-scroll-target="#planar-pose-and-its-derivative"><span class="header-section-number">3.1</span> Planar pose and its derivative</a>
+  <ul class="collapse">
+  <li><a href="#deriving-the-planar-model" id="toc-deriving-the-planar-model" class="nav-link" data-scroll-target="#deriving-the-planar-model"><span class="header-section-number">3.1.1</span> Deriving the planar model</a></li>
+  <li><a href="#the-no-sideways-motion-constraint" id="toc-the-no-sideways-motion-constraint" class="nav-link" data-scroll-target="#the-no-sideways-motion-constraint"><span class="header-section-number">3.1.2</span> The no-sideways-motion constraint</a></li>
+  <li><a href="#quick-test-a-planar-kinematics" id="toc-quick-test-a-planar-kinematics" class="nav-link" data-scroll-target="#quick-test-a-planar-kinematics">Quick test A: planar kinematics</a></li>
+  </ul></li>
+  <li><a href="#differential-drive-wheel-kinematics" id="toc-differential-drive-wheel-kinematics" class="nav-link" data-scroll-target="#differential-drive-wheel-kinematics"><span class="header-section-number">3.2</span> Differential-drive wheel kinematics</a>
+  <ul class="collapse">
+  <li><a href="#sec-wheel-speeds-body-motion" id="toc-sec-wheel-speeds-body-motion" class="nav-link" data-scroll-target="#sec-wheel-speeds-body-motion"><span class="header-section-number">3.2.1</span> Relating wheel speeds to body motion</a></li>
+  <li><a href="#characteristic-motions" id="toc-characteristic-motions" class="nav-link" data-scroll-target="#characteristic-motions"><span class="header-section-number">3.2.2</span> Characteristic motions</a></li>
+  <li><a href="#quick-test-b-wheel-to-body-mapping" id="toc-quick-test-b-wheel-to-body-mapping" class="nav-link" data-scroll-target="#quick-test-b-wheel-to-body-mapping">Quick test B: wheel-to-body mapping</a></li>
+  </ul></li>
+  <li><a href="#from-velocity-to-a-finite-pose-change" id="toc-from-velocity-to-a-finite-pose-change" class="nav-link" data-scroll-target="#from-velocity-to-a-finite-pose-change"><span class="header-section-number">3.3</span> From velocity to a finite pose change</a>
+  <ul class="collapse">
+  <li><a href="#exact-straight-motion" id="toc-exact-straight-motion" class="nav-link" data-scroll-target="#exact-straight-motion"><span class="header-section-number">3.3.1</span> Exact straight motion</a></li>
+  <li><a href="#exact-constant-curvature-motion" id="toc-exact-constant-curvature-motion" class="nav-link" data-scroll-target="#exact-constant-curvature-motion"><span class="header-section-number">3.3.2</span> Exact constant-curvature motion</a></li>
+  <li><a href="#quick-test-c-exact-finite-motion" id="toc-quick-test-c-exact-finite-motion" class="nav-link" data-scroll-target="#quick-test-c-exact-finite-motion">Quick test C: exact finite motion</a></li>
+  </ul></li>
+  <li><a href="#numerical-integration-with-forward-euler" id="toc-numerical-integration-with-forward-euler" class="nav-link" data-scroll-target="#numerical-integration-with-forward-euler"><span class="header-section-number">3.4</span> Numerical integration with Forward Euler</a>
+  <ul class="collapse">
+  <li><a href="#derivation-from-a-taylor-expansion" id="toc-derivation-from-a-taylor-expansion" class="nav-link" data-scroll-target="#derivation-from-a-taylor-expansion"><span class="header-section-number">3.4.1</span> Derivation from a Taylor expansion</a></li>
+  <li><a href="#local-and-accumulated-error" id="toc-local-and-accumulated-error" class="nav-link" data-scroll-target="#local-and-accumulated-error"><span class="header-section-number">3.4.2</span> Local and accumulated error</a></li>
+  <li><a href="#worked-comparison-with-the-exact-update" id="toc-worked-comparison-with-the-exact-update" class="nav-link" data-scroll-target="#worked-comparison-with-the-exact-update"><span class="header-section-number">3.4.3</span> Worked comparison with the exact update</a></li>
+  <li><a href="#choosing-and-checking-an-integration-method" id="toc-choosing-and-checking-an-integration-method" class="nav-link" data-scroll-target="#choosing-and-checking-an-integration-method"><span class="header-section-number">3.4.4</span> Choosing and checking an integration method</a></li>
+  <li><a href="#quick-test-d-forward-euler" id="toc-quick-test-d-forward-euler" class="nav-link" data-scroll-target="#quick-test-d-forward-euler">Quick test D: Forward Euler</a></li>
+  </ul></li>
+  <li><a href="#engineering-implications-and-failure-modes" id="toc-engineering-implications-and-failure-modes" class="nav-link" data-scroll-target="#engineering-implications-and-failure-modes"><span class="header-section-number">3.5</span> Engineering implications and failure modes</a></li>
+  <li><a href="#cumulative-chapter-test" id="toc-cumulative-chapter-test" class="nav-link" data-scroll-target="#cumulative-chapter-test">Cumulative chapter test</a>
+  <ul class="collapse">
+  <li><a href="#cumulative-answers-and-hints" id="toc-cumulative-answers-and-hints" class="nav-link" data-scroll-target="#cumulative-answers-and-hints">Cumulative answers and hints</a></li>
+  </ul></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part_01_motion_mechanics_control/01_linear_algebra_foundations.html"><span>Part I:</span> Motion, Mechanics, and Control</a></li><li class="breadcrumb-item"><a href="../part_01_motion_mechanics_control/03_kinematics_and_numerical_integration.html"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Differential-Drive Kinematics and Numerical Integration: Model and Derivation</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span id="sec-differential-drive-model" class="quarto-section-identifier"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Differential-Drive Kinematics and Numerical Integration: Model and Derivation</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="why-this-chapter-matters" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="why-this-chapter-matters">Why this chapter matters</h2>
+<p>Kinematics describes motion without asking which forces or torques produce it. For a differential-drive robot, kinematics connects wheel angular speeds to the time evolution of position and heading. Numerical integration converts this continuous-time model into sampled updates used by simulation, odometry, planning, and control.</p>
+<p>This chapter develops that chain in four steps: define planar pose and its derivative, derive the no-sideways-motion model, derive body velocity from wheel speeds, and compare exact constant-input motion with Forward Euler integration.</p>
+</section>
+<section id="prerequisites-and-assumptions" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="prerequisites-and-assumptions">Prerequisites and assumptions</h2>
+<p>The reader should understand vectors and matrices from <a href="01_linear_algebra_foundations.html" class="quarto-xref"><span>Chapter 1</span></a>, coordinate frames and rotations from <a href="02_geometry_and_coordinate_frames.html" class="quarto-xref"><span>Chapter 2</span></a>, and elementary derivatives, integrals, sine, and cosine.</p>
+<p>The system considered here is a differential-drive ground robot: a rigid chassis propelled by left and right drive wheels that are mounted on a common axle and can be driven independently. The robot operates on a stationary, level, rigid floor, and the model describes its motion as viewed from above. Any additional support hardware does not affect the ideal kinematic model.</p>
+<p>Frame <span class="math inline">\(\{w\}\)</span> is fixed to the floor and is called the world frame. Frame <span class="math inline">\(\{b\}\)</span> is rigidly attached to the robot and is called the body frame. Its origin <span class="math inline">\(O_b\)</span> lies midway between the two drive-wheel ground-contact centre lines. The positive <span class="math inline">\(x_b\)</span>-axis points forward, the positive <span class="math inline">\(y_b\)</span>-axis points left, and the positive <span class="math inline">\(z_b\)</span>-axis points upward, so frame <span class="math inline">\(\{b\}\)</span> is right-handed. As the robot moves, frame <span class="math inline">\(\{b\}\)</span> translates and rotates relative to the stationary frame <span class="math inline">\(\{w\}\)</span>.</p>
+<p>Both drive wheels have the same effective rolling radius <span class="math inline">\(r&gt;0\)</span>, measured in metres. The track width <span class="math inline">\(L&gt;0\)</span>, measured in metres, is the lateral distance between the left and right wheel ground-contact centre lines.</p>
+<p>The kinematic model uses the following assumptions:</p>
+<ul>
+<li>The chassis remains rigid, and its pose changes only through horizontal position and rotation about the upward <span class="math inline">\(z_b\)</span>-axis; its height, roll, and pitch remain unchanged.</li>
+<li>Each wheel maintains contact with the floor and rolls without longitudinal slip, so the distance travelled in the wheel’s rolling direction equals the arc length swept out at its effective radius.</li>
+<li>The scalar body-frame lateral component <span class="math inline">\({}^{b}v_y\)</span>, also written <span class="math inline">\(v_y\)</span> when the frame is clear, is measured in <span class="math inline">\(\mathrm{m\,s^{-1}}\)</span> and lies along the <span class="math inline">\(+y_b\)</span>-direction. The wheel constraints impose <span class="math inline">\({}^{b}v_y=0\)</span> at <span class="math inline">\(O_b\)</span>. The robot can still turn because its forward direction changes continuously.</li>
+<li>The effective wheel radius <span class="math inline">\(r\)</span> and track width <span class="math inline">\(L\)</span> remain constant.</li>
+<li>Wheel deformation, tyre slip, backlash, encoder error, actuator dynamics, collisions, and uneven or moving terrain are ignored.</li>
+<li>Length is measured in metres, time in seconds, and angle in radians; corresponding velocities are measured in <span class="math inline">\(\mathrm{m\,s^{-1}}\)</span> and <span class="math inline">\(\mathrm{rad\,s^{-1}}\)</span>.</li>
+</ul>
+<p>Together, these assumptions define an ideal planar kinematic model rather than a complete physical model. A real robot violates them to some degree, especially during rapid acceleration, braking, collision, wheel slip, or motion over compliant or uneven terrain.</p>
+<p>Figure <a href="#fig-differential-drive-geometry" class="quarto-xref">Figure&nbsp;<span>3.1</span></a> summarizes the frames, wheel dimensions, rolling condition, and lateral-velocity constraint used by the model.</p>
+<div id="fig-differential-drive-geometry" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-differential-drive-geometry-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../figures/differential_drive_geometry.svg" class="img-fluid figure-img" style="width:95.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-differential-drive-geometry-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3.1: Differential-drive robot geometry and ideal rolling constraints.
+</figcaption>
+</figure>
+</div>
+<p>As a preview of the pure-rolling relation, <span class="math inline">\(v_i=r\dot\phi_i\)</span> for <span class="math inline">\(i\in\{L,R\}\)</span>, where <span class="math inline">\(v_i\)</span> is the signed longitudinal ground speed of wheel <span class="math inline">\(i\)</span> and <span class="math inline">\(\dot\phi_i\)</span> is its signed angular speed. <a href="#sec-wheel-speeds-body-motion" class="quarto-xref"><span>Section 3.2.1</span></a> derives how the individual wheel speeds determine the body-forward speed <span class="math inline">\(v\)</span> and yaw rate <span class="math inline">\(\omega\)</span>.</p>
+</section>
+<section id="planar-pose-and-its-derivative" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="planar-pose-and-its-derivative"><span class="header-section-number">3.1</span> Planar pose and its derivative</h2>
+<p>Let <span class="math inline">\(t\in\mathbb R_{\geq0}\)</span> denote continuous time, measured in seconds. Define the planar robot pose by</p>
+<p><span class="math display">\[
+\mathbf q(t)
+\mathrel{:=}
+\begin{bmatrix}
+x(t)\\
+y(t)\\
+\theta(t)
+\end{bmatrix}.
+\]</span></p>
+<p>Here, <span class="math inline">\(x(t),y(t)\in\mathbb R\)</span> are the world-frame coordinates of body-frame origin <span class="math inline">\(O_b\)</span>, measured in metres, and <span class="math inline">\(\theta(t)\in\mathbb R\)</span> is the counter-clockwise heading of frame <span class="math inline">\(\{b\}\)</span> relative to frame <span class="math inline">\(\{w\}\)</span>, measured in radians. Angles that differ by an integer multiple of <span class="math inline">\(2\pi\)</span> represent the same physical heading.</p>
+<p>The pose derivative is</p>
+<p><span class="math display">\[
+\dot{\mathbf q}(t)
+\mathrel{:=}
+\frac{d\mathbf q(t)}{dt}
+=
+\begin{bmatrix}
+\dot x(t)\\
+\dot y(t)\\
+\dot\theta(t)
+\end{bmatrix}.
+\]</span></p>
+<p>The components <span class="math inline">\(\dot x\)</span> and <span class="math inline">\(\dot y\)</span> are measured in <span class="math inline">\(\mathrm{m\,s^{-1}}\)</span>, while <span class="math inline">\(\dot\theta\)</span> is measured in <span class="math inline">\(\mathrm{rad\,s^{-1}}\)</span>. Although they appear in one column, their units are not identical.</p>
+<p>Define the body-velocity input by</p>
+<p><span class="math display">\[
+\mathbf u(t)
+\mathrel{:=}
+\begin{bmatrix}
+v(t)\\
+\omega(t)
+\end{bmatrix},
+\]</span></p>
+<p>where <span class="math inline">\(v(t)\in\mathbb R\)</span> is signed forward speed along <span class="math inline">\(+x_b\)</span>, measured in <span class="math inline">\(\mathrm{m\,s^{-1}}\)</span>, and <span class="math inline">\(\omega(t)\in\mathbb R\)</span> is signed yaw rate about <span class="math inline">\(+z_b\)</span>, measured in <span class="math inline">\(\mathrm{rad\,s^{-1}}\)</span>. Positive <span class="math inline">\(\omega\)</span> produces counter-clockwise rotation when viewed from above.</p>
+<section id="deriving-the-planar-model" class="level3" data-number="3.1.1">
+<h3 data-number="3.1.1" class="anchored" data-anchor-id="deriving-the-planar-model"><span class="header-section-number">3.1.1</span> Deriving the planar model</h3>
+<p>Because the ideal robot has no body-frame lateral velocity, its translational velocity expressed in frame <span class="math inline">\(\{b\}\)</span> is</p>
+<p><span class="math display">\[
+{}^{b}\mathbf v
+=
+\begin{bmatrix}
+v\\
+0
+\end{bmatrix}
+\in\mathbb R^2.
+\]</span></p>
+<p>The rotation matrix <span class="math inline">\(\mathbf R_{wb}(\theta)\in\mathbb R^{2\times2}\)</span> maps coordinates from frame <span class="math inline">\(\{b\}\)</span> to frame <span class="math inline">\(\{w\}\)</span>. Therefore,</p>
+<p><span class="math display">\[
+\begin{bmatrix}
+\dot x\\
+\dot y
+\end{bmatrix}
+=
+\underbrace{
+\begin{bmatrix}
+\cos\theta&amp;-\sin\theta\\
+\sin\theta&amp;\cos\theta
+\end{bmatrix}
+}_{\mathbf R_{wb}(\theta)}
+\begin{bmatrix}
+v\\
+0
+\end{bmatrix}
+=
+\begin{bmatrix}
+v\cos\theta\\
+v\sin\theta
+\end{bmatrix}.
+\]</span></p>
+<p>Together with <span class="math inline">\(\dot\theta=\omega\)</span>, this gives</p>
+<p><span class="math display">\[
+\boxed{
+\dot{\mathbf q}
+=
+\mathbf f(\mathbf q,\mathbf u)
+=
+\begin{bmatrix}
+v\cos\theta\\
+v\sin\theta\\
+\omega
+\end{bmatrix}
+=
+\begin{bmatrix}
+\cos\theta&amp;0\\
+\sin\theta&amp;0\\
+0&amp;1
+\end{bmatrix}
+\begin{bmatrix}
+v\\
+\omega
+\end{bmatrix}
+}.
+\]</span></p>
+<p>Here, <span class="math inline">\(\mathbf f\)</span> is the kinematic state-derivative function: it maps current pose <span class="math inline">\(\mathbf q\)</span> and input <span class="math inline">\(\mathbf u\)</span> to instantaneous pose derivative <span class="math inline">\(\dot{\mathbf q}\)</span>. The position rates depend on <span class="math inline">\(\theta\)</span> because the body forward direction changes relative to the world frame.</p>
+</section>
+<section id="the-no-sideways-motion-constraint" class="level3" data-number="3.1.2">
+<h3 data-number="3.1.2" class="anchored" data-anchor-id="the-no-sideways-motion-constraint"><span class="header-section-number">3.1.2</span> The no-sideways-motion constraint</h3>
+<p>Define the axle-midpoint linear velocity expressed in the world frame by</p>
+<p><span class="math display">\[
+{}^{w}\mathbf v
+\mathrel{:=}
+\begin{bmatrix}
+\dot x\\
+\dot y
+\end{bmatrix}
+\in\mathbb R^2,
+\]</span></p>
+<p>where <span class="math inline">\(\dot x\)</span> and <span class="math inline">\(\dot y\)</span> are its components along <span class="math inline">\(+x_w\)</span> and <span class="math inline">\(+y_w\)</span>, respectively, and are measured in <span class="math inline">\(\mathrm{m\,s^{-1}}\)</span>.</p>
+<p>The geometric unit vector along the body-frame <span class="math inline">\(+y_b\)</span>-axis, expressed using world-frame coordinates, is the second column of <span class="math inline">\(\mathbf R_{wb}(\theta)\)</span>:</p>
+<p><span class="math display">\[
+{}^{w}\mathbf e_{y,b}
+=
+\begin{bmatrix}
+-\sin\theta\\
+\cos\theta
+\end{bmatrix}
+\in\mathbb R^2.
+\]</span></p>
+<p>Both <span class="math inline">\({}^{w}\mathbf e_{y,b}\)</span> and <span class="math inline">\({}^{w}\mathbf v\)</span> are expressed in frame <span class="math inline">\(\{w\}\)</span>, and <span class="math inline">\({}^{w}\mathbf e_{y,b}\)</span> has unit length. Their dot product therefore gives the signed component of the velocity along the robot’s lateral <span class="math inline">\(+y_b\)</span>-direction:</p>
+<p><span class="math display">\[
+\begin{aligned}
+{}^{b}v_y
+&amp;=
+({}^{w}\mathbf e_{y,b})^{\mathsf T}{}^{w}\mathbf v\\
+&amp;=
+\begin{bmatrix}
+-\sin\theta &amp; \cos\theta
+\end{bmatrix}
+\begin{bmatrix}
+\dot x\\
+\dot y
+\end{bmatrix}\\
+&amp;=
+-\dot x\sin\theta+
+\dot y\cos\theta.
+\end{aligned}
+\]</span></p>
+<p>The left superscript in <span class="math inline">\({}^{b}v_y\)</span> makes explicit that this scalar is the <span class="math inline">\(y\)</span>-component of velocity measured along a body-frame axis, even though the projection was calculated using world-frame coordinates.</p>
+<p>The matrix <span class="math inline">\(\mathbf R_{wb}(\theta)\)</span> maps coordinate columns from frame <span class="math inline">\(\{b\}\)</span> to frame <span class="math inline">\(\{w\}\)</span>. Its columns are orthonormal, so its inverse equals its transpose. Define the reverse coordinate map by</p>
+<p><span class="math display">\[
+\begin{aligned}
+\mathbf R_{bw}(\theta)
+&amp;\mathrel{:=}
+\mathbf R_{wb}(\theta)^{-1}\\
+&amp;=
+\mathbf R_{wb}(\theta)^{\mathsf T}\\
+&amp;=
+\begin{bmatrix}
+\cos\theta &amp; \sin\theta\\
+-\sin\theta &amp; \cos\theta
+\end{bmatrix}.
+\end{aligned}
+\]</span></p>
+<p>Therefore, <span class="math inline">\(\mathbf R_{bw}(\theta)\)</span> maps coordinate columns from frame <span class="math inline">\(\{w\}\)</span> to frame <span class="math inline">\(\{b\}\)</span>. The notation uses the same heading <span class="math inline">\(\theta\)</span> because both matrices depend on the robot’s heading, but the reverse map applies the opposite rotation: <span class="math inline">\(\mathbf R_{bw}(\theta)=\mathbf R_{wb}(-\theta)\)</span>.</p>
+<p>The complete change from world-frame velocity components to body-frame velocity components is</p>
+<p><span class="math display">\[
+{}^{b}\mathbf v
+=
+\begin{bmatrix}
+{}^{b}v_x\\
+{}^{b}v_y
+\end{bmatrix}
+=
+\mathbf R_{bw}(\theta){}^{w}\mathbf v
+=
+\mathbf R_{wb}(\theta)^{\mathsf T}{}^{w}\mathbf v
+=
+\begin{bmatrix}
+\dot x\cos\theta+\dot y\sin\theta\\
+-\dot x\sin\theta+\dot y\cos\theta
+\end{bmatrix}.
+\]</span></p>
+<p>Here, <span class="math inline">\({}^{b}v_x\)</span> and <span class="math inline">\({}^{b}v_y\)</span> are the signed forward and lateral velocity components along <span class="math inline">\(+x_b\)</span> and <span class="math inline">\(+y_b\)</span>, respectively, and both are measured in <span class="math inline">\(\mathrm{m\,s^{-1}}\)</span>. Thus, <span class="math inline">\(\dot x\)</span> and <span class="math inline">\(\dot y\)</span> are world-frame components, whereas <span class="math inline">\({}^{b}v_x\)</span> and <span class="math inline">\({}^{b}v_y\)</span> are body-frame components.</p>
+<p>The ideal no-sideways-motion assumption is therefore written most clearly as</p>
+<p><span class="math display">\[
+\boxed{
+{}^{b}v_y
+=
+-\dot x\sin\theta+
+\dot y\cos\theta
+=
+0
+}.
+\]</span></p>
+<p>The signed forward speed <span class="math inline">\(v\)</span> defined earlier equals <span class="math inline">\({}^{b}v_x\)</span>, so the constrained body-frame velocity and its world-frame representation are</p>
+<p><span class="math display">\[
+{}^{b}\mathbf v
+=
+\begin{bmatrix}
+v\\
+0
+\end{bmatrix},
+\qquad
+{}^{w}\mathbf v
+=
+\mathbf R_{wb}(\theta)
+\begin{bmatrix}
+v\\
+0
+\end{bmatrix}
+=
+\begin{bmatrix}
+v\cos\theta\\
+v\sin\theta
+\end{bmatrix}.
+\]</span></p>
+<p>Consequently, zero body-frame lateral velocity does not imply <span class="math inline">\(\dot y=0\)</span>. For example, when <span class="math inline">\(\theta=\pi/4\)</span>, forward motion gives <span class="math inline">\(\dot x=\dot y=v/\sqrt{2}\)</span>. The angle <span class="math inline">\(\theta\)</span> specifies orientation; it does not itself create translation. If <span class="math inline">\(v=0\)</span> and <span class="math inline">\(\omega\ne0\)</span>, the robot rotates in place about <span class="math inline">\(O_b\)</span>, so <span class="math inline">\(\dot x=\dot y=0\)</span> while <span class="math inline">\(\theta\)</span> changes.</p>
+<p>This equation is a nonholonomic velocity constraint. It restricts the directions in which the robot can move at the current pose, but it does not require the pose variables <span class="math inline">\(x\)</span>, <span class="math inline">\(y\)</span>, and <span class="math inline">\(\theta\)</span> to remain on a fixed lower-dimensional surface. In contrast, a holonomic condition such as <span class="math inline">\(y=0\)</span> would confine every allowable pose to the world <span class="math inline">\(x_w\)</span>-axis.</p>
+<p>The distinction concerns instantaneous motion versus accumulated motion. At every instant, the axle midpoint translates only along the robot’s current <span class="math inline">\(x_b\)</span>-axis, but turning changes the direction of <span class="math inline">\(x_b\)</span> relative to the world. For example, a robot initially aligned with <span class="math inline">\(+x_w\)</span> can rotate by <span class="math inline">\(\pi/2\)</span>, drive forward a distance <span class="math inline">\(d&gt;0\)</span>, and rotate back by <span class="math inline">\(-\pi/2\)</span>. Its final heading equals its initial heading, yet it has acquired a world-frame <span class="math inline">\(+y_w\)</span> displacement of <span class="math inline">\(d\)</span>. It never moved along its instantaneous <span class="math inline">\(y_b\)</span>-axis; the net sideways displacement resulted from a sequence of allowed rotations and forward motions.</p>
+</section>
+<section id="quick-test-a-planar-kinematics" class="level3 unnumbered">
+<h3 class="unnumbered anchored" data-anchor-id="quick-test-a-planar-kinematics">Quick test A: planar kinematics</h3>
+<ol type="1">
+<li>Define every component of <span class="math inline">\(\mathbf q=[x\;y\;\theta]^\mathsf T\)</span>, including its frame and units.</li>
+<li>Why do <span class="math inline">\(\dot x\)</span> and <span class="math inline">\(\dot y\)</span> depend on <span class="math inline">\(\theta\)</span>, while <span class="math inline">\(v\)</span> does not?</li>
+<li>Starting with <span class="math inline">\({}^{b}\mathbf v=[v\;0]^\mathsf T\)</span>, derive <span class="math inline">\(\dot y=v\sin\theta\)</span>.</li>
+<li>If <span class="math inline">\(v=1\,\mathrm{m\,s^{-1}}\)</span> and <span class="math inline">\(\theta=\pi/2\,\mathrm{rad}\)</span>, find <span class="math inline">\(\dot x\)</span> and <span class="math inline">\(\dot y\)</span>.</li>
+<li>Does the no-sideways-motion constraint prevent a net sideways displacement? Explain.</li>
+</ol>
+<section id="answers-and-hints" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="answers-and-hints">Answers and hints</h4>
+<ol type="1">
+<li><span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span> are the world-frame position coordinates of <span class="math inline">\(O_b\)</span> in metres; <span class="math inline">\(\theta\)</span> is counter-clockwise body heading relative to the world frame in radians.</li>
+<li><span class="math inline">\(v\)</span> is defined along the moving <span class="math inline">\(x_b\)</span>-axis. Its world-frame components depend on the orientation of that axis.</li>
+<li>The second row of <span class="math inline">\(\mathbf R_{wb}(\theta)[v\;0]^\mathsf T\)</span> is <span class="math inline">\(v\sin\theta\)</span>.</li>
+<li><span class="math inline">\(\dot x=0\,\mathrm{m\,s^{-1}}\)</span> and <span class="math inline">\(\dot y=1\,\mathrm{m\,s^{-1}}\)</span>.</li>
+<li>No.&nbsp;The constraint forbids instantaneous sideways velocity, but combined forward and turning motions can produce a sideways displacement.</li>
+</ol>
+</section>
+</section>
+</section>
+<section id="differential-drive-wheel-kinematics" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="differential-drive-wheel-kinematics"><span class="header-section-number">3.2</span> Differential-drive wheel kinematics</h2>
+<p>Let <span class="math inline">\(\phi_L(t),\phi_R(t)\in\mathbb R\)</span> be the rotational positions of the left and right wheels about their axles at time <span class="math inline">\(t\)</span>, measured in radians. The subscripts <span class="math inline">\(L\)</span> and <span class="math inline">\(R\)</span> identify the left and right wheels. These are rolling angles, not steering angles: the wheel planes remain fixed relative to the chassis.</p>
+<p>Choose <span class="math inline">\(\phi_L=\phi_R=0\)</span> at an arbitrary reference position. A change of <span class="math inline">\(2\pi\)</span> radians is one complete wheel revolution. Although the marked orientation of a wheel repeats after each revolution, <span class="math inline">\(\phi_L\)</span> and <span class="math inline">\(\phi_R\)</span> are treated as unwrapped accumulated angles in <span class="math inline">\(\mathbb R\)</span>, so they may increase beyond <span class="math inline">\(2\pi\)</span> or decrease below zero.</p>
+<p>Their time derivatives <span class="math inline">\(\dot\phi_L(t)\)</span> and <span class="math inline">\(\dot\phi_R(t)\)</span> are the left and right wheel angular speeds, measured in <span class="math inline">\(\mathrm{rad\,s^{-1}}\)</span>. Positive angular speed is defined to roll the corresponding wheel and the robot forward.</p>
+<p>For a wheel of effective radius <span class="math inline">\(r\)</span>, let <span class="math inline">\(\Delta\phi\)</span> be a signed angular change and let <span class="math inline">\(\Delta s\)</span> be the corresponding signed arc displacement swept out at the wheel rim. Both <span class="math inline">\(r\)</span> and <span class="math inline">\(\Delta s\)</span> are measured in metres. By the definition of radian measure,</p>
+<p><span class="math display">\[
+\Delta\phi
+=
+\frac{\Delta s}{r},
+\qquad
+\frac{\mathrm m}{\mathrm m}=1.
+\]</span></p>
+<p>The metre units cancel, so a radian is dimensionless in the International System of Units (SI). Nevertheless, angles are labelled in <span class="math inline">\(\mathrm{rad}\)</span> and angular speeds in <span class="math inline">\(\mathrm{rad\,s^{-1}}\)</span> so their physical meanings remain clear. Rearranging the radian definition gives the swept arc displacement <span class="math inline">\(\Delta s=r\Delta\phi\)</span>. Under rolling without slip, this swept arc displacement equals the signed longitudinal displacement along the ground.</p>
+<p>For wheel <span class="math inline">\(i\in\{L,R\}\)</span>, let <span class="math inline">\(s_i(t)\)</span> be its signed accumulated longitudinal ground displacement. Over a time interval <span class="math inline">\(\Delta t&gt;0\)</span>, pure rolling gives <span class="math inline">\(\Delta s_i=r\Delta\phi_i\)</span>. Because <span class="math inline">\(r\)</span> is constant, dividing by <span class="math inline">\(\Delta t\)</span> and taking the limit <span class="math inline">\(\Delta t\to0\)</span> gives</p>
+<p><span class="math display">\[
+v_i
+\mathrel{:=}
+\dot s_i
+=
+\lim_{\Delta t\to0}\frac{\Delta s_i}{\Delta t}
+=
+r\lim_{\Delta t\to0}\frac{\Delta\phi_i}{\Delta t}
+=
+r\dot\phi_i.
+\]</span></p>
+<p>Applying this relation to the left and right wheels gives</p>
+<p><span class="math display">\[
+v_L=r\dot\phi_L,
+\qquad
+v_R=r\dot\phi_R,
+\]</span></p>
+<p>where <span class="math inline">\(v_L,v_R\in\mathbb R\)</span> are measured in <span class="math inline">\(\mathrm{m\,s^{-1}}\)</span>. The unit calculation for either wheel is</p>
+<p><span class="math display">\[
+\begin{aligned}
+\text{metres}\times\frac{\text{radians}}{\text{second}}
+&amp;=
+\mathrm m\cdot\frac{\mathrm{rad}}{\mathrm s}\\
+&amp;=
+\mathrm m\cdot\frac{1}{\mathrm s}\\
+&amp;=
+\mathrm{m\,s^{-1}}.
+\end{aligned}
+\]</span></p>
+<p>The symbol <span class="math inline">\(\mathrm{rad}\)</span> is retained to communicate that <span class="math inline">\(\phi\)</span> is an angle, even though it contributes no independent physical dimension in the unit calculation.</p>
+<section id="sec-wheel-speeds-body-motion" class="level3" data-number="3.2.1">
+<h3 data-number="3.2.1" class="anchored" data-anchor-id="sec-wheel-speeds-body-motion"><span class="header-section-number">3.2.1</span> Relating wheel speeds to body motion</h3>
+<p>The rigid-body point-velocity relation derived in the <a href="../part_01_motion_mechanics_control/02_geometry_and_coordinate_frames.html">geometry and coordinate-frames chapter</a> is</p>
+<p><span class="math display">\[
+{}^{b}\mathbf v_P
+=
+{}^{b}\mathbf v_O
++
+{}^{b}\boldsymbol{\omega}\times{}^{b}\mathbf r_{OP},
+\]</span></p>
+<p>provided that every vector is expressed in the same orthonormal frame, here the body frame <span class="math inline">\(\{b\}\)</span>. The vector <span class="math inline">\({}^{b}\mathbf v_P\)</span> is the velocity of a rigid-body point <span class="math inline">\(P\)</span>, <span class="math inline">\({}^{b}\mathbf v_O\)</span> is the velocity of a reference point <span class="math inline">\(O\)</span>, <span class="math inline">\({}^{b}\mathbf r_{OP}\)</span> is the position of <span class="math inline">\(P\)</span> relative to <span class="math inline">\(O\)</span>, and <span class="math inline">\({}^{b}\boldsymbol{\omega}\)</span> is the rigid body angular-velocity vector.</p>
+<p>For the differential-drive chassis, choose the reference point as the axle midpoint <span class="math inline">\(O=O_b\)</span>. Let <span class="math inline">\(C_L\)</span> and <span class="math inline">\(C_R\)</span> denote the left and right wheel centres on the axle. Both points are fixed relative to the chassis. Under ideal rolling without longitudinal slip, the <span class="math inline">\(+x_b\)</span> components of their translational velocities equal the longitudinal wheel speeds <span class="math inline">\(v_L\)</span> and <span class="math inline">\(v_R\)</span> defined above.</p>
+<p>Because <span class="math inline">\(+y_b\)</span> points left, the wheel-centre position vectors are</p>
+<p><span class="math display">\[
+{}^{b}\mathbf r_{O_bC_L}
+=
+\begin{bmatrix}0\\L/2\\0\end{bmatrix},
+\qquad
+{}^{b}\mathbf r_{O_bC_R}
+=
+\begin{bmatrix}0\\-L/2\\0\end{bmatrix},
+\qquad
+{}^{b}\mathbf r_{O_bC_L},{}^{b}\mathbf r_{O_bC_R}\in\mathbb R^3.
+\]</span></p>
+<p>Their components have units of metres. The axle midpoint moves forward with scalar speed <span class="math inline">\(v\)</span>, and the chassis yaws about <span class="math inline">\(+z_b\)</span> with scalar rate <span class="math inline">\(\omega\)</span>, so</p>
+<p><span class="math display">\[
+{}^{b}\mathbf v_{O_b}
+=
+\begin{bmatrix}v\\0\\0\end{bmatrix}
+\in\mathbb R^3,
+\qquad
+{}^{b}\boldsymbol{\omega}
+=
+\begin{bmatrix}0\\0\\\omega\end{bmatrix}
+\in\mathbb R^3.
+\]</span></p>
+<p>The components of <span class="math inline">\({}^{b}\mathbf v_{O_b}\)</span> have units of <span class="math inline">\(\mathrm{m\,s^{-1}}\)</span>, and the components of <span class="math inline">\({}^{b}\boldsymbol{\omega}\)</span> have units of <span class="math inline">\(\mathrm{rad\,s^{-1}}\)</span>.</p>
+<p>Applying the rigid-body relation to each wheel-centre point gives</p>
+<p><span class="math display">\[
+{}^{b}\mathbf v_{C_L}
+=
+{}^{b}\mathbf v_{O_b}
++
+{}^{b}\boldsymbol{\omega}\times{}^{b}\mathbf r_{O_bC_L},
+\qquad
+{}^{b}\mathbf v_{C_R}
+=
+{}^{b}\mathbf v_{O_b}
++
+{}^{b}\boldsymbol{\omega}\times{}^{b}\mathbf r_{O_bC_R}.
+\]</span></p>
+<p>For the left wheel, the rotational contribution is</p>
+<p><span class="math display">\[
+\begin{aligned}
+{}^{b}\boldsymbol{\omega}\times{}^{b}\mathbf r_{O_bC_L}
+&amp;=
+\begin{bmatrix}0\\0\\\omega\end{bmatrix}
+\times
+\begin{bmatrix}0\\L/2\\0\end{bmatrix}
+=
+\begin{bmatrix}-L\omega/2\\0\\0\end{bmatrix}.
+\end{aligned}
+\]</span></p>
+<p>For the right wheel, it is</p>
+<p><span class="math display">\[
+\begin{aligned}
+{}^{b}\boldsymbol{\omega}\times{}^{b}\mathbf r_{O_bC_R}
+&amp;=
+\begin{bmatrix}0\\0\\\omega\end{bmatrix}
+\times
+\begin{bmatrix}0\\-L/2\\0\end{bmatrix}
+=
+\begin{bmatrix}L\omega/2\\0\\0\end{bmatrix}.
+\end{aligned}
+\]</span></p>
+<p>Therefore, the wheel-centre velocity vectors are</p>
+<p><span class="math display">\[
+{}^{b}\mathbf v_{C_L}
+=
+\begin{bmatrix}v-L\omega/2\\0\\0\end{bmatrix},
+\qquad
+{}^{b}\mathbf v_{C_R}
+=
+\begin{bmatrix}v+L\omega/2\\0\\0\end{bmatrix}.
+\]</span></p>
+<p>The longitudinal wheel speeds <span class="math inline">\(v_L\)</span> and <span class="math inline">\(v_R\)</span> are the <span class="math inline">\(+x_b\)</span> components of these vectors. Consequently,</p>
+<p><span class="math display">\[
+\boxed{
+v_L=v-\frac{L}{2}\omega,
+\qquad
+v_R=v+\frac{L}{2}\omega
+}.
+\]</span></p>
+<p>The signs follow from the right-hand-rule identities <span class="math inline">\(\mathbf e_{z,b}\times\mathbf e_{y,b}=-\mathbf e_{x,b}\)</span> and <span class="math inline">\(\mathbf e_{z,b}\times(-\mathbf e_{y,b})=\mathbf e_{x,b}\)</span>. For a positive yaw rate, the robot turns left: rotation reduces the left-wheel forward speed and increases the right-wheel forward speed. The product <span class="math inline">\(L\omega\)</span> has units <span class="math inline">\(\mathrm{m\,s^{-1}}\)</span> because radians are dimensionless in dimensional calculations.</p>
+<p>Adding the two equations isolates forward speed, while subtracting the left equation from the right equation isolates yaw rate:</p>
+<p><span class="math display">\[
+v=\frac{v_R+v_L}{2},
+\qquad
+\omega=\frac{v_R-v_L}{L}.
+\]</span></p>
+<p>Substituting the pure-rolling relations produces</p>
+<p><span class="math display">\[
+\boxed{
+v
+=
+\frac{r}{2}\left(\dot\phi_R+\dot\phi_L\right),
+\qquad
+\omega
+=
+\frac{r}{L}\left(\dot\phi_R-\dot\phi_L\right)
+}.
+\]</span></p>
+<p>In matrix form,</p>
+<p><span class="math display">\[
+\boxed{
+\begin{bmatrix}
+v\\
+\omega
+\end{bmatrix}
+=
+\underbrace{
+\begin{bmatrix}
+r/2&amp;r/2\\
+-r/L&amp;r/L
+\end{bmatrix}
+}_{\mathbf G\in\mathbb R^{2\times2}}
+\begin{bmatrix}
+\dot\phi_L\\
+\dot\phi_R
+\end{bmatrix}
+}.
+\]</span></p>
+<p>The matrix <span class="math inline">\(\mathbf G\)</span> maps the wheel-speed column <span class="math inline">\([\dot\phi_L\;\dot\phi_R]^\mathsf T\)</span> to the body-velocity column <span class="math inline">\([v\;\omega]^\mathsf T\)</span>. In this chapter, this input-output direction is called the <strong>wheel-to-body velocity mapping</strong>: its inputs are the two wheel angular speeds, and its outputs are the resulting body-forward speed and yaw rate. It is also called the <strong>forward differential-drive velocity kinematics</strong>. Here, <em>velocity kinematics</em> means an algebraic relationship among instantaneous velocities without integrating the pose or modelling the forces that produce the motion. The word <em>forward</em> describes the calculation from wheel motion to body motion; it does not mean that the robot must travel in the positive forward direction, because the signed wheel speeds and <span class="math inline">\(v\)</span> may be negative.</p>
+<p>The two rows of <span class="math inline">\(\mathbf G\)</span> have different physical units because the two outputs have different units.</p>
+<p>Because <span class="math inline">\(r&gt;0\)</span> and <span class="math inline">\(L&gt;0\)</span>, the mapping can be inverted. Solving for the wheel speeds gives</p>
+<p><span class="math display">\[
+\boxed{
+\dot\phi_L=\frac{v}{r}-\frac{L\omega}{2r},
+\qquad
+\dot\phi_R=\frac{v}{r}+\frac{L\omega}{2r}
+}.
+\]</span></p>
+<p>This opposite input-output direction is called the <strong>body-to-wheel velocity mapping</strong>, or the <strong>inverse differential-drive velocity kinematics</strong>. Its inputs are a desired body-forward speed <span class="math inline">\(v\)</span> and yaw rate <span class="math inline">\(\omega\)</span>, and its outputs are the ideal left and right wheel angular speeds <span class="math inline">\(\dot\phi_L\)</span> and <span class="math inline">\(\dot\phi_R\)</span> required by the no-slip model. The word <em>inverse</em> means that this calculation reverses the wheel-to-body mapping; it does not mean that the robot is commanded to drive backwards. In a controller, the body-to-wheel mapping converts a desired chassis motion into wheel-speed commands, whereas the wheel-to-body mapping can convert measured wheel speeds into an estimate of chassis motion.</p>
+</section>
+<section id="characteristic-motions" class="level3" data-number="3.2.2">
+<h3 data-number="3.2.2" class="anchored" data-anchor-id="characteristic-motions"><span class="header-section-number">3.2.2</span> Characteristic motions</h3>
+<ul>
+<li>If <span class="math inline">\(\dot\phi_L=\dot\phi_R\)</span>, then <span class="math inline">\(\omega=0\)</span> and the robot moves straight.</li>
+<li>If <span class="math inline">\(\dot\phi_L=-\dot\phi_R\)</span>, then <span class="math inline">\(v=0\)</span> and the robot rotates about <span class="math inline">\(O_b\)</span>.</li>
+<li>If one wheel is stationary, the ideal robot follows a circle about that wheel contact point.</li>
+<li>If the wheel speeds are unequal and not opposite, the robot follows an arc about an instantaneous centre; the signed turning radius is derived next.</li>
+</ul>
+<section id="instantaneous-centre-of-curvature-and-signed-turning-radius" class="level4">
+<h4 class="anchored" data-anchor-id="instantaneous-centre-of-curvature-and-signed-turning-radius">Instantaneous centre of curvature and signed turning radius</h4>
+<p>Assume <span class="math inline">\(\omega\neq0\)</span> at time <span class="math inline">\(t\)</span>. At that instant, the planar rigid-body motion can be regarded as rotation about a point <span class="math inline">\(C\)</span> in the plane whose instantaneous linear velocity is zero. This point is called the instantaneous centre of curvature (ICC). The body origin <span class="math inline">\(O_b\)</span> therefore moves instantaneously along a circular arc centred at <span class="math inline">\(C\)</span>.</p>
+<p>The no-sideways-motion constraint makes the velocity of <span class="math inline">\(O_b\)</span> tangent to the arc and parallel to the body <span class="math inline">\(x_b\)</span>-axis. A circle radius is perpendicular to its tangent, so the line joining <span class="math inline">\(O_b\)</span> and <span class="math inline">\(C\)</span> lies along the lateral <span class="math inline">\(y_b\)</span>-axis.</p>
+<p>Let <span class="math inline">\({}^{w}\mathbf p_{O_b},{}^{w}\mathbf p_C\in\mathbb R^2\)</span> be the world-frame position columns of <span class="math inline">\(O_b\)</span> and <span class="math inline">\(C\)</span>, respectively. Define the ordinary nonnegative radius <span class="math inline">\(\rho\)</span>, measured in metres, by</p>
+<p><span class="math display">\[
+\rho
+\mathrel{:=}
+\operatorname{distance}(O_b,C)
+=
+\left\|{}^{w}\mathbf p_C-{}^{w}\mathbf p_{O_b}\right\|_2
+\geq0.
+\]</span></p>
+<p>The magnitude <span class="math inline">\(\rho\)</span> records only the distance between the two points. Define the signed turning radius <span class="math inline">\(R\in\mathbb R\)</span> by using its sign to record which side of the robot contains the ICC:</p>
+<p><span class="math display">\[
+R
+\mathrel{:=}
+\begin{cases}
++\rho, &amp; C\text{ is to the left of }O_b,\\[4pt]
+-\rho, &amp; C\text{ is to the right of }O_b.
+\end{cases}
+\]</span></p>
+<p>Consequently, <span class="math inline">\(|R|=\rho\)</span>. The relative-position vector from <span class="math inline">\(O_b\)</span> to <span class="math inline">\(C\)</span>, expressed in world-frame coordinates, is</p>
+<p><span class="math display">\[
+{}^{w}\mathbf r_{O_bC}
+\mathrel{:=}
+{}^{w}\mathbf p_C-{}^{w}\mathbf p_{O_b}
+=
+R\,{}^{w}\mathbf e_{y,b},
+\qquad
+{}^{w}\mathbf e_{y,b}
+=
+\begin{bmatrix}-\sin\theta\\\cos\theta\end{bmatrix}
+\in\mathbb R^2.
+\]</span></p>
+<p>The unit vector <span class="math inline">\({}^{w}\mathbf e_{y,b}\)</span> points along the robot lateral <span class="math inline">\(+y_b\)</span>-axis and is expressed in world coordinates. Multiplying it by <span class="math inline">\(R&gt;0\)</span> places <span class="math inline">\(C\)</span> to the left of <span class="math inline">\(O_b\)</span>, while multiplying it by <span class="math inline">\(R&lt;0\)</span> reverses the direction and places <span class="math inline">\(C\)</span> to the right. Figure <a href="#fig-signed-turning-radius" class="quarto-xref">Figure&nbsp;<span>3.2</span></a> shows both cases. The forward velocity is tangent to the circular path and therefore perpendicular to the radius direction.</p>
+<div id="fig-signed-turning-radius" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-signed-turning-radius-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../figures/signed_turning_radius.svg" class="img-fluid figure-img" style="width:95.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-signed-turning-radius-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3.2: Relationship among the body origin, body axes, instantaneous centre of curvature, tangent velocity, and signed turning radius.
+</figcaption>
+</figure>
+</div>
+<p>To derive the relationship among <span class="math inline">\(R\)</span>, <span class="math inline">\(v\)</span>, and <span class="math inline">\(\omega\)</span>, consider a short interval <span class="math inline">\(\Delta t&gt;0\)</span> during which the instantaneous values are treated as constant. Define the signed heading change by</p>
+<p><span class="math display">\[
+\Delta\theta
+\mathrel{:=}
+\theta(t+\Delta t)-\theta(t),
+\]</span></p>
+<p>where <span class="math inline">\(\Delta\theta\)</span> is measured in radians. Let <span class="math inline">\(\Delta\ell\in\mathbb R\)</span> be the signed distance travelled by <span class="math inline">\(O_b\)</span> along the arc, measured in metres; <span class="math inline">\(\Delta\ell&gt;0\)</span> denotes travel in the <span class="math inline">\(+x_b\)</span>-direction and <span class="math inline">\(\Delta\ell&lt;0\)</span> denotes travel in the <span class="math inline">\(-x_b\)</span>-direction.</p>
+<p>The radian definition gives arc length equal to radius times angular change. With the signed quantities just defined, it becomes</p>
+<p><span class="math display">\[
+\boxed{\Delta\ell=R\,\Delta\theta}.
+\]</span></p>
+<p>For a forward left turn, both <span class="math inline">\(R\)</span> and <span class="math inline">\(\Delta\theta\)</span> are positive. For a forward right turn, both are negative. Their product is therefore the positive forward distance <span class="math inline">\(\Delta\ell\)</span> in either case; the same signed equation also remains valid for backward motion.</p>
+<p>Divide the signed arc equation by <span class="math inline">\(\Delta t\)</span>:</p>
+<p><span class="math display">\[
+\frac{\Delta\ell}{\Delta t}
+=
+R\frac{\Delta\theta}{\Delta t}.
+\]</span></p>
+<p>Taking the limit as <span class="math inline">\(\Delta t\to0\)</span> gives</p>
+<p><span class="math display">\[
+\frac{d\ell}{dt}
+=
+R\frac{d\theta}{dt}.
+\]</span></p>
+<p>By definition, the signed forward speed is <span class="math inline">\(v=d\ell/dt\)</span>, measured in <span class="math inline">\(\mathrm{m\,s^{-1}}\)</span>, and the signed yaw rate is <span class="math inline">\(\omega=d\theta/dt\)</span>, measured in <span class="math inline">\(\mathrm{rad\,s^{-1}}\)</span>. Therefore,</p>
+<p><span class="math display">\[
+\boxed{v=R\omega}.
+\]</span></p>
+<p>When <span class="math inline">\(\omega\neq0\)</span>, division by <span class="math inline">\(\omega\)</span> yields</p>
+<p><span class="math display">\[
+\boxed{
+R=\frac{v}{\omega}
+},
+\qquad
+\omega\neq0.
+\]</span></p>
+<p>The quotient has units of metres because radians are dimensionless in dimensional calculations. If <span class="math inline">\(\omega=0\)</span> and <span class="math inline">\(v\neq0\)</span>, the robot moves straight and has no finite ICC; its turning radius is informally described as infinite. If <span class="math inline">\(v=0\)</span> and <span class="math inline">\(\omega\neq0\)</span>, then <span class="math inline">\(R=0\)</span> and the robot rotates in place about <span class="math inline">\(O_b\)</span>.</p>
+<p>The symbol <span class="math inline">\(R\)</span> in this subsection is a scalar signed turning radius, not a rotation matrix.</p>
+</section>
+</section>
+<section id="quick-test-b-wheel-to-body-mapping" class="level3 unnumbered">
+<h3 class="unnumbered anchored" data-anchor-id="quick-test-b-wheel-to-body-mapping">Quick test B: wheel-to-body mapping</h3>
+<ol type="1">
+<li>Define <span class="math inline">\(\phi_L\)</span>, <span class="math inline">\(\phi_R\)</span>, <span class="math inline">\(\dot\phi_L\)</span>, <span class="math inline">\(\dot\phi_R\)</span>, <span class="math inline">\(r\)</span>, and <span class="math inline">\(L\)</span>, including their units, and distinguish wheel angle from angular speed.</li>
+<li>Why is a radian dimensionless in an SI unit calculation, and why does <span class="math inline">\(r\dot\phi\)</span> have units of metres per second?</li>
+<li>Starting from <span class="math inline">\({}^{b}\mathbf v_P={}^{b}\mathbf v_O+{}^{b}\boldsymbol{\omega}\times{}^{b}\mathbf r_{OP}\)</span>, use the two wheel-centre position vectors to derive <span class="math inline">\(v_L=v-L\omega/2\)</span> and <span class="math inline">\(v_R=v+L\omega/2\)</span>.</li>
+<li>Why does equal wheel speed produce <span class="math inline">\(\omega=0\)</span>?</li>
+<li>Derive <span class="math inline">\(\omega=r(\dot\phi_R-\dot\phi_L)/L\)</span>.</li>
+<li>Let <span class="math inline">\(r=0.10\,\mathrm m\)</span>, <span class="math inline">\(L=0.50\,\mathrm m\)</span>, <span class="math inline">\(\dot\phi_L=2\,\mathrm{rad\,s^{-1}}\)</span>, and <span class="math inline">\(\dot\phi_R=4\,\mathrm{rad\,s^{-1}}\)</span>. Find <span class="math inline">\(v\)</span> and <span class="math inline">\(\omega\)</span>.</li>
+<li>Define the ICC <span class="math inline">\(C\)</span>, ordinary radius <span class="math inline">\(\rho\)</span>, signed radius <span class="math inline">\(R\)</span>, signed distance <span class="math inline">\(\Delta\ell\)</span>, and heading change <span class="math inline">\(\Delta\theta\)</span>. Starting from <span class="math inline">\(\Delta\ell=R\Delta\theta\)</span>, derive <span class="math inline">\(R=v/\omega\)</span> and explain the signs for left and right turns.</li>
+<li>Name two physical effects that can make predicted and real motion disagree.</li>
+</ol>
+<section id="answers-and-hints-1" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="answers-and-hints-1">Answers and hints</h4>
+<ol type="1">
+<li><span class="math inline">\(\phi_L\)</span> and <span class="math inline">\(\phi_R\)</span> are unwrapped left and right wheel rotational positions in radians; <span class="math inline">\(\dot\phi_L\)</span> and <span class="math inline">\(\dot\phi_R\)</span> are their angular speeds in <span class="math inline">\(\mathrm{rad\,s^{-1}}\)</span>; <span class="math inline">\(r\)</span> is effective wheel radius in metres; and <span class="math inline">\(L\)</span> is track width in metres.</li>
+<li>Radian measure is an arc-length-to-radius ratio, so its metre units cancel. Therefore, <span class="math inline">\(r\dot\phi\)</span> has units <span class="math inline">\(\mathrm m\cdot\mathrm{rad\,s^{-1}}=\mathrm{m\,s^{-1}}\)</span>.</li>
+<li>In frame <span class="math inline">\(\{b\}\)</span>, use <span class="math inline">\({}^{b}\mathbf r_{O_bC_L}=[0,L/2,0]^\mathsf T\)</span>, <span class="math inline">\({}^{b}\mathbf r_{O_bC_R}=[0,-L/2,0]^\mathsf T\)</span>, <span class="math inline">\({}^{b}\mathbf v_{O_b}=[v,0,0]^\mathsf T\)</span>, and <span class="math inline">\({}^{b}\boldsymbol{\omega}=[0,0,\omega]^\mathsf T\)</span>. The cross products contribute <span class="math inline">\([-L\omega/2,0,0]^\mathsf T\)</span> on the left and <span class="math inline">\([L\omega/2,0,0]^\mathsf T\)</span> on the right. Adding <span class="math inline">\({}^{b}\mathbf v_{O_b}\)</span> and selecting the <span class="math inline">\(+x_b\)</span> components gives the two required equations.</li>
+<li>Equal wheel speeds have zero difference, so the yaw-rate equation gives <span class="math inline">\(\omega=0\)</span>.</li>
+<li>Subtract <span class="math inline">\(v_L=v-L\omega/2\)</span> from <span class="math inline">\(v_R=v+L\omega/2\)</span>, then substitute <span class="math inline">\(v_R=r\dot\phi_R\)</span> and <span class="math inline">\(v_L=r\dot\phi_L\)</span>.</li>
+<li><span class="math inline">\(v=0.30\,\mathrm{m\,s^{-1}}\)</span> and <span class="math inline">\(\omega=0.40\,\mathrm{rad\,s^{-1}}\)</span>.</li>
+<li>The ICC <span class="math inline">\(C\)</span> is the point about which the robot is instantaneously rotating. The radius <span class="math inline">\(\rho=\operatorname{distance}(O_b,C)\geq0\)</span> is an ordinary distance, while <span class="math inline">\(R=+\rho\)</span> for an ICC on the left and <span class="math inline">\(R=-\rho\)</span> for one on the right. The quantity <span class="math inline">\(\Delta\ell\)</span> is signed forward distance and <span class="math inline">\(\Delta\theta\)</span> is signed heading change. Dividing <span class="math inline">\(\Delta\ell=R\Delta\theta\)</span> by <span class="math inline">\(\Delta t\)</span> and taking the limit gives <span class="math inline">\(v=R\omega\)</span>, hence <span class="math inline">\(R=v/\omega\)</span> for <span class="math inline">\(\omega\neq0\)</span>. A forward left turn has <span class="math inline">\(R&gt;0\)</span> and <span class="math inline">\(\omega&gt;0\)</span>; a forward right turn has <span class="math inline">\(R&lt;0\)</span> and <span class="math inline">\(\omega&lt;0\)</span>.</li>
+<li>Examples include wheel slip, unequal wheel radii, tyre deformation, backlash, encoder error, an incorrect track width, and uneven ground.</li>
+</ol>
+</section>
+</section>
+</section>
+<section id="from-velocity-to-a-finite-pose-change" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="from-velocity-to-a-finite-pose-change"><span class="header-section-number">3.3</span> From velocity to a finite pose change</h2>
+<p>The differential equation <span class="math inline">\(\dot{\mathbf q}=\mathbf f(\mathbf q,\mathbf u)\)</span> specifies instantaneous motion. A simulator or odometry system needs the pose after a finite interval.</p>
+<p>Let <span class="math inline">\(t_k\)</span> denote sample time <span class="math inline">\(k\)</span>, where <span class="math inline">\(k\in\{0,1,2,\ldots\}\)</span>, and define</p>
+<p><span class="math display">\[
+\Delta t
+\mathrel{:=}
+t_{k+1}-t_k&gt;0.
+\]</span></p>
+<p>The sampling interval <span class="math inline">\(\Delta t\)</span> is measured in seconds. Define <span class="math inline">\(\mathbf q_k\mathrel{:=}\mathbf q(t_k)\)</span> and assume that <span class="math inline">\(v\)</span> and <span class="math inline">\(\omega\)</span> remain constant on <span class="math inline">\([t_k,t_{k+1}]\)</span>. This is a zero-order-hold input assumption.</p>
+<section id="exact-straight-motion" class="level3" data-number="3.3.1">
+<h3 data-number="3.3.1" class="anchored" data-anchor-id="exact-straight-motion"><span class="header-section-number">3.3.1</span> Exact straight motion</h3>
+<p>If <span class="math inline">\(\omega=0\)</span>, the heading remains constant. Recall that</p>
+<p><span class="math display">\[
+\begin{bmatrix}
+\dot x\\
+\dot y \\
+\dot \theta \\
+\end{bmatrix}
+=
+\begin{bmatrix}
+v\cos\theta\\
+v\sin\theta \\
+\omega
+\end{bmatrix}.
+\]</span></p>
+<p>Integrating the three rate equations gives</p>
+<p><span class="math display">\[
+\boxed{
+\begin{aligned}
+x_{k+1}&amp;=x_k+v\Delta t\cos\theta_k,\\
+y_{k+1}&amp;=y_k+v\Delta t\sin\theta_k,\\
+\theta_{k+1}&amp;=\theta_k.
+\end{aligned}
+}
+\]</span></p>
+</section>
+<section id="exact-constant-curvature-motion" class="level3" data-number="3.3.2">
+<h3 data-number="3.3.2" class="anchored" data-anchor-id="exact-constant-curvature-motion"><span class="header-section-number">3.3.2</span> Exact constant-curvature motion</h3>
+<p>If <span class="math inline">\(\omega\neq0\)</span>, let <span class="math inline">\(\tau\in[0,\Delta t]\)</span> denote elapsed time within the interval. Then</p>
+<p><span class="math display">\[
+\theta(t_k+\tau)=\theta_k+\omega\tau.
+\]</span></p>
+<p>Substituting this heading into the position-rate equations and integrating gives</p>
+<p><span class="math display">\[
+\begin{aligned}
+x_{k+1}-x_k
+&amp;=\int_0^{\Delta t}v\cos(\theta_k+\omega\tau)\,d\tau\\
+&amp;=\frac{v}{\omega}\left[\sin(\theta_k+\omega\Delta t)-\sin\theta_k\right],\\[4pt]
+y_{k+1}-y_k
+&amp;=\int_0^{\Delta t}v\sin(\theta_k+\omega\tau)\,d\tau\\
+&amp;=\frac{v}{\omega}\left[\cos\theta_k-\cos(\theta_k+\omega\Delta t)\right].
+\end{aligned}
+\]</span></p>
+<p>Therefore,</p>
+<p><span class="math display">\[
+\boxed{
+\begin{aligned}
+x_{k+1}&amp;=x_k+\frac{v}{\omega}\left[\sin(\theta_k+\omega\Delta t)-\sin\theta_k\right],\\
+y_{k+1}&amp;=y_k+\frac{v}{\omega}\left[\cos\theta_k-\cos(\theta_k+\omega\Delta t)\right],\\
+\theta_{k+1}&amp;=\theta_k+\omega\Delta t.
+\end{aligned}
+}
+\]</span></p>
+<p>The signed turning radius is <span class="math inline">\(R=v/\omega\)</span>, measured in metres, and the signed angular change is <span class="math inline">\(\Delta\theta=\omega\Delta t\)</span>, measured in radians. The robot therefore follows a circular arc.</p>
+<p>The formulas contain <span class="math inline">\(v/\omega\)</span> and therefore cannot be evaluated directly when <span class="math inline">\(\omega=0\)</span>. To express their continuous limit, define the unnormalised sinc function <span class="math inline">\(\operatorname{sinc}:\mathbb R\to\mathbb R\)</span> by</p>
+<p><span class="math display">\[
+\operatorname{sinc}(z)
+\mathrel{:=}
+\begin{cases}
+\dfrac{\sin z}{z},&amp;z\neq0,\\[6pt]
+1,&amp;z=0.
+\end{cases}
+\]</span></p>
+<p>Here, <span class="math inline">\(z\in\mathbb R\)</span> is a dimensionless scalar, and the value at zero follows from <span class="math inline">\(\lim_{z\to0}\sin z/z=1\)</span>. This convention must be stated because some software libraries instead define a normalised sinc function containing <span class="math inline">\(\pi z\)</span>.</p>
+<p>Using the trigonometric identities</p>
+<p><span class="math display">\[
+\sin(\theta_k+\Delta\theta)-\sin\theta_k
+=
+2\cos\left(\theta_k+\frac{\Delta\theta}{2}\right)
+\sin\left(\frac{\Delta\theta}{2}\right)
+\]</span></p>
+<p>and</p>
+<p><span class="math display">\[
+\cos\theta_k-\cos(\theta_k+\Delta\theta)
+=
+2\sin\left(\theta_k+\frac{\Delta\theta}{2}\right)
+\sin\left(\frac{\Delta\theta}{2}\right),
+\]</span></p>
+<p>the common scale factor in both position increments can be rewritten, for <span class="math inline">\(\omega\neq0\)</span>, as</p>
+<p><span class="math display">\[
+\begin{aligned}
+\frac{v}{\omega}\,2\sin\left(\frac{\Delta\theta}{2}\right)
+&amp;=
+v\Delta t\,
+\frac{\sin(\Delta\theta/2)}{\Delta\theta/2}\\
+&amp;=
+v\Delta t\,
+\operatorname{sinc}\left(\frac{\Delta\theta}{2}\right),
+\end{aligned}
+\]</span></p>
+<p>where <span class="math inline">\(\Delta\theta=\omega\Delta t\)</span> was used in the first equality. The exact update is consequently equivalent to</p>
+<p><span class="math display">\[
+\boxed{
+\begin{aligned}
+x_{k+1}
+&amp;=
+x_k+
+v\Delta t\,
+\operatorname{sinc}\left(\frac{\Delta\theta}{2}\right)
+\cos\left(\theta_k+\frac{\Delta\theta}{2}\right),\\
+y_{k+1}
+&amp;=
+y_k+
+v\Delta t\,
+\operatorname{sinc}\left(\frac{\Delta\theta}{2}\right)
+\sin\left(\theta_k+\frac{\Delta\theta}{2}\right),\\
+\theta_{k+1}
+&amp;=
+\theta_k+\Delta\theta.
+\end{aligned}
+}
+\]</span></p>
+<p>As <span class="math inline">\(\omega\to0\)</span>, the angular change <span class="math inline">\(\Delta\theta\to0\)</span>, <span class="math inline">\(\operatorname{sinc}(\Delta\theta/2)\to1\)</span>, and the midpoint heading <span class="math inline">\(\theta_k+\Delta\theta/2\to\theta_k\)</span>. The position equations therefore reduce smoothly to the straight-motion update</p>
+<p><span class="math display">\[
+x_{k+1}=x_k+v\Delta t\cos\theta_k,
+\qquad
+y_{k+1}=y_k+v\Delta t\sin\theta_k.
+\]</span></p>
+<p>Software may use an explicit straight-motion case when <span class="math inline">\(|\omega|\)</span> is below a declared tolerance or a sinc implementation designed to remain numerically stable near zero. Directly computing <span class="math inline">\(\sin z/z\)</span> at <span class="math inline">\(z=0\)</span> would still divide by zero despite the function’s well-defined limiting value.</p>
+</section>
+<section id="quick-test-c-exact-finite-motion" class="level3 unnumbered">
+<h3 class="unnumbered anchored" data-anchor-id="quick-test-c-exact-finite-motion">Quick test C: exact finite motion</h3>
+<ol type="1">
+<li>What does the zero-order-hold assumption say about <span class="math inline">\(v\)</span> and <span class="math inline">\(\omega\)</span>?</li>
+<li>Why is <span class="math inline">\(\theta(t_k+\tau)=\theta_k+\omega\tau\)</span> when <span class="math inline">\(\omega\)</span> is constant?</li>
+<li>Where does the factor <span class="math inline">\(1/\omega\)</span> in the position integral come from?</li>
+<li>Starting from <span class="math inline">\(\mathbf q_k=[0\;0\;0]^\mathsf T\)</span>, let <span class="math inline">\(v=1\,\mathrm{m\,s^{-1}}\)</span>, <span class="math inline">\(\omega=1\,\mathrm{rad\,s^{-1}}\)</span>, and <span class="math inline">\(\Delta t=1\,\mathrm s\)</span>. Find the exact next pose.</li>
+<li>Define the unnormalised sinc function and explain how it exposes the straight-motion limit.</li>
+<li>Why should software not directly evaluate either <span class="math inline">\(v/\omega\)</span> at <span class="math inline">\(\omega=0\)</span> or <span class="math inline">\(\sin z/z\)</span> at <span class="math inline">\(z=0\)</span>?</li>
+</ol>
+<section id="answers-and-hints-2" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="answers-and-hints-2">Answers and hints</h4>
+<ol type="1">
+<li>Both inputs remain constant throughout the sample interval.</li>
+<li>Integrating <span class="math inline">\(\dot\theta=\omega\)</span> for elapsed time <span class="math inline">\(\tau\)</span> gives heading change <span class="math inline">\(\omega\tau\)</span>.</li>
+<li>With <span class="math inline">\(z=\theta_k+\omega\tau\)</span>, <span class="math inline">\(dz=\omega\,d\tau\)</span>, so <span class="math inline">\(d\tau=dz/\omega\)</span>.</li>
+<li><span class="math inline">\(\mathbf q_{k+1}=[\sin1\;\;1-\cos1\;\;1]^\mathsf T\approx[0.8415\;\;0.4597\;\;1.0000]^\mathsf T\)</span>, with position in metres and heading in radians.</li>
+<li>The unnormalised function is <span class="math inline">\(\operatorname{sinc}(z)=\sin z/z\)</span> for <span class="math inline">\(z\neq0\)</span> and <span class="math inline">\(\operatorname{sinc}(0)=1\)</span>. Rewriting the update with <span class="math inline">\(\operatorname{sinc}(\Delta\theta/2)\)</span> makes the limit visible: as <span class="math inline">\(\omega\to0\)</span>, <span class="math inline">\(\Delta\theta\to0\)</span>, the sinc factor tends to <span class="math inline">\(1\)</span>, and the midpoint heading tends to <span class="math inline">\(\theta_k\)</span>.</li>
+<li>Both direct expressions would divide by zero even though their mathematical limits are well defined. Software must select the straight case or evaluate sinc with a numerically stable near-zero implementation.</li>
+</ol>
+</section>
+</section>
+</section>
+<section id="numerical-integration-with-forward-euler" class="level2" data-number="3.4">
+<h2 data-number="3.4" class="anchored" data-anchor-id="numerical-integration-with-forward-euler"><span class="header-section-number">3.4</span> Numerical integration with Forward Euler</h2>
+<p>For a general time-varying input, the exact solution may not have a convenient closed form. The integral form of the state equation over one interval is</p>
+<p><span class="math display">\[
+\mathbf q(t_{k+1})
+=
+\mathbf q(t_k)
++
+\int_{t_k}^{t_{k+1}}
+\mathbf f(\mathbf q(t),\mathbf u(t))\,dt.
+\]</span></p>
+<p>Numerical integration approximates this integral using a finite number of evaluations of <span class="math inline">\(\mathbf f\)</span>.</p>
+<section id="derivation-from-a-taylor-expansion" class="level3" data-number="3.4.1">
+<h3 data-number="3.4.1" class="anchored" data-anchor-id="derivation-from-a-taylor-expansion"><span class="header-section-number">3.4.1</span> Derivation from a Taylor expansion</h3>
+<p>Assume <span class="math inline">\(\mathbf q(t)\)</span> is sufficiently differentiable near <span class="math inline">\(t_k\)</span>. Its Taylor expansion is</p>
+<p><span class="math display">\[
+\mathbf q(t_k+\Delta t)
+=
+\mathbf q(t_k)
++\Delta t\,\dot{\mathbf q}(t_k)
++\frac{\Delta t^2}{2}\,\ddot{\mathbf q}(\xi_k),
+\]</span></p>
+<p>for some <span class="math inline">\(\xi_k\in(t_k,t_{k+1})\)</span>. Substituting <span class="math inline">\(\dot{\mathbf q}(t_k)=\mathbf f(\mathbf q_k,\mathbf u_k)\)</span> and discarding the term proportional to <span class="math inline">\(\Delta t^2\)</span> gives the Forward Euler update</p>
+<p><span class="math display">\[
+\boxed{
+\mathbf q_{k+1}^{\mathrm E}
+=
+\mathbf q_k^{\mathrm E}
++\Delta t\,\mathbf f(\mathbf q_k^{\mathrm E},\mathbf u_k)
+}.
+\]</span></p>
+<p>The superscript <span class="math inline">\(\mathrm E\)</span> identifies the Euler approximation, and <span class="math inline">\(\mathbf u_k\mathrel{:=}\mathbf u(t_k)\)</span> is the sampled input. Forward Euler uses the slope at the beginning of the interval and treats it as constant across the whole interval.</p>
+<p>For the planar kinematic model,</p>
+<p><span class="math display">\[
+\boxed{
+\begin{aligned}
+x_{k+1}^{\mathrm E}&amp;=x_k^{\mathrm E}+\Delta t\,v_k\cos\theta_k^{\mathrm E},\\
+y_{k+1}^{\mathrm E}&amp;=y_k^{\mathrm E}+\Delta t\,v_k\sin\theta_k^{\mathrm E},\\
+\theta_{k+1}^{\mathrm E}&amp;=\theta_k^{\mathrm E}+\Delta t\,\omega_k.
+\end{aligned}
+}
+\]</span></p>
+<p>Here, <span class="math inline">\(v_k\)</span> and <span class="math inline">\(\omega_k\)</span> are the body-forward speed and yaw rate used for sample <span class="math inline">\(k\)</span>.</p>
+</section>
+<section id="local-and-accumulated-error" class="level3" data-number="3.4.2">
+<h3 data-number="3.4.2" class="anchored" data-anchor-id="local-and-accumulated-error"><span class="header-section-number">3.4.2</span> Local and accumulated error</h3>
+<p>Let <span class="math inline">\(E(\Delta t)\geq0\)</span> denote a chosen error magnitude produced using step size <span class="math inline">\(\Delta t&gt;0\)</span>. For an exponent <span class="math inline">\(p&gt;0\)</span>, the statement</p>
+<p><span class="math display">\[
+E(\Delta t)=O(\Delta t^p)
+\qquad\text{as}\qquad
+\Delta t\to0
+\]</span></p>
+<p>means that there are constants <span class="math inline">\(C&gt;0\)</span> and <span class="math inline">\(\Delta t_0&gt;0\)</span>, independent of <span class="math inline">\(\Delta t\)</span>, such that</p>
+<p><span class="math display">\[
+E(\Delta t)\leq C\Delta t^p
+\qquad
+\text{for every}\qquad
+0&lt;\Delta t\leq\Delta t_0.
+\]</span></p>
+<p>The exponent <span class="math inline">\(p\)</span> is the convergence order. The big-<span class="math inline">\(O\)</span> statement is a bound on how the error scales for sufficiently small steps, not an equation claiming that the error equals <span class="math inline">\(\Delta t^p\)</span>. When the leading error term is nonzero and <span class="math inline">\(\Delta t\)</span> is sufficiently small, one commonly observes the approximate scaling <span class="math inline">\(E(\Delta t)\approx K\Delta t^p\)</span> for a constant <span class="math inline">\(K&gt;0\)</span> that does not depend on <span class="math inline">\(\Delta t\)</span>.</p>
+<p>The local truncation error is the error introduced in one step when that step begins from the exact state. Forward Euler has local truncation error <span class="math inline">\(O(\Delta t^2)\)</span>. Over a fixed total time interval, reducing <span class="math inline">\(\Delta t\)</span> creates more steps, and their errors accumulate. The resulting global error of Forward Euler is generally <span class="math inline">\(O(\Delta t)\)</span>. In the sufficiently-small-step regime where the leading first-order term dominates, halving <span class="math inline">\(\Delta t\)</span> therefore approximately halves the global error; it does not usually quarter it.</p>
+</section>
+<section id="worked-comparison-with-the-exact-update" class="level3" data-number="3.4.3">
+<h3 data-number="3.4.3" class="anchored" data-anchor-id="worked-comparison-with-the-exact-update"><span class="header-section-number">3.4.3</span> Worked comparison with the exact update</h3>
+<p>Use the initial pose and constant input</p>
+<p><span class="math display">\[
+\mathbf q_0=
+\begin{bmatrix}
+0\\
+0\\
+0
+\end{bmatrix},
+\qquad
+v=1\,\mathrm{m\,s^{-1}},
+\qquad
+\omega=1\,\mathrm{rad\,s^{-1}},
+\qquad
+\Delta t=1\,\mathrm s.
+\]</span></p>
+<p>The exact update is</p>
+<p><span class="math display">\[
+\mathbf q_1
+\approx
+\begin{bmatrix}
+0.8415\,\mathrm m\\
+0.4597\,\mathrm m\\
+1.0000\,\mathrm{rad}
+\end{bmatrix}.
+\]</span></p>
+<p>Forward Euler evaluates the direction only at initial heading <span class="math inline">\(\theta_0=0\)</span>:</p>
+<p><span class="math display">\[
+\mathbf q_1^{\mathrm E}
+=
+\begin{bmatrix}
+0+1\cos0\\
+0+1\sin0\\
+0+1
+\end{bmatrix}
+=
+\begin{bmatrix}
+1\,\mathrm m\\
+0\,\mathrm m\\
+1\,\mathrm{rad}
+\end{bmatrix}.
+\]</span></p>
+<p>Both methods produce the same heading because <span class="math inline">\(\omega\)</span> is constant and the heading equation is linear. The Euler position is wrong because the forward direction rotates substantially during the one-second interval. Define one-step position error by</p>
+<p><span class="math display">\[
+e_p
+\mathrel{:=}
+\sqrt{(x_1^{\mathrm E}-x_1)^2+(y_1^{\mathrm E}-y_1)^2}.
+\]</span></p>
+<p>For this example, <span class="math inline">\(e_p\approx0.4863\,\mathrm m\)</span>. Smaller steps allow Euler to update the direction more often. When constant-input differential-drive motion is assumed, however, the exact arc update is available and more accurate.</p>
+</section>
+<section id="choosing-and-checking-an-integration-method" class="level3" data-number="3.4.4">
+<h3 data-number="3.4.4" class="anchored" data-anchor-id="choosing-and-checking-an-integration-method"><span class="header-section-number">3.4.4</span> Choosing and checking an integration method</h3>
+<ul>
+<li>Use the exact straight-or-arc update when <span class="math inline">\(v\)</span> and <span class="math inline">\(\omega\)</span> are held constant and the ideal planar model is appropriate.</li>
+<li>Use a numerical method when the input or model varies within the interval and no convenient exact solution is available.</li>
+<li>Reduce <span class="math inline">\(\Delta t\)</span> when the state changes too much during one step, while recognising that smaller steps increase computation.</li>
+<li>Compare a numerical trajectory with a known exact case before trusting it on a harder case.</li>
+<li>Compute <span class="math inline">\(\Delta t\)</span> from the intended time source; do not silently assume perfectly periodic execution.</li>
+</ul>
+</section>
+<section id="quick-test-d-forward-euler" class="level3 unnumbered">
+<h3 class="unnumbered anchored" data-anchor-id="quick-test-d-forward-euler">Quick test D: Forward Euler</h3>
+<ol type="1">
+<li>State the Forward Euler update and define every symbol in it.</li>
+<li>In plain language, what approximation does Forward Euler make during one step?</li>
+<li>Suppose one Forward Euler step begins from the exact pose and <span class="math inline">\(v\)</span> and <span class="math inline">\(\omega\)</span> remain constant during the step. Why does Forward Euler compute the exact position when <span class="math inline">\(\omega=0\)</span>, but generally not when the robot turns with <span class="math inline">\(\omega\neq0\)</span>?</li>
+<li>What does the global-error statement <span class="math inline">\(E(\Delta t)=O(\Delta t)\)</span> mean, and what approximate change in global error should occur when a sufficiently small <span class="math inline">\(\Delta t\)</span> is halved over the same fixed total time interval?</li>
+<li>Give one exact verification case and one physical limitation for an odometry integrator.</li>
+</ol>
+<section id="answers-and-hints-3" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="answers-and-hints-3">Answers and hints</h4>
+<ol type="1">
+<li><span class="math inline">\(\mathbf q_{k+1}^{\mathrm E}=\mathbf q_k^{\mathrm E}+\Delta t\,\mathbf f(\mathbf q_k^{\mathrm E},\mathbf u_k)\)</span>. The terms are the next approximate state, current approximate state, step duration, state-derivative function, and sampled input.</li>
+<li>It uses the derivative at the start as if that derivative remained constant across the interval.</li>
+<li>When <span class="math inline">\(\omega=0\)</span>, the heading <span class="math inline">\(\theta\)</span> remains constant. Constant <span class="math inline">\(v\)</span> then gives the constant world-frame velocity <span class="math inline">\([v\cos\theta_k\;\;v\sin\theta_k]^\mathsf T\)</span>, so multiplying the initial velocity by <span class="math inline">\(\Delta t\)</span> evaluates the position integral exactly. When <span class="math inline">\(\omega\neq0\)</span> and <span class="math inline">\(v\neq0\)</span>, the heading and therefore the world-frame velocity direction change continuously during the step. Forward Euler holds the initial direction constant and produces a straight tangent displacement instead of the exact arc displacement. The word “generally” allows special cases such as pure rotation with <span class="math inline">\(v=0\)</span>, for which the position remains unchanged and is therefore exact.</li>
+<li>The statement <span class="math inline">\(E(\Delta t)=O(\Delta t)\)</span> means that constants <span class="math inline">\(C&gt;0\)</span> and <span class="math inline">\(\Delta t_0&gt;0\)</span> exist such that <span class="math inline">\(E(\Delta t)\leq C\Delta t\)</span> whenever <span class="math inline">\(0&lt;\Delta t\leq\Delta t_0\)</span>. It describes first-order scaling as <span class="math inline">\(\Delta t\to0\)</span>, not exact equality. In the regime where the leading first-order error dominates, <span class="math inline">\(E(\Delta t)\approx K\Delta t\)</span>, so replacing <span class="math inline">\(\Delta t\)</span> by <span class="math inline">\(\Delta t/2\)</span> approximately halves the global error over the same fixed total time interval.</li>
+<li>Exact cases include constant straight motion, pure rotation, and constant-curvature motion. Physical limitations include slip, parameter error, encoder quantisation, and timing error.</li>
+</ol>
+</section>
+</section>
+</section>
+<section id="engineering-implications-and-failure-modes" class="level2" data-number="3.5">
+<h2 data-number="3.5" class="anchored" data-anchor-id="engineering-implications-and-failure-modes"><span class="header-section-number">3.5</span> Engineering implications and failure modes</h2>
+<ol type="1">
+<li><p><strong>Frame inconsistency:</strong> The scalar <span class="math inline">\(v\)</span> is a body-frame forward speed, but <span class="math inline">\(\dot x\)</span> and <span class="math inline">\(\dot y\)</span> are world-frame components. Assigning <span class="math inline">\(\dot x=v\)</span> is valid only when <span class="math inline">\(\theta=0\)</span> modulo <span class="math inline">\(2\pi\)</span>.</p></li>
+<li><p><strong>Sign-convention mismatch:</strong> Swapping left and right wheels or using a clockwise-positive yaw convention reverses the predicted turn. Under this chapter convention, <span class="math inline">\(\dot\phi_L&lt;\dot\phi_R\)</span> must produce positive counter-clockwise yaw.</p></li>
+<li><p><strong>Unit mismatch:</strong> Wheel speed may arrive in revolutions per minute while the model expects radians per second. Heading may arrive in degrees while trigonometric functions expect radians. Convert units at explicit interface boundaries.</p></li>
+<li><p><strong>Incorrect or variable sampling time:</strong> Using an assumed <span class="math inline">\(\Delta t\)</span> when measurements arrive irregularly causes distance and angle errors. An update should validate timestamp differences and define behaviour for zero, negative, missing, or unreasonably large intervals.</p></li>
+<li><p><strong>Angle representation:</strong> The equations allow <span class="math inline">\(\theta\)</span> to grow without bound, but an interface may require <span class="math inline">\(\theta\in(-\pi,\pi]\)</span>. Wrapping changes the numerical representative, not the physical orientation. Heading differences require a wrap-aware calculation.</p></li>
+<li><p><strong>Model error versus integration error:</strong> Reducing <span class="math inline">\(\Delta t\)</span> reduces integration error but cannot correct an inaccurate physical model. If a wheel slips, even exact integration of the ideal no-slip equations gives the wrong physical trajectory.</p></li>
+<li><p><strong>Encoder integration and drift:</strong> Wheel encoders measure incremental rotation rather than global position. Integrating these increments estimates pose relative to an initial condition. Small systematic and random errors accumulate, so wheel odometry alone generally drifts and requires external sensing for long-term correction.</p></li>
+</ol>
+</section>
+<section id="cumulative-chapter-test" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="cumulative-chapter-test">Cumulative chapter test</h2>
+<ol type="1">
+<li>Define <span class="math inline">\(\mathbf q\)</span>, <span class="math inline">\(\mathbf u\)</span>, <span class="math inline">\(\mathbf f\)</span>, <span class="math inline">\(r\)</span>, <span class="math inline">\(L\)</span>, <span class="math inline">\(\dot\phi_L\)</span>, <span class="math inline">\(\dot\phi_R\)</span>, <span class="math inline">\(t_k\)</span>, and <span class="math inline">\(\Delta t\)</span>, including dimensions or units.</li>
+<li>Starting with <span class="math inline">\({}^{b}\mathbf v=[v\;0]^\mathsf T\)</span>, derive <span class="math inline">\(\dot x=v\cos\theta\)</span> and <span class="math inline">\(\dot y=v\sin\theta\)</span>.</li>
+<li>Derive the no-sideways-motion constraint from the world-frame coordinate column of the <span class="math inline">\(y_b\)</span>-axis.</li>
+<li>Derive the wheel-to-body equations for <span class="math inline">\(v\)</span> and <span class="math inline">\(\omega\)</span> and the body-to-wheel equations for <span class="math inline">\(\dot\phi_L\)</span> and <span class="math inline">\(\dot\phi_R\)</span>.</li>
+<li>A robot has <span class="math inline">\(r=0.08\,\mathrm m\)</span>, <span class="math inline">\(L=0.40\,\mathrm m\)</span>, <span class="math inline">\(\dot\phi_L=5\,\mathrm{rad\,s^{-1}}\)</span>, and <span class="math inline">\(\dot\phi_R=7\,\mathrm{rad\,s^{-1}}\)</span>. Find <span class="math inline">\(v\)</span> and <span class="math inline">\(\omega\)</span> and state the turn direction.</li>
+<li>Derive the exact constant-curvature update by integrating the position rates over one interval.</li>
+<li>Derive Forward Euler from the first two Taylor terms and explain the discarded term.</li>
+<li>Explain why exact mathematical integration can still produce inaccurate physical odometry.</li>
+<li>Design three verification cases that separately reveal a wheel-order error, a yaw-sign error, and excessive integration error.</li>
+</ol>
+<section id="cumulative-answers-and-hints" class="level3 unnumbered">
+<h3 class="unnumbered anchored" data-anchor-id="cumulative-answers-and-hints">Cumulative answers and hints</h3>
+<ol type="1">
+<li><span class="math inline">\(\mathbf q=[x\;y\;\theta]^\mathsf T\)</span> is planar pose with units <span class="math inline">\(\mathrm m,\mathrm m,\mathrm{rad}\)</span>; <span class="math inline">\(\mathbf u=[v\;\omega]^\mathsf T\)</span> contains forward speed and yaw rate in <span class="math inline">\(\mathrm{m\,s^{-1}}\)</span> and <span class="math inline">\(\mathrm{rad\,s^{-1}}\)</span>; <span class="math inline">\(\mathbf f\)</span> maps pose and input to pose derivative; <span class="math inline">\(r\)</span> is wheel radius in metres; <span class="math inline">\(L\)</span> is track width in metres; <span class="math inline">\(\dot\phi_L\)</span> and <span class="math inline">\(\dot\phi_R\)</span> are wheel angular speeds in radians per second; <span class="math inline">\(t_k\)</span> is sample time in seconds; and <span class="math inline">\(\Delta t=t_{k+1}-t_k\)</span> is the positive integration interval in seconds.</li>
+<li>Premultiply <span class="math inline">\({}^{b}\mathbf v\)</span> by <span class="math inline">\(\mathbf R_{wb}(\theta)\)</span> and read the two components.</li>
+<li>Use <span class="math inline">\({}^{w}\mathbf e_{y,b}=[-\sin\theta\;\cos\theta]^\mathsf T\)</span> and set its dot product with <span class="math inline">\([\dot x\;\dot y]^\mathsf T\)</span> equal to zero.</li>
+<li>Use <span class="math inline">\(r\dot\phi_L=v-L\omega/2\)</span> and <span class="math inline">\(r\dot\phi_R=v+L\omega/2\)</span>. Addition isolates <span class="math inline">\(v\)</span> and subtraction isolates <span class="math inline">\(\omega\)</span>; solving the pair for wheel speeds gives the inverse equations.</li>
+<li><span class="math inline">\(v=(0.08/2)(5+7)=0.48\,\mathrm{m\,s^{-1}}\)</span> and <span class="math inline">\(\omega=(0.08/0.40)(7-5)=0.40\,\mathrm{rad\,s^{-1}}\)</span>. The positive yaw rate is a counter-clockwise or left turn.</li>
+<li>Write <span class="math inline">\(\theta(t_k+\tau)=\theta_k+\omega\tau\)</span>, integrate over <span class="math inline">\(\tau\in[0,\Delta t]\)</span>, and use antiderivatives <span class="math inline">\(\sin(\theta_k+\omega\tau)/\omega\)</span> and <span class="math inline">\(-\cos(\theta_k+\omega\tau)/\omega\)</span>.</li>
+<li>Taylor expansion gives <span class="math inline">\(\mathbf q(t_k+\Delta t)=\mathbf q(t_k)+\Delta t\dot{\mathbf q}(t_k)+O(\Delta t^2)\)</span>. Replacing <span class="math inline">\(\dot{\mathbf q}\)</span> with <span class="math inline">\(\mathbf f\)</span> and omitting the second-order remainder gives Forward Euler. The discarded term represents within-step change of the derivative.</li>
+<li>Exact integration eliminates approximation for the stated model and input assumption; it cannot eliminate slip, parameter error, encoder error, timing error, or other model violations.</li>
+<li>For wheel order, command unequal known wheel speeds and check the turn direction. For yaw sign, command pure positive rotation and check that heading increases counter-clockwise. For integration error, compare with the exact constant-curvature solution at decreasing values of <span class="math inline">\(\Delta t\)</span> and verify convergence.</li>
+</ol>
+</section>
+</section>
+<section id="references" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="references">References</h2>
+<ul>
+<li>Kevin M. Lynch and Frank C. Park, <em>Modern Robotics: Mechanics, Planning, and Control</em>, Chapter 13, especially the wheeled-mobile-robot kinematic models and odometry discussion.</li>
+<li>Steven M. LaValle, <em>Planning Algorithms</em>, Chapter 13, especially continuous-time differential models, velocity constraints, and wheeled-vehicle models.</li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const toolbar = document.querySelector(".navbar .quarto-navbar-tools");
+
+  if (!toolbar || document.getElementById("left-sidebar-button")) {
+    return;
+  }
+
+  const controls = [
+    {
+      id: "left-sidebar-button",
+      className: "left-sidebar-hidden",
+      storageKey: "quarto-left-sidebar-hidden",
+      targetId: "quarto-sidebar",
+      noun: "chapter navigation",
+      icon: "bi-layout-sidebar"
+    },
+    {
+      id: "right-sidebar-button",
+      className: "right-sidebar-hidden",
+      storageKey: "quarto-right-sidebar-hidden",
+      targetId: "quarto-margin-sidebar",
+      noun: "table of contents",
+      icon: "bi-layout-sidebar-reverse"
+    }
+  ];
+
+  const storedState = (key) => {
+    try {
+      return window.localStorage.getItem(key) === "true";
+    } catch {
+      return false;
+    }
+  };
+
+  const storeState = (key, hidden) => {
+    try {
+      window.localStorage.setItem(key, String(hidden));
+    } catch {
+      // The controls still work when browser storage is unavailable.
+    }
+  };
+
+  controls.forEach((control) => {
+    document.body.classList.toggle(
+      control.className,
+      storedState(control.storageKey)
+    );
+
+    const button = document.createElement("button");
+    button.id = control.id;
+    button.type = "button";
+    button.className = "sidebar-toggle-button quarto-navigation-tool";
+    button.setAttribute("aria-controls", control.targetId);
+    button.innerHTML = `<i class="bi ${control.icon}" aria-hidden="true"></i>`;
+
+    const updateButton = () => {
+      const hidden = document.body.classList.contains(control.className);
+      const label = `${hidden ? "Show" : "Hide"} ${control.noun}`;
+
+      button.title = label;
+      button.setAttribute("aria-label", label);
+      button.setAttribute("aria-expanded", String(!hidden));
+    };
+
+    button.addEventListener("click", () => {
+      const hidden = document.body.classList.toggle(control.className);
+      storeState(control.storageKey, hidden);
+      updateButton();
+    });
+
+    toolbar.appendChild(button);
+    updateButton();
+  });
+});
+</script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../part_01_motion_mechanics_control/02_geometry_and_coordinate_frames.html" class="pagination-link" aria-label="Geometry and Coordinate Frames">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Geometry and Coordinate Frames</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../part_01_motion_mechanics_control/04_kinematics_and_numerical_integration_implementation.html" class="pagination-link" aria-label="Differential-Drive Kinematics and Numerical Integration: Implementation">
+        <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Differential-Drive Kinematics and Numerical Integration: Implementation</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

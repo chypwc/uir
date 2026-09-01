@@ -21,16 +21,22 @@ book:
     - notation.qmd
     - part: '[Part I:]{.content-visible when-format="html"} Motion, Mechanics, and Control'
       chapters:
-        - 01_linear_algebra_foundations.qmd
-        - 02_geometry_and_coordinate_frames.qmd
-        - 03_kinematics_and_numerical_integration.qmd
-        - 04_kinematics_and_numerical_integration_implementation.qmd
-        - 05_ros2_packages_and_development_workflow.qmd
-        - 06_planar_rigid_body_motion_se2_and_twists.qmd
-        - 07_degrees_of_freedom_and_spatial_motion_so3_se3.qmd
-        - 08_screw_motion_se3_exponential_and_spatial_integration.qmd
-        - 09_spatial_geometry_kernel_implementation.qmd
-        - 10_general_robot_kinematics_and_jacobians.qmd
+        - part_01_motion_mechanics_control/01_linear_algebra_foundations.qmd
+        - part_01_motion_mechanics_control/02_geometry_and_coordinate_frames.qmd
+        - part_01_motion_mechanics_control/03_kinematics_and_numerical_integration.qmd
+        - part_01_motion_mechanics_control/04_kinematics_and_numerical_integration_implementation.qmd
+        - part_01_motion_mechanics_control/05_ros2_packages_and_development_workflow.qmd
+        - part_01_motion_mechanics_control/06_planar_rigid_body_motion_se2_and_twists.qmd
+        - part_01_motion_mechanics_control/07_degrees_of_freedom_and_spatial_motion_so3_se3.qmd
+        - part_01_motion_mechanics_control/08_screw_motion_se3_exponential_and_spatial_integration.qmd
+        - part_01_motion_mechanics_control/09_spatial_geometry_kernel_implementation.qmd
+        - part_01_motion_mechanics_control/10_general_robot_kinematics_and_jacobians.qmd
+    - part: '[Part II:]{.content-visible when-format="html"} Probability and Estimation'
+      chapters:
+        - part_02_probability_estimation/finite_markov_chains.qmd
+    - part: '[Part V:]{.content-visible when-format="html"} Optimisation, Planning, and Decisions'
+      chapters:
+        - part_05_optimisation_planning_decisions/finite_markov_decision_processes.qmd
 
 
 lang: en-AU

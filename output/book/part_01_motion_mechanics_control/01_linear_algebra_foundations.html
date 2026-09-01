@@ -1,0 +1,2481 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-AU" xml:lang="en-AU"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>1&nbsp; Linear Algebra Foundations – Understanding Intelligence Through Robotics</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../part_01_motion_mechanics_control/02_geometry_and_coordinate_frames.html" rel="next">
+<link href="../notation.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-0a6b7249c26820e032cb0bd839ff02b1.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-6b4ca53971d8dc7d9276afc35a4f526f.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-12ba8748c5d8fcf0bac24d3d70cd9353.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-6b4ca53971d8dc7d9276afc35a4f526f.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Understanding Intelligence Through Robotics</span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools tools-end">
+    <a href="../Understanding-Intelligence-Through-Robotics.pdf" title="Download PDF" class="quarto-navigation-tool px-1" aria-label="Download PDF"><i class="bi bi-file-pdf"></i></a>
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part_01_motion_mechanics_control/01_linear_algebra_foundations.html"><span>Part I:</span> Motion, Mechanics, and Control</a></li><li class="breadcrumb-item"><a href="../part_01_motion_mechanics_control/01_linear_algebra_foundations.html"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Linear Algebra Foundations</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../notation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Unified Notation and Conventions</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text"><span>Part I:</span> Motion, Mechanics, and Control</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part_01_motion_mechanics_control/01_linear_algebra_foundations.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Linear Algebra Foundations</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part_01_motion_mechanics_control/02_geometry_and_coordinate_frames.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Geometry and Coordinate Frames</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part_01_motion_mechanics_control/03_kinematics_and_numerical_integration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Differential-Drive Kinematics and Numerical Integration: Model and Derivation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part_01_motion_mechanics_control/04_kinematics_and_numerical_integration_implementation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Differential-Drive Kinematics and Numerical Integration: Implementation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part_01_motion_mechanics_control/05_ros2_packages_and_development_workflow.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">ROS 2 Package Development Workflow</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part_01_motion_mechanics_control/06_planar_rigid_body_motion_se2_and_twists.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Planar Rigid-Body Motion: <span class="math inline">\(SE(2)\)</span> and Twists</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part_01_motion_mechanics_control/07_degrees_of_freedom_and_spatial_motion_so3_se3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Degrees of Freedom and Spatial Motion: <span class="math inline">\(SO(3)\)</span> and <span class="math inline">\(SE(3)\)</span></span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part_01_motion_mechanics_control/08_screw_motion_se3_exponential_and_spatial_integration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Screw Motion, the <span class="math inline">\(SE(3)\)</span> Exponential, and Spatial Pose Integration</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part_01_motion_mechanics_control/09_spatial_geometry_kernel_implementation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Spatial Geometry Kernel Implementation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part_01_motion_mechanics_control/10_general_robot_kinematics_and_jacobians.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">General Robot Kinematics and Jacobians</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text"><span>Part II:</span> Probability and Estimation</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part_02_probability_estimation/finite_markov_chains.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Finite Markov Chains</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#why-linear-algebra-matters" id="toc-why-linear-algebra-matters" class="nav-link active" data-scroll-target="#why-linear-algebra-matters">Why linear algebra matters</a></li>
+  <li><a href="#prerequisites-and-assumptions" id="toc-prerequisites-and-assumptions" class="nav-link" data-scroll-target="#prerequisites-and-assumptions">Prerequisites and assumptions</a>
+  <ul class="collapse">
+  <li><a href="#prerequisites" id="toc-prerequisites" class="nav-link" data-scroll-target="#prerequisites">Prerequisites</a></li>
+  <li><a href="#assumptions" id="toc-assumptions" class="nav-link" data-scroll-target="#assumptions">Assumptions</a></li>
+  </ul></li>
+  <li><a href="#dependency-map" id="toc-dependency-map" class="nav-link" data-scroll-target="#dependency-map">Dependency map</a></li>
+  <li><a href="#vectors-quantities-with-magnitude-and-direction" id="toc-vectors-quantities-with-magnitude-and-direction" class="nav-link" data-scroll-target="#vectors-quantities-with-magnitude-and-direction"><span class="header-section-number">1.1</span> Vectors: quantities with magnitude and direction</a>
+  <ul class="collapse">
+  <li><a href="#geometric-vector-versus-coordinate-column" id="toc-geometric-vector-versus-coordinate-column" class="nav-link" data-scroll-target="#geometric-vector-versus-coordinate-column"><span class="header-section-number">1.1.1</span> Geometric vector versus coordinate column</a></li>
+  <li><a href="#addition-and-scalar-multiplication" id="toc-addition-and-scalar-multiplication" class="nav-link" data-scroll-target="#addition-and-scalar-multiplication"><span class="header-section-number">1.1.2</span> Addition and scalar multiplication</a></li>
+  <li><a href="#sec-linear-algebra-vector-norm" id="toc-sec-linear-algebra-vector-norm" class="nav-link" data-scroll-target="#sec-linear-algebra-vector-norm"><span class="header-section-number">1.1.3</span> Length and unit direction</a></li>
+  <li><a href="#dot-product-and-angle" id="toc-dot-product-and-angle" class="nav-link" data-scroll-target="#dot-product-and-angle"><span class="header-section-number">1.1.4</span> Dot product and angle</a></li>
+  <li><a href="#sec-linear-algebra-cross-product" id="toc-sec-linear-algebra-cross-product" class="nav-link" data-scroll-target="#sec-linear-algebra-cross-product"><span class="header-section-number">1.1.5</span> Cross product and useful identities</a></li>
+  <li><a href="#sec-linear-algebra-scalar-triple-product" id="toc-sec-linear-algebra-scalar-triple-product" class="nav-link" data-scroll-target="#sec-linear-algebra-scalar-triple-product"><span class="header-section-number">1.1.6</span> Scalar triple product</a></li>
+  <li><a href="#linear-combinations-span-and-basis" id="toc-linear-combinations-span-and-basis" class="nav-link" data-scroll-target="#linear-combinations-span-and-basis"><span class="header-section-number">1.1.7</span> Linear combinations, span, and basis</a></li>
+  </ul></li>
+  <li><a href="#quick-test-a-vectors-and-bases" id="toc-quick-test-a-vectors-and-bases" class="nav-link" data-scroll-target="#quick-test-a-vectors-and-bases">Quick test A: vectors and bases</a>
+  <ul class="collapse">
+  <li><a href="#answers-and-hints" id="toc-answers-and-hints" class="nav-link" data-scroll-target="#answers-and-hints">Answers and hints</a></li>
+  </ul></li>
+  <li><a href="#matrices-linear-maps-and-basis-changes" id="toc-matrices-linear-maps-and-basis-changes" class="nav-link" data-scroll-target="#matrices-linear-maps-and-basis-changes"><span class="header-section-number">1.2</span> Matrices: linear maps and basis changes</a>
+  <ul class="collapse">
+  <li><a href="#matrix-dimensions" id="toc-matrix-dimensions" class="nav-link" data-scroll-target="#matrix-dimensions"><span class="header-section-number">1.2.1</span> Matrix dimensions</a></li>
+  <li><a href="#identity-transpose-null-space-rank-and-inverse" id="toc-identity-transpose-null-space-rank-and-inverse" class="nav-link" data-scroll-target="#identity-transpose-null-space-rank-and-inverse"><span class="header-section-number">1.2.2</span> Identity, transpose, null space, rank, and inverse</a></li>
+  <li><a href="#multiplication-order" id="toc-multiplication-order" class="nav-link" data-scroll-target="#multiplication-order"><span class="header-section-number">1.2.3</span> Multiplication order</a></li>
+  </ul></li>
+  <li><a href="#quick-test-b-matrices-rank-and-inverses" id="toc-quick-test-b-matrices-rank-and-inverses" class="nav-link" data-scroll-target="#quick-test-b-matrices-rank-and-inverses">Quick test B: matrices, rank, and inverses</a>
+  <ul class="collapse">
+  <li><a href="#answers-and-hints-1" id="toc-answers-and-hints-1" class="nav-link" data-scroll-target="#answers-and-hints-1">Answers and hints</a></li>
+  </ul></li>
+  <li><a href="#sec-linear-algebra-determinants" id="toc-sec-linear-algebra-determinants" class="nav-link" data-scroll-target="#sec-linear-algebra-determinants"><span class="header-section-number">1.3</span> Determinants and signed volume</a>
+  <ul class="collapse">
+  <li><a href="#what-the-determinant-measures" id="toc-what-the-determinant-measures" class="nav-link" data-scroll-target="#what-the-determinant-measures"><span class="header-section-number">1.3.1</span> What the determinant measures</a></li>
+  <li><a href="#algebraic-definition" id="toc-algebraic-definition" class="nav-link" data-scroll-target="#algebraic-definition"><span class="header-section-number">1.3.2</span> Algebraic definition</a></li>
+  <li><a href="#why-determinants-multiply" id="toc-why-determinants-multiply" class="nav-link" data-scroll-target="#why-determinants-multiply"><span class="header-section-number">1.3.3</span> Why determinants multiply</a></li>
+  <li><a href="#sec-linear-algebra-cross-product-linear-map" id="toc-sec-linear-algebra-cross-product-linear-map" class="nav-link" data-scroll-target="#sec-linear-algebra-cross-product-linear-map"><span class="header-section-number">1.3.4</span> How an invertible linear map transforms a cross product</a></li>
+  </ul></li>
+  <li><a href="#quick-test-c-determinants" id="toc-quick-test-c-determinants" class="nav-link" data-scroll-target="#quick-test-c-determinants">Quick test C: determinants</a>
+  <ul class="collapse">
+  <li><a href="#answers-and-hints-2" id="toc-answers-and-hints-2" class="nav-link" data-scroll-target="#answers-and-hints-2">Answers and hints</a></li>
+  </ul></li>
+  <li><a href="#orthogonal-matrices" id="toc-orthogonal-matrices" class="nav-link" data-scroll-target="#orthogonal-matrices"><span class="header-section-number">1.4</span> Orthogonal matrices</a></li>
+  <li><a href="#quick-test-d-orthogonal-matrices" id="toc-quick-test-d-orthogonal-matrices" class="nav-link" data-scroll-target="#quick-test-d-orthogonal-matrices">Quick test D: orthogonal matrices</a>
+  <ul class="collapse">
+  <li><a href="#answers-and-hints-3" id="toc-answers-and-hints-3" class="nav-link" data-scroll-target="#answers-and-hints-3">Answers and hints</a></li>
+  </ul></li>
+  <li><a href="#cumulative-chapter-test" id="toc-cumulative-chapter-test" class="nav-link" data-scroll-target="#cumulative-chapter-test">Cumulative chapter test</a>
+  <ul class="collapse">
+  <li><a href="#cumulative-answers-and-hints" id="toc-cumulative-answers-and-hints" class="nav-link" data-scroll-target="#cumulative-answers-and-hints">Cumulative answers and hints</a></li>
+  </ul></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part_01_motion_mechanics_control/01_linear_algebra_foundations.html"><span>Part I:</span> Motion, Mechanics, and Control</a></li><li class="breadcrumb-item"><a href="../part_01_motion_mechanics_control/01_linear_algebra_foundations.html"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Linear Algebra Foundations</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span id="sec-linear-algebra-foundations" class="quarto-section-identifier"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Linear Algebra Foundations</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="why-linear-algebra-matters" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="why-linear-algebra-matters">Why linear algebra matters</h2>
+<p>Autonomous robots represent directions, velocities, forces, sensor measurements, model parameters, and control commands with vectors. Matrices transform those vectors, combine coordinate descriptions, solve systems of equations, and expose whether information has been preserved or lost. Linear algebra provides the language needed to reason about these operations before they are used in geometry, kinematics, estimation, optimisation, and control.</p>
+<p>This chapter develops that language from first principles. It distinguishes geometric vectors from coordinate columns, explains matrices as linear maps, connects null spaces and rank to invertibility, defines determinants as signed volume scaling, and derives the properties of orthogonal matrices used later for rotations.</p>
+</section>
+<section id="prerequisites-and-assumptions" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="prerequisites-and-assumptions">Prerequisites and assumptions</h2>
+<section id="prerequisites" class="level3 unnumbered">
+<h3 class="unnumbered anchored" data-anchor-id="prerequisites">Prerequisites</h3>
+<p>The reader should be comfortable with:</p>
+<ul>
+<li>arithmetic and elementary algebra;</li>
+<li>Cartesian coordinates;</li>
+<li>solving simple equations;</li>
+<li>sine and cosine; and</li>
+<li>the project notation conventions.</li>
+</ul>
+</section>
+<section id="assumptions" class="level3 unnumbered">
+<h3 class="unnumbered anchored" data-anchor-id="assumptions">Assumptions</h3>
+<ul>
+<li>Scalars are real numbers unless stated otherwise.</li>
+<li>Vectors are written as columns.</li>
+<li>Matrix and vector dimensions are declared when symbols are introduced.</li>
+<li>Coordinate bases used for Euclidean lengths and angles are orthonormal.</li>
+<li>Physical units are carried by the represented quantity; abstract basis and transformation matrices are dimensionless unless stated otherwise.</li>
+</ul>
+</section>
+</section>
+<section id="dependency-map" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="dependency-map">Dependency map</h2>
+<pre class="text"><code>Vectors and linear combinations
+        |
+        v
+Bases and coordinate columns
+        |
+        v
+Matrices as linear maps
+        |
+        v
+Null spaces, rank, and inverses
+        |
+        v
+Determinants and orthogonal matrices
+        |
+        v
+Coordinate frames, rotations, kinematics, estimation, and control</code></pre>
+</section>
+<section id="vectors-quantities-with-magnitude-and-direction" class="level2" data-number="1.1">
+<h2 data-number="1.1" class="anchored" data-anchor-id="vectors-quantities-with-magnitude-and-direction"><span class="header-section-number">1.1</span> Vectors: quantities with magnitude and direction</h2>
+<section id="geometric-vector-versus-coordinate-column" class="level3" data-number="1.1.1">
+<h3 data-number="1.1.1" class="anchored" data-anchor-id="geometric-vector-versus-coordinate-column"><span class="header-section-number">1.1.1</span> Geometric vector versus coordinate column</h3>
+<p>A geometric vector is independent of any coordinate frame. A coordinate column is the numerical description of that vector in a chosen basis.</p>
+<p>Let <span class="math inline">\(\{a\}\)</span> denote a right-handed coordinate frame with orthonormal basis vectors <span class="math inline">\(\mathbf{e}_{x,a}\)</span>, <span class="math inline">\(\mathbf{e}_{y,a}\)</span>, and <span class="math inline">\(\mathbf{e}_{z,a}\)</span>. For a geometric vector <span class="math inline">\(\mathbf{v}\)</span>, the symbol <span class="math inline">\({}^{a}\mathbf{v}\)</span> denotes its coordinate column expressed in frame <span class="math inline">\(\{a\}\)</span>. In three-dimensional space,</p>
+<p><span class="math display">\[
+{}^{a}\mathbf{v}
+=
+\begin{bmatrix}
+v_x \\
+v_y \\
+v_z
+\end{bmatrix}.
+\]</span></p>
+<p>The entries mean that</p>
+<p><span class="math display">\[
+\mathbf{v}
+=
+v_x\mathbf{e}_{x,a}
++v_y\mathbf{e}_{y,a}
++v_z\mathbf{e}_{z,a}.
+\]</span></p>
+<p>The vector <span class="math inline">\(\mathbf{v}\)</span> is the physical or geometric object, whereas the column <span class="math inline">\({}^{a}\mathbf{v}\)</span> depends on frame <span class="math inline">\(\{a\}\)</span>. Omitting the frame label is safe only when the surrounding context makes the frame unambiguous.</p>
+</section>
+<section id="addition-and-scalar-multiplication" class="level3" data-number="1.1.2">
+<h3 data-number="1.1.2" class="anchored" data-anchor-id="addition-and-scalar-multiplication"><span class="header-section-number">1.1.2</span> Addition and scalar multiplication</h3>
+<p>For vectors expressed in the same frame,</p>
+<p><span class="math display">\[
+{}^{a}\mathbf{u}
++{}^{a}\mathbf{v}
+=
+\begin{bmatrix}
+u_x+v_x \\
+u_y+v_y \\
+u_z+v_z
+\end{bmatrix}.
+\]</span></p>
+<p>For a scalar <span class="math inline">\(\alpha\)</span>,</p>
+<p><span class="math display">\[
+\alpha\,{}^{a}\mathbf{v}
+=
+\begin{bmatrix}
+\alpha v_x \\
+\alpha v_y \\
+\alpha v_z
+\end{bmatrix}.
+\]</span></p>
+<p>The algebra is valid only when the quantities are physically compatible. For example, adding two positions expressed in different frames is not meaningful until one has been transformed. Adding a velocity in metres per second to a position in metres is dimensionally invalid even if both are three-element columns.</p>
+</section>
+<section id="sec-linear-algebra-vector-norm" class="level3" data-number="1.1.3">
+<h3 data-number="1.1.3" class="anchored" data-anchor-id="sec-linear-algebra-vector-norm"><span class="header-section-number">1.1.3</span> Length and unit direction</h3>
+<p>The Euclidean norm is</p>
+<p><span class="math display">\[
+\left\|{}^{a}\mathbf{v}\right\|_2
+=
+\sqrt{v_x^2+v_y^2+v_z^2}.
+\]</span></p>
+<p>If <span class="math inline">\(\mathbf{v}\neq\mathbf{0}\)</span>, let <span class="math inline">\({}^{a}\mathbf{e}_v\)</span> denote its unit direction expressed in frame <span class="math inline">\(\{a\}\)</span>:</p>
+<p><span class="math display">\[
+{}^{a}\mathbf{e}_v
+=
+\frac{{}^{a}\mathbf{v}}
+{\left\|{}^{a}\mathbf{v}\right\|_2}.
+\]</span></p>
+<p>The norm has the same physical units as the vector, while the unit vector is dimensionless because the units cancel.</p>
+</section>
+<section id="dot-product-and-angle" class="level3" data-number="1.1.4">
+<h3 data-number="1.1.4" class="anchored" data-anchor-id="dot-product-and-angle"><span class="header-section-number">1.1.4</span> Dot product and angle</h3>
+<p>Let two vectors be expressed as coordinate columns in the same orthonormal frame:</p>
+<p><span class="math display">\[
+{}^{a}\mathbf{u}
+=
+\begin{bmatrix}
+u_x\\
+u_y\\
+u_z
+\end{bmatrix},
+\qquad
+{}^{a}\mathbf{v}
+=
+\begin{bmatrix}
+v_x\\
+v_y\\
+v_z
+\end{bmatrix}.
+\]</span></p>
+<p>The superscript <span class="math inline">\(\mathsf{T}\)</span> denotes the <strong>transpose</strong> operation. It turns the column <span class="math inline">\({}^{a}\mathbf{u}\in\mathbb{R}^{3\times 1}\)</span> into the row</p>
+<p><span class="math display">\[
+\left({}^{a}\mathbf{u}\right)^\mathsf{T}
+=
+{}^{a}\mathbf{u}^\mathsf{T}
+=
+\begin{bmatrix}
+u_x &amp; u_y &amp; u_z
+\end{bmatrix}
+\in\mathbb{R}^{1\times 3}.
+\]</span></p>
+<p>Here, <span class="math inline">\(\mathsf{T}\)</span> is an operation on the coordinate column; it is not a power. Multiplying this row by the column <span class="math inline">\({}^{a}\mathbf{v}\)</span> produces a scalar:</p>
+<p><span class="math display">\[
+{}^{a}\mathbf{u}^\mathsf{T}\,{}^{a}\mathbf{v}
+=
+\begin{bmatrix}
+u_x &amp; u_y &amp; u_z
+\end{bmatrix}
+\begin{bmatrix}
+v_x\\
+v_y\\
+v_z
+\end{bmatrix}
+=
+u_xv_x+u_yv_y+u_zv_z.
+\]</span></p>
+<p>This scalar is the <strong>dot product</strong>, or Euclidean inner product, of the two vectors:</p>
+<p><span class="math display">\[
+\mathbf{u}\boldsymbol{\cdot}\mathbf{v}
+\mathrel{:=}
+{}^{a}\mathbf{u}^\mathsf{T}\,{}^{a}\mathbf{v}.
+\]</span></p>
+<p>The norm introduced in <a href="#sec-linear-algebra-vector-norm" class="quarto-xref"><span>Section 1.1.3</span></a> can equivalently be defined from the dot product of a vector with itself:</p>
+<p><span class="math display">\[
+\begin{aligned}
+\left\|{}^{a}\mathbf{u}\right\|_2
+&amp;\mathrel{:=}
+\sqrt{{}^{a}\mathbf{u}^\mathsf{T}\,{}^{a}\mathbf{u}}\\
+&amp;=
+\sqrt{u_x^2+u_y^2+u_z^2}.
+\end{aligned}
+\]</span></p>
+<p>Equivalently, the squared norm is</p>
+<p><span class="math display">\[
+\left\|{}^{a}\mathbf{u}\right\|_2^2
+=
+{}^{a}\mathbf{u}^\mathsf{T}\,{}^{a}\mathbf{u}.
+\]</span></p>
+<p>Thus, dotting a vector with itself gives its squared length, and taking the nonnegative square root gives its length. Because frame <span class="math inline">\(\{a\}\)</span> is orthonormal, this coordinate norm equals the geometric length <span class="math inline">\(\|\mathbf{u}\|_2\)</span>.</p>
+<p>The coordinate formula above has a geometric interpretation. To establish it, we first derive the law of cosines.</p>
+<section id="law-of-cosines" class="level4">
+<h4 class="anchored" data-anchor-id="law-of-cosines">Law of cosines</h4>
+<p>Consider a triangle with two sides of lengths <span class="math inline">\(r\)</span> and <span class="math inline">\(s\)</span> and included angle <span class="math inline">\(\theta\)</span>. Place its vertices at</p>
+<p><span class="math display">\[
+\mathbf{p}_0=(0,0),
+\qquad
+\mathbf{p}_1=(r,0),
+\qquad
+\mathbf{p}_2=(s\cos\theta,s\sin\theta).
+\]</span></p>
+<p>Let <span class="math inline">\(c\)</span> be the length of the side from <span class="math inline">\(\mathbf{p}_1\)</span> to <span class="math inline">\(\mathbf{p}_2\)</span>. The horizontal and vertical displacements along that side are <span class="math inline">\(s\cos\theta-r\)</span> and <span class="math inline">\(s\sin\theta\)</span>. By the Pythagorean theorem,</p>
+<p><span class="math display">\[
+\begin{aligned}
+c^2
+&amp;=(s\cos\theta-r)^2+(s\sin\theta)^2\\
+&amp;=s^2\cos^2\theta-2rs\cos\theta+r^2
+  +s^2\sin^2\theta\\
+&amp;=r^2+s^2\left(\cos^2\theta+\sin^2\theta\right)
+  -2rs\cos\theta\\
+&amp;=r^2+s^2-2rs\cos\theta.
+\end{aligned}
+\]</span></p>
+<p>Therefore, the law of cosines is</p>
+<p><span class="math display">\[
+\boxed{c^2=r^2+s^2-2rs\cos\theta}.
+\]</span></p>
+</section>
+<section id="deriving-the-dot-product-angle-formula" class="level4">
+<h4 class="anchored" data-anchor-id="deriving-the-dot-product-angle-formula">Deriving the dot-product angle formula</h4>
+<p>For nonzero vectors <span class="math inline">\(\mathbf{u}\)</span> and <span class="math inline">\(\mathbf{v}\)</span>, place their tails at the same point and let <span class="math inline">\(\theta\)</span> be the angle between them. The vectors form a triangle whose side lengths are</p>
+<p><span class="math display">\[
+r=\|\mathbf{u}\|_2,
+\qquad
+s=\|\mathbf{v}\|_2,
+\qquad
+c=\|\mathbf{u}-\mathbf{v}\|_2.
+\]</span></p>
+<p>The law of cosines therefore gives</p>
+<p><span class="math display">\[
+\|\mathbf{u}-\mathbf{v}\|_2^2
+=
+\|\mathbf{u}\|_2^2+\|\mathbf{v}\|_2^2
+-2\|\mathbf{u}\|_2\|\mathbf{v}\|_2\cos\theta.
+\]</span></p>
+<p>Because frame <span class="math inline">\(\{a\}\)</span> is orthonormal, Euclidean lengths are preserved by its coordinate representation. Expanding the same squared length using coordinate columns gives</p>
+<p><span class="math display">\[
+\begin{aligned}
+\|\mathbf{u}-\mathbf{v}\|_2^2
+&amp;=
+\left({}^{a}\mathbf{u}-{}^{a}\mathbf{v}\right)^\mathsf{T}
+\left({}^{a}\mathbf{u}-{}^{a}\mathbf{v}\right)\\
+&amp;=
+\|\mathbf{u}\|_2^2+\|\mathbf{v}\|_2^2
+-2\,{}^{a}\mathbf{u}^\mathsf{T}\,{}^{a}\mathbf{v}.
+\end{aligned}
+\]</span></p>
+<p>Equating the two expressions for <span class="math inline">\(\|\mathbf{u}-\mathbf{v}\|_2^2\)</span> and cancelling their common terms gives</p>
+<p><span class="math display">\[
+{}^{a}\mathbf{u}^\mathsf{T}\,{}^{a}\mathbf{v}
+=
+\|\mathbf{u}\|_2\|\mathbf{v}\|_2\cos\theta,
+\]</span></p>
+<p>which is the dot-product angle formula. Solving it for the angle gives</p>
+<p><span class="math display">\[
+\theta
+=
+\cos^{-1}
+\left(
+\frac{{}^{a}\mathbf{u}^\mathsf{T}\,{}^{a}\mathbf{v}}
+{\|\mathbf{u}\|_2\|\mathbf{v}\|_2}
+\right),
+\]</span></p>
+<p>provided neither vector is zero.</p>
+<p>The dot product is useful for projection, alignment, and checking orthogonality. If</p>
+<p><span class="math display">\[
+{}^{a}\mathbf{u}^\mathsf{T}\,{}^{a}\mathbf{v}=0,
+\]</span></p>
+<p>then nonzero <span class="math inline">\(\mathbf{u}\)</span> and <span class="math inline">\(\mathbf{v}\)</span> are perpendicular.</p>
+</section>
+</section>
+<section id="sec-linear-algebra-cross-product" class="level3" data-number="1.1.5">
+<h3 data-number="1.1.5" class="anchored" data-anchor-id="sec-linear-algebra-cross-product"><span class="header-section-number">1.1.5</span> Cross product and useful identities</h3>
+<p>The dot product returns a scalar that measures alignment. Three-dimensional geometry also needs an operation that constructs a vector perpendicular to two given directions. Let <span class="math inline">\(\mathbf u=[u_1\;u_2\;u_3]^\mathsf T\in\mathbb R^3\)</span> and <span class="math inline">\(\mathbf v=[v_1\;v_2\;v_3]^\mathsf T\in\mathbb R^3\)</span> be coordinate columns expressed in the same right-handed orthonormal frame. Their <strong>cross product</strong> is the coordinate column</p>
+<p><span class="math display">\[
+\boxed{
+\mathbf u\times\mathbf v
+\mathrel{:=}
+\begin{bmatrix}
+u_2v_3-u_3v_2\\
+u_3v_1-u_1v_3\\
+u_1v_2-u_2v_1
+\end{bmatrix}
+\in\mathbb R^3
+}.
+\]</span></p>
+<p>The output is perpendicular to both inputs because direct substitution gives</p>
+<p><span class="math display">\[
+\mathbf u^\mathsf T(\mathbf u\times\mathbf v)
+=
+0,
+\qquad
+\mathbf v^\mathsf T(\mathbf u\times\mathbf v)
+=
+0.
+\]</span></p>
+<p>Its direction follows the right-hand rule. Expanding its squared norm gives</p>
+<p><span class="math display">\[
+\begin{aligned}
+\|\mathbf u\times\mathbf v\|_2^2
+&amp;=
+(u_2v_3-u_3v_2)^2
++
+(u_3v_1-u_1v_3)^2
++
+(u_1v_2-u_2v_1)^2\\
+&amp;=
+\|\mathbf u\|_2^2\|\mathbf v\|_2^2
+-
+(\mathbf u^\mathsf T\mathbf v)^2\\
+&amp;=
+\|\mathbf u\|_2^2\|\mathbf v\|_2^2\sin^2\theta,
+\end{aligned}
+\]</span></p>
+<p>where <span class="math inline">\(\theta\in[0,\pi]\)</span> is the angle between the nonzero inputs and the last equality uses <span class="math inline">\(\mathbf u^\mathsf T\mathbf v=\|\mathbf u\|_2\|\mathbf v\|_2\cos\theta\)</span>. Taking the nonnegative square root gives</p>
+<p><span class="math display">\[
+\boxed{
+\|\mathbf u\times\mathbf v\|_2
+=
+\|\mathbf u\|_2\|\mathbf v\|_2\sin\theta
+}.
+\]</span></p>
+<p>If the input components have physical units, the cross-product components have the product of those units. The coordinate definition also gives the useful identities</p>
+<p><span class="math display">\[
+\boxed{
+\mathbf u\times\mathbf v
+=
+-\mathbf v\times\mathbf u,
+\qquad
+\mathbf u\times\mathbf u
+=
+\mathbf 0_3
+}.
+\]</span></p>
+<p>Cross products are not associative: <span class="math inline">\(\mathbf a\times(\mathbf b\times\mathbf c)\)</span> and <span class="math inline">\((\mathbf a\times\mathbf b)\times\mathbf c\)</span> are generally different. For <span class="math inline">\(\mathbf a,\mathbf b,\mathbf c\in\mathbb R^3\)</span> expressed in the same right-handed orthonormal frame, the <strong>vector triple-product identity</strong> is</p>
+<p><span class="math display">\[
+\boxed{
+\mathbf a\times(\mathbf b\times\mathbf c)
+=
+\mathbf b(\mathbf a^\mathsf T\mathbf c)
+-
+\mathbf c(\mathbf a^\mathsf T\mathbf b)
+}.
+\]</span></p>
+<p>To verify the identity from the cross-product definition, set <span class="math inline">\(\mathbf d\mathrel{:=}\mathbf b\times\mathbf c\)</span>. Substituting the components of <span class="math inline">\(\mathbf d\)</span> into <span class="math inline">\(\mathbf a\times\mathbf d\)</span> and regrouping by the components of <span class="math inline">\(\mathbf b\)</span> and <span class="math inline">\(\mathbf c\)</span> gives</p>
+<p><span class="math display">\[
+\begin{aligned}
+\mathbf a\times\mathbf d
+&amp;=
+\begin{bmatrix}
+a_2(b_1c_2-b_2c_1)-a_3(b_3c_1-b_1c_3)\\
+a_3(b_2c_3-b_3c_2)-a_1(b_1c_2-b_2c_1)\\
+a_1(b_3c_1-b_1c_3)-a_2(b_2c_3-b_3c_2)
+\end{bmatrix}\\
+&amp;=
+\begin{bmatrix}
+b_1(\mathbf a^\mathsf T\mathbf c)-c_1(\mathbf a^\mathsf T\mathbf b)\\
+b_2(\mathbf a^\mathsf T\mathbf c)-c_2(\mathbf a^\mathsf T\mathbf b)\\
+b_3(\mathbf a^\mathsf T\mathbf c)-c_3(\mathbf a^\mathsf T\mathbf b)
+\end{bmatrix}\\
+&amp;=
+\mathbf b(\mathbf a^\mathsf T\mathbf c)
+-
+\mathbf c(\mathbf a^\mathsf T\mathbf b).
+\end{aligned}
+\]</span></p>
+<p>A case used later for rotations sets <span class="math inline">\(\mathbf b=\mathbf a\)</span> and <span class="math inline">\(\mathbf c=\mathbf y\)</span>:</p>
+<p><span class="math display">\[
+\boxed{
+\mathbf a\times(\mathbf a\times\mathbf y)
+=
+\mathbf a(\mathbf a^\mathsf T\mathbf y)
+-
+(\mathbf a^\mathsf T\mathbf a)\mathbf y
+}.
+\]</span></p>
+<p>If <span class="math inline">\(\mathbf a\)</span> is a unit vector, then <span class="math inline">\(\mathbf a^\mathsf T\mathbf a=1\)</span>.</p>
+</section>
+<section id="sec-linear-algebra-scalar-triple-product" class="level3" data-number="1.1.6">
+<h3 data-number="1.1.6" class="anchored" data-anchor-id="sec-linear-algebra-scalar-triple-product"><span class="header-section-number">1.1.6</span> Scalar triple product</h3>
+<p>A cross product supplies a direction perpendicular to two vectors and a magnitude equal to their parallelogram area. Taking its dot product with a third vector converts this area vector into a signed volume. For <span class="math inline">\(\mathbf a,\mathbf b,\mathbf c\in\mathbb R^3\)</span> expressed in the same right-handed orthonormal frame, the <strong>scalar triple product</strong> is</p>
+<p><span class="math display">\[
+\boxed{
+\mathbf a^\mathsf T
+(\mathbf b\times\mathbf c)
+\in\mathbb R
+}.
+\]</span></p>
+<p>The word <em>scalar</em> records that the outer dot product returns one real number, while <em>triple</em> records that the expression uses three vectors. Substituting the cross-product components gives the explicit formula</p>
+<p><span class="math display">\[
+\begin{aligned}
+\mathbf a^\mathsf T(\mathbf b\times\mathbf c)
+&amp;=
+a_1(b_2c_3-b_3c_2)
++
+a_2(b_3c_1-b_1c_3)\\
+&amp;\quad+
+a_3(b_1c_2-b_2c_1).
+\end{aligned}
+\]</span></p>
+<p>Geometrically, <span class="math inline">\(\|\mathbf b\times\mathbf c\|_2\)</span> is the area of the parallelogram spanned by <span class="math inline">\(\mathbf b\)</span> and <span class="math inline">\(\mathbf c\)</span>. If <span class="math inline">\(\mathbf b\times\mathbf c\ne\mathbf 0_3\)</span>, define its unit normal by <span class="math inline">\(\mathbf n\mathrel{:=}(\mathbf b\times\mathbf c)/\|\mathbf b\times\mathbf c\|_2\)</span>. Then</p>
+<p><span class="math display">\[
+\mathbf a^\mathsf T(\mathbf b\times\mathbf c)
+=
+\underbrace{\mathbf a^\mathsf T\mathbf n}_{\text{signed height}}
+\underbrace{\|\mathbf b\times\mathbf c\|_2}_{\text{base area}}.
+\]</span></p>
+<p>Its absolute value is therefore the volume of the parallelepiped spanned by the three vectors. Its sign states whether the ordered directions <span class="math inline">\((\mathbf a,\mathbf b,\mathbf c)\)</span> have positive or negative orientation, and it is zero when the three vectors are coplanar. If the input vectors carry physical units, the scalar triple product carries the product of all three units.</p>
+<p>Direct component expansion also gives the cyclic identities</p>
+<p><span class="math display">\[
+\boxed{
+\mathbf a^\mathsf T(\mathbf b\times\mathbf c)
+=
+\mathbf b^\mathsf T(\mathbf c\times\mathbf a)
+=
+\mathbf c^\mathsf T(\mathbf a\times\mathbf b)
+}.
+\]</span></p>
+<p>Cyclically moving the three vectors does not change the value, but swapping any two vectors reverses its sign. This scalar-valued expression differs from the vector triple product in <a href="#sec-linear-algebra-cross-product" class="quarto-xref"><span>Section 1.1.5</span></a>, whose output is a vector. The determinant discussion in <a href="#sec-linear-algebra-determinants" class="quarto-xref"><span>Section 1.3</span></a> will show that the scalar triple product is also the determinant of the matrix whose columns are <span class="math inline">\(\mathbf a\)</span>, <span class="math inline">\(\mathbf b\)</span>, and <span class="math inline">\(\mathbf c\)</span> in that order.</p>
+</section>
+<section id="linear-combinations-span-and-basis" class="level3" data-number="1.1.7">
+<h3 data-number="1.1.7" class="anchored" data-anchor-id="linear-combinations-span-and-basis"><span class="header-section-number">1.1.7</span> Linear combinations, span, and basis</h3>
+<p>Let <span class="math inline">\(\mathbf v_1,\ldots,\mathbf v_k\in\mathbb R^n\)</span> and let <span class="math inline">\(\alpha_1,\ldots,\alpha_k\in\mathbb R\)</span>. A <strong>linear combination</strong> of these vectors is any vector of the form</p>
+<p><span class="math display">\[
+\alpha_1\mathbf v_1+\cdots+\alpha_k\mathbf v_k.
+\]</span></p>
+<p>The <strong>span</strong> of <span class="math inline">\(\mathbf v_1,\ldots,\mathbf v_k\)</span> is the set of every linear combination that can be formed from them:</p>
+<p><span class="math display">\[
+\operatorname{span}\{\mathbf v_1,\ldots,\mathbf v_k\}
+\mathrel{:=}
+\left\{
+\sum_{j=1}^{k}\alpha_j\mathbf v_j:
+\alpha_1,\ldots,\alpha_k\in\mathbb R
+\right\}.
+\]</span></p>
+<p>The vectors are <strong>linearly independent</strong> if</p>
+<p><span class="math display">\[
+\alpha_1\mathbf v_1+\cdots+\alpha_k\mathbf v_k=\mathbf 0_n
+\]</span></p>
+<p>implies <span class="math inline">\(\alpha_1=\cdots=\alpha_k=0\)</span>, where <span class="math inline">\(\mathbf 0_n\in\mathbb R^n\)</span> is the zero vector. If a nonzero set of coefficients produces <span class="math inline">\(\mathbf 0_n\)</span>, the vectors are linearly dependent.</p>
+<p>A <strong>basis</strong> of <span class="math inline">\(\mathbb R^n\)</span> is a set of <span class="math inline">\(n\)</span> linearly independent vectors that spans <span class="math inline">\(\mathbb R^n\)</span>. If <span class="math inline">\(\mathbf e_1,\ldots,\mathbf e_n\)</span> is a basis, every <span class="math inline">\(\mathbf x\in\mathbb R^n\)</span> has a unique expansion</p>
+<p><span class="math display">\[
+\mathbf x=x_1\mathbf e_1+\cdots+x_n\mathbf e_n.
+\]</span></p>
+<p>The scalar coefficients <span class="math inline">\(x_1,\ldots,x_n\in\mathbb R\)</span> form the coordinate column of <span class="math inline">\(\mathbf x\)</span> in that basis. Uniqueness is essential: if the basis vectors were dependent, the same vector could have more than one coefficient description.</p>
+<p>The <strong>standard basis</strong> of <span class="math inline">\(\mathbb R^n\)</span> is <span class="math inline">\(\mathbf e_1,\ldots,\mathbf e_n\)</span>, where <span class="math inline">\(\mathbf e_i\)</span> has entry <span class="math inline">\(1\)</span> in position <span class="math inline">\(i\)</span> and entry <span class="math inline">\(0\)</span> in every other position. In the standard basis,</p>
+<p><span class="math display">\[
+\mathbf x=x_1\mathbf e_1+\cdots+x_n\mathbf e_n
+\quad\Longleftrightarrow\quad
+\mathbf x=
+\begin{bmatrix}
+x_1&amp;\cdots&amp;x_n
+\end{bmatrix}^{\mathsf T}.
+\]</span></p>
+</section>
+</section>
+<section id="quick-test-a-vectors-and-bases" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="quick-test-a-vectors-and-bases">Quick test A: vectors and bases</h2>
+<ol type="1">
+<li><strong>Recall:</strong> What is the difference between a geometric vector <span class="math inline">\(\mathbf v\)</span> and a coordinate column <span class="math inline">\({}^{a}\mathbf v\)</span>?</li>
+<li><strong>Explanation:</strong> Why must coordinate columns be associated with a basis?</li>
+<li><strong>Derivation:</strong> Use the law of cosines and an algebraic expansion of <span class="math inline">\(\|\mathbf u-\mathbf v\|_2^2\)</span> to derive <span class="math inline">\({}^{a}\mathbf u^{\mathsf T}{}^{a}\mathbf v=\|\mathbf u\|_2\|\mathbf v\|_2\cos\theta\)</span>.</li>
+<li><strong>Application:</strong> Find the norm and unit direction of <span class="math inline">\(\mathbf x=[3\;\;4]^\mathsf T\)</span>.</li>
+<li><strong>Limitations:</strong> Why is the angle formula undefined when either vector is zero?</li>
+<li><strong>Basis:</strong> Explain why two parallel nonzero vectors cannot form a basis of <span class="math inline">\(\mathbb R^2\)</span>.</li>
+<li><strong>Cross product:</strong> For a unit vector <span class="math inline">\(\mathbf a\in\mathbb R^3\)</span>, use the vector triple-product identity to simplify <span class="math inline">\(\mathbf a\times(\mathbf a\times\mathbf y)\)</span>.</li>
+<li><strong>Scalar triple product:</strong> Evaluate <span class="math inline">\(\mathbf e_1^\mathsf T(\mathbf e_2\times\mathbf e_3)\)</span>, then predict the value after swapping <span class="math inline">\(\mathbf e_2\)</span> and <span class="math inline">\(\mathbf e_3\)</span>. What geometric change causes the sign change?</li>
+</ol>
+<section id="answers-and-hints" class="level3 unnumbered">
+<h3 class="unnumbered anchored" data-anchor-id="answers-and-hints">Answers and hints</h3>
+<ol type="1">
+<li><span class="math inline">\(\mathbf v\)</span> is the coordinate-independent geometric object; <span class="math inline">\({}^{a}\mathbf v\)</span> is its numerical representation in basis or frame <span class="math inline">\(\{a\}\)</span>.</li>
+<li>The entries are coefficients multiplying particular basis vectors. Without the basis, the numbers do not determine physical or geometric directions.</li>
+<li>Equate the law-of-cosines expression for <span class="math inline">\(\|\mathbf u-\mathbf v\|_2^2\)</span> with its dot-product expansion and cancel the common norm terms.</li>
+<li><span class="math inline">\(\|\mathbf x\|_2=5\)</span> and the unit direction is <span class="math inline">\([0.6\;\;0.8]^\mathsf T\)</span>.</li>
+<li>The denominator <span class="math inline">\(\|\mathbf u\|_2\|\mathbf v\|_2\)</span> becomes zero, and a zero vector has no direction.</li>
+<li>One vector is a scalar multiple of the other, so their span is only a line and their coefficient representation is not unique.</li>
+<li><span class="math inline">\(\mathbf a\times(\mathbf a\times\mathbf y)=\mathbf a(\mathbf a^\mathsf T\mathbf y)-\mathbf y\)</span> because <span class="math inline">\(\mathbf a^\mathsf T\mathbf a=1\)</span>.</li>
+<li>Since <span class="math inline">\(\mathbf e_2\times\mathbf e_3=\mathbf e_1\)</span>, the first value is <span class="math inline">\(1\)</span>. Swapping the two cross-product inputs gives <span class="math inline">\(\mathbf e_3\times\mathbf e_2=-\mathbf e_1\)</span>, so the second value is <span class="math inline">\(-1\)</span>. The swap reverses the orientation of the ordered directions while preserving the volume magnitude.</li>
+</ol>
+</section>
+</section>
+<section id="matrices-linear-maps-and-basis-changes" class="level2" data-number="1.2">
+<h2 data-number="1.2" class="anchored" data-anchor-id="matrices-linear-maps-and-basis-changes"><span class="header-section-number">1.2</span> Matrices: linear maps and basis changes</h2>
+<section id="matrix-dimensions" class="level3" data-number="1.2.1">
+<h3 data-number="1.2.1" class="anchored" data-anchor-id="matrix-dimensions"><span class="header-section-number">1.2.1</span> Matrix dimensions</h3>
+<p>A matrix <span class="math inline">\(\mathbf{A}\in\mathbb{R}^{m\times n}\)</span> maps an <span class="math inline">\(n\)</span>-element coordinate vector to an <span class="math inline">\(m\)</span>-element coordinate vector:</p>
+<p><span class="math display">\[
+\mathbf{y}=\mathbf{A}\mathbf{x}
+\]</span></p>
+<p>where <span class="math inline">\(\mathbf{y} \in \mathbb{R}^m\)</span> and <span class="math inline">\(\mathbf{x} \in \mathbb{R}^n\)</span>.</p>
+<p>If</p>
+<p><span class="math display">\[
+\mathbf{A}=
+\begin{bmatrix}
+a_{11} &amp; a_{12} \\
+a_{21} &amp; a_{22}
+\end{bmatrix},
+\qquad
+\mathbf{x}=
+\begin{bmatrix}
+x_1\\
+x_2
+\end{bmatrix},
+\]</span></p>
+<p>then</p>
+<p><span class="math display">\[
+\mathbf{A}\mathbf{x}
+=
+\begin{bmatrix}
+a_{11}x_1+a_{12}x_2\\
+a_{21}x_1+a_{22}x_2
+\end{bmatrix}.
+\]</span></p>
+<p>Equivalently, if <span class="math inline">\(\mathbf{a}_1\)</span> and <span class="math inline">\(\mathbf{a}_2\)</span> are the columns of <span class="math inline">\(\mathbf{A}\)</span>,</p>
+<p><span class="math display">\[
+\mathbf{A}\mathbf{x}=x_1\mathbf{a}_1+x_2\mathbf{a}_2.
+\]</span></p>
+<p>This column interpretation is central to rotation matrices: their columns are the axes of one frame expressed in another frame.</p>
+</section>
+<section id="identity-transpose-null-space-rank-and-inverse" class="level3" data-number="1.2.2">
+<h3 data-number="1.2.2" class="anchored" data-anchor-id="identity-transpose-null-space-rank-and-inverse"><span class="header-section-number">1.2.2</span> Identity, transpose, null space, rank, and inverse</h3>
+<p>Let <span class="math inline">\(\mathbf{I}_n\)</span> denote the <span class="math inline">\(n\times n\)</span> identity matrix. It leaves compatible coordinates unchanged:</p>
+<p><span class="math display">\[
+\mathbf{I}_n\mathbf{x}=\mathbf{x}.
+\]</span></p>
+<p>The transpose swaps rows and columns:</p>
+<p><span class="math display">\[
+\left(\mathbf{A}^\mathsf{T}\right)_{ij}=a_{ji}.
+\]</span></p>
+<p>Let <span class="math inline">\(\mathbf A\in\mathbb R^{m\times n}\)</span>. Its <strong>column space</strong>, denoted <span class="math inline">\(\operatorname{Col}(\mathbf A)\)</span>, is the set of all linear combinations of its columns. The <strong>rank</strong>, denoted <span class="math inline">\(\operatorname{rank}(\mathbf A)\)</span>, is the number of linearly independent columns, equivalently the dimension of <span class="math inline">\(\operatorname{Col}(\mathbf A)\)</span>.</p>
+<p>The <strong>null space</strong> of <span class="math inline">\(\mathbf A\)</span> is</p>
+<p><span class="math display">\[
+\mathcal N(\mathbf A)
+\mathrel{:=}
+\left\{\mathbf x\in\mathbb R^n:\mathbf A\mathbf x=\mathbf 0_m\right\},
+\]</span></p>
+<p>where <span class="math inline">\(\mathbf 0_m\in\mathbb R^m\)</span> is the zero vector. The null space contains all input directions that the mapping sends to zero.</p>
+<section id="sec-linear-algebra-rank-nullity" class="level4">
+<h4 class="anchored" data-anchor-id="sec-linear-algebra-rank-nullity">Rank-nullity theorem</h4>
+<p>The <strong>nullity</strong> of <span class="math inline">\(\mathbf A\)</span> is the dimension of its null space:</p>
+<p><span class="math display">\[
+\operatorname{nullity}(\mathbf A)
+\mathrel{:=}
+\dim\mathcal N(\mathbf A).
+\]</span></p>
+<p>For every matrix <span class="math inline">\(\mathbf A\in\mathbb R^{m\times n}\)</span>, the <strong>rank-nullity theorem</strong> states</p>
+<p><span class="math display">\[
+\boxed{
+\operatorname{rank}(\mathbf A)
++
+\operatorname{nullity}(\mathbf A)
+=
+n
+}.
+\]</span></p>
+<p>The number <span class="math inline">\(n\)</span> is the dimension of the input space <span class="math inline">\(\mathbb R^n\)</span>. The theorem says that its independent input directions divide into two counts: <span class="math inline">\(\operatorname{nullity}(\mathbf A)\)</span> directions that the mapping sends to zero and <span class="math inline">\(\operatorname{rank}(\mathbf A)\)</span> directions that produce independent output directions.</p>
+<p>To prove the theorem, let</p>
+<p><span class="math display">\[
+k
+\mathrel{:=}
+\operatorname{nullity}(\mathbf A),
+\]</span></p>
+<p>and choose a basis <span class="math inline">\(\mathbf n_1,\ldots,\mathbf n_k\in\mathbb R^n\)</span> for <span class="math inline">\(\mathcal N(\mathbf A)\)</span>. Because these vectors are linearly independent, they can be extended to a basis of the whole input space by repeatedly adding vectors outside their current span. Write the resulting basis as</p>
+<p><span class="math display">\[
+\mathbf n_1,\ldots,\mathbf n_k,
+\mathbf v_1,\ldots,\mathbf v_{n-k}.
+\]</span></p>
+<p>The output vectors</p>
+<p><span class="math display">\[
+\mathbf A\mathbf v_1,\ldots,\mathbf A\mathbf v_{n-k}
+\]</span></p>
+<p>span <span class="math inline">\(\operatorname{Col}(\mathbf A)\)</span>. To see this, express any input <span class="math inline">\(\mathbf x\in\mathbb R^n\)</span> in the chosen input basis:</p>
+<p><span class="math display">\[
+\mathbf x
+=
+\sum_{i=1}^{k}a_i\mathbf n_i
++
+\sum_{j=1}^{n-k}b_j\mathbf v_j.
+\]</span></p>
+<p>Because every <span class="math inline">\(\mathbf n_i\)</span> belongs to the null space, <span class="math inline">\(\mathbf A\mathbf n_i=\mathbf0_m\)</span>. Applying <span class="math inline">\(\mathbf A\)</span> therefore gives</p>
+<p><span class="math display">\[
+\mathbf A\mathbf x
+=
+\sum_{j=1}^{n-k}b_j\mathbf A\mathbf v_j,
+\]</span></p>
+<p>so every possible output is a linear combination of the listed output vectors.</p>
+<p>These output vectors are also linearly independent. If</p>
+<p><span class="math display">\[
+\sum_{j=1}^{n-k}c_j\mathbf A\mathbf v_j
+=
+\mathbf0_m,
+\]</span></p>
+<p>then</p>
+<p><span class="math display">\[
+\mathbf A
+\left(
+\sum_{j=1}^{n-k}c_j\mathbf v_j
+\right)
+=
+\mathbf0_m.
+\]</span></p>
+<p>Thus, <span class="math inline">\(\sum_j c_j\mathbf v_j\)</span> belongs to <span class="math inline">\(\mathcal N(\mathbf A)\)</span> and can also be written as a linear combination of <span class="math inline">\(\mathbf n_1,\ldots,\mathbf n_k\)</span>. The complete list <span class="math inline">\(\mathbf n_1,\ldots,\mathbf n_k,\mathbf v_1,\ldots,\mathbf v_{n-k}\)</span> is a basis and is therefore linearly independent, so this is possible only when every <span class="math inline">\(c_j=0\)</span>. Hence, the <span class="math inline">\(n-k\)</span> vectors <span class="math inline">\(\mathbf A\mathbf v_j\)</span> form a basis of <span class="math inline">\(\operatorname{Col}(\mathbf A)\)</span>, and</p>
+<p><span class="math display">\[
+\operatorname{rank}(\mathbf A)
+=
+n-k.
+\]</span></p>
+<p>Since <span class="math inline">\(k=\operatorname{nullity}(\mathbf A)\)</span>,</p>
+<p><span class="math display">\[
+\operatorname{rank}(\mathbf A)
++
+\operatorname{nullity}(\mathbf A)
+=
+(n-k)+k
+=
+n,
+\]</span></p>
+<p>which proves the theorem.</p>
+<p>For example, let</p>
+<p><span class="math display">\[
+\mathbf A
+=
+\begin{bmatrix}
+1&amp;0&amp;1\\
+0&amp;1&amp;1
+\end{bmatrix}
+\in\mathbb R^{2\times3}.
+\]</span></p>
+<p>The first two columns are independent and the third is their sum, so <span class="math inline">\(\operatorname{rank}(\mathbf A)=2\)</span>. Solving <span class="math inline">\(\mathbf A\mathbf x=\mathbf0_2\)</span> gives</p>
+<p><span class="math display">\[
+\mathcal N(\mathbf A)
+=
+\left\{
+\alpha
+\begin{bmatrix}
+-1\\-1\\1
+\end{bmatrix}
+\;\middle|\;
+\alpha\in\mathbb R
+\right\},
+\]</span></p>
+<p>so <span class="math inline">\(\operatorname{nullity}(\mathbf A)=1\)</span>. The input dimension is therefore partitioned as</p>
+<p><span class="math display">\[
+\underbrace{3}_{\text{input dimension}}
+=
+\underbrace{2}_{\text{rank}}
++
+\underbrace{1}_{\text{nullity}}.
+\]</span></p>
+</section>
+<section id="injective-mappings-and-unique-recovery" class="level4">
+<h4 class="anchored" data-anchor-id="injective-mappings-and-unique-recovery">Injective mappings and unique recovery</h4>
+<p>Let <span class="math inline">\(\mathbf A\in\mathbb R^{m\times n}\)</span> define the linear map</p>
+<p><span class="math display">\[
+T_{\mathbf A}:\mathbb R^n\rightarrow\mathbb R^m,
+\qquad
+T_{\mathbf A}(\mathbf x)=\mathbf A\mathbf x.
+\]</span></p>
+<p>The map <span class="math inline">\(T_{\mathbf A}\)</span> is <strong>injective</strong>, or <strong>one-to-one</strong>, if equal outputs can occur only when the inputs are equal. Formally, for every <span class="math inline">\(\mathbf x^{(1)},\mathbf x^{(2)}\in\mathbb R^n\)</span>, where the parenthesised superscripts <span class="math inline">\((1)\)</span> and <span class="math inline">\((2)\)</span> label two inputs and are not exponents,</p>
+<p><span class="math display">\[
+\mathbf A\mathbf x^{(1)}=\mathbf A\mathbf x^{(2)}
+\quad\Longrightarrow\quad
+\mathbf x^{(1)}=\mathbf x^{(2)}.
+\]</span></p>
+<p>Equivalently, distinct inputs must produce distinct outputs:</p>
+<p><span class="math display">\[
+\mathbf x^{(1)}\neq\mathbf x^{(2)}
+\quad\Longrightarrow\quad
+\mathbf A\mathbf x^{(1)}\neq\mathbf A\mathbf x^{(2)}.
+\]</span></p>
+<p>The map is <strong>not injective</strong> if at least one pair of distinct inputs produces the same output:</p>
+<p><span class="math display">\[
+\exists\,\mathbf x^{(1)},\mathbf x^{(2)}\in\mathbb R^n:
+\quad
+\mathbf x^{(1)}\neq\mathbf x^{(2)},
+\qquad
+\mathbf A\mathbf x^{(1)}=\mathbf A\mathbf x^{(2)}.
+\]</span></p>
+<p>To connect injectivity to the null space, suppose two inputs have the same output. Subtracting the outputs gives</p>
+<p><span class="math display">\[
+\begin{aligned}
+\mathbf A\mathbf x^{(1)}&amp;=\mathbf A\mathbf x^{(2)}\\
+\Longrightarrow\quad
+\mathbf A(\mathbf x^{(1)}-\mathbf x^{(2)})&amp;=\mathbf0_m.
+\end{aligned}
+\]</span></p>
+<p>If <span class="math inline">\(\mathcal N(\mathbf A)=\{\mathbf0_n\}\)</span>, then <span class="math inline">\(\mathbf x^{(1)}-\mathbf x^{(2)}=\mathbf0_n\)</span>, so the inputs must be equal. Conversely, if a nonzero vector <span class="math inline">\(\mathbf z\in\mathcal N(\mathbf A)\)</span> exists, then for any <span class="math inline">\(\mathbf x\in\mathbb R^n\)</span>,</p>
+<p><span class="math display">\[
+\mathbf A(\mathbf x+\mathbf z)
+=\mathbf A\mathbf x+\mathbf A\mathbf z
+=\mathbf A\mathbf x.
+\]</span></p>
+<p>Because <span class="math inline">\(\mathbf z\neq\mathbf0_n\)</span>, the inputs <span class="math inline">\(\mathbf x\)</span> and <span class="math inline">\(\mathbf x+\mathbf z\)</span> are different but produce the same output. Therefore,</p>
+<p><span class="math display">\[
+\boxed{
+T_{\mathbf A}\text{ is injective}
+\quad\Longleftrightarrow\quad
+\mathcal N(\mathbf A)=\{\mathbf0_n\}
+\quad\Longleftrightarrow\quad
+\mathbf A\text{ has full column rank}
+}.
+\]</span></p>
+<p>For a square matrix, these conditions are also equivalent to nonsingularity and invertibility. If the map is injective, its output uniquely identifies its input; if it is not injective, some input information cannot be recovered from the output.</p>
+<p>Let <span class="math inline">\(\mathbf A\in\mathbb R^{n\times n}\)</span> be a square matrix with columns <span class="math inline">\(\mathbf a_1,\ldots,\mathbf a_n\in\mathbb R^n\)</span>, and let <span class="math inline">\(\mathbf x=[x_1\;\cdots\;x_n]^\mathsf T\in\mathbb R^n\)</span>. Matrix-vector multiplication forms the linear combination</p>
+<p><span class="math display">\[
+\mathbf A\mathbf x
+=
+x_1\mathbf a_1+\cdots+x_n\mathbf a_n
+=
+\sum_{j=1}^{n}x_j\mathbf a_j.
+\]</span></p>
+<p>For every matrix, <span class="math inline">\(\mathbf x=\mathbf 0\)</span> implies <span class="math inline">\(\mathbf A\mathbf x=\mathbf 0\)</span>. The square matrix <span class="math inline">\(\mathbf A\)</span> is <strong>nonsingular</strong> when the converse is also true:</p>
+<p><span class="math display">\[
+\mathbf A\mathbf x=\mathbf 0
+\quad\Longleftrightarrow\quad
+\mathbf x=\mathbf 0.
+\]</span></p>
+<p>Equivalently,</p>
+<p><span class="math display">\[
+\mathbf x\neq\mathbf 0
+\quad\Longrightarrow\quad
+\mathbf A\mathbf x\neq\mathbf 0.
+\]</span></p>
+<p>Because <span class="math inline">\(\mathbf A\mathbf x=\sum_{j=1}^{n}x_j\mathbf a_j\)</span>, nonsingularity means that</p>
+<p><span class="math display">\[
+x_1\mathbf a_1+\cdots+x_n\mathbf a_n=\mathbf 0
+\]</span></p>
+<p>only when <span class="math inline">\(x_1=\cdots=x_n=0\)</span>. This is precisely the definition that the columns <span class="math inline">\(\mathbf a_1,\ldots,\mathbf a_n\)</span> are linearly independent.</p>
+<p>A square matrix that is not nonsingular is called <strong>singular</strong>. For a singular matrix, at least one nonzero <span class="math inline">\(\mathbf x\)</span> satisfies <span class="math inline">\(\mathbf A\mathbf x=\mathbf 0\)</span>, so the mapping loses information about that input direction.</p>
+<p>More generally, if <span class="math inline">\(\mathbf A\in\mathbb R^{m\times n}\)</span>, then its columns are <span class="math inline">\(\mathbf a_1,\ldots,\mathbf a_n\in\mathbb R^m\)</span> and <span class="math inline">\(\mathbf A\mathbf x=\sum_{j=1}^{n}x_j\mathbf a_j\)</span>. The condition <span class="math inline">\(\mathbf A\mathbf x=\mathbf 0_m\Rightarrow\mathbf x=\mathbf 0_n\)</span> means that <span class="math inline">\(\mathcal N(\mathbf A)=\{\mathbf 0_n\}\)</span> and that all <span class="math inline">\(n\)</span> columns are linearly independent. In that case <span class="math inline">\(\operatorname{rank}(\mathbf A)=n\)</span>, which is called <strong>full column rank</strong>. The term <em>nonsingular</em> is normally reserved for the square case <span class="math inline">\(m=n\)</span>.</p>
+<p>Only a nonsingular square matrix has an inverse <span class="math inline">\(\mathbf A^{-1}\in\mathbb R^{n\times n}\)</span>. The inverse reverses the action of <span class="math inline">\(\mathbf A\)</span> and satisfies</p>
+<p><span class="math display">\[
+\mathbf{A}^{-1}\mathbf{A}=\mathbf{A}\mathbf{A}^{-1}=\mathbf{I}_n.
+\]</span></p>
+</section>
+</section>
+<section id="multiplication-order" class="level3" data-number="1.2.3">
+<h3 data-number="1.2.3" class="anchored" data-anchor-id="multiplication-order"><span class="header-section-number">1.2.3</span> Multiplication order</h3>
+<p>Let <span class="math inline">\(n\)</span> be a positive integer. Let <span class="math inline">\(\mathbf A,\mathbf B,\mathbf C\in\mathbb R^{n\times n}\)</span> be three matrices, and let <span class="math inline">\(\mathbf x,\mathbf y,\mathbf z\in\mathbb R^n\)</span> be coordinate vectors. Define the intermediate vector <span class="math inline">\(\mathbf z\)</span> and output vector <span class="math inline">\(\mathbf y\)</span> by</p>
+<p><span class="math display">\[
+\mathbf z=\mathbf B\mathbf x
+\qquad\text{and}\qquad
+\mathbf y=\mathbf A\mathbf z.
+\]</span></p>
+<p>Substituting the expression for <span class="math inline">\(\mathbf z\)</span> into the expression for <span class="math inline">\(\mathbf y\)</span> gives</p>
+<p><span class="math display">\[
+\mathbf y
+=\mathbf A(\mathbf B\mathbf x)
+=(\mathbf A\mathbf B)\mathbf x.
+\]</span></p>
+<p>Thus, the rightmost matrix acts first: <span class="math inline">\(\mathbf B\)</span> maps <span class="math inline">\(\mathbf x\)</span> to <span class="math inline">\(\mathbf z\)</span>, and then <span class="math inline">\(\mathbf A\)</span> maps <span class="math inline">\(\mathbf z\)</span> to <span class="math inline">\(\mathbf y\)</span>.</p>
+<p>The third matrix <span class="math inline">\(\mathbf C\)</span> allows three transformations to be composed. Matrix multiplication is <strong>associative</strong>, meaning that changing the grouping does not change the product:</p>
+<p><span class="math display">\[
+(\mathbf A\mathbf B)\mathbf C
+=
+\mathbf A(\mathbf B\mathbf C).
+\]</span></p>
+<p>Both sides are matrices in <span class="math inline">\(\mathbb R^{n\times n}\)</span>. However, matrix multiplication is generally <strong>not commutative</strong>, meaning that changing the order can change the result:</p>
+<p><span class="math display">\[
+\mathbf A\mathbf B\neq\mathbf B\mathbf A.
+\]</span></p>
+<p>This order becomes critical when several coordinate transformations are composed.</p>
+</section>
+</section>
+<section id="quick-test-b-matrices-rank-and-inverses" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="quick-test-b-matrices-rank-and-inverses">Quick test B: matrices, rank, and inverses</h2>
+<ol type="1">
+<li><strong>Recall:</strong> For <span class="math inline">\(\mathbf A\in\mathbb R^{m\times n}\)</span>, what are the dimensions of an input <span class="math inline">\(\mathbf x\)</span> and output <span class="math inline">\(\mathbf y=\mathbf A\mathbf x\)</span>?</li>
+<li><strong>Explanation:</strong> What does column <span class="math inline">\(j\)</span> of <span class="math inline">\(\mathbf A\)</span> tell us about the mapping?</li>
+<li><strong>Derivation:</strong> Explain why <span class="math inline">\(\mathbf A\mathbf x=\mathbf 0\)</span> has only the zero solution exactly when the columns of <span class="math inline">\(\mathbf A\)</span> are linearly independent.</li>
+<li><strong>Application:</strong> Determine the null space and rank of <span class="math inline">\(\mathbf A=\begin{bmatrix}1&amp;2\\2&amp;4\end{bmatrix}\)</span>.</li>
+<li><strong>Limitations:</strong> Why can a nonsquare matrix not have a two-sided inverse of the same kind as a nonsingular square matrix?</li>
+<li><strong>Composition:</strong> If <span class="math inline">\(\mathbf z=\mathbf B\mathbf x\)</span> and <span class="math inline">\(\mathbf y=\mathbf A\mathbf z\)</span>, which matrix acts first in <span class="math inline">\(\mathbf y=\mathbf A\mathbf B\mathbf x\)</span>?</li>
+<li><strong>Injectivity:</strong> Define an injective matrix mapping and explain why it is equivalent to <span class="math inline">\(\mathcal N(\mathbf A)=\{\mathbf0\}\)</span>.</li>
+<li><strong>Rank-nullity:</strong> State the rank-nullity theorem for <span class="math inline">\(\mathbf A\in\mathbb R^{m\times n}\)</span> and verify it for the matrix in Question 4.</li>
+</ol>
+<section id="answers-and-hints-1" class="level3 unnumbered">
+<h3 class="unnumbered anchored" data-anchor-id="answers-and-hints-1">Answers and hints</h3>
+<ol type="1">
+<li><span class="math inline">\(\mathbf x\in\mathbb R^n\)</span> and <span class="math inline">\(\mathbf y\in\mathbb R^m\)</span>.</li>
+<li>It is the output produced by applying <span class="math inline">\(\mathbf A\)</span> to the corresponding standard basis input; general outputs are linear combinations of the columns.</li>
+<li>The equation is the linear combination <span class="math inline">\(x_1\mathbf a_1+\cdots+x_n\mathbf a_n=\mathbf 0\)</span>. Only zero coefficients solve it precisely when the columns are independent.</li>
+<li>The second column is twice the first, so the rank is <span class="math inline">\(1\)</span>. Solving <span class="math inline">\(x_1+2x_2=0\)</span> gives <span class="math inline">\(\mathcal N(\mathbf A)=\{t[-2\;\;1]^\mathsf T:t\in\mathbb R\}\)</span>.</li>
+<li>A two-sided inverse would have to undo mappings in both domain and codomain, which requires equal dimensions and no lost directions.</li>
+<li><span class="math inline">\(\mathbf B\)</span> acts first, followed by <span class="math inline">\(\mathbf A\)</span>.</li>
+<li>A map is injective if <span class="math inline">\(\mathbf A\mathbf x^{(1)}=\mathbf A\mathbf x^{(2)}\)</span> implies <span class="math inline">\(\mathbf x^{(1)}=\mathbf x^{(2)}\)</span>. If <span class="math inline">\(\mathcal N(\mathbf A)=\{\mathbf0\}\)</span>, subtracting equal outputs gives <span class="math inline">\(\mathbf A(\mathbf x^{(1)}-\mathbf x^{(2)})=\mathbf0\)</span>, so <span class="math inline">\(\mathbf x^{(1)}-\mathbf x^{(2)}=\mathbf0\)</span>. Conversely, a nonzero null vector <span class="math inline">\(\mathbf z\)</span> makes <span class="math inline">\(\mathbf x\)</span> and <span class="math inline">\(\mathbf x+\mathbf z\)</span> distinct inputs with the same output.</li>
+<li>The theorem is <span class="math inline">\(\operatorname{rank}(\mathbf A)+\operatorname{nullity}(\mathbf A)=n\)</span>. The matrix in Question 4 has two input columns, rank one, and a one-dimensional null space, so <span class="math inline">\(1+1=2\)</span>.</li>
+</ol>
+</section>
+</section>
+<section id="sec-linear-algebra-determinants" class="level2" data-number="1.3">
+<h2 data-number="1.3" class="anchored" data-anchor-id="sec-linear-algebra-determinants"><span class="header-section-number">1.3</span> Determinants and signed volume</h2>
+<section id="what-the-determinant-measures" class="level3" data-number="1.3.1">
+<h3 data-number="1.3.1" class="anchored" data-anchor-id="what-the-determinant-measures"><span class="header-section-number">1.3.1</span> What the determinant measures</h3>
+<p>The determinant is defined for a square matrix <span class="math inline">\(\mathbf A\in\mathbb R^{n\times n}\)</span> and returns a scalar:</p>
+<p><span class="math display">\[
+\det:\mathbb R^{n\times n}\rightarrow\mathbb R.
+\]</span></p>
+<p>Geometrically, <span class="math inline">\(|\det(\mathbf A)|\)</span> is the factor by which the linear map <span class="math inline">\(\mathbf x\mapsto\mathbf A\mathbf x\)</span> scales <span class="math inline">\(n\)</span>-dimensional volume. The sign records whether the ordered basis orientation is preserved or reversed.</p>
+<p>For <span class="math inline">\(\mathbf A=\begin{bmatrix}a&amp;b\\c&amp;d\end{bmatrix}\in\mathbb R^{2\times2}\)</span>,</p>
+<p><span class="math display">\[
+\det(\mathbf A)=ad-bc.
+\]</span></p>
+<p>Its magnitude is the area of the parallelogram formed by the columns of <span class="math inline">\(\mathbf A\)</span>. For <span class="math inline">\(\mathbf A=[\mathbf a_1\;\mathbf a_2\;\mathbf a_3]\in\mathbb R^{3\times3}\)</span>, the determinant is the scalar triple product defined in <a href="#sec-linear-algebra-scalar-triple-product" class="quarto-xref"><span>Section 1.1.6</span></a>:</p>
+<p><span class="math display">\[
+\det(\mathbf A)
+=
+\mathbf a_1^{\mathsf T}(\mathbf a_2\times\mathbf a_3).
+\]</span></p>
+<p>Its magnitude is the volume of the parallelepiped formed by the columns.</p>
+<section id="determinant-sign-the-right-hand-rule-and-reflection" class="level4">
+<h4 class="anchored" data-anchor-id="determinant-sign-the-right-hand-rule-and-reflection">Determinant sign, the right-hand rule, and reflection</h4>
+<p>The columns of <span class="math inline">\(\mathbf A=[\mathbf a_1\;\cdots\;\mathbf a_n]\)</span> are the images of the standard basis vectors because <span class="math inline">\(\mathbf A\mathbf e_i=\mathbf a_i\)</span>. The determinant sign therefore compares the orientation of the ordered transformed columns with the orientation of the ordered standard basis.</p>
+<p>In three dimensions, the standard basis is right-handed:</p>
+<p><span class="math display">\[
+\mathbf e_1\times\mathbf e_2=\mathbf e_3.
+\]</span></p>
+<p>For <span class="math inline">\(\mathbf A=[\mathbf a_1\;\mathbf a_2\;\mathbf a_3]\in\mathbb R^{3\times3}\)</span>, the determinant can be written as</p>
+<p><span class="math display">\[
+\det(\mathbf A)
+=
+(\mathbf a_1\times\mathbf a_2)^{\mathsf T}\mathbf a_3.
+\]</span></p>
+<p>The cross product <span class="math inline">\(\mathbf a_1\times\mathbf a_2\)</span> points in the right-hand-rule normal direction determined by the first two columns. Consequently:</p>
+<ul>
+<li>If <span class="math inline">\(\det(\mathbf A)&gt;0\)</span>, then <span class="math inline">\(\mathbf a_3\)</span> has a positive component in that right-hand-rule direction. The ordered columns <span class="math inline">\((\mathbf a_1,\mathbf a_2,\mathbf a_3)\)</span> are right-handed, so the transformation preserves orientation.</li>
+<li>If <span class="math inline">\(\det(\mathbf A)&lt;0\)</span>, then <span class="math inline">\(\mathbf a_3\)</span> points to the opposite side of the plane spanned by <span class="math inline">\(\mathbf a_1\)</span> and <span class="math inline">\(\mathbf a_2\)</span>. The ordered columns are left-handed, so the transformation reverses orientation.</li>
+<li>If <span class="math inline">\(\det(\mathbf A)=0\)</span>, then the three columns are coplanar or otherwise linearly dependent. The three-dimensional volume collapses to zero, so a full three-dimensional orientation is no longer defined.</li>
+</ul>
+<p>A reflection reverses orientation. For example, reflection across the <span class="math inline">\(y\)</span>-<span class="math inline">\(z\)</span> plane is represented by</p>
+<p><span class="math display">\[
+\mathbf S
+=
+\begin{bmatrix}
+-1&amp;0&amp;0\\
+0&amp;1&amp;0\\
+0&amp;0&amp;1
+\end{bmatrix},
+\qquad
+\det(\mathbf S)=-1.
+\]</span></p>
+<p>This transformation sends <span class="math inline">\(\mathbf e_1\)</span> to <span class="math inline">\(-\mathbf e_1\)</span> while leaving <span class="math inline">\(\mathbf e_2\)</span> and <span class="math inline">\(\mathbf e_3\)</span> unchanged. The transformed basis is left-handed because</p>
+<p><span class="math display">\[
+(-\mathbf e_1)\times\mathbf e_2=-\mathbf e_3,
+\]</span></p>
+<p>whereas its third basis vector is <span class="math inline">\(+\mathbf e_3\)</span>. Thus, the negative determinant detects the orientation reversal introduced by the reflection.</p>
+<p>A matrix with negative determinant need not be a pure reflection: it may also stretch, scale, or shear. The negative sign means that its total action contains an orientation-reversing, or reflection-like, component. By contrast, a proper rotation preserves right-handedness and has determinant <span class="math inline">\(+1\)</span>.</p>
+</section>
+</section>
+<section id="algebraic-definition" class="level3" data-number="1.3.2">
+<h3 data-number="1.3.2" class="anchored" data-anchor-id="algebraic-definition"><span class="header-section-number">1.3.2</span> Algebraic definition</h3>
+<p>The determinant is the unique scalar-valued function of the columns of a square matrix with three defining properties:</p>
+<ol type="1">
+<li><strong>Multilinearity:</strong> it is linear in each column while the other columns are held fixed.</li>
+<li><strong>Alternation:</strong> swapping two columns changes the sign; consequently, a matrix with repeated columns has determinant zero.</li>
+<li><strong>Normalisation:</strong> <span class="math inline">\(\det(\mathbf I_n)=1\)</span>.</li>
+</ol>
+<section id="multilinearity-in-one-column" class="level4">
+<h4 class="anchored" data-anchor-id="multilinearity-in-one-column">Multilinearity in one column</h4>
+<p>Write the columns of <span class="math inline">\(\mathbf A\in\mathbb R^{n\times n}\)</span> as <span class="math inline">\(\mathbf A=[\mathbf a_1\;\cdots\;\mathbf a_n]\)</span>, where each <span class="math inline">\(\mathbf a_i\in\mathbb R^n\)</span>. Choose a column index <span class="math inline">\(j\in\{1,\ldots,n\}\)</span> and hold every column except column <span class="math inline">\(j\)</span> fixed. For any vectors <span class="math inline">\(\mathbf u,\mathbf v\in\mathbb R^n\)</span> and scalars <span class="math inline">\(\alpha,\beta\in\mathbb R\)</span>, linearity in column <span class="math inline">\(j\)</span> means</p>
+<p><span class="math display">\[
+\begin{aligned}
+&amp;\det(\mathbf a_1,\ldots,\mathbf a_{j-1},\alpha\mathbf u+\beta\mathbf v,\mathbf a_{j+1},\ldots,\mathbf a_n)\\
+&amp;\quad=
+\alpha\det(\mathbf a_1,\ldots,\mathbf a_{j-1},\mathbf u,\mathbf a_{j+1},\ldots,\mathbf a_n)\\
+&amp;\qquad+
+\beta\det(\mathbf a_1,\ldots,\mathbf a_{j-1},\mathbf v,\mathbf a_{j+1},\ldots,\mathbf a_n).
+\end{aligned}
+\]</span></p>
+<p>Thus, a sum placed in one column can be separated into a sum of determinants, and a scalar multiplying one column can be moved outside the determinant. The word <strong>multilinear</strong> means that this linearity property holds separately for every column. It does not mean that the determinant is linear in the whole matrix at once; in general,</p>
+<p><span class="math display">\[
+\det(\mathbf A+\mathbf B)\neq\det(\mathbf A)+\det(\mathbf B).
+\]</span></p>
+<p>For a two-dimensional check, let <span class="math inline">\(\mathbf u=[u_1\;u_2]^\mathsf T\)</span>, <span class="math inline">\(\mathbf v=[v_1\;v_2]^\mathsf T\)</span>, and <span class="math inline">\(\mathbf w=[w_1\;w_2]^\mathsf T\)</span>. Linearity in the first column follows directly from</p>
+<p><span class="math display">\[
+\begin{aligned}
+\det\!\begin{bmatrix}\alpha u_1+\beta v_1&amp;w_1\\\alpha u_2+\beta v_2&amp;w_2\end{bmatrix}
+&amp;=(\alpha u_1+\beta v_1)w_2-w_1(\alpha u_2+\beta v_2)\\
+&amp;=\alpha(u_1w_2-w_1u_2)+\beta(v_1w_2-w_1v_2)\\
+&amp;=\alpha\det[\mathbf u\;\mathbf w]+\beta\det[\mathbf v\;\mathbf w].
+\end{aligned}
+\]</span></p>
+</section>
+<section id="alternation-and-repeated-columns" class="level4">
+<h4 class="anchored" data-anchor-id="alternation-and-repeated-columns">Alternation and repeated columns</h4>
+<p>Let <span class="math inline">\(\mathbf A'\)</span> be obtained from <span class="math inline">\(\mathbf A\)</span> by swapping columns <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span>, where <span class="math inline">\(i\neq j\)</span>. Alternation means</p>
+<p><span class="math display">\[
+\det(\mathbf A')=-\det(\mathbf A).
+\]</span></p>
+<p>A single swap reverses the orientation of the ordered columns, so it reverses the sign of the signed volume without changing its magnitude.</p>
+<p>Now suppose columns <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> are equal to the same vector <span class="math inline">\(\mathbf c\in\mathbb R^n\)</span>. Let the determinant of this matrix be <span class="math inline">\(D\)</span>. Swapping the two equal columns leaves the matrix numerically unchanged, so its determinant is still <span class="math inline">\(D\)</span>. Alternation simultaneously requires the determinant to become <span class="math inline">\(-D\)</span>. Therefore,</p>
+<p><span class="math display">\[
+D=-D
+\quad\Longrightarrow\quad
+2D=0
+\quad\Longrightarrow\quad
+D=0.
+\]</span></p>
+<p>Hence, every matrix with two identical columns has determinant zero. Geometrically, two identical column directions cannot span an <span class="math inline">\(n\)</span>-dimensional parallelepiped, so its <span class="math inline">\(n\)</span>-dimensional volume collapses to zero.</p>
+<p>Equivalently, if <span class="math inline">\(\mathbf A=[a_{ij}]\in\mathbb R^{n\times n}\)</span>, then</p>
+<p><span class="math display">\[
+\det(\mathbf A)
+=
+\sum_{\sigma\in S_n}
+\operatorname{sgn}(\sigma)
+\prod_{j=1}^{n}a_{\sigma(j),j}.
+\]</span></p>
+<p>Here, <span class="math inline">\(S_n\)</span> is the set of all permutations of the indices <span class="math inline">\(1,\ldots,n\)</span>. The sign <span class="math inline">\(\operatorname{sgn}(\sigma)\)</span> equals <span class="math inline">\(+1\)</span> when the permutation can be produced by an even number of pairwise swaps and <span class="math inline">\(-1\)</span> when it requires an odd number.</p>
+<p>If the columns of <span class="math inline">\(\mathbf A\)</span> are linearly dependent, one column can be written as a linear combination of the others. Multilinearity and alternation then force <span class="math inline">\(\det(\mathbf A)=0\)</span>. Conversely, <span class="math inline">\(\det(\mathbf A)=0\)</span> means that the signed volume has collapsed, so the columns do not span <span class="math inline">\(\mathbb R^n\)</span>. Therefore,</p>
+<p><span class="math display">\[
+\boxed{
+\det(\mathbf A)\neq0
+\quad\Longleftrightarrow\quad
+\mathbf A\text{ is nonsingular}
+}.
+\]</span></p>
+</section>
+<section id="example-a-singular-matrix-loses-one-input-component" class="level4">
+<h4 class="anchored" data-anchor-id="example-a-singular-matrix-loses-one-input-component">Example: a singular matrix loses one input component</h4>
+<p>Consider the linear map <span class="math inline">\(\mathbf x\mapsto\mathbf A\mathbf x\)</span> from <span class="math inline">\(\mathbb R^2\)</span> to <span class="math inline">\(\mathbb R^2\)</span>, where</p>
+<p><span class="math display">\[
+\mathbf A
+=
+\begin{bmatrix}
+1&amp;0\\
+0&amp;0
+\end{bmatrix}.
+\]</span></p>
+<p>Its determinant is</p>
+<p><span class="math display">\[
+\det(\mathbf A)=0.
+\]</span></p>
+<p>For an input coordinate column</p>
+<p><span class="math display">\[
+\mathbf x
+=
+\begin{bmatrix}
+x_1\\
+x_2
+\end{bmatrix}
+\in\mathbb R^2,
+\]</span></p>
+<p>the output is</p>
+<p><span class="math display">\[
+\mathbf A\mathbf x
+=
+\begin{bmatrix}
+x_1\\
+0
+\end{bmatrix}
+\in\mathbb R^2.
+\]</span></p>
+<p>The output retains <span class="math inline">\(x_1\)</span> but completely removes <span class="math inline">\(x_2\)</span>. For example,</p>
+<p><span class="math display">\[
+\mathbf A
+\begin{bmatrix}
+3\\
+1
+\end{bmatrix}
+=
+\begin{bmatrix}
+3\\
+0
+\end{bmatrix},
+\qquad
+\mathbf A
+\begin{bmatrix}
+3\\
+7
+\end{bmatrix}
+=
+\begin{bmatrix}
+3\\
+0
+\end{bmatrix}.
+\]</span></p>
+<p>The two inputs are different, but their outputs are identical. From the output <span class="math inline">\([3\;0]^{\mathsf T}\)</span>, we can recover <span class="math inline">\(x_1=3\)</span>, but we cannot determine whether <span class="math inline">\(x_2\)</span> was <span class="math inline">\(1\)</span>, <span class="math inline">\(7\)</span>, or any other real number. In fact,</p>
+<p><span class="math display">\[
+\mathcal N(\mathbf A)
+=
+\left\{
+t
+\begin{bmatrix}
+0\\
+1
+\end{bmatrix}
+:t\in\mathbb R
+\right\},
+\]</span></p>
+<p>so the entire input direction <span class="math inline">\([0\;1]^{\mathsf T}\)</span> is lost.</p>
+<p>Geometrically, <span class="math inline">\(\mathbf A\)</span> maps the entire two-dimensional plane onto the one-dimensional <span class="math inline">\(x\)</span>-axis:</p>
+<p><span class="math display">\[
+\mathbb R^2
+\longrightarrow
+\left\{
+\begin{bmatrix}
+y_1\\
+0
+\end{bmatrix}
+:y_1\in\mathbb R
+\right\}.
+\]</span></p>
+<p>Every two-dimensional region is flattened into a line segment, whose two-dimensional area is zero. This agrees with <span class="math inline">\(\det(\mathbf A)=0\)</span>.</p>
+<p>Recall that <strong>not injective</strong> means that there exist at least two distinct inputs <span class="math inline">\(\mathbf x^{(1)},\mathbf x^{(2)}\in\mathbb R^n\)</span> with the same output:</p>
+<p><span class="math display">\[
+\mathbf x^{(1)}\neq\mathbf x^{(2)},
+\qquad
+\mathbf A\mathbf x^{(1)}=\mathbf A\mathbf x^{(2)}.
+\]</span></p>
+<p>The statement does not mean that every pair of inputs has the same output; it means that at least one distinct pair cannot be distinguished from the output.</p>
+<p>If <span class="math inline">\(\mathbf A\)</span> is singular, then there exists <span class="math inline">\(\mathbf z \in \mathcal N(\mathbf A)\)</span> such that <span class="math inline">\(\mathbf A \mathbf z = \mathbf 0\)</span>. This implies <span class="math inline">\(\mathbf A(\mathbf x+\mathbf z) = \mathbf A\mathbf x\)</span> for all <span class="math inline">\(\mathbf x \in \mathbb R^n\)</span>. Hence, a singular matrix is not injective and different inputs can produce the same output.</p>
+<p>For a square matrix <span class="math inline">\(\mathbf A\in\mathbb R^{n\times n}\)</span>, the general equivalences are</p>
+<p><span class="math display">\[
+\boxed{
+\begin{aligned}
+\det(\mathbf A)=0
+&amp;\Longleftrightarrow \mathbf A\text{ is singular}\\
+&amp;\Longleftrightarrow \mathcal N(\mathbf A)\neq\{\mathbf0\}\\
+&amp;\Longleftrightarrow \mathbf A\text{ is not injective}\\
+&amp;\Longleftrightarrow \text{different inputs can produce the same output}\\
+&amp;\Longleftrightarrow \text{the input cannot be uniquely recovered}.
+\end{aligned}
+}
+\]</span></p>
+</section>
+</section>
+<section id="why-determinants-multiply" class="level3" data-number="1.3.3">
+<h3 data-number="1.3.3" class="anchored" data-anchor-id="why-determinants-multiply"><span class="header-section-number">1.3.3</span> Why determinants multiply</h3>
+<p>Let <span class="math inline">\(\mathbf A,\mathbf B\in\mathbb R^{n\times n}\)</span>. The product <span class="math inline">\(\mathbf A\mathbf B\)</span> represents the composition</p>
+<p><span class="math display">\[
+\mathbf x \mapsto \mathbf B\mathbf x \mapsto \mathbf A\mathbf B\mathbf x.
+\]</span></p>
+<p>Geometrically, <span class="math inline">\(\mathbf B\)</span> first scales signed volume by <span class="math inline">\(\det(\mathbf B)\)</span>, and <span class="math inline">\(\mathbf A\)</span> then scales the result by <span class="math inline">\(\det(\mathbf A)\)</span>. This suggests</p>
+<p><span class="math display">\[
+\det(\mathbf A\mathbf B)=\det(\mathbf A)\det(\mathbf B).
+\]</span></p>
+<p>A formal proof follows from the defining properties of the determinant. Hold <span class="math inline">\(\mathbf A\)</span> fixed and define</p>
+<p><span class="math display">\[
+F:\mathbb R^{n\times n}\rightarrow\mathbb R,
+\qquad
+F(\mathbf B)\mathrel{:=}\det(\mathbf A\mathbf B).
+\]</span></p>
+<p>Write <span class="math inline">\(\mathbf B=[\mathbf b_1\;\cdots\;\mathbf b_n]\)</span>, where each <span class="math inline">\(\mathbf b_j\in\mathbb R^n\)</span>. Then</p>
+<p><span class="math display">\[
+\mathbf A\mathbf B
+=
+\begin{bmatrix}
+\mathbf A\mathbf b_1&amp;\cdots&amp;\mathbf A\mathbf b_n
+\end{bmatrix}.
+\]</span></p>
+<p>To check linearity in column <span class="math inline">\(j\)</span>, let <span class="math inline">\(\mathbf u,\mathbf v\in\mathbb R^n\)</span> and <span class="math inline">\(\alpha,\beta\in\mathbb R\)</span>. Because multiplication by <span class="math inline">\(\mathbf A\)</span> is linear,</p>
+<p><span class="math display">\[
+\mathbf A(\alpha\mathbf u+\beta\mathbf v)
+=
+\alpha\mathbf A\mathbf u+\beta\mathbf A\mathbf v.
+\]</span></p>
+<p>The determinant is linear in column <span class="math inline">\(j\)</span>, so</p>
+<p><span class="math display">\[
+\begin{aligned}
+&amp;F(\mathbf b_1,\ldots,\alpha\mathbf u+\beta\mathbf v,\ldots,\mathbf b_n)\\
+&amp;=\alpha F(\mathbf b_1,\ldots,\mathbf u,\ldots,\mathbf b_n)
++\beta F(\mathbf b_1,\ldots,\mathbf v,\ldots,\mathbf b_n).
+\end{aligned}
+\]</span></p>
+<p>Thus, <span class="math inline">\(F\)</span> is multilinear in the columns of <span class="math inline">\(\mathbf B\)</span>. If two columns of <span class="math inline">\(\mathbf B\)</span> are equal, their images under <span class="math inline">\(\mathbf A\)</span> are equal, so <span class="math inline">\(\mathbf A\mathbf B\)</span> has repeated columns and <span class="math inline">\(F(\mathbf B)=0\)</span>. Swapping two columns of <span class="math inline">\(\mathbf B\)</span> swaps the corresponding columns of <span class="math inline">\(\mathbf A\mathbf B\)</span> and changes the determinant sign.</p>
+<p>Hence, <span class="math inline">\(F\)</span> is an alternating multilinear scalar-valued function of the columns of <span class="math inline">\(\mathbf B\)</span>. We claim that</p>
+<p><span class="math display">\[
+F(\mathbf B)=c\det(\mathbf B),
+\qquad
+c\mathrel{:=}F(\mathbf e_1,\ldots,\mathbf e_n).
+\]</span></p>
+<p>The following expansion proves the claim.</p>
+<p>Let <span class="math inline">\(\mathbf e_1,\ldots,\mathbf e_n\)</span> be the standard basis of <span class="math inline">\(\mathbb R^n\)</span>. Because it is a basis, every column <span class="math inline">\(\mathbf b_j\)</span> of <span class="math inline">\(\mathbf B\)</span> has the unique expansion</p>
+<p><span class="math display">\[
+\mathbf b_j=\sum_{i=1}^{n}b_{ij}\mathbf e_i.
+\]</span></p>
+<p>Using multilinearity once for each of the <span class="math inline">\(n\)</span> columns gives</p>
+<p><span class="math display">\[
+F(\mathbf B)
+=
+\sum_{i_1=1}^{n}\cdots\sum_{i_n=1}^{n}
+\left(\prod_{j=1}^{n}b_{i_j,j}\right)
+F(\mathbf e_{i_1},\ldots,\mathbf e_{i_n}).
+\]</span></p>
+<p>This sum initially contains <span class="math inline">\(n^n\)</span> terms. If two indices are equal, such as <span class="math inline">\(i_p=i_q\)</span>, then the corresponding argument list contains the same basis vector twice. Alternation makes that term zero:</p>
+<p><span class="math display">\[
+F(\ldots,\mathbf e_{i_p},\ldots,\mathbf e_{i_p},\ldots)=0.
+\]</span></p>
+<p>A term can therefore survive only when <span class="math inline">\(i_1,\ldots,i_n\)</span> are all different. Because every <span class="math inline">\(i_j\)</span> belongs to <span class="math inline">\(\{1,\ldots,n\}\)</span>, the surviving index list must contain every index exactly once. Thus, it has the form</p>
+<p><span class="math display">\[
+(i_1,\ldots,i_n)=(\sigma(1),\ldots,\sigma(n))
+\]</span></p>
+<p>for some permutation <span class="math inline">\(\sigma\in S_n\)</span>.</p>
+<p>Alternation determines the value of every surviving basis term relative to the ordered basis term. Reordering <span class="math inline">\((\mathbf e_{\sigma(1)},\ldots,\mathbf e_{\sigma(n)})\)</span> into <span class="math inline">\((\mathbf e_1,\ldots,\mathbf e_n)\)</span> requires an even or odd number of swaps, so</p>
+<p><span class="math display">\[
+F(\mathbf e_{\sigma(1)},\ldots,\mathbf e_{\sigma(n)})
+=
+\operatorname{sgn}(\sigma)
+F(\mathbf e_1,\ldots,\mathbf e_n).
+\]</span></p>
+<p>Substituting this result into the expansion for <span class="math inline">\(F(\mathbf B)\)</span> leaves only the permutation terms:</p>
+<p><span class="math display">\[
+\begin{aligned}
+F(\mathbf B)
+&amp;=\sum_{\sigma\in S_n}
+\operatorname{sgn}(\sigma)
+\prod_{j=1}^{n}b_{\sigma(j),j}  F(\mathbf e_1,\ldots,\mathbf e_n)\\
+\end{aligned}
+\]</span></p>
+<p>The scalar appearing in the claim is</p>
+<p><span class="math display">\[
+c\mathrel{:=}F(\mathbf e_1,\ldots,\mathbf e_n).
+\]</span></p>
+<p>The columns of <span class="math inline">\(\mathbf I_n\)</span> are the ordered standard basis vectors, so the same reference value can be written as</p>
+<p><span class="math display">\[
+c=F(\mathbf e_1,\ldots,\mathbf e_n)=F(\mathbf I_n).
+\]</span></p>
+<p>Substituting the surviving terms into the expansion gives</p>
+<p><span class="math display">\[
+\begin{aligned}
+F(\mathbf B)
+&amp;=c\sum_{\sigma\in S_n}
+\operatorname{sgn}(\sigma)
+\prod_{j=1}^{n}b_{\sigma(j),j}\\
+&amp;=c\det(\mathbf B).
+\end{aligned}
+\]</span></p>
+<p>A two-dimensional example makes the one-free-value idea explicit. In this example, <span class="math inline">\(F(\mathbf u,\mathbf v)\)</span> is shorthand for <span class="math inline">\(F([\mathbf u\;\mathbf v])\)</span>, where <span class="math inline">\(\mathbf u\)</span> and <span class="math inline">\(\mathbf v\)</span> are the two columns of the input matrix. Let <span class="math inline">\(\mathbf u=u_1\mathbf e_1+u_2\mathbf e_2\)</span> and <span class="math inline">\(\mathbf v=v_1\mathbf e_1+v_2\mathbf e_2\)</span>. Using multilinearity in both columns gives</p>
+<p><span class="math display">\[
+\begin{aligned}
+F(\mathbf u,\mathbf v)
+&amp;=u_1v_1F(\mathbf e_1,\mathbf e_1)
++u_1v_2F(\mathbf e_1,\mathbf e_2)\\
+&amp;\quad+u_2v_1F(\mathbf e_2,\mathbf e_1)
++u_2v_2F(\mathbf e_2,\mathbf e_2).
+\end{aligned}
+\]</span></p>
+<p>The repeated-basis terms are zero, <span class="math inline">\(F(\mathbf e_1,\mathbf e_2)=c\)</span>, and <span class="math inline">\(F(\mathbf e_2,\mathbf e_1)=-c\)</span>. Therefore,</p>
+<p><span class="math display">\[
+\begin{aligned}
+F(\mathbf u,\mathbf v)
+&amp;=u_1v_2c-u_2v_1c\\
+&amp;=c(u_1v_2-u_2v_1)\\
+&amp;=c\det[\mathbf u\;\mathbf v].
+\end{aligned}
+\]</span></p>
+<p>After <span class="math inline">\(c\)</span> is known, this equation fixes <span class="math inline">\(F(\mathbf u,\mathbf v)\)</span> for every pair <span class="math inline">\(\mathbf u,\mathbf v\in\mathbb R^2\)</span>.</p>
+<p>For the particular function <span class="math inline">\(F(\mathbf B)=\det(\mathbf A\mathbf B)\)</span>,</p>
+<p><span class="math display">\[
+\begin{aligned}
+c
+&amp;=F(\mathbf I_n)\\
+&amp;=\det(\mathbf A\mathbf I_n)\\
+&amp;=\det(\mathbf A).
+\end{aligned}
+\]</span></p>
+<p>Consequently,</p>
+<p><span class="math display">\[
+\boxed{
+\det(\mathbf A\mathbf B)
+=
+\det(\mathbf A)\det(\mathbf B)
+}.
+\]</span></p>
+<section id="why-transposition-does-not-change-the-determinant" class="level4">
+<h4 class="anchored" data-anchor-id="why-transposition-does-not-change-the-determinant">Why transposition does not change the determinant</h4>
+<p>The related identity</p>
+<p><span class="math display">\[
+\boxed{\det(\mathbf A^{\mathsf T})=\det(\mathbf A)}
+\]</span></p>
+<p>does not follow from multiplicativity alone. It follows directly from the permutation definition of the determinant.</p>
+<p>Let <span class="math inline">\(\mathbf A=[a_{ij}]\in\mathbb R^{n\times n}\)</span>. Because <span class="math inline">\((\mathbf A^{\mathsf T})_{ij}=a_{ji}\)</span>,</p>
+<p><span class="math display">\[
+\begin{aligned}
+\det(\mathbf A^{\mathsf T})
+&amp;=\sum_{\sigma\in S_n}\operatorname{sgn}(\sigma)
+\prod_{j=1}^{n}(\mathbf A^{\mathsf T})_{\sigma(j),j}\\
+&amp;=\sum_{\sigma\in S_n}\operatorname{sgn}(\sigma)
+\prod_{j=1}^{n}a_{j,\sigma(j)}.
+\end{aligned}
+\]</span></p>
+<p>A permutation <span class="math inline">\(\sigma\in S_n\)</span> is a bijection from the index set <span class="math inline">\(\{1,\ldots,n\}\)</span> to itself. Because it is bijective, it has a unique <strong>inverse permutation</strong>, denoted by <span class="math inline">\(\sigma^{-1}\)</span>, that reverses the mapping performed by <span class="math inline">\(\sigma\)</span>. Define</p>
+<p><span class="math display">\[
+\tau\mathrel{:=}\sigma^{-1}.
+\]</span></p>
+<p>The defining identities are</p>
+<p><span class="math display">\[
+\tau(\sigma(j))=j,
+\qquad
+\sigma(\tau(k))=k.
+\]</span></p>
+<p>Equivalently,</p>
+<p><span class="math display">\[
+k=\sigma(j)
+\quad\Longleftrightarrow\quad
+j=\tau(k).
+\]</span></p>
+<p>For example, suppose <span class="math inline">\(n=3\)</span> and</p>
+<p><span class="math display">\[
+\sigma(1)=2,
+\qquad
+\sigma(2)=3,
+\qquad
+\sigma(3)=1.
+\]</span></p>
+<p>The inverse permutation reverses these assignments:</p>
+<p><span class="math display">\[
+\tau(1)=3,
+\qquad
+\tau(2)=1,
+\qquad
+\tau(3)=2.
+\]</span></p>
+<p>For instance, <span class="math inline">\(\sigma(1)=2\)</span> is reversed by <span class="math inline">\(\tau(2)=1\)</span>.</p>
+<p>As <span class="math inline">\(\sigma\)</span> runs through all permutations in <span class="math inline">\(S_n\)</span>, <span class="math inline">\(\tau=\sigma^{-1}\)</span> also runs through all permutations in <span class="math inline">\(S_n\)</span>. This is because inversion pairs every <span class="math inline">\(\sigma\)</span> with exactly one <span class="math inline">\(\tau\)</span>, and the pairing is reversible: <span class="math inline">\(\sigma=\tau^{-1}\)</span>. Therefore, replacing the summation index <span class="math inline">\(\sigma\)</span> by <span class="math inline">\(\tau\)</span> neither loses nor duplicates a permutation.</p>
+<p>The inverse permutation also has the same sign as the original permutation. Suppose <span class="math inline">\(\sigma\)</span> can be produced by <span class="math inline">\(r\)</span> pairwise swaps. To undo <span class="math inline">\(\sigma\)</span>, perform those same <span class="math inline">\(r\)</span> swaps in reverse order. Thus, <span class="math inline">\(\sigma^{-1}\)</span> uses the same number of swaps as <span class="math inline">\(\sigma\)</span>. They therefore have the same even-or-odd parity, so</p>
+<p><span class="math display">\[
+\operatorname{sgn}(\tau)
+=
+\operatorname{sgn}(\sigma^{-1})
+=
+\operatorname{sgn}(\sigma).
+\]</span></p>
+<p>Now consider the product</p>
+<p><span class="math display">\[
+\prod_{j=1}^{n}a_{j,\sigma(j)}.
+\]</span></p>
+<p>Introduce the new index</p>
+<p><span class="math display">\[
+k\mathrel{:=}\sigma(j).
+\]</span></p>
+<p>Because <span class="math inline">\(\sigma\)</span> is a permutation, as <span class="math inline">\(j\)</span> visits <span class="math inline">\(1,\ldots,n\)</span>, the index <span class="math inline">\(k=\sigma(j)\)</span> also visits every value <span class="math inline">\(1,\ldots,n\)</span> exactly once. From <span class="math inline">\(\tau=\sigma^{-1}\)</span>, the relation <span class="math inline">\(k=\sigma(j)\)</span> implies <span class="math inline">\(j=\tau(k)\)</span>. Each factor can therefore be rewritten as</p>
+<p><span class="math display">\[
+a_{j,\sigma(j)}=a_{\tau(k),k}.
+\]</span></p>
+<p>Consequently,</p>
+<p><span class="math display">\[
+\prod_{j=1}^{n}a_{j,\sigma(j)}
+=
+\prod_{k=1}^{n}a_{\tau(k),k}.
+\]</span></p>
+<p>The two products contain the same scalar factors, possibly in a different order. Scalar multiplication is commutative, so their order does not affect the product. In the three-dimensional example above,</p>
+<p><span class="math display">\[
+\begin{aligned}
+\prod_{j=1}^{3}a_{j,\sigma(j)}
+&amp;=a_{1,2}a_{2,3}a_{3,1},\\
+\prod_{k=1}^{3}a_{\tau(k),k}
+&amp;=a_{3,1}a_{1,2}a_{2,3}.
+\end{aligned}
+\]</span></p>
+<p>These products are equal because they contain exactly the same three factors.</p>
+<p>Therefore,</p>
+<p><span class="math display">\[
+\begin{aligned}
+\det(\mathbf A^{\mathsf T})
+&amp;=\sum_{\tau\in S_n}\operatorname{sgn}(\tau)
+\prod_{k=1}^{n}a_{\tau(k),k}\\
+&amp;=\det(\mathbf A).
+\end{aligned}
+\]</span></p>
+<p>Thus, exchanging the rows and columns changes how the same determinant terms are indexed but does not change their values or signs.</p>
+</section>
+<section id="determinant-of-an-inverse" class="level4">
+<h4 class="anchored" data-anchor-id="determinant-of-an-inverse">Determinant of an inverse</h4>
+<p>For nonsingular <span class="math inline">\(\mathbf A\)</span>, multiplicativity does give the inverse identity. Taking determinants of <span class="math inline">\(\mathbf A^{-1}\mathbf A=\mathbf I_n\)</span> yields</p>
+<p><span class="math display">\[
+\begin{aligned}
+1
+&amp;=\det(\mathbf I_n)\\
+&amp;=\det(\mathbf A^{-1}\mathbf A)\\
+&amp;=\det(\mathbf A^{-1})\det(\mathbf A).
+\end{aligned}
+\]</span></p>
+<p>Since <span class="math inline">\(\det(\mathbf A)\neq0\)</span>,</p>
+<p><span class="math display">\[
+\boxed{
+\det(\mathbf A^{-1})
+=
+\frac{1}{\det(\mathbf A)}
+}.
+\]</span></p>
+</section>
+</section>
+<section id="sec-linear-algebra-cross-product-linear-map" class="level3" data-number="1.3.4">
+<h3 data-number="1.3.4" class="anchored" data-anchor-id="sec-linear-algebra-cross-product-linear-map"><span class="header-section-number">1.3.4</span> How an invertible linear map transforms a cross product</h3>
+<p>The cross product depends on lengths, angles, and the handedness of the coordinate system. A general linear map may stretch those lengths, change the angles, or reverse the handedness, so it does not usually pass through a cross product unchanged.</p>
+<p>Let <span class="math inline">\(\mathbf A\in\mathbb R^{3\times3}\)</span> be nonsingular, and let <span class="math inline">\(\mathbf a,\mathbf b\in\mathbb R^3\)</span> be expressed in the same right-handed orthonormal coordinates. The transformed cross product is</p>
+<p><span class="math display">\[
+\boxed{
+(\mathbf A\mathbf a)\times(\mathbf A\mathbf b)
+=
+\det(\mathbf A)\mathbf A^{-\mathsf T}
+(\mathbf a\times\mathbf b)
+},
+\]</span></p>
+<p>where <span class="math inline">\(\mathbf A^{-\mathsf T}\mathrel{:=}(\mathbf A^{-1})^\mathsf T=(\mathbf A^\mathsf T)^{-1}\)</span> is the <strong>inverse transpose</strong> of <span class="math inline">\(\mathbf A\)</span>. Nonsingularity is required because <span class="math inline">\(\mathbf A^{-1}\)</span> must exist.</p>
+<p>To prove the identity, compare the dot product of both sides with an arbitrary test column <span class="math inline">\(\mathbf c\in\mathbb R^3\)</span>. The scalar-triple-product formula from <a href="#sec-linear-algebra-scalar-triple-product" class="quarto-xref"><span>Section 1.1.6</span></a> gives</p>
+<p><span class="math display">\[
+\begin{aligned}
+\mathbf c^\mathsf T
+\left[
+(\mathbf A\mathbf a)\times(\mathbf A\mathbf b)
+\right]
+&amp;=
+\det
+\begin{bmatrix}
+\mathbf c&amp;\mathbf A\mathbf a&amp;\mathbf A\mathbf b
+\end{bmatrix}\\
+&amp;=
+\det
+\left(
+\mathbf A
+\begin{bmatrix}
+\mathbf A^{-1}\mathbf c&amp;\mathbf a&amp;\mathbf b
+\end{bmatrix}
+\right)\\
+&amp;=
+\det(\mathbf A)
+\det
+\begin{bmatrix}
+\mathbf A^{-1}\mathbf c&amp;\mathbf a&amp;\mathbf b
+\end{bmatrix}\\
+&amp;=
+\det(\mathbf A)
+(\mathbf A^{-1}\mathbf c)^\mathsf T
+(\mathbf a\times\mathbf b)\\
+&amp;=
+\mathbf c^\mathsf T
+\left[
+\det(\mathbf A)\mathbf A^{-\mathsf T}
+(\mathbf a\times\mathbf b)
+\right].
+\end{aligned}
+\]</span></p>
+<p>The second equality uses <span class="math inline">\(\mathbf c=\mathbf A(\mathbf A^{-1}\mathbf c)\)</span> to factor <span class="math inline">\(\mathbf A\)</span> from all three columns. The third uses determinant multiplicativity. The final equality uses <span class="math inline">\((\mathbf A^{-1}\mathbf c)^\mathsf T=\mathbf c^\mathsf T\mathbf A^{-\mathsf T}\)</span>. Because both candidate vectors have the same dot product with every <span class="math inline">\(\mathbf c\)</span>, they are equal.</p>
+<p>For an orthogonal matrix <span class="math inline">\(\mathbf Q\in\mathbb R^{3\times3}\)</span>, <span class="math inline">\(\mathbf Q^\mathsf T\mathbf Q=\mathbf I_3\)</span> implies <span class="math inline">\(\mathbf Q^{-\mathsf T}=\mathbf Q\)</span>. The general identity then becomes</p>
+<p><span class="math display">\[
+(\mathbf Q\mathbf a)\times(\mathbf Q\mathbf b)
+=
+\det(\mathbf Q)\mathbf Q
+(\mathbf a\times\mathbf b).
+\]</span></p>
+<p>If <span class="math inline">\(\det(\mathbf Q)=1\)</span>, then <span class="math inline">\(\mathbf Q\)</span> is a proper rotation and preserves the cross-product direction. If <span class="math inline">\(\det(\mathbf Q)=-1\)</span>, then <span class="math inline">\(\mathbf Q\)</span> contains a reflection and reverses that direction. This determinant sign is why orthogonality alone is insufficient for a rotation to preserve cross products.</p>
+</section>
+</section>
+<section id="quick-test-c-determinants" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="quick-test-c-determinants">Quick test C: determinants</h2>
+<ol type="1">
+<li><strong>Recall:</strong> What does <span class="math inline">\(|\det(\mathbf A)|\)</span> measure geometrically?</li>
+<li><strong>Explanation:</strong> What does the sign of a determinant record?</li>
+<li><strong>Derivation:</strong> Explain why repeated columns force the determinant to be zero.</li>
+<li><strong>Application:</strong> Compute <span class="math inline">\(\det\begin{bmatrix}2&amp;1\\3&amp;4\end{bmatrix}\)</span> and interpret its magnitude.</li>
+<li><strong>Limitations:</strong> Why is the determinant not defined in the same way for a rectangular matrix?</li>
+<li><strong>Composition:</strong> Explain geometrically why <span class="math inline">\(\det(\mathbf A\mathbf B)=\det(\mathbf A)\det(\mathbf B)\)</span>.</li>
+<li><strong>Reindexing:</strong> If <span class="math inline">\(\sigma(1)=2\)</span>, <span class="math inline">\(\sigma(2)=3\)</span>, and <span class="math inline">\(\sigma(3)=1\)</span>, find <span class="math inline">\(\tau=\sigma^{-1}\)</span> and verify <span class="math inline">\(\prod_{j=1}^{3}a_{j,\sigma(j)}=\prod_{k=1}^{3}a_{\tau(k),k}\)</span>.</li>
+<li><strong>Cross products under linear maps:</strong> State how a nonsingular <span class="math inline">\(\mathbf A\in\mathbb R^{3\times3}\)</span> transforms a cross product. Why does a proper rotation preserve the cross product while a reflection reverses it?</li>
+</ol>
+<section id="answers-and-hints-2" class="level3 unnumbered">
+<h3 class="unnumbered anchored" data-anchor-id="answers-and-hints-2">Answers and hints</h3>
+<ol type="1">
+<li>The factor by which the associated linear map scales <span class="math inline">\(n\)</span>-dimensional volume.</li>
+<li>A positive determinant preserves the ordered right-handed orientation; a negative determinant reverses it to a left-handed orientation and therefore indicates a reflection component; a zero determinant collapses the volume, so no full-dimensional orientation remains.</li>
+<li>Swapping identical columns leaves the matrix unchanged but must negate the determinant, so the determinant equals its own negative and is zero.</li>
+<li>The determinant is <span class="math inline">\(2(4)-1(3)=5\)</span>, so areas are scaled by a factor of <span class="math inline">\(5\)</span> and orientation is preserved.</li>
+<li>A rectangular map changes dimension, so it does not map an <span class="math inline">\(n\)</span>-dimensional volume to another volume in the same <span class="math inline">\(n\)</span>-dimensional space.</li>
+<li><span class="math inline">\(\mathbf B\)</span> scales signed volume first and <span class="math inline">\(\mathbf A\)</span> scales the resulting signed volume second, so the factors multiply.</li>
+<li>The inverse is <span class="math inline">\(\tau(1)=3\)</span>, <span class="math inline">\(\tau(2)=1\)</span>, and <span class="math inline">\(\tau(3)=2\)</span>. The left product is <span class="math inline">\(a_{1,2}a_{2,3}a_{3,1}\)</span>, while the reindexed product is <span class="math inline">\(a_{3,1}a_{1,2}a_{2,3}\)</span>; these are equal because scalar factors commute.</li>
+<li><span class="math inline">\((\mathbf A\mathbf a)\times(\mathbf A\mathbf b)=\det(\mathbf A)\mathbf A^{-\mathsf T}(\mathbf a\times\mathbf b)\)</span>. For orthogonal <span class="math inline">\(\mathbf Q\)</span>, <span class="math inline">\(\mathbf Q^{-\mathsf T}=\mathbf Q\)</span>. A proper rotation has determinant <span class="math inline">\(+1\)</span> and therefore preserves the cross product, whereas an orthogonal reflection has determinant <span class="math inline">\(-1\)</span> and introduces a minus sign.</li>
+</ol>
+</section>
+</section>
+<section id="orthogonal-matrices" class="level2" data-number="1.4">
+<h2 data-number="1.4" class="anchored" data-anchor-id="orthogonal-matrices"><span class="header-section-number">1.4</span> Orthogonal matrices</h2>
+<p>Let <span class="math inline">\(\mathbf Q\in\mathbb R^{n\times n}\)</span>. The matrix <span class="math inline">\(\mathbf Q\)</span> is <strong>orthogonal</strong> if</p>
+<p><span class="math display">\[
+\mathbf Q^{\mathsf T}\mathbf Q=\mathbf I_n.
+\]</span></p>
+<p>The entries of <span class="math inline">\(\mathbf Q^{\mathsf T}\mathbf Q\)</span> are pairwise dot products between columns of <span class="math inline">\(\mathbf Q\)</span>. Therefore, this equation is equivalent to saying that the columns form an orthonormal basis of <span class="math inline">\(\mathbb R^n\)</span>.</p>
+<p>Because <span class="math inline">\(\mathbf Q^{\mathsf T}\mathbf Q=\mathbf I_n\)</span>, the transpose satisfies the defining equation for the inverse:</p>
+<p><span class="math display">\[
+\boxed{\mathbf Q^{-1}=\mathbf Q^{\mathsf T}}.
+\]</span></p>
+<p>For <span class="math inline">\(\mathbf x,\mathbf y\in\mathbb R^n\)</span>,</p>
+<p><span class="math display">\[
+(\mathbf Q\mathbf x)^{\mathsf T}(\mathbf Q\mathbf y)
+=
+\mathbf x^{\mathsf T}\mathbf Q^{\mathsf T}\mathbf Q\mathbf y
+=
+\mathbf x^{\mathsf T}\mathbf y.
+\]</span></p>
+<p>Thus, orthogonal matrices preserve dot products, lengths, and angles.</p>
+<p>Taking determinants of <span class="math inline">\(\mathbf Q^{\mathsf T}\mathbf Q=\mathbf I_n\)</span> gives</p>
+<p><span class="math display">\[
+\det(\mathbf Q)^2=1,
+\]</span></p>
+<p>so</p>
+<p><span class="math display">\[
+\det(\mathbf Q)=+1
+\qquad\text{or}\qquad
+\det(\mathbf Q)=-1.
+\]</span></p>
+<p>The <strong>orthogonal group</strong> is</p>
+<p><span class="math display">\[
+O(n)
+\mathrel{:=}
+\left\{\mathbf Q\in\mathbb R^{n\times n}:\mathbf Q^{\mathsf T}\mathbf Q=\mathbf I_n\right\}.
+\]</span></p>
+<p>The <strong>special orthogonal group</strong> is</p>
+<p><span class="math display">\[
+SO(n)
+\mathrel{:=}
+\left\{\mathbf Q\in O(n):\det(\mathbf Q)=1\right\}.
+\]</span></p>
+<p>Matrices in <span class="math inline">\(SO(n)\)</span> preserve lengths, angles, and orientation. Orthogonal matrices with determinant <span class="math inline">\(-1\)</span> preserve lengths and angles but reverse orientation through a reflection. Rotation matrices used for right-handed coordinate frames belong to <span class="math inline">\(SO(2)\)</span> or <span class="math inline">\(SO(3)\)</span>.</p>
+</section>
+<section id="quick-test-d-orthogonal-matrices" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="quick-test-d-orthogonal-matrices">Quick test D: orthogonal matrices</h2>
+<ol type="1">
+<li><strong>Recall:</strong> What equation defines an orthogonal matrix?</li>
+<li><strong>Explanation:</strong> Why is the inverse of an orthogonal matrix its transpose?</li>
+<li><strong>Derivation:</strong> Show that <span class="math inline">\(\|\mathbf Q\mathbf x\|_2=\|\mathbf x\|_2\)</span>.</li>
+<li><strong>Application:</strong> Determine whether <span class="math inline">\(\begin{bmatrix}0&amp;1\\1&amp;0\end{bmatrix}\)</span> belongs to <span class="math inline">\(SO(2)\)</span>.</li>
+<li><strong>Limitations:</strong> Why is <span class="math inline">\(\mathbf Q^{\mathsf T}\mathbf Q=\mathbf I_n\)</span> insufficient by itself to identify a proper rotation?</li>
+</ol>
+<section id="answers-and-hints-3" class="level3 unnumbered">
+<h3 class="unnumbered anchored" data-anchor-id="answers-and-hints-3">Answers and hints</h3>
+<ol type="1">
+<li><span class="math inline">\(\mathbf Q^{\mathsf T}\mathbf Q=\mathbf I_n\)</span>.</li>
+<li>The transpose already satisfies the defining inverse equation.</li>
+<li>Square both norms and use <span class="math inline">\(\mathbf Q^{\mathsf T}\mathbf Q=\mathbf I_n\)</span>.</li>
+<li>It is orthogonal but has determinant <span class="math inline">\(-1\)</span>, so it is a reflection in <span class="math inline">\(O(2)\)</span> and does not belong to <span class="math inline">\(SO(2)\)</span>.</li>
+<li>Orthogonality permits determinant <span class="math inline">\(-1\)</span> reflections as well as determinant <span class="math inline">\(+1\)</span> rotations.</li>
+</ol>
+</section>
+</section>
+<section id="cumulative-chapter-test" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="cumulative-chapter-test">Cumulative chapter test</h2>
+<ol type="1">
+<li>Define a basis and explain why coordinate columns are unique in a basis.</li>
+<li>Given <span class="math inline">\(\mathbf A\in\mathbb R^{3\times2}\)</span> and <span class="math inline">\(\mathbf x\in\mathbb R^2\)</span>, state the dimension of <span class="math inline">\(\mathbf A\mathbf x\)</span> and interpret it using the columns of <span class="math inline">\(\mathbf A\)</span>.</li>
+<li>Explain the relationship between <span class="math inline">\(\mathcal N(\mathbf A)\)</span>, independent columns, and full column rank.</li>
+<li>Prove that a nonsingular square matrix cannot map a nonzero vector to zero.</li>
+<li>Define the determinant using multilinearity, alternation, and normalisation.</li>
+<li>Explain why <span class="math inline">\(\det(\mathbf A)=0\)</span> indicates lost information.</li>
+<li>Derive <span class="math inline">\(\det(\mathbf A^{-1})=1/\det(\mathbf A)\)</span>.</li>
+<li>Distinguish <span class="math inline">\(O(3)\)</span> from <span class="math inline">\(SO(3)\)</span> and explain which set contains rigid-body rotation matrices.</li>
+<li>State the rank-nullity theorem and explain what its two terms count.</li>
+<li>State the vector triple-product identity and explain why the order and parentheses in a nested cross product matter.</li>
+</ol>
+<section id="cumulative-answers-and-hints" class="level3 unnumbered">
+<h3 class="unnumbered anchored" data-anchor-id="cumulative-answers-and-hints">Cumulative answers and hints</h3>
+<ol type="1">
+<li><p>A basis is a linearly independent spanning set. Independence prevents multiple coefficient descriptions, while spanning guarantees that a description exists.</p></li>
+<li><p><span class="math inline">\(\mathbf A\mathbf x\in\mathbb R^3\)</span> and equals <span class="math inline">\(x_1\mathbf a_1+x_2\mathbf a_2\)</span>.</p></li>
+<li><p><span class="math inline">\(\mathcal N(\mathbf A)=\{\mathbf0\}\)</span> exactly when the columns are independent; for <span class="math inline">\(n\)</span> columns this gives <span class="math inline">\(\operatorname{rank}(\mathbf A)=n\)</span>.</p></li>
+<li><p>Nonsingularity is equivalent to <span class="math inline">\(\mathbf A\mathbf x=\mathbf0\Rightarrow\mathbf x=\mathbf0\)</span>; the contrapositive is <span class="math inline">\(\mathbf x\neq\mathbf0\Rightarrow\mathbf A\mathbf x\neq\mathbf0\)</span>.</p></li>
+<li><p>The determinant is the unique scalar function that is linear in each column, changes sign under a column swap, and equals <span class="math inline">\(1\)</span> on <span class="math inline">\(\mathbf I_n\)</span>.</p></li>
+<li><p>For <span class="math inline">\(\mathbf A\in\mathbb R^{n\times n}\)</span>, <span class="math inline">\(\det(\mathbf A)=0\)</span> means that <span class="math inline">\(\mathbf A\)</span> is singular, so its null space contains a nonzero vector <span class="math inline">\(\mathbf z\in\mathbb R^n\)</span> satisfying <span class="math inline">\(\mathbf A\mathbf z=\mathbf0\)</span>. For any <span class="math inline">\(\mathbf x\in\mathbb R^n\)</span>,</p>
+<p><span class="math display">\[
+\mathbf A(\mathbf x+\mathbf z)
+=\mathbf A\mathbf x+\mathbf A\mathbf z
+=\mathbf A\mathbf x.
+\]</span></p>
+<p>Therefore, the distinct inputs <span class="math inline">\(\mathbf x\)</span> and <span class="math inline">\(\mathbf x+\mathbf z\)</span> produce the same output. The output cannot reveal the input component in the null-space direction <span class="math inline">\(\mathbf z\)</span>, so the input cannot be uniquely recovered. This is the meaning of <strong>lost information</strong> here: an independent input direction or degree of freedom has disappeared, not that Shannon information has been calculated. Geometrically, the map collapses <span class="math inline">\(n\)</span>-dimensional volume into a lower-dimensional set, which is why its volume-scaling factor is zero.</p></li>
+<li><p>Take determinants of <span class="math inline">\(\mathbf A^{-1}\mathbf A=\mathbf I_n\)</span> and use multiplicativity.</p></li>
+<li><p><span class="math inline">\(O(3)\)</span> contains all orthogonal <span class="math inline">\(3\times3\)</span> matrices with determinant <span class="math inline">\(\pm1\)</span>; <span class="math inline">\(SO(3)\)</span> contains the determinant-<span class="math inline">\(1\)</span> members and therefore the proper rigid-body rotations.</p></li>
+<li><p>For <span class="math inline">\(\mathbf A\in\mathbb R^{m\times n}\)</span>, <span class="math inline">\(\operatorname{rank}(\mathbf A)+\operatorname{nullity}(\mathbf A)=n\)</span>. Rank counts independent output directions produced by the map, while nullity counts independent input directions sent to zero.</p></li>
+<li><p><span class="math inline">\(\mathbf a\times(\mathbf b\times\mathbf c)=\mathbf b(\mathbf a^\mathsf T\mathbf c)-\mathbf c(\mathbf a^\mathsf T\mathbf b)\)</span>. The cross product is not associative, so changing the parentheses generally changes the result.</p></li>
+</ol>
+</section>
+</section>
+<section id="references" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="references">References</h2>
+<ul>
+<li>Richard Szeliski, <em>Computer Vision: Algorithms and Applications</em>, 2nd ed., Appendix A, especially the discussion of orthonormal matrices, rank, singular values, and matrix factorisations.</li>
+<li>Kevin M. Lynch and Frank C. Park, <em>Modern Robotics</em>, Chapter 3, especially Section 3.2.1 on rotation matrices and the distinction between orthogonality and right-handed orientation.</li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const toolbar = document.querySelector(".navbar .quarto-navbar-tools");
+
+  if (!toolbar || document.getElementById("left-sidebar-button")) {
+    return;
+  }
+
+  const controls = [
+    {
+      id: "left-sidebar-button",
+      className: "left-sidebar-hidden",
+      storageKey: "quarto-left-sidebar-hidden",
+      targetId: "quarto-sidebar",
+      noun: "chapter navigation",
+      icon: "bi-layout-sidebar"
+    },
+    {
+      id: "right-sidebar-button",
+      className: "right-sidebar-hidden",
+      storageKey: "quarto-right-sidebar-hidden",
+      targetId: "quarto-margin-sidebar",
+      noun: "table of contents",
+      icon: "bi-layout-sidebar-reverse"
+    }
+  ];
+
+  const storedState = (key) => {
+    try {
+      return window.localStorage.getItem(key) === "true";
+    } catch {
+      return false;
+    }
+  };
+
+  const storeState = (key, hidden) => {
+    try {
+      window.localStorage.setItem(key, String(hidden));
+    } catch {
+      // The controls still work when browser storage is unavailable.
+    }
+  };
+
+  controls.forEach((control) => {
+    document.body.classList.toggle(
+      control.className,
+      storedState(control.storageKey)
+    );
+
+    const button = document.createElement("button");
+    button.id = control.id;
+    button.type = "button";
+    button.className = "sidebar-toggle-button quarto-navigation-tool";
+    button.setAttribute("aria-controls", control.targetId);
+    button.innerHTML = `<i class="bi ${control.icon}" aria-hidden="true"></i>`;
+
+    const updateButton = () => {
+      const hidden = document.body.classList.contains(control.className);
+      const label = `${hidden ? "Show" : "Hide"} ${control.noun}`;
+
+      button.title = label;
+      button.setAttribute("aria-label", label);
+      button.setAttribute("aria-expanded", String(!hidden));
+    };
+
+    button.addEventListener("click", () => {
+      const hidden = document.body.classList.toggle(control.className);
+      storeState(control.storageKey, hidden);
+      updateButton();
+    });
+
+    toolbar.appendChild(button);
+    updateButton();
+  });
+});
+</script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../notation.html" class="pagination-link" aria-label="Unified Notation and Conventions">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Unified Notation and Conventions</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../part_01_motion_mechanics_control/02_geometry_and_coordinate_frames.html" class="pagination-link" aria-label="Geometry and Coordinate Frames">
+        <span class="nav-page-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Geometry and Coordinate Frames</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

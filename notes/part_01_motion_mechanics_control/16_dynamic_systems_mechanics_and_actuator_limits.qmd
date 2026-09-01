@@ -256,7 +256,7 @@ The torque vector is perpendicular to the plane containing $\boldsymbol\rho$ and
 
 Figure @fig-torque-vector-geometry shows the position vector, applied force, angle, perpendicular moment arm, and out-of-page torque direction in one geometric construction.
 
-![Vector geometry of torque about point $O$.](figures/torque_vector_geometry.svg){#fig-torque-vector-geometry width=88%}
+![Vector geometry of torque about point $O$.](../figures/torque_vector_geometry.svg){#fig-torque-vector-geometry width=88%}
 
 Let $\rho\mathrel{:=}\lVert\boldsymbol\rho\rVert_2$ be the distance from $O$ to the force application point in metres, let $F\mathrel{:=}\lVert\mathbf F\rVert_2$ be the force magnitude in newtons, and let $\theta\in[0,\pi]$ be the angle from $\boldsymbol\rho$ to $\mathbf F$. The cross-product magnitude satisfies
 
@@ -307,7 +307,7 @@ Thus $\tau=FL$ is not a different torque law; it is the magnitude of the cross-p
 
 Figure @fig-torque-angle-examples holds radius and force magnitude constant while changing only $\theta$. The angled force produces less torque because only its component perpendicular to the radius contributes.
 
-![Torque magnitude for equal forces applied at $90^\circ$ and $60^\circ$.](figures/torque_angle_examples.svg){#fig-torque-angle-examples width=100%}
+![Torque magnitude for equal forces applied at $90^\circ$ and $60^\circ$.](../figures/torque_angle_examples.svg){#fig-torque-angle-examples width=100%}
 
 If $\mathbf e_a\in\mathbb R^3$ is a unit vector along a chosen axis, the signed scalar torque about that axis is the projection
 
