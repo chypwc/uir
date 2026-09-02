@@ -103,4 +103,42 @@ const RevoluteLimits & RevoluteJoint::limits() const noexcept
   return limits_;
 }
 
+PrismaticJoint PrismaticJoint::from_axis(
+  const Eigen::Vector3d & space_axis_direction, PrismaticLimits limits)
+{
+  const Eigen::Vector3d normalized_direction =
+    normalize_axis_direction(space_axis_direction);
+
+  Vector6LinearFirst space_screw_axis;
+  space_screw_axis.head<3>() = normalized_direction;
+  space_screw_axis.tail<3>().setZero();
+
+  return PrismaticJoint(
+    normalized_direction, std::move(limits), space_screw_axis);
+}
+
+PrismaticJoint::PrismaticJoint(
+  Eigen::Vector3d space_axis_direction, PrismaticLimits limits,
+  Vector6LinearFirst space_screw_axis)
+: space_axis_direction_(std::move(space_axis_direction)),
+  limits_(std::move(limits)),
+  space_screw_axis_(std::move(space_screw_axis))
+{
+}
+
+const Eigen::Vector3d & PrismaticJoint::space_axis_direction() const noexcept
+{
+  return space_axis_direction_;
+}
+
+const Vector6LinearFirst & PrismaticJoint::space_screw_axis() const noexcept
+{
+  return space_screw_axis_;
+}
+
+const PrismaticLimits & PrismaticJoint::limits() const noexcept
+{
+  return limits_;
+}
+
 }  // namespace rigid_body_kinematics

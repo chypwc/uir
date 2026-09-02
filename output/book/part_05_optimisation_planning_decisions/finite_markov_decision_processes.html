@@ -438,15 +438,13 @@ window.Quarto = {
   <li><a href="#sec-mdp-actions-feasible-sets" id="toc-sec-mdp-actions-feasible-sets" class="nav-link" data-scroll-target="#sec-mdp-actions-feasible-sets"><span class="header-section-number">12.1</span> Actions and feasible action sets</a></li>
   <li><a href="#sec-controlled-markov-property" id="toc-sec-controlled-markov-property" class="nav-link" data-scroll-target="#sec-controlled-markov-property"><span class="header-section-number">12.2</span> The controlled Markov property</a></li>
   <li><a href="#sec-controlled-transition-probabilities" id="toc-sec-controlled-transition-probabilities" class="nav-link" data-scroll-target="#sec-controlled-transition-probabilities"><span class="header-section-number">12.3</span> Controlled transition probabilities</a></li>
-  <li><a href="#sec-uncontrolled-versus-controlled-dynamics" id="toc-sec-uncontrolled-versus-controlled-dynamics" class="nav-link" data-scroll-target="#sec-uncontrolled-versus-controlled-dynamics"><span class="header-section-number">12.4</span> Uncontrolled and controlled dynamics are different objects</a></li>
-  <li><a href="#quick-test-actions-and-controlled-transitions" id="toc-quick-test-actions-and-controlled-transitions" class="nav-link" data-scroll-target="#quick-test-actions-and-controlled-transitions">Quick test: actions and controlled transitions</a>
+  <li><a href="#sec-uncontrolled-versus-controlled-dynamics" id="toc-sec-uncontrolled-versus-controlled-dynamics" class="nav-link" data-scroll-target="#sec-uncontrolled-versus-controlled-dynamics"><span class="header-section-number">12.4</span> Uncontrolled and controlled dynamics are different objects</a>
   <ul class="collapse">
-  <li><a href="#answers-and-hints" id="toc-answers-and-hints" class="nav-link" data-scroll-target="#answers-and-hints">Answers and hints</a></li>
+  <li><a href="#quick-test-actions-and-controlled-transitions" id="toc-quick-test-actions-and-controlled-transitions" class="nav-link" data-scroll-target="#quick-test-actions-and-controlled-transitions">Quick test: actions and controlled transitions</a></li>
   </ul></li>
-  <li><a href="#sec-mdp-rewards-joint-dynamics" id="toc-sec-mdp-rewards-joint-dynamics" class="nav-link" data-scroll-target="#sec-mdp-rewards-joint-dynamics"><span class="header-section-number">12.5</span> Rewards and joint one-step dynamics</a></li>
-  <li><a href="#quick-test-rewards-and-joint-dynamics" id="toc-quick-test-rewards-and-joint-dynamics" class="nav-link" data-scroll-target="#quick-test-rewards-and-joint-dynamics">Quick test: rewards and joint dynamics</a>
+  <li><a href="#sec-mdp-rewards-joint-dynamics" id="toc-sec-mdp-rewards-joint-dynamics" class="nav-link" data-scroll-target="#sec-mdp-rewards-joint-dynamics"><span class="header-section-number">12.5</span> Rewards and joint one-step dynamics</a>
   <ul class="collapse">
-  <li><a href="#answers-and-hints-1" id="toc-answers-and-hints-1" class="nav-link" data-scroll-target="#answers-and-hints-1">Answers and hints</a></li>
+  <li><a href="#quick-test-rewards-and-joint-dynamics" id="toc-quick-test-rewards-and-joint-dynamics" class="nav-link" data-scroll-target="#quick-test-rewards-and-joint-dynamics">Quick test: rewards and joint dynamics</a></li>
   </ul></li>
   <li><a href="#sec-mdp-policies-induced-dynamics" id="toc-sec-mdp-policies-induced-dynamics" class="nav-link" data-scroll-target="#sec-mdp-policies-induced-dynamics"><span class="header-section-number">12.6</span> Policies and policy-induced dynamics</a>
   <ul class="collapse">
@@ -463,10 +461,7 @@ window.Quarto = {
   <li><a href="#an-absorbing-extension-represents-the-stopped-episode" id="toc-an-absorbing-extension-represents-the-stopped-episode" class="nav-link" data-scroll-target="#an-absorbing-extension-represents-the-stopped-episode"><span class="header-section-number">12.7.2</span> An absorbing extension represents the stopped episode</a></li>
   <li><a href="#truncation-stops-the-record-not-the-task" id="toc-truncation-stops-the-record-not-the-task" class="nav-link" data-scroll-target="#truncation-stops-the-record-not-the-task"><span class="header-section-number">12.7.3</span> Truncation stops the record, not the task</a></li>
   <li><a href="#a-time-limit-can-belong-inside-or-outside-the-task" id="toc-a-time-limit-can-belong-inside-or-outside-the-task" class="nav-link" data-scroll-target="#a-time-limit-can-belong-inside-or-outside-the-task"><span class="header-section-number">12.7.4</span> A time limit can belong inside or outside the task</a></li>
-  </ul></li>
-  <li><a href="#quick-test-termination-and-truncation" id="toc-quick-test-termination-and-truncation" class="nav-link" data-scroll-target="#quick-test-termination-and-truncation">Quick test: termination and truncation</a>
-  <ul class="collapse">
-  <li><a href="#answers-and-hints-3" id="toc-answers-and-hints-3" class="nav-link" data-scroll-target="#answers-and-hints-3">Answers and hints</a></li>
+  <li><a href="#quick-test-termination-and-truncation" id="toc-quick-test-termination-and-truncation" class="nav-link" data-scroll-target="#quick-test-termination-and-truncation">Quick test: termination and truncation</a></li>
   </ul></li>
   <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
   </ul>
@@ -682,9 +677,8 @@ p(s_3\mid s_2,a_1)
 <p>The resulting distribution is a valid row distribution because <span class="math inline">\(\mathbf P^{(a_1)}\)</span> is row-stochastic.</p>
 </div>
 </div>
-</section>
-<section id="quick-test-actions-and-controlled-transitions" class="level2 unnumbered">
-<h2 class="unnumbered anchored" data-anchor-id="quick-test-actions-and-controlled-transitions">Quick test: actions and controlled transitions</h2>
+<section id="quick-test-actions-and-controlled-transitions" class="level3 unnumbered">
+<h3 class="unnumbered anchored" data-anchor-id="quick-test-actions-and-controlled-transitions">Quick test: actions and controlled transitions</h3>
 <ol type="1">
 <li><strong>Recall:</strong> What is the difference between the global action set <span class="math inline">\(\mathcal A\)</span> and the feasible action set <span class="math inline">\(\mathcal A(s)\)</span>?</li>
 <li><strong>Explanation:</strong> Why can <span class="math inline">\(A_t\)</span> be represented as a random variable even though an action is a control choice?</li>
@@ -695,8 +689,8 @@ p(s_3\mid s_2,a_1)
 <li><strong>Validity:</strong> Why must an infeasible state–action pair not be represented by a zero transition row?</li>
 <li><strong>Model distinction:</strong> Why is a controlled transition kernel different from an uncontrolled Markov chain with one transition matrix?</li>
 </ol>
-<section id="answers-and-hints" class="level3 unnumbered">
-<h3 class="unnumbered anchored" data-anchor-id="answers-and-hints">Answers and hints</h3>
+<section id="answers-and-hints" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="answers-and-hints">Answers and hints</h4>
 <ol type="1">
 <li><span class="math inline">\(\mathcal A\)</span> contains every action label in the model. <span class="math inline">\(\mathcal A(s)\subseteq\mathcal A\)</span> contains only the actions admitted when the current state is <span class="math inline">\(s\)</span>.</li>
 <li>Across possible trajectories, different actions may be realised, so <span class="math inline">\(A_t:\Omega\to\mathcal A\)</span> records which action occurs. The realised value <span class="math inline">\(a\)</span> is still the control input, while a separate action-selection mechanism determines which value is chosen.</li>
@@ -707,6 +701,7 @@ p(s_3\mid s_2,a_1)
 <li>A zero row sums to zero, not one, so it is not a next-state distribution. More importantly, the transition law is undefined outside its feasible domain; inserting zeros would turn unavailability into false numerical data.</li>
 <li>The kernel supplies several possible next-state distributions for each state, one per feasible action. The current state alone does not select a unique next-state distribution; the action or an action-selection rule is an additional input.</li>
 </ol>
+</section>
 </section>
 </section>
 <section id="sec-mdp-rewards-joint-dynamics" class="level2" data-number="12.5">
@@ -914,9 +909,8 @@ p(s_3\mid s_2,a_1)
 <p>Each next state has exactly one possible reward in this example, so the expected transition rewards are <span class="math inline">\(\bar r(s_2,a_1,s_1)=-1\)</span>, <span class="math inline">\(\bar r(s_2,a_1,s_2)=0\)</span>, and <span class="math inline">\(\bar r(s_2,a_1,s_3)=2\)</span>. The transition row alone does not contain these reward values.</p>
 </div>
 </div>
-</section>
-<section id="quick-test-rewards-and-joint-dynamics" class="level2 unnumbered">
-<h2 class="unnumbered anchored" data-anchor-id="quick-test-rewards-and-joint-dynamics">Quick test: rewards and joint dynamics</h2>
+<section id="quick-test-rewards-and-joint-dynamics" class="level3 unnumbered">
+<h3 class="unnumbered anchored" data-anchor-id="quick-test-rewards-and-joint-dynamics">Quick test: rewards and joint dynamics</h3>
 <ol type="1">
 <li><strong>Recall:</strong> Why is the reward following action <span class="math inline">\(A_t\)</span> indexed by <span class="math inline">\(t+1\)</span>?</li>
 <li><strong>Representation:</strong> What does each argument in <span class="math inline">\(p(s',r\mid s,a)\)</span> identify, and why are <span class="math inline">\((s',r)\)</span> written to the left of the conditioning bar?</li>
@@ -925,8 +919,8 @@ p(s_3\mid s_2,a_1)
 <li><strong>Validity:</strong> Why is <span class="math inline">\(\bar r(s,a,s')\)</span> defined by the displayed ratio only when <span class="math inline">\(p(s'\mid s,a)&gt;0\)</span>?</li>
 <li><strong>Model distinction:</strong> Do <span class="math inline">\(p(s'\mid s,a)\)</span> and <span class="math inline">\(\bar r(s,a)\)</span> determine the complete joint transition–reward distribution? Explain.</li>
 </ol>
-<section id="answers-and-hints-1" class="level3 unnumbered">
-<h3 class="unnumbered anchored" data-anchor-id="answers-and-hints-1">Answers and hints</h3>
+<section id="answers-and-hints-1" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="answers-and-hints-1">Answers and hints</h4>
 <ol type="1">
 <li>State <span class="math inline">\(S_t\)</span> and action <span class="math inline">\(A_t\)</span> are the inputs to one environment step; reward <span class="math inline">\(R_{t+1}\)</span> and state <span class="math inline">\(S_{t+1}\)</span> are the outputs of that step.</li>
 <li>The variables <span class="math inline">\(s\)</span> and <span class="math inline">\(a\)</span> are the supplied current state and feasible action. The variables <span class="math inline">\(s'\)</span> and <span class="math inline">\(r\)</span> are the possible next-state and reward outcome. They appear to the left of the bar because their joint probability is being evaluated conditional on <span class="math inline">\((s,a)\)</span>.</li>
@@ -935,6 +929,7 @@ p(s_3\mid s_2,a_1)
 <li>The value <span class="math inline">\(p(s'\mid s,a)\)</span> is the probability of reaching <span class="math inline">\(s'\)</span> from <span class="math inline">\((s,a)\)</span>. If it is zero, that transition never occurs, so there are no such outcomes on which to condition the reward distribution. The elementary conditional-probability ratio would divide by zero and is undefined.</li>
 <li>No.&nbsp;The transition probability removes the reward variable by marginalisation, and the expected reward retains only a weighted average. Different reward distributions can have the same transition probabilities and expected reward.</li>
 </ol>
+</section>
 </section>
 </section>
 <section id="sec-mdp-policies-induced-dynamics" class="level2" data-number="12.6">
@@ -1411,7 +1406,7 @@ p_\pi(s_3\mid s_2)
 </section>
 <section id="sec-mdp-termination-truncation" class="level2" data-number="12.7">
 <h2 data-number="12.7" class="anchored" data-anchor-id="sec-mdp-termination-truncation"><span class="header-section-number">12.7</span> Episode endings: termination and truncation</h2>
-<p>A finite interaction record can end because the modelled task has ended or because an external collector has stopped recording. These cases may produce trajectory files of the same length, but they make different claims about what could happen next. The distinction is useful because later return and value calculations must know whether future task rewards truly cease or merely become unobserved.</p>
+<p>A finite interaction record can end because the modelled task has ended or because an external collector has stopped recording. The distinction is useful because later return and value calculations must know whether future task rewards truly cease or merely become unobserved.</p>
 <p>The known inputs are the task’s state and transition definitions, the realised next state and reward, and any stopping rule imposed outside the task. The required outputs are two separate facts: whether the task terminated and whether collection was truncated. Their relationship is</p>
 <p><span class="math display">\[
 \begin{aligned}
@@ -1423,7 +1418,7 @@ p_\pi(s_3\mid s_2)
 \]</span></p>
 <section id="a-terminal-state-ends-the-modelled-task" class="level3" data-number="12.7.1">
 <h3 data-number="12.7.1" class="anchored" data-anchor-id="a-terminal-state-ends-the-modelled-task"><span class="header-section-number">12.7.1</span> A terminal state ends the modelled task</h3>
-<p>Let <span class="math inline">\(\mathcal S_{\mathrm{term}}\subseteq\mathcal S\)</span> be the set of <strong>terminal states</strong>, possibly empty, and define the set of nonterminal decision states by</p>
+<p>Let <span class="math inline">\(\mathcal S_{\mathrm{term}}\subseteq\mathcal S\)</span> be the set of <strong>terminal states</strong>, possibly empty, and define the set of nonterminal <strong>decision states</strong> by</p>
 <p><span class="math display">\[
 \mathcal S_{\mathrm{dec}}
 \mathrel{:=}
@@ -1476,7 +1471,7 @@ p(s_\dagger,0\mid s_\dagger,a_\bot)=1.
 </section>
 <section id="a-time-limit-can-belong-inside-or-outside-the-task" class="level3" data-number="12.7.4">
 <h3 data-number="12.7.4" class="anchored" data-anchor-id="a-time-limit-can-belong-inside-or-outside-the-task"><span class="header-section-number">12.7.4</span> A time limit can belong inside or outside the task</h3>
-<p>Let a task-defined finite horizon be <span class="math inline">\(N\in\mathbb N\)</span> decisions, with actions selected at times <span class="math inline">\(t\in\{0,\ldots,N-1\}\)</span>. The transition to <span class="math inline">\(S_N\)</span> completes the task because the horizon is part of its definition. This is termination, not truncation. If the transition and decision laws can depend on the number of decisions remaining, a stationary Markov representation must include that information. Define the augmented state space and state by</p>
+<p>Let a task-defined finite horizon be <span class="math inline">\(N\in\mathbb N\)</span> decision steps, with actions selected at times <span class="math inline">\(t\in\{0,\ldots,N-1\}\)</span>. The transition to <span class="math inline">\(S_N\)</span> completes the task because the horizon is part of its definition. This is termination, not truncation. If the transition and decision laws can depend on the number of decision steps remaining, a stationary Markov representation must include that information. Define the augmented state space and state by</p>
 <p><span class="math display">\[
 \widetilde{\mathcal S}
 \mathrel{:=}
@@ -1486,7 +1481,7 @@ p(s_\dagger,0\mid s_\dagger,a_\bot)=1.
 \mathrel{:=}
 (S_t,N-t).
 \]</span></p>
-<p>The second component records the number of decisions remaining. The augmented terminal set is</p>
+<p>The second component records the number of decision steps remaining. The augmented terminal set is</p>
 <p><span class="math display">\[
 \widetilde{\mathcal S}_{\mathrm{term}}
 \mathrel{:=}
@@ -1507,25 +1502,25 @@ p(s_\dagger,0\mid s_\dagger,a_\bot)=1.
 </div>
 </div>
 </section>
-</section>
-<section id="quick-test-termination-and-truncation" class="level2 unnumbered">
-<h2 class="unnumbered anchored" data-anchor-id="quick-test-termination-and-truncation">Quick test: termination and truncation</h2>
+<section id="quick-test-termination-and-truncation" class="level3 unnumbered">
+<h3 class="unnumbered anchored" data-anchor-id="quick-test-termination-and-truncation">Quick test: termination and truncation</h3>
 <ol type="1">
 <li><strong>Recall:</strong> What mathematical condition makes a realised transition terminate the task?</li>
 <li><strong>Contrast:</strong> Why is a terminal state not identical by definition to an absorbing state?</li>
 <li><strong>Application:</strong> A trajectory reaches its task-defined goal while receiving reward <span class="math inline">\(5\)</span>. Is the reward discarded when the episode terminates?</li>
 <li><strong>Application:</strong> A collector stops after <span class="math inline">\(200\)</span> transitions in an ordinary nonterminal state. Is this termination or truncation?</li>
-<li><strong>Validity condition:</strong> A task lasts exactly <span class="math inline">\(N\)</span> decisions, but the optimal action can depend on the number of decisions remaining. What must a stationary Markov state representation contain?</li>
+<li><strong>Validity condition:</strong> A task lasts exactly <span class="math inline">\(N\)</span> decision steps, but the optimal action can depend on the number of decision steps remaining. What must a stationary Markov state representation contain?</li>
 </ol>
-<section id="answers-and-hints-3" class="level3 unnumbered">
-<h3 class="unnumbered anchored" data-anchor-id="answers-and-hints-3">Answers and hints</h3>
+<section id="answers-and-hints-3" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="answers-and-hints-3">Answers and hints</h4>
 <ol type="1">
-<li>A state-based transition terminates when its realised next state satisfies <span class="math inline">\(S_{t+1}\in\mathcal S_{\mathrm{term}}\)</span>. A task-defined finite horizon is also termination and can be expressed by augmenting the state with the remaining decision count.</li>
+<li>A state-based transition terminates when its realised next state satisfies <span class="math inline">\(S_{t+1}\in\mathcal S_{\mathrm{term}}\)</span>. A task-defined finite horizon is also termination and can be expressed by augmenting the state with the remaining decision-step count.</li>
 <li>Terminal is a task-ending meaning, whereas absorbing is the transition condition that the next state equals the same state with probability one. A zero-reward absorbing self-loop can represent a terminal state after the task has stopped, but that representation is an added convention.</li>
 <li>No.&nbsp;Reward <span class="math inline">\(R_{t+1}=5\)</span> belongs to the transition that enters the terminal state and remains part of the episode.</li>
 <li>It is truncation because the external collector stopped the record while the MDP still admitted continuation from the final state.</li>
-<li>The state must include the relevant stage information, such as the remaining count <span class="math inline">\(N-t\)</span>. Otherwise identical physical-state labels can require different transition or decision laws at different stages.</li>
+<li>The state must include the relevant stage information, such as the remaining decision-step count <span class="math inline">\(N-t\)</span>. Otherwise identical physical-state labels can require different transition or decision laws at different stages.</li>
 </ol>
+</section>
 </section>
 </section>
 <section id="references" class="level2 unnumbered">

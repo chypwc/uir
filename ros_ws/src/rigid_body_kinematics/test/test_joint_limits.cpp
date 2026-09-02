@@ -56,7 +56,6 @@ TEST(JointLimitsTest, RejectsNaNRevoluteBound)
     (void)rigid_body_kinematics::RevoluteLimits::from_bounds(quiet_nan, 1.0);
 
     FAIL() << "Expected a NaN revolute bound to be rejected.";
-
   } catch (const rigid_body_kinematics::SerialChainException & error) {
     EXPECT_EQ(
       error.code(),

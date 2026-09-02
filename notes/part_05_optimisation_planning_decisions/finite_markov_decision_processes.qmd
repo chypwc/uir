@@ -223,7 +223,7 @@ The resulting distribution is a valid row distribution because $\mathbf P^{(a_1)
 
 :::
 
-## Quick test: actions and controlled transitions {.unnumbered}
+### Quick test: actions and controlled transitions {.unnumbered}
 
 1. **Recall:** What is the difference between the global action set $\mathcal A$ and the feasible action set $\mathcal A(s)$?
 2. **Explanation:** Why can $A_t$ be represented as a random variable even though an action is a control choice?
@@ -234,7 +234,7 @@ The resulting distribution is a valid row distribution because $\mathbf P^{(a_1)
 7. **Validity:** Why must an infeasible state--action pair not be represented by a zero transition row?
 8. **Model distinction:** Why is a controlled transition kernel different from an uncontrolled Markov chain with one transition matrix?
 
-### Answers and hints {.unnumbered}
+#### Answers and hints {.unnumbered}
 
 1. $\mathcal A$ contains every action label in the model. $\mathcal A(s)\subseteq\mathcal A$ contains only the actions admitted when the current state is $s$.
 2. Across possible trajectories, different actions may be realised, so $A_t:\Omega\to\mathcal A$ records which action occurs. The realised value $a$ is still the control input, while a separate action-selection mechanism determines which value is chosen.
@@ -463,7 +463,7 @@ Each next state has exactly one possible reward in this example, so the expected
 
 :::
 
-## Quick test: rewards and joint dynamics {.unnumbered}
+### Quick test: rewards and joint dynamics {.unnumbered}
 
 1. **Recall:** Why is the reward following action $A_t$ indexed by $t+1$?
 2. **Representation:** What does each argument in $p(s',r\mid s,a)$ identify, and why are $(s',r)$ written to the left of the conditioning bar?
@@ -472,7 +472,7 @@ Each next state has exactly one possible reward in this example, so the expected
 5. **Validity:** Why is $\bar r(s,a,s')$ defined by the displayed ratio only when $p(s'\mid s,a)>0$?
 6. **Model distinction:** Do $p(s'\mid s,a)$ and $\bar r(s,a)$ determine the complete joint transition--reward distribution? Explain.
 
-### Answers and hints {.unnumbered}
+#### Answers and hints {.unnumbered}
 
 1. State $S_t$ and action $A_t$ are the inputs to one environment step; reward $R_{t+1}$ and state $S_{t+1}$ are the outputs of that step.
 2. The variables $s$ and $a$ are the supplied current state and feasible action. The variables $s'$ and $r$ are the possible next-state and reward outcome. They appear to the left of the bar because their joint probability is being evaluated conditional on $(s,a)$.
@@ -1026,7 +1026,7 @@ The policy averages probabilities to obtain an induced transition row and averag
 
 ## Episode endings: termination and truncation {#sec-mdp-termination-truncation}
 
-A finite interaction record can end because the modelled task has ended or because an external collector has stopped recording. These cases may produce trajectory files of the same length, but they make different claims about what could happen next. The distinction is useful because later return and value calculations must know whether future task rewards truly cease or merely become unobserved.
+A finite interaction record can end because the modelled task has ended or because an external collector has stopped recording. The distinction is useful because later return and value calculations must know whether future task rewards truly cease or merely become unobserved.
 
 The known inputs are the task's state and transition definitions, the realised next state and reward, and any stopping rule imposed outside the task. The required outputs are two separate facts: whether the task terminated and whether collection was truncated. Their relationship is
 
@@ -1041,7 +1041,7 @@ $$
 
 ### A terminal state ends the modelled task
 
-Let $\mathcal S_{\mathrm{term}}\subseteq\mathcal S$ be the set of **terminal states**, possibly empty, and define the set of nonterminal decision states by
+Let $\mathcal S_{\mathrm{term}}\subseteq\mathcal S$ be the set of **terminal states**, possibly empty, and define the set of nonterminal **decision states** by
 
 $$
 \mathcal S_{\mathrm{dec}}
@@ -1080,7 +1080,7 @@ Termination and truncation must therefore be recorded separately. A termination 
 
 ### A time limit can belong inside or outside the task
 
-Let a task-defined finite horizon be $N\in\mathbb N$ decisions, with actions selected at times $t\in\{0,\ldots,N-1\}$. The transition to $S_N$ completes the task because the horizon is part of its definition. This is termination, not truncation. If the transition and decision laws can depend on the number of decisions remaining, a stationary Markov representation must include that information. Define the augmented state space and state by
+Let a task-defined finite horizon be $N\in\mathbb N$ decision steps, with actions selected at times $t\in\{0,\ldots,N-1\}$. The transition to $S_N$ completes the task because the horizon is part of its definition. This is termination, not truncation. If the transition and decision laws can depend on the number of decision steps remaining, a stationary Markov representation must include that information. Define the augmented state space and state by
 
 $$
 \widetilde{\mathcal S}
@@ -1092,7 +1092,7 @@ $$
 (S_t,N-t).
 $$
 
-The second component records the number of decisions remaining. The augmented terminal set is
+The second component records the number of decision steps remaining. The augmented terminal set is
 
 $$
 \widetilde{\mathcal S}_{\mathrm{term}}
@@ -1108,21 +1108,21 @@ This example demonstrates why record length alone cannot identify the kind of en
 
 :::
 
-## Quick test: termination and truncation {.unnumbered}
+### Quick test: termination and truncation {.unnumbered}
 
 1. **Recall:** What mathematical condition makes a realised transition terminate the task?
 2. **Contrast:** Why is a terminal state not identical by definition to an absorbing state?
 3. **Application:** A trajectory reaches its task-defined goal while receiving reward $5$. Is the reward discarded when the episode terminates?
 4. **Application:** A collector stops after $200$ transitions in an ordinary nonterminal state. Is this termination or truncation?
-5. **Validity condition:** A task lasts exactly $N$ decisions, but the optimal action can depend on the number of decisions remaining. What must a stationary Markov state representation contain?
+5. **Validity condition:** A task lasts exactly $N$ decision steps, but the optimal action can depend on the number of decision steps remaining. What must a stationary Markov state representation contain?
 
-### Answers and hints {.unnumbered}
+#### Answers and hints {.unnumbered}
 
-1. A state-based transition terminates when its realised next state satisfies $S_{t+1}\in\mathcal S_{\mathrm{term}}$. A task-defined finite horizon is also termination and can be expressed by augmenting the state with the remaining decision count.
+1. A state-based transition terminates when its realised next state satisfies $S_{t+1}\in\mathcal S_{\mathrm{term}}$. A task-defined finite horizon is also termination and can be expressed by augmenting the state with the remaining decision-step count.
 2. Terminal is a task-ending meaning, whereas absorbing is the transition condition that the next state equals the same state with probability one. A zero-reward absorbing self-loop can represent a terminal state after the task has stopped, but that representation is an added convention.
 3. No. Reward $R_{t+1}=5$ belongs to the transition that enters the terminal state and remains part of the episode.
 4. It is truncation because the external collector stopped the record while the MDP still admitted continuation from the final state.
-5. The state must include the relevant stage information, such as the remaining count $N-t$. Otherwise identical physical-state labels can require different transition or decision laws at different stages.
+5. The state must include the relevant stage information, such as the remaining decision-step count $N-t$. Otherwise identical physical-state labels can require different transition or decision laws at different stages.
 
 ## References {.unnumbered}
 
