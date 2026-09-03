@@ -1006,7 +1006,7 @@ The policy averages probabilities to obtain an induced transition row and averag
 
 :::
 
-## Quick test: policies and induced dynamics {.unnumbered}
+### Quick test: policies and induced dynamics {.unnumbered}
 
 1. **Representation and recall:** What does $\pi(a\mid s)$ mean? How is it related to matrix entry $[\boldsymbol\Pi]_{i\ell}$ for feasible and infeasible actions?
 2. **Contrast:** What is the difference between a stochastic policy and a deterministic policy?
@@ -1015,7 +1015,7 @@ The policy averages probabilities to obtain an induced transition row and averag
 5. **Model distinction:** Which object describes the environment's response, which object describes the agent's action selection, and which object describes the resulting state sequence?
 6. **Joint model:** Prove that $p_\pi(s',r\mid s)$ is normalized over $(s',r)$ for each state $s$, and show how it recovers $p_\pi(s'\mid s)$.
 
-### Answers and hints {.unnumbered}
+#### Answers and hints {.unnumbered}
 
 1. For $a\in\mathcal A(s)$, $\pi(a\mid s)$ is the probability of selecting action $a$ in state $s$. Matrix entry $[\boldsymbol\Pi]_{i\ell}$ equals $\pi(a_\ell\mid s_i)$ when $a_\ell$ is feasible and is the zero-padding value when $a_\ell$ is infeasible. Feasible-action probabilities are non-negative and sum to one.
 2. A stochastic policy may assign positive probability to several feasible actions. A deterministic policy selects exactly one feasible action in each state and is represented by policy probabilities zero and one.
@@ -1124,9 +1124,241 @@ This example demonstrates why record length alone cannot identify the kind of en
 4. It is truncation because the external collector stopped the record while the MDP still admitted continuation from the final state.
 5. The state must include the relevant stage information, such as the remaining decision-step count $N-t$. Otherwise identical physical-state labels can require different transition or decision laws at different stages.
 
+## The finite MDP and its task settings {#sec-finite-mdp-task-settings}
+
+The preceding sections provide all components needed to separate three questions: what outcomes the controlled environment permits, where an episode starts and ends, and how rewards at different decision steps are weighted. This separation is useful because changing a policy, initial distribution, horizon, discount, or collection limit does not necessarily change the environment dynamics.
+
+### The finite MDP specifies controlled one-step outcomes
+
+In this book, the **finite Markov decision process** is the controlled environment model
+
+$$
+\mathcal M
+\mathrel{:=}
+\left(
+\mathcal S,
+\mathcal A,
+\{\mathcal A(s)\}_{s\in\mathcal S},
+\mathcal R,
+p
+\right).
+$$
+
+The sets $\mathcal S$, $\mathcal A$, and $\mathcal R$ are finite. The family $\{\mathcal A(s)\}_{s\in\mathcal S}$ supplies the nonempty feasible action set for each state, and $p(s',r\mid s,a)$ supplies a normalized joint next-state--reward distribution for each feasible pair $(s,a)$. Together these components answer the one-step question: after action $a$ is applied in state $s$, what probabilities are assigned to the possible outcomes $(s',r)$?
+
+The word *finite* describes the cardinalities of the state, action, and reward sets. It does not mean that every trajectory has a finite number of decision steps. A finite MDP may define a continuing task with no terminal state and no fixed horizon.
+
+This tuple convention keeps the initial distribution $p_0$, policy $\pi$, and reward-weighting objective separate from the controlled environment. Some texts include $p_0$ or a discount factor in the object they call an MDP, so the declared tuple must be checked when comparing notation.
+
+### Initial conditions, policies, and task endings add distinct information
+
+The initial distribution $p_0$ states where trajectories begin. The policy $\pi$ states how actions are selected. Combining $p_0$, $\pi$, and $\mathcal M$ produces the trajectory law $\Pr_\pi$. Changing $p_0$ or $\pi$ generally changes trajectory probabilities without changing the controlled kernel $p(s',r\mid s,a)$.
+
+The terminal set $\mathcal S_{\mathrm{term}}$ and a task-defined horizon specify when task rewards cease. Let
+
+$$
+N\in\mathbb N\cup\{\infty\},
+$$
+
+where finite $N$ denotes a fixed maximum of $N$ decision steps and $N=\infty$ denotes the absence of a fixed horizon. A trajectory may still terminate before a finite horizon by entering $\mathcal S_{\mathrm{term}}$, and it may terminate after a random number of decision steps when $N=\infty$. An external truncation rule is not part of $\mathcal M$ or the task horizon because it stops data collection rather than the modelled task.
+
+### Cumulative reward gives discounting a purpose
+
+The one-step reward $R_{t+1}$ evaluates only the transition from time $t$ to time $t+1$, but the chosen action can also affect later rewards. To compare such consequences, combine the reward sequence into one scalar. Choose a dimensionless **discount factor** $\gamma\in[0,1]$.
+
+Define the **discounted return** from decision epoch $t$ by
+
+$$
+G_t
+\mathrel{:=}
+\begin{cases}
+\displaystyle
+\sum_{k=0}^{N-t-1}\gamma^kR_{t+k+1},
+&N<\infty,\\[1em]
+\displaystyle
+\sum_{k=0}^{\infty}\gamma^kR_{t+k+1},
+&N=\infty.
+\end{cases}
+$$
+
+For finite $N$, the sum applies at $t\in\{0,\ldots,N-1\}$ and $G_N\mathrel{:=}0$.  The return $G_t$ is a random variable because its component rewards are random variables. For a finite horizon, the earlier zero-reward absorbing extension supplies zero terms if the episode terminates before time $N$. An external truncation stops observation of the reward sequence but does not redefine the task horizon or remove the unobserved terms from $G_t$.
+
+The subscript in $G_t$ identifies the decision epoch from which consequences are evaluated: $R_{t+1}$ is the next reward and the immediate consequence of action $A_t$, even though the environment produces it after the transition from $t$ to $t+1$.
+
+![Decision timing and discount weights for the return $G_t$.](../figures/discounted_return_timeline.png){#fig-discounted-return-timeline width=60%}
+
+The exponent $k$ is the number of additional decision steps before reward $R_{t+k+1}$ is received. The immediate reward $R_{t+1}$ has weight $\gamma^0=1$. If $0<\gamma<1$, later weights decrease geometrically. If $\gamma=0$, only the immediate reward has nonzero weight. If $\gamma=1$, rewards are not discounted.
+
+For a continuing task, discounting also provides a simple convergence guarantee. Because $\mathcal R$ is finite, define the finite reward bound $R_{\max}:=\max_{r\in\mathcal R}|r|$. If $N=\infty$ and $0\leq\gamma<1$, then
+
+$$
+\sum_{k=0}^{\infty}
+\left|\gamma^kR_{t+k+1}\right|
+\leq
+R_{\max}\sum_{k=0}^{\infty}\gamma^k
+=
+\frac{R_{\max}}{1-\gamma}.
+$$
+
+Thus the infinite discounted return converges absolutely. When $N=\infty$ and $\gamma=1$, this bound is unavailable and the undiscounted sum may diverge. The discount factor is not a transition probability: it does not alter $p(s',r\mid s,a)$ or the trajectory law under a fixed policy. It changes the scalar assigned to a reward sequence and can therefore change which policy is preferred.
+
+::: {.callout-note title="Example: One MDP with two discount factors" appearance="simple" icon=false}
+
+This example demonstrates that changing $\gamma$ can change the preferred reward timing without changing the environment. Suppose one action produces reward $1$ immediately and then terminates, while another produces reward $0$ immediately and reward $2$ one decision step later before terminating. Their returns are
+
+$$
+1
+\qquad\text{and}\qquad
+0+2\gamma.
+$$
+
+For $\gamma=0.4$, the delayed alternative has return $0.8$, so the immediate reward is larger. For $\gamma=0.9$, the delayed alternative has return $1.8$, so the delayed reward is larger. The transition and reward kernel is identical in both comparisons; only the reward-timing objective changes.
+
+:::
+
+### Quick test: the finite MDP and task settings {.unnumbered}
+
+1. **Recall:** What does *finite* mean in a finite MDP?
+2. **Contrast:** What is the difference between a finite MDP and a finite-horizon task?
+3. **Model identification:** Which object specifies the probability of outcome $(s',r)$ after feasible pair $(s,a)$?
+4. **Reasoning:** If $p_0$ changes while $\mathcal M$ and $\pi$ remain fixed, which probability law changes and which kernel remains unchanged?
+5. **Return and discounting:** Why is $G_t$ needed, and does changing $\gamma$ change the trajectory law under a fixed policy?
+6. **Classification:** Is an external data-collection limit part of $N$ or an external truncation rule?
+
+#### Answers and hints {.unnumbered}
+
+1. The state, action, and reward sets are finite. The trajectory length need not be finite.
+2. A finite MDP has finite state, action, and reward sets. A finite-horizon task permits only a fixed finite number $N$ of decision steps; either property can hold without the other.
+3. The joint controlled kernel $p(s',r\mid s,a)$.
+4. The trajectory law $\Pr_\pi$ changes because the initial-state probabilities change. The controlled kernel $p(s',r\mid s,a)$ remains unchanged.
+5. The return $G_t$ combines the sequence of rewards affected by an action into one scalar. The fixed-policy trajectory law does not contain $\gamma$, so changing $\gamma$ does not change that law; it changes the relative weighting of rewards at different decision steps and can therefore change which policy is preferred.
+6. It is an external truncation rule. Only a limit belonging to the task definition is represented by the task horizon $N$.
+
+## Cumulative chapter test {.unnumbered}
+
+Use the following finite MDP for Questions 1--8. Its state, action, terminal-state, and reward sets are
+
+$$
+\begin{aligned}
+\mathcal S&=\{s_1,s_2,s_\dagger\},
+&\mathcal S_{\mathrm{term}}&=\{s_\dagger\},\\
+\mathcal A&=\{a_1,a_2,a_\bot\},\\
+\mathcal R&=\{-1,0,1,2,4\}.
+\end{aligned}
+$$
+
+The feasible action sets are
+
+$$
+\mathcal A(s_1)=\mathcal A(s_2)=\{a_1,a_2\},
+\qquad
+\mathcal A(s_\dagger)=\{a_\bot\}.
+$$
+
+The table lists every joint outcome with positive probability. Every outcome not listed has probability zero.
+
+| Current state | Action   | Next state  | Reward | $p(s',r\mid s,a)$ |
+| ------------- | -------- | ----------- | -----: | ----------------: |
+| $s_1$         | $a_1$    | $s_1$       |    $0$ |             $0.5$ |
+| $s_1$         | $a_1$    | $s_2$       |    $1$ |             $0.5$ |
+| $s_1$         | $a_2$    | $s_\dagger$ |    $2$ |               $1$ |
+| $s_2$         | $a_1$    | $s_\dagger$ |    $4$ |               $1$ |
+| $s_2$         | $a_2$    | $s_1$       |   $-1$ |               $1$ |
+| $s_\dagger$   | $a_\bot$ | $s_\dagger$ |    $0$ |               $1$ |
+|               |          |             |        |                   |
+
+In state order $(s_1,s_2,s_\dagger)$, let the initial distribution be
+
+$$
+\mathbf p_0
+=
+\begin{bmatrix}
+1&0&0
+\end{bmatrix}.
+$$
+
+Let policy $\pi$ be
+
+$$
+\begin{aligned}
+\pi(a_1\mid s_1)&=0.6,
+&\pi(a_2\mid s_1)&=0.4,\\
+\pi(a_1\mid s_2)&=0.75,
+&\pi(a_2\mid s_2)&=0.25,\\
+\pi(a_\bot\mid s_\dagger)&=1.
+\end{aligned}
+$$
+
+1. **Model validation:** Explain why each feasible state--action pair defines a valid joint probability mass function.
+2. **Marginalisation and expectation:** Calculate $p(s'\mid s_1,a_1)$ for every $s'\in\mathcal S$ and calculate $\bar r(s_1,a_1)$.
+3. **Policy-induced model:** Derive the policy-induced transition matrix $\mathbf P^\pi$ in state order $(s_1,s_2,s_\dagger)$ and the reward vector $\bar{\mathbf r}^{\,\pi}$.
+4. **Trajectory probability:** Calculate the probability under $\Pr_\pi$ of the two-step event
+
+    $$
+    S_0=s_1,
+    A_0=a_1,
+    R_1=1,
+    S_1=s_2,
+    A_1=a_2,
+    R_2=-1,
+    S_2=s_1.
+    $$
+
+5. **Markov-chain identification:** Explain why the state sequence under $\pi$ is a time-homogeneous Markov chain and identify its transition matrix.
+6. **Termination:** What happens to the episode and its final reward when a transition enters $s_\dagger$? What role does the $a_\bot$ row serve?
+7. **Truncation:** Suppose a collector stops a record in state $s_2$ solely because it has stored its maximum number of transitions. Has the MDP terminated?
+8. **Return:** Suppose the event in Question 4 belongs to a task with horizon $N=2$ and discount factor $\gamma=0.5$. Calculate $G_0$.
+9. **Contrast:** Can a finite MDP have an infinite horizon? Can an MDP with infinitely many states have a finite horizon? Explain which use of *finite* each statement concerns.
+10. **Validity conditions:** State one condition needed to use an elementary conditional probability and one condition that guarantees convergence of a continuing discounted return in this chapter.
+
+### Answers and hints {.unnumbered}
+
+1. For each feasible pair, every listed probability is non-negative and the probabilities over all $(s',r)$ sum to one. In particular, the two outcomes for $(s_1,a_1)$ sum to $0.5+0.5=1$, and every other feasible pair has one probability-one outcome.
+2. Marginalising over reward gives $p(s_1\mid s_1,a_1)=0.5$, $p(s_2\mid s_1,a_1)=0.5$, and $p(s_\dagger\mid s_1,a_1)=0$. Therefore $\bar r(s_1,a_1)=(0)(0.5)+(1)(0.5)=0.5$.
+3. Averaging each controlled row and expected reward with the policy gives
+
+    $$
+    \mathbf P^\pi
+    =
+    \begin{bmatrix}
+    0.30&0.30&0.40\\
+    0.25&0&0.75\\
+    0&0&1
+    \end{bmatrix},
+    \qquad
+    \bar{\mathbf r}^{\,\pi}
+    =
+    \begin{bmatrix}
+    1.10&2.75&0
+    \end{bmatrix}.
+    $$
+
+4. The trajectory law multiplies the initial-state, action-selection, and joint-outcome probabilities:
+
+    $$
+    (1)(0.6)(0.5)(0.25)(1)=0.075.
+    $$
+
+5. The controlled kernel is Markov and time-homogeneous, and the stationary Markov policy depends only on the current state. Their action-weighted kernel $p_\pi(s'\mid s)$ therefore has the same rows at every time and depends on no earlier state. Its matrix is $\mathbf P^\pi$ from Answer 3.
+6. The transition reward is retained and the episode then stops before another real action is requested. The $a_\bot$ row is the zero-reward absorbing extension used to keep state-sequence and matrix calculations valid after termination.
+7. No. This is truncation: $s_2\notin\mathcal S_{\mathrm{term}}$, and the MDP still defines feasible actions and outcome probabilities from $s_2$.
+8. The two rewards are $R_1=1$ and $R_2=-1$, so
+
+    $$
+    G_0
+    =
+    R_1+\gamma R_2
+    =
+    1+(0.5)(-1)
+    =0.5.
+    $$
+
+9. Yes to both. A finite MDP has finite state, action, and reward sets; its horizon may be infinite. A finite-horizon MDP has finitely many decision steps; its state space need not be finite.
+10. The elementary conditional probability $\Pr(E\mid B)$ requires $\Pr(B)>0$. For the continuing return used here, the finite reward set supplies a bound $R_{\max}<\infty$, and $0\leq\gamma<1$ then guarantees absolute convergence.
+
 ## References {.unnumbered}
 
 - Richard S. Sutton and Andrew G. Barto, *Reinforcement Learning: An Introduction*, second-edition draft, Chapter 3, especially Sections 3.1--3.4, 3.6, and 3.7 on the agent--environment interaction, rewards, episodic and continuing tasks, terminal-state extensions, finite-MDP dynamics, policies, and policy-dependent state evolution.
-- Dimitri P. Bertsekas, *Reinforcement Learning and Optimal Control*, second edition, Chapter 1, especially Sections 1.3.1, 1.6.2, and 1.6.4 on stochastic controlled models, termination states, and finite-to-infinite-horizon reformulations.
-- Zhiqing Xiao, *Reinforcement Learning: Theory and Python Implementation*, Chapters 1 and 2, especially the agent--environment interface and the finite-MDP treatment of terminal states and trajectories.
+- Dimitri P. Bertsekas, *Reinforcement Learning and Optimal Control*, second edition, Chapter 1, especially Sections 1.3.1, 1.4, 1.6.2, and 1.6.4 on stochastic controlled models, discounted objectives, termination states, and finite-to-infinite-horizon reformulations.
+- Zhiqing Xiao, *Reinforcement Learning: Theory and Python Implementation*, Chapters 1 and 2, especially the agent--environment interface and Sections 2.1.1--2.1.4 on finite-MDP components, policies, terminal states, and discounting.
 - Farama Foundation, *Gymnasium Documentation*, “Handling Time Limits,” on the distinction between task-defined termination and externally imposed truncation.

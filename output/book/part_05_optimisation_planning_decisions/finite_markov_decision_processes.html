@@ -450,10 +450,7 @@ window.Quarto = {
   <ul class="collapse">
   <li><a href="#sec-policy-induced-transition-matrix" id="toc-sec-policy-induced-transition-matrix" class="nav-link" data-scroll-target="#sec-policy-induced-transition-matrix"><span class="header-section-number">12.6.1</span> The policy-induced transition matrix</a></li>
   <li><a href="#sec-policy-induced-joint-rewards" id="toc-sec-policy-induced-joint-rewards" class="nav-link" data-scroll-target="#sec-policy-induced-joint-rewards"><span class="header-section-number">12.6.2</span> Policy-induced joint outcomes and rewards</a></li>
-  </ul></li>
-  <li><a href="#quick-test-policies-and-induced-dynamics" id="toc-quick-test-policies-and-induced-dynamics" class="nav-link" data-scroll-target="#quick-test-policies-and-induced-dynamics">Quick test: policies and induced dynamics</a>
-  <ul class="collapse">
-  <li><a href="#answers-and-hints-2" id="toc-answers-and-hints-2" class="nav-link" data-scroll-target="#answers-and-hints-2">Answers and hints</a></li>
+  <li><a href="#quick-test-policies-and-induced-dynamics" id="toc-quick-test-policies-and-induced-dynamics" class="nav-link" data-scroll-target="#quick-test-policies-and-induced-dynamics">Quick test: policies and induced dynamics</a></li>
   </ul></li>
   <li><a href="#sec-mdp-termination-truncation" id="toc-sec-mdp-termination-truncation" class="nav-link" data-scroll-target="#sec-mdp-termination-truncation"><span class="header-section-number">12.7</span> Episode endings: termination and truncation</a>
   <ul class="collapse">
@@ -462,6 +459,17 @@ window.Quarto = {
   <li><a href="#truncation-stops-the-record-not-the-task" id="toc-truncation-stops-the-record-not-the-task" class="nav-link" data-scroll-target="#truncation-stops-the-record-not-the-task"><span class="header-section-number">12.7.3</span> Truncation stops the record, not the task</a></li>
   <li><a href="#a-time-limit-can-belong-inside-or-outside-the-task" id="toc-a-time-limit-can-belong-inside-or-outside-the-task" class="nav-link" data-scroll-target="#a-time-limit-can-belong-inside-or-outside-the-task"><span class="header-section-number">12.7.4</span> A time limit can belong inside or outside the task</a></li>
   <li><a href="#quick-test-termination-and-truncation" id="toc-quick-test-termination-and-truncation" class="nav-link" data-scroll-target="#quick-test-termination-and-truncation">Quick test: termination and truncation</a></li>
+  </ul></li>
+  <li><a href="#sec-finite-mdp-task-settings" id="toc-sec-finite-mdp-task-settings" class="nav-link" data-scroll-target="#sec-finite-mdp-task-settings"><span class="header-section-number">12.8</span> The finite MDP and its task settings</a>
+  <ul class="collapse">
+  <li><a href="#the-finite-mdp-specifies-controlled-one-step-outcomes" id="toc-the-finite-mdp-specifies-controlled-one-step-outcomes" class="nav-link" data-scroll-target="#the-finite-mdp-specifies-controlled-one-step-outcomes"><span class="header-section-number">12.8.1</span> The finite MDP specifies controlled one-step outcomes</a></li>
+  <li><a href="#initial-conditions-policies-and-task-endings-add-distinct-information" id="toc-initial-conditions-policies-and-task-endings-add-distinct-information" class="nav-link" data-scroll-target="#initial-conditions-policies-and-task-endings-add-distinct-information"><span class="header-section-number">12.8.2</span> Initial conditions, policies, and task endings add distinct information</a></li>
+  <li><a href="#cumulative-reward-gives-discounting-a-purpose" id="toc-cumulative-reward-gives-discounting-a-purpose" class="nav-link" data-scroll-target="#cumulative-reward-gives-discounting-a-purpose"><span class="header-section-number">12.8.3</span> Cumulative reward gives discounting a purpose</a></li>
+  <li><a href="#quick-test-the-finite-mdp-and-task-settings" id="toc-quick-test-the-finite-mdp-and-task-settings" class="nav-link" data-scroll-target="#quick-test-the-finite-mdp-and-task-settings">Quick test: the finite MDP and task settings</a></li>
+  </ul></li>
+  <li><a href="#cumulative-chapter-test" id="toc-cumulative-chapter-test" class="nav-link" data-scroll-target="#cumulative-chapter-test">Cumulative chapter test</a>
+  <ul class="collapse">
+  <li><a href="#answers-and-hints-5" id="toc-answers-and-hints-5" class="nav-link" data-scroll-target="#answers-and-hints-5">Answers and hints</a></li>
   </ul></li>
   <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
   </ul>
@@ -1381,9 +1389,8 @@ p_\pi(s_3\mid s_2)
 </div>
 </div>
 </section>
-</section>
-<section id="quick-test-policies-and-induced-dynamics" class="level2 unnumbered">
-<h2 class="unnumbered anchored" data-anchor-id="quick-test-policies-and-induced-dynamics">Quick test: policies and induced dynamics</h2>
+<section id="quick-test-policies-and-induced-dynamics" class="level3 unnumbered">
+<h3 class="unnumbered anchored" data-anchor-id="quick-test-policies-and-induced-dynamics">Quick test: policies and induced dynamics</h3>
 <ol type="1">
 <li><strong>Representation and recall:</strong> What does <span class="math inline">\(\pi(a\mid s)\)</span> mean? How is it related to matrix entry <span class="math inline">\([\boldsymbol\Pi]_{i\ell}\)</span> for feasible and infeasible actions?</li>
 <li><strong>Contrast:</strong> What is the difference between a stochastic policy and a deterministic policy?</li>
@@ -1392,8 +1399,8 @@ p_\pi(s_3\mid s_2)
 <li><strong>Model distinction:</strong> Which object describes the environment’s response, which object describes the agent’s action selection, and which object describes the resulting state sequence?</li>
 <li><strong>Joint model:</strong> Prove that <span class="math inline">\(p_\pi(s',r\mid s)\)</span> is normalized over <span class="math inline">\((s',r)\)</span> for each state <span class="math inline">\(s\)</span>, and show how it recovers <span class="math inline">\(p_\pi(s'\mid s)\)</span>.</li>
 </ol>
-<section id="answers-and-hints-2" class="level3 unnumbered">
-<h3 class="unnumbered anchored" data-anchor-id="answers-and-hints-2">Answers and hints</h3>
+<section id="answers-and-hints-2" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="answers-and-hints-2">Answers and hints</h4>
 <ol type="1">
 <li>For <span class="math inline">\(a\in\mathcal A(s)\)</span>, <span class="math inline">\(\pi(a\mid s)\)</span> is the probability of selecting action <span class="math inline">\(a\)</span> in state <span class="math inline">\(s\)</span>. Matrix entry <span class="math inline">\([\boldsymbol\Pi]_{i\ell}\)</span> equals <span class="math inline">\(\pi(a_\ell\mid s_i)\)</span> when <span class="math inline">\(a_\ell\)</span> is feasible and is the zero-padding value when <span class="math inline">\(a_\ell\)</span> is infeasible. Feasible-action probabilities are non-negative and sum to one.</li>
 <li>A stochastic policy may assign positive probability to several feasible actions. A deterministic policy selects exactly one feasible action in each state and is represented by policy probabilities zero and one.</li>
@@ -1402,6 +1409,7 @@ p_\pi(s_3\mid s_2)
 <li>The controlled kernel <span class="math inline">\(p(s'\mid s,a)\)</span> describes the environment’s response to a supplied action. The policy <span class="math inline">\(\pi(a\mid s)\)</span> describes action selection. The induced kernel <span class="math inline">\(p_\pi(s'\mid s)\)</span> describes the resulting state sequence, and <span class="math inline">\(\mathbf P^\pi\)</span> is its matrix representation.</li>
 <li>Sum the definition of <span class="math inline">\(p_\pi(s',r\mid s)\)</span> over <span class="math inline">\(s'\)</span> and <span class="math inline">\(r\)</span>, interchange the finite sums, use <span class="math inline">\(\sum_{s'}\sum_rp(s',r\mid s,a)=1\)</span> for every feasible action, and then use <span class="math inline">\(\sum_{a\in\mathcal A(s)}\pi(a\mid s)=1\)</span>. Summing only over reward gives <span class="math inline">\(\sum_rp_\pi(s',r\mid s)=\sum_{a\in\mathcal A(s)}\pi(a\mid s)p(s'\mid s,a)=p_\pi(s'\mid s)\)</span>.</li>
 </ol>
+</section>
 </section>
 </section>
 <section id="sec-mdp-termination-truncation" class="level2" data-number="12.7">
@@ -1523,12 +1531,285 @@ p(s_\dagger,0\mid s_\dagger,a_\bot)=1.
 </section>
 </section>
 </section>
+<section id="sec-finite-mdp-task-settings" class="level2" data-number="12.8">
+<h2 data-number="12.8" class="anchored" data-anchor-id="sec-finite-mdp-task-settings"><span class="header-section-number">12.8</span> The finite MDP and its task settings</h2>
+<p>The preceding sections provide all components needed to separate three questions: what outcomes the controlled environment permits, where an episode starts and ends, and how rewards at different decision steps are weighted. This separation is useful because changing a policy, initial distribution, horizon, discount, or collection limit does not necessarily change the environment dynamics.</p>
+<section id="the-finite-mdp-specifies-controlled-one-step-outcomes" class="level3" data-number="12.8.1">
+<h3 data-number="12.8.1" class="anchored" data-anchor-id="the-finite-mdp-specifies-controlled-one-step-outcomes"><span class="header-section-number">12.8.1</span> The finite MDP specifies controlled one-step outcomes</h3>
+<p>In this book, the <strong>finite Markov decision process</strong> is the controlled environment model</p>
+<p><span class="math display">\[
+\mathcal M
+\mathrel{:=}
+\left(
+\mathcal S,
+\mathcal A,
+\{\mathcal A(s)\}_{s\in\mathcal S},
+\mathcal R,
+p
+\right).
+\]</span></p>
+<p>The sets <span class="math inline">\(\mathcal S\)</span>, <span class="math inline">\(\mathcal A\)</span>, and <span class="math inline">\(\mathcal R\)</span> are finite. The family <span class="math inline">\(\{\mathcal A(s)\}_{s\in\mathcal S}\)</span> supplies the nonempty feasible action set for each state, and <span class="math inline">\(p(s',r\mid s,a)\)</span> supplies a normalized joint next-state–reward distribution for each feasible pair <span class="math inline">\((s,a)\)</span>. Together these components answer the one-step question: after action <span class="math inline">\(a\)</span> is applied in state <span class="math inline">\(s\)</span>, what probabilities are assigned to the possible outcomes <span class="math inline">\((s',r)\)</span>?</p>
+<p>The word <em>finite</em> describes the cardinalities of the state, action, and reward sets. It does not mean that every trajectory has a finite number of decision steps. A finite MDP may define a continuing task with no terminal state and no fixed horizon.</p>
+<p>This tuple convention keeps the initial distribution <span class="math inline">\(p_0\)</span>, policy <span class="math inline">\(\pi\)</span>, and reward-weighting objective separate from the controlled environment. Some texts include <span class="math inline">\(p_0\)</span> or a discount factor in the object they call an MDP, so the declared tuple must be checked when comparing notation.</p>
+</section>
+<section id="initial-conditions-policies-and-task-endings-add-distinct-information" class="level3" data-number="12.8.2">
+<h3 data-number="12.8.2" class="anchored" data-anchor-id="initial-conditions-policies-and-task-endings-add-distinct-information"><span class="header-section-number">12.8.2</span> Initial conditions, policies, and task endings add distinct information</h3>
+<p>The initial distribution <span class="math inline">\(p_0\)</span> states where trajectories begin. The policy <span class="math inline">\(\pi\)</span> states how actions are selected. Combining <span class="math inline">\(p_0\)</span>, <span class="math inline">\(\pi\)</span>, and <span class="math inline">\(\mathcal M\)</span> produces the trajectory law <span class="math inline">\(\Pr_\pi\)</span>. Changing <span class="math inline">\(p_0\)</span> or <span class="math inline">\(\pi\)</span> generally changes trajectory probabilities without changing the controlled kernel <span class="math inline">\(p(s',r\mid s,a)\)</span>.</p>
+<p>The terminal set <span class="math inline">\(\mathcal S_{\mathrm{term}}\)</span> and a task-defined horizon specify when task rewards cease. Let</p>
+<p><span class="math display">\[
+N\in\mathbb N\cup\{\infty\},
+\]</span></p>
+<p>where finite <span class="math inline">\(N\)</span> denotes a fixed maximum of <span class="math inline">\(N\)</span> decision steps and <span class="math inline">\(N=\infty\)</span> denotes the absence of a fixed horizon. A trajectory may still terminate before a finite horizon by entering <span class="math inline">\(\mathcal S_{\mathrm{term}}\)</span>, and it may terminate after a random number of decision steps when <span class="math inline">\(N=\infty\)</span>. An external truncation rule is not part of <span class="math inline">\(\mathcal M\)</span> or the task horizon because it stops data collection rather than the modelled task.</p>
+</section>
+<section id="cumulative-reward-gives-discounting-a-purpose" class="level3" data-number="12.8.3">
+<h3 data-number="12.8.3" class="anchored" data-anchor-id="cumulative-reward-gives-discounting-a-purpose"><span class="header-section-number">12.8.3</span> Cumulative reward gives discounting a purpose</h3>
+<p>The one-step reward <span class="math inline">\(R_{t+1}\)</span> evaluates only the transition from time <span class="math inline">\(t\)</span> to time <span class="math inline">\(t+1\)</span>, but the chosen action can also affect later rewards. To compare such consequences, combine the reward sequence into one scalar. Choose a dimensionless <strong>discount factor</strong> <span class="math inline">\(\gamma\in[0,1]\)</span>.</p>
+<p>Define the <strong>discounted return</strong> from decision epoch <span class="math inline">\(t\)</span> by</p>
+<p><span class="math display">\[
+G_t
+\mathrel{:=}
+\begin{cases}
+\displaystyle
+\sum_{k=0}^{N-t-1}\gamma^kR_{t+k+1},
+&amp;N&lt;\infty,\\[1em]
+\displaystyle
+\sum_{k=0}^{\infty}\gamma^kR_{t+k+1},
+&amp;N=\infty.
+\end{cases}
+\]</span></p>
+<p>For finite <span class="math inline">\(N\)</span>, the sum applies at <span class="math inline">\(t\in\{0,\ldots,N-1\}\)</span> and <span class="math inline">\(G_N\mathrel{:=}0\)</span>. The return <span class="math inline">\(G_t\)</span> is a random variable because its component rewards are random variables. For a finite horizon, the earlier zero-reward absorbing extension supplies zero terms if the episode terminates before time <span class="math inline">\(N\)</span>. An external truncation stops observation of the reward sequence but does not redefine the task horizon or remove the unobserved terms from <span class="math inline">\(G_t\)</span>.</p>
+<p>The subscript in <span class="math inline">\(G_t\)</span> identifies the decision epoch from which consequences are evaluated: <span class="math inline">\(R_{t+1}\)</span> is the next reward and the immediate consequence of action <span class="math inline">\(A_t\)</span>, even though the environment produces it after the transition from <span class="math inline">\(t\)</span> to <span class="math inline">\(t+1\)</span>.</p>
+<div id="fig-discounted-return-timeline" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-discounted-return-timeline-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../figures/discounted_return_timeline.png" class="img-fluid figure-img" style="width:60.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-discounted-return-timeline-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;12.1: Decision timing and discount weights for the return <span class="math inline">\(G_t\)</span>.
+</figcaption>
+</figure>
+</div>
+<p>The exponent <span class="math inline">\(k\)</span> is the number of additional decision steps before reward <span class="math inline">\(R_{t+k+1}\)</span> is received. The immediate reward <span class="math inline">\(R_{t+1}\)</span> has weight <span class="math inline">\(\gamma^0=1\)</span>. If <span class="math inline">\(0&lt;\gamma&lt;1\)</span>, later weights decrease geometrically. If <span class="math inline">\(\gamma=0\)</span>, only the immediate reward has nonzero weight. If <span class="math inline">\(\gamma=1\)</span>, rewards are not discounted.</p>
+<p>For a continuing task, discounting also provides a simple convergence guarantee. Because <span class="math inline">\(\mathcal R\)</span> is finite, define the finite reward bound <span class="math inline">\(R_{\max}:=\max_{r\in\mathcal R}|r|\)</span>. If <span class="math inline">\(N=\infty\)</span> and <span class="math inline">\(0\leq\gamma&lt;1\)</span>, then</p>
+<p><span class="math display">\[
+\sum_{k=0}^{\infty}
+\left|\gamma^kR_{t+k+1}\right|
+\leq
+R_{\max}\sum_{k=0}^{\infty}\gamma^k
+=
+\frac{R_{\max}}{1-\gamma}.
+\]</span></p>
+<p>Thus the infinite discounted return converges absolutely. When <span class="math inline">\(N=\infty\)</span> and <span class="math inline">\(\gamma=1\)</span>, this bound is unavailable and the undiscounted sum may diverge. The discount factor is not a transition probability: it does not alter <span class="math inline">\(p(s',r\mid s,a)\)</span> or the trajectory law under a fixed policy. It changes the scalar assigned to a reward sequence and can therefore change which policy is preferred.</p>
+<div class="callout callout-style-simple callout-note no-icon callout-titled" title="Example: One MDP with two discount factors">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Example: One MDP with two discount factors
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This example demonstrates that changing <span class="math inline">\(\gamma\)</span> can change the preferred reward timing without changing the environment. Suppose one action produces reward <span class="math inline">\(1\)</span> immediately and then terminates, while another produces reward <span class="math inline">\(0\)</span> immediately and reward <span class="math inline">\(2\)</span> one decision step later before terminating. Their returns are</p>
+<p><span class="math display">\[
+1
+\qquad\text{and}\qquad
+0+2\gamma.
+\]</span></p>
+<p>For <span class="math inline">\(\gamma=0.4\)</span>, the delayed alternative has return <span class="math inline">\(0.8\)</span>, so the immediate reward is larger. For <span class="math inline">\(\gamma=0.9\)</span>, the delayed alternative has return <span class="math inline">\(1.8\)</span>, so the delayed reward is larger. The transition and reward kernel is identical in both comparisons; only the reward-timing objective changes.</p>
+</div>
+</div>
+</section>
+<section id="quick-test-the-finite-mdp-and-task-settings" class="level3 unnumbered">
+<h3 class="unnumbered anchored" data-anchor-id="quick-test-the-finite-mdp-and-task-settings">Quick test: the finite MDP and task settings</h3>
+<ol type="1">
+<li><strong>Recall:</strong> What does <em>finite</em> mean in a finite MDP?</li>
+<li><strong>Contrast:</strong> What is the difference between a finite MDP and a finite-horizon task?</li>
+<li><strong>Model identification:</strong> Which object specifies the probability of outcome <span class="math inline">\((s',r)\)</span> after feasible pair <span class="math inline">\((s,a)\)</span>?</li>
+<li><strong>Reasoning:</strong> If <span class="math inline">\(p_0\)</span> changes while <span class="math inline">\(\mathcal M\)</span> and <span class="math inline">\(\pi\)</span> remain fixed, which probability law changes and which kernel remains unchanged?</li>
+<li><strong>Return and discounting:</strong> Why is <span class="math inline">\(G_t\)</span> needed, and does changing <span class="math inline">\(\gamma\)</span> change the trajectory law under a fixed policy?</li>
+<li><strong>Classification:</strong> Is an external data-collection limit part of <span class="math inline">\(N\)</span> or an external truncation rule?</li>
+</ol>
+<section id="answers-and-hints-4" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="answers-and-hints-4">Answers and hints</h4>
+<ol type="1">
+<li>The state, action, and reward sets are finite. The trajectory length need not be finite.</li>
+<li>A finite MDP has finite state, action, and reward sets. A finite-horizon task permits only a fixed finite number <span class="math inline">\(N\)</span> of decision steps; either property can hold without the other.</li>
+<li>The joint controlled kernel <span class="math inline">\(p(s',r\mid s,a)\)</span>.</li>
+<li>The trajectory law <span class="math inline">\(\Pr_\pi\)</span> changes because the initial-state probabilities change. The controlled kernel <span class="math inline">\(p(s',r\mid s,a)\)</span> remains unchanged.</li>
+<li>The return <span class="math inline">\(G_t\)</span> combines the sequence of rewards affected by an action into one scalar. The fixed-policy trajectory law does not contain <span class="math inline">\(\gamma\)</span>, so changing <span class="math inline">\(\gamma\)</span> does not change that law; it changes the relative weighting of rewards at different decision steps and can therefore change which policy is preferred.</li>
+<li>It is an external truncation rule. Only a limit belonging to the task definition is represented by the task horizon <span class="math inline">\(N\)</span>.</li>
+</ol>
+</section>
+</section>
+</section>
+<section id="cumulative-chapter-test" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="cumulative-chapter-test">Cumulative chapter test</h2>
+<p>Use the following finite MDP for Questions 1–8. Its state, action, terminal-state, and reward sets are</p>
+<p><span class="math display">\[
+\begin{aligned}
+\mathcal S&amp;=\{s_1,s_2,s_\dagger\},
+&amp;\mathcal S_{\mathrm{term}}&amp;=\{s_\dagger\},\\
+\mathcal A&amp;=\{a_1,a_2,a_\bot\},\\
+\mathcal R&amp;=\{-1,0,1,2,4\}.
+\end{aligned}
+\]</span></p>
+<p>The feasible action sets are</p>
+<p><span class="math display">\[
+\mathcal A(s_1)=\mathcal A(s_2)=\{a_1,a_2\},
+\qquad
+\mathcal A(s_\dagger)=\{a_\bot\}.
+\]</span></p>
+<p>The table lists every joint outcome with positive probability. Every outcome not listed has probability zero.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Current state</th>
+<th>Action</th>
+<th>Next state</th>
+<th style="text-align: right;">Reward</th>
+<th style="text-align: right;"><span class="math inline">\(p(s',r\mid s,a)\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(s_1\)</span></td>
+<td><span class="math inline">\(a_1\)</span></td>
+<td><span class="math inline">\(s_1\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.5\)</span></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(s_1\)</span></td>
+<td><span class="math inline">\(a_1\)</span></td>
+<td><span class="math inline">\(s_2\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(1\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.5\)</span></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(s_1\)</span></td>
+<td><span class="math inline">\(a_2\)</span></td>
+<td><span class="math inline">\(s_\dagger\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(2\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(1\)</span></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(s_2\)</span></td>
+<td><span class="math inline">\(a_1\)</span></td>
+<td><span class="math inline">\(s_\dagger\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(4\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(1\)</span></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(s_2\)</span></td>
+<td><span class="math inline">\(a_2\)</span></td>
+<td><span class="math inline">\(s_1\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-1\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(1\)</span></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(s_\dagger\)</span></td>
+<td><span class="math inline">\(a_\bot\)</span></td>
+<td><span class="math inline">\(s_\dagger\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(1\)</span></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td></td>
+<td></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+</tr>
+</tbody>
+</table>
+<p>In state order <span class="math inline">\((s_1,s_2,s_\dagger)\)</span>, let the initial distribution be</p>
+<p><span class="math display">\[
+\mathbf p_0
+=
+\begin{bmatrix}
+1&amp;0&amp;0
+\end{bmatrix}.
+\]</span></p>
+<p>Let policy <span class="math inline">\(\pi\)</span> be</p>
+<p><span class="math display">\[
+\begin{aligned}
+\pi(a_1\mid s_1)&amp;=0.6,
+&amp;\pi(a_2\mid s_1)&amp;=0.4,\\
+\pi(a_1\mid s_2)&amp;=0.75,
+&amp;\pi(a_2\mid s_2)&amp;=0.25,\\
+\pi(a_\bot\mid s_\dagger)&amp;=1.
+\end{aligned}
+\]</span></p>
+<ol type="1">
+<li><p><strong>Model validation:</strong> Explain why each feasible state–action pair defines a valid joint probability mass function.</p></li>
+<li><p><strong>Marginalisation and expectation:</strong> Calculate <span class="math inline">\(p(s'\mid s_1,a_1)\)</span> for every <span class="math inline">\(s'\in\mathcal S\)</span> and calculate <span class="math inline">\(\bar r(s_1,a_1)\)</span>.</p></li>
+<li><p><strong>Policy-induced model:</strong> Derive the policy-induced transition matrix <span class="math inline">\(\mathbf P^\pi\)</span> in state order <span class="math inline">\((s_1,s_2,s_\dagger)\)</span> and the reward vector <span class="math inline">\(\bar{\mathbf r}^{\,\pi}\)</span>.</p></li>
+<li><p><strong>Trajectory probability:</strong> Calculate the probability under <span class="math inline">\(\Pr_\pi\)</span> of the two-step event</p>
+<p><span class="math display">\[
+S_0=s_1,
+A_0=a_1,
+R_1=1,
+S_1=s_2,
+A_1=a_2,
+R_2=-1,
+S_2=s_1.
+\]</span></p></li>
+<li><p><strong>Markov-chain identification:</strong> Explain why the state sequence under <span class="math inline">\(\pi\)</span> is a time-homogeneous Markov chain and identify its transition matrix.</p></li>
+<li><p><strong>Termination:</strong> What happens to the episode and its final reward when a transition enters <span class="math inline">\(s_\dagger\)</span>? What role does the <span class="math inline">\(a_\bot\)</span> row serve?</p></li>
+<li><p><strong>Truncation:</strong> Suppose a collector stops a record in state <span class="math inline">\(s_2\)</span> solely because it has stored its maximum number of transitions. Has the MDP terminated?</p></li>
+<li><p><strong>Return:</strong> Suppose the event in Question 4 belongs to a task with horizon <span class="math inline">\(N=2\)</span> and discount factor <span class="math inline">\(\gamma=0.5\)</span>. Calculate <span class="math inline">\(G_0\)</span>.</p></li>
+<li><p><strong>Contrast:</strong> Can a finite MDP have an infinite horizon? Can an MDP with infinitely many states have a finite horizon? Explain which use of <em>finite</em> each statement concerns.</p></li>
+<li><p><strong>Validity conditions:</strong> State one condition needed to use an elementary conditional probability and one condition that guarantees convergence of a continuing discounted return in this chapter.</p></li>
+</ol>
+<section id="answers-and-hints-5" class="level3 unnumbered">
+<h3 class="unnumbered anchored" data-anchor-id="answers-and-hints-5">Answers and hints</h3>
+<ol type="1">
+<li><p>For each feasible pair, every listed probability is non-negative and the probabilities over all <span class="math inline">\((s',r)\)</span> sum to one. In particular, the two outcomes for <span class="math inline">\((s_1,a_1)\)</span> sum to <span class="math inline">\(0.5+0.5=1\)</span>, and every other feasible pair has one probability-one outcome.</p></li>
+<li><p>Marginalising over reward gives <span class="math inline">\(p(s_1\mid s_1,a_1)=0.5\)</span>, <span class="math inline">\(p(s_2\mid s_1,a_1)=0.5\)</span>, and <span class="math inline">\(p(s_\dagger\mid s_1,a_1)=0\)</span>. Therefore <span class="math inline">\(\bar r(s_1,a_1)=(0)(0.5)+(1)(0.5)=0.5\)</span>.</p></li>
+<li><p>Averaging each controlled row and expected reward with the policy gives</p>
+<p><span class="math display">\[
+\mathbf P^\pi
+=
+\begin{bmatrix}
+0.30&amp;0.30&amp;0.40\\
+0.25&amp;0&amp;0.75\\
+0&amp;0&amp;1
+\end{bmatrix},
+\qquad
+\bar{\mathbf r}^{\,\pi}
+=
+\begin{bmatrix}
+1.10&amp;2.75&amp;0
+\end{bmatrix}.
+\]</span></p></li>
+<li><p>The trajectory law multiplies the initial-state, action-selection, and joint-outcome probabilities:</p>
+<p><span class="math display">\[
+(1)(0.6)(0.5)(0.25)(1)=0.075.
+\]</span></p></li>
+<li><p>The controlled kernel is Markov and time-homogeneous, and the stationary Markov policy depends only on the current state. Their action-weighted kernel <span class="math inline">\(p_\pi(s'\mid s)\)</span> therefore has the same rows at every time and depends on no earlier state. Its matrix is <span class="math inline">\(\mathbf P^\pi\)</span> from Answer 3.</p></li>
+<li><p>The transition reward is retained and the episode then stops before another real action is requested. The <span class="math inline">\(a_\bot\)</span> row is the zero-reward absorbing extension used to keep state-sequence and matrix calculations valid after termination.</p></li>
+<li><p>No.&nbsp;This is truncation: <span class="math inline">\(s_2\notin\mathcal S_{\mathrm{term}}\)</span>, and the MDP still defines feasible actions and outcome probabilities from <span class="math inline">\(s_2\)</span>.</p></li>
+<li><p>The two rewards are <span class="math inline">\(R_1=1\)</span> and <span class="math inline">\(R_2=-1\)</span>, so</p>
+<p><span class="math display">\[
+G_0
+=
+R_1+\gamma R_2
+=
+1+(0.5)(-1)
+=0.5.
+\]</span></p></li>
+<li><p>Yes to both. A finite MDP has finite state, action, and reward sets; its horizon may be infinite. A finite-horizon MDP has finitely many decision steps; its state space need not be finite.</p></li>
+<li><p>The elementary conditional probability <span class="math inline">\(\Pr(E\mid B)\)</span> requires <span class="math inline">\(\Pr(B)&gt;0\)</span>. For the continuing return used here, the finite reward set supplies a bound <span class="math inline">\(R_{\max}&lt;\infty\)</span>, and <span class="math inline">\(0\leq\gamma&lt;1\)</span> then guarantees absolute convergence.</p></li>
+</ol>
+</section>
+</section>
 <section id="references" class="level2 unnumbered">
 <h2 class="unnumbered anchored" data-anchor-id="references">References</h2>
 <ul>
 <li>Richard S. Sutton and Andrew G. Barto, <em>Reinforcement Learning: An Introduction</em>, second-edition draft, Chapter 3, especially Sections 3.1–3.4, 3.6, and 3.7 on the agent–environment interaction, rewards, episodic and continuing tasks, terminal-state extensions, finite-MDP dynamics, policies, and policy-dependent state evolution.</li>
-<li>Dimitri P. Bertsekas, <em>Reinforcement Learning and Optimal Control</em>, second edition, Chapter 1, especially Sections 1.3.1, 1.6.2, and 1.6.4 on stochastic controlled models, termination states, and finite-to-infinite-horizon reformulations.</li>
-<li>Zhiqing Xiao, <em>Reinforcement Learning: Theory and Python Implementation</em>, Chapters 1 and 2, especially the agent–environment interface and the finite-MDP treatment of terminal states and trajectories.</li>
+<li>Dimitri P. Bertsekas, <em>Reinforcement Learning and Optimal Control</em>, second edition, Chapter 1, especially Sections 1.3.1, 1.4, 1.6.2, and 1.6.4 on stochastic controlled models, discounted objectives, termination states, and finite-to-infinite-horizon reformulations.</li>
+<li>Zhiqing Xiao, <em>Reinforcement Learning: Theory and Python Implementation</em>, Chapters 1 and 2, especially the agent–environment interface and Sections 2.1.1–2.1.4 on finite-MDP components, policies, terminal states, and discounting.</li>
 <li>Farama Foundation, <em>Gymnasium Documentation</em>, “Handling Time Limits,” on the distinction between task-defined termination and externally imposed truncation.</li>
 </ul>
 

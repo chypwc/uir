@@ -32,8 +32,8 @@ This is the live progress tracker for the parallel intelligence-foundations trac
 - **Milestone:** `IM0` — Exact sequential-decision foundation.
 - **Capability:** `IF.4` — Finite MDPs, Bellman equations, and exact dynamic programming.
 - **Cycle:** Cycle 1 — Finite Markov chains and the tabular MDP model.
-- **Active stage:** Learn and review.
-- **Active task:** Review the episode-endings block in [Finite Markov Decision Processes](notes/part_05_optimisation_planning_decisions/finite_markov_decision_processes.qmd): terminal states, the absorbing extension, termination versus truncation, and task-defined versus external time limits.
+- **Active stage:** Specify.
+- **Active task:** Review the minimum [finite-MDP model capability specification](docs/05_optimisation_planning_decisions/finite_mdp_model.md), including its domains, table representation, policy representation, terminal and truncation semantics, validation, failures, frozen fixture, and acceptance cases.
 - **Prerequisite policy:** Do not complete separate `IF.1`–`IF.3` surveys. When `IF.4+` first uses an undeclared mathematical result, pause that consumer, write and review only the required prerequisite block in its final book part, then resume the consumer.
 - **Main-phase destination:** Phase 5 — Optimisation, planning, and decisions; the Markov-chain prerequisite block belongs in Phase 2's probability part.
 - **Blockers:** None.
@@ -103,9 +103,9 @@ These identifiers remain only to preserve roadmap history. They have no completi
 
 ### Cycle 1 — Finite Markov chains and the tabular MDP model
 
-- [ ] Route the block through Sutton and Barto, Chapter 3, and Bertsekas, Chapter 1, using the probability sources routed by `textbooks/INDEX.md` only for a missing prerequisite derivation.
-- [ ] Write and review the smallest Part II prerequisite block defining a finite stochastic state sequence, the first-order Markov property, time-homogeneous transition probabilities, a row-stochastic transition matrix, one-step distribution propagation, multi-step trajectory probability, and absorbing states. Do not expand it into the retired probability survey.
-- [ ] Write and review the consuming Part V block that adds actions, rewards, policies, terminal states, truncation, finite horizons, and discounting to form a finite MDP; distinguish the uncontrolled Markov chain from the policy-induced chain and the controlled MDP.
+- [x] Route the block through Sutton and Barto, Chapter 3, and Bertsekas, Chapter 1, using the probability sources routed by `textbooks/INDEX.md` only for a missing prerequisite derivation.
+- [x] Write and review the smallest Part II prerequisite block defining a finite stochastic state sequence, the first-order Markov property, time-homogeneous transition probabilities, a row-stochastic transition matrix, one-step distribution propagation, multi-step trajectory probability, and absorbing states. Do not expand it into the retired probability survey.
+- [x] Write and review the consuming Part V block that adds actions, rewards, policies, terminal states, truncation, finite horizons, and discounting to form a finite MDP; distinguish the uncontrolled Markov chain from the policy-induced chain and the controlled MDP.
 - [ ] Specify the simulator-neutral environment result, finite-MDP table representation, state and action domains, transition and reward validation, policy representation, terminal versus truncation semantics, deterministic fixture, and invalid-input behaviour.
 - [ ] Create the minimum `intelligence_foundations` and `synthetic_intelligence_engine` package skeletons when the reviewed model and first exact fixture are ready; implement the finite table, validation, policy-induced transition calculation, and deterministic fixture in C++20.
 - [ ] Verify stochastic rows, invalid probabilities, non-finite values, incompatible dimensions, absorbing and terminal cases, policy-induced transitions, and hand-calculated trajectory probabilities; then write and review the retrospective companion and close Cycle 1.

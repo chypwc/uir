@@ -29,6 +29,8 @@ add_library(${PROJECT_NAME}
   src/planar_geometry.cpp
   src/joint_limits.cpp
   src/joint_definition.cpp
+  src/serial_chain_model.cpp
+  src/forward_kinematics.cpp
 )
 
 
@@ -183,6 +185,22 @@ if(BUILD_TESTING)
   )
 
   target_link_libraries(test_joint_definition
+    ${PROJECT_NAME}
+  )
+
+  ament_add_gtest(test_serial_chain_model
+    test/test_serial_chain_model.cpp
+  )
+
+  target_link_libraries(test_serial_chain_model
+    ${PROJECT_NAME}
+  )
+
+  ament_add_gtest(test_forward_kinematics
+    test/test_forward_kinematics.cpp
+  )
+
+  target_link_libraries(test_forward_kinematics
     ${PROJECT_NAME}
   )
 
