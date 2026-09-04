@@ -114,9 +114,9 @@ $$
 
 ## Representation and contracts
 
-### State and action identifiers
+### State and action indices
 
-`StateId` and `ActionId` shall be distinct strong types backed by non-negative integer indices. For a model with $n\geq1$ states and $m\geq1$ global action labels, valid identifiers correspond to the contiguous ranges $0,\ldots,n-1$ and $0,\ldots,m-1$. Their ordering defines matrix row, matrix column, and policy-column order. The foundations package shall not attach names, units, coordinates, or robot meanings to these identifiers.
+`StateIndex` and `ActionIndex` shall be distinct strong types backed by non-negative integers. For a model with $n\geq1$ states and $m\geq1$ global action labels, valid indices belong to the contiguous ranges $0,\ldots,n-1$ and $0,\ldots,m-1$. Their ordering defines matrix row, matrix column, and policy-column order. The foundations package shall not attach names, units, coordinates, or robot meanings to these indices.
 
 The model shall store a nonempty feasible action list for every state. Each list shall contain valid, unique action identifiers in increasing global action order.
 
@@ -165,7 +165,7 @@ Cycle 1 defines and validates this result contract but does not yet require stoc
 
 Construction accepts the state count, action count, feasible-action lists, terminal-state set, sparse joint-outcome table, and a probability-sum tolerance. It returns one immutable valid model or an explicit construction failure. No partially valid model shall be observable.
 
-The probability-sum tolerance shall be finite and satisfy $0<\varepsilon_p<1$. For each feasible pair, construction shall calculate the row sum using a numerically stable summation method and require
+The probability-sum tolerance shall be finite and satisfy $0<\varepsilon_p\leq10^{-12}$. This upper bound is a deliberate package validation policy: the tolerance accounts for floating-point summation error rather than permitting materially non-normalised probability data. For each feasible pair, construction shall calculate the row sum using a numerically stable summation method and require
 
 $$
 \left|
@@ -272,7 +272,7 @@ Use the frozen fixture and $\varepsilon_p=10^{-12}$ unless a case states otherwi
 | IF-MDP-ACC-004 | Multiply the factors for the declared two-step event $s_1,a_1,1,s_2,a_2,-1,s_1$. | The independently calculated trajectory probability is $0.075$. |
 | IF-MDP-ACC-005 | Classify the outcome entering $s_\dagger$ with reward $2$ and no collector stop. | The result retains reward $2$, sets `terminated=true`, and sets `truncated=false`. |
 | IF-MDP-ACC-006 | Stop collection after a transition into nonterminal $s_2$ without a task ending. | The result sets `terminated=false` and `truncated=true`; the model still defines subsequent actions from $s_2$. |
-| IF-MDP-ACC-007 | Replace one fixture probability by a negative, non-finite, or greater-than-one value, or make a row sum violate $\varepsilon_p$. | Construction fails with an invalid-probability error and returns no model. |
+| IF-MDP-ACC-007 | Replace one fixture probability by a negative, non-finite, or greater-than-one value, or make a row sum violate $\varepsilon_p$. | An invalid entry fails with `invalid_probability`; an invalid row sum fails with `invalid_probability_sum`; construction returns no model. |
 | IF-MDP-ACC-008 | Give a policy positive mass on an infeasible action or an invalid row sum. | Policy validation fails and no induced matrix or reward row is returned. |
 | IF-MDP-ACC-009 | Query an invalid state, invalid action, or infeasible pair. | The query fails explicitly and returns no probability or reward result. |
 | IF-MDP-ACC-010 | Repeat a valid policy-induced calculation. | Every returned entry is identical across calls on the same platform and configuration. |
@@ -305,4 +305,4 @@ These operations belong to later declared cycles and shall not expand the first 
 
 ## Gate to implementation
 
-Implementation may begin only after this minimum specification is reviewed. The first implementation block shall create the two package skeletons and the strong identifiers plus immutable joint-outcome table model; policy-induced calculations follow only after model construction and validation tests pass.
+Implementation may begin only after this minimum specification is reviewed. The first buildable block shall create the `intelligence_foundations` package and its strong state and action identifiers. The immutable joint-outcome table follows in manageable blocks; the `synthetic_intelligence_engine` package begins when the frozen fixture is ready to consume the installed foundations target. Policy-induced calculations follow only after model construction and validation tests pass.
