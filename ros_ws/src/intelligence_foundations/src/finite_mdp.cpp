@@ -115,13 +115,12 @@ FiniteMdp FiniteMdp::from_rows(
   for (const StateIndex state : terminal_states) {
     // p(state, 0 | state, bookkeeping_action) = 1 exactly.
     // Appending to rows is safe because this loop iterates over terminal_states.
-    rows.push_back(
-      StateActionDistribution{
-        state,
-        ActionIndex{task_action_count},
-        JointOutcomeDistribution::from_outcomes(
-          state_count, {{state, 0.0, 1.0}}, 1.0e-12),
-      });
+    rows.push_back(StateActionDistribution{
+      state,
+      ActionIndex{task_action_count},
+      JointOutcomeDistribution::from_outcomes(
+        state_count, {{state, 0.0, 1.0}}, 1.0e-12),
+    });
 
     feasible_action_counts[state.value()] = 1U;
   }

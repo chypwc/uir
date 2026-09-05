@@ -23,6 +23,7 @@ docs/effort_log.md
 
 .pytest_cache/
 
+tmp/
 
 # Quarto working state
 /.quarto/

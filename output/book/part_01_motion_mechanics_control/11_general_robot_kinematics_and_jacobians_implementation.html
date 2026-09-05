@@ -1,0 +1,1749 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-AU" xml:lang="en-AU"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>11&nbsp; General Robot Kinematics and Jacobians Implementation – Understanding Intelligence Through Robotics</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../part_02_probability_estimation/finite_markov_chains.html" rel="next">
+<link href="../part_01_motion_mechanics_control/10_general_robot_kinematics_and_jacobians.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-0a6b7249c26820e032cb0bd839ff02b1.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-6b4ca53971d8dc7d9276afc35a4f526f.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-12ba8748c5d8fcf0bac24d3d70cd9353.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-6b4ca53971d8dc7d9276afc35a4f526f.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Understanding Intelligence Through Robotics</span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools tools-end">
+    <a href="../Understanding-Intelligence-Through-Robotics.pdf" title="Download PDF" class="quarto-navigation-tool px-1" aria-label="Download PDF"><i class="bi bi-file-pdf"></i></a>
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part_01_motion_mechanics_control/01_linear_algebra_foundations.html"><span>Part I:</span> Motion, Mechanics, and Control</a></li><li class="breadcrumb-item"><a href="../part_01_motion_mechanics_control/11_general_robot_kinematics_and_jacobians_implementation.html"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">General Robot Kinematics and Jacobians Implementation</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../notation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Unified Notation and Conventions</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text"><span>Part I:</span> Motion, Mechanics, and Control</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part_01_motion_mechanics_control/01_linear_algebra_foundations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Linear Algebra Foundations</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part_01_motion_mechanics_control/02_geometry_and_coordinate_frames.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Geometry and Coordinate Frames</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part_01_motion_mechanics_control/03_kinematics_and_numerical_integration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Differential-Drive Kinematics and Numerical Integration: Model and Derivation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part_01_motion_mechanics_control/04_kinematics_and_numerical_integration_implementation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Differential-Drive Kinematics and Numerical Integration: Implementation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part_01_motion_mechanics_control/05_ros2_packages_and_development_workflow.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">ROS 2 Package Development Workflow</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part_01_motion_mechanics_control/06_planar_rigid_body_motion_se2_and_twists.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Planar Rigid-Body Motion: <span class="math inline">\(SE(2)\)</span> and Twists</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part_01_motion_mechanics_control/07_degrees_of_freedom_and_spatial_motion_so3_se3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Degrees of Freedom and Spatial Motion: <span class="math inline">\(SO(3)\)</span> and <span class="math inline">\(SE(3)\)</span></span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part_01_motion_mechanics_control/08_screw_motion_se3_exponential_and_spatial_integration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Screw Motion, the <span class="math inline">\(SE(3)\)</span> Exponential, and Spatial Pose Integration</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part_01_motion_mechanics_control/09_spatial_geometry_kernel_implementation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Spatial Geometry Kernel Implementation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part_01_motion_mechanics_control/10_general_robot_kinematics_and_jacobians.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">General Robot Kinematics and Jacobians</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part_01_motion_mechanics_control/11_general_robot_kinematics_and_jacobians_implementation.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">General Robot Kinematics and Jacobians Implementation</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text"><span>Part II:</span> Probability and Estimation</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part_02_probability_estimation/finite_markov_chains.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Finite Markov Chains</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text"><span>Part V:</span> Optimisation, Planning, and Decisions</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part_05_optimisation_planning_decisions/finite_markov_decision_processes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Finite Markov Decision Processes</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part_05_optimisation_planning_decisions/finite_mdp_implementation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Finite-MDP Model Implementation</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#prerequisites" id="toc-prerequisites" class="nav-link active" data-scroll-target="#prerequisites">Prerequisites</a></li>
+  <li><a href="#sec-general-kinematics-impl-joint-limits" id="toc-sec-general-kinematics-impl-joint-limits" class="nav-link" data-scroll-target="#sec-general-kinematics-impl-joint-limits"><span class="header-section-number">11.1</span> Typed joint-coordinate limits</a>
+  <ul class="collapse">
+  <li><a href="#representing-an-optional-bound" id="toc-representing-an-optional-bound" class="nav-link" data-scroll-target="#representing-an-optional-bound"><span class="header-section-number">11.1.1</span> Representing an optional bound</a></li>
+  <li><a href="#validating-before-construction" id="toc-validating-before-construction" class="nav-link" data-scroll-target="#validating-before-construction"><span class="header-section-number">11.1.2</span> Validating before construction</a></li>
+  <li><a href="#using-an-interval" id="toc-using-an-interval" class="nav-link" data-scroll-target="#using-an-interval"><span class="header-section-number">11.1.3</span> Using an interval</a></li>
+  <li><a href="#verification-meaning" id="toc-verification-meaning" class="nav-link" data-scroll-target="#verification-meaning"><span class="header-section-number">11.1.4</span> Verification meaning</a></li>
+  </ul></li>
+  <li><a href="#sec-general-kinematics-impl-joints" id="toc-sec-general-kinematics-impl-joints" class="nav-link" data-scroll-target="#sec-general-kinematics-impl-joints"><span class="header-section-number">11.2</span> Revolute and prismatic joints</a>
+  <ul class="collapse">
+  <li><a href="#storing-geometry-and-typed-limits" id="toc-storing-geometry-and-typed-limits" class="nav-link" data-scroll-target="#storing-geometry-and-typed-limits"><span class="header-section-number">11.2.1</span> Storing geometry and typed limits</a></li>
+  <li><a href="#normalizing-the-positive-direction" id="toc-normalizing-the-positive-direction" class="nav-link" data-scroll-target="#normalizing-the-positive-direction"><span class="header-section-number">11.2.2</span> Normalizing the positive direction</a></li>
+  <li><a href="#constructing-a-revolute-screw" id="toc-constructing-a-revolute-screw" class="nav-link" data-scroll-target="#constructing-a-revolute-screw"><span class="header-section-number">11.2.3</span> Constructing a revolute screw</a></li>
+  <li><a href="#constructing-a-prismatic-screw" id="toc-constructing-a-prismatic-screw" class="nav-link" data-scroll-target="#constructing-a-prismatic-screw"><span class="header-section-number">11.2.4</span> Constructing a prismatic screw</a></li>
+  <li><a href="#verification-meaning-1" id="toc-verification-meaning-1" class="nav-link" data-scroll-target="#verification-meaning-1"><span class="header-section-number">11.2.5</span> Verification meaning</a></li>
+  </ul></li>
+  <li><a href="#sec-general-kinematics-impl-serial-model" id="toc-sec-general-kinematics-impl-serial-model" class="nav-link" data-scroll-target="#sec-general-kinematics-impl-serial-model"><span class="header-section-number">11.3</span> Serial-chain model</a>
+  <ul class="collapse">
+  <li><a href="#owning-the-home-pose-and-ordered-joints" id="toc-owning-the-home-pose-and-ordered-joints" class="nav-link" data-scroll-target="#owning-the-home-pose-and-ordered-joints"><span class="header-section-number">11.3.1</span> Owning the home pose and ordered joints</a></li>
+  <li><a href="#validating-construction-without-duplicating-nested-checks" id="toc-validating-construction-without-duplicating-nested-checks" class="nav-link" data-scroll-target="#validating-construction-without-duplicating-nested-checks"><span class="header-section-number">11.3.2</span> Validating construction without duplicating nested checks</a></li>
+  <li><a href="#verification-meaning-2" id="toc-verification-meaning-2" class="nav-link" data-scroll-target="#verification-meaning-2"><span class="header-section-number">11.3.3</span> Verification meaning</a></li>
+  </ul></li>
+  <li><a href="#sec-general-kinematics-impl-space-forward-kinematics" id="toc-sec-general-kinematics-impl-space-forward-kinematics" class="nav-link" data-scroll-target="#sec-general-kinematics-impl-space-forward-kinematics"><span class="header-section-number">11.4</span> Space-form forward kinematics</a>
+  <ul class="collapse">
+  <li><a href="#public-input-and-output" id="toc-public-input-and-output" class="nav-link" data-scroll-target="#public-input-and-output"><span class="header-section-number">11.4.1</span> Public input and output</a></li>
+  <li><a href="#accessing-either-joint-kind" id="toc-accessing-either-joint-kind" class="nav-link" data-scroll-target="#accessing-either-joint-kind"><span class="header-section-number">11.4.2</span> Accessing either joint kind</a></li>
+  <li><a href="#evaluating-the-ordered-product" id="toc-evaluating-the-ordered-product" class="nav-link" data-scroll-target="#evaluating-the-ordered-product"><span class="header-section-number">11.4.3</span> Evaluating the ordered product</a></li>
+  <li><a href="#verification-meaning-3" id="toc-verification-meaning-3" class="nav-link" data-scroll-target="#verification-meaning-3"><span class="header-section-number">11.4.4</span> Verification meaning</a></li>
+  </ul></li>
+  <li><a href="#sec-general-kinematics-impl-cycle-connections" id="toc-sec-general-kinematics-impl-cycle-connections" class="nav-link" data-scroll-target="#sec-general-kinematics-impl-cycle-connections"><span class="header-section-number">11.5</span> How the classes and functions connect</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part_01_motion_mechanics_control/01_linear_algebra_foundations.html"><span>Part I:</span> Motion, Mechanics, and Control</a></li><li class="breadcrumb-item"><a href="../part_01_motion_mechanics_control/11_general_robot_kinematics_and_jacobians_implementation.html"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">General Robot Kinematics and Jacobians Implementation</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span id="sec-general-kinematics-implementation" class="quarto-section-identifier"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">General Robot Kinematics and Jacobians Implementation</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="prerequisites" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="prerequisites">Prerequisites</h2>
+<p><a href="10_general_robot_kinematics_and_jacobians.html#sec-general-forward-kinematics" class="quarto-xref"><span>Section 10.1</span></a> defines a joint-coordinate column and the allowed set for each coordinate. Recall that revolute coordinates are signed angles in radians and prismatic coordinates are signed displacements in metres. <a href="09_spatial_geometry_kernel_implementation.html#sec-spatial-kernel-rotation3" class="quarto-xref"><span>Section 9.2</span></a> introduces validated C++ value objects, public factories, private constructors, and exceptions; the same construction pattern is used here.</p>
+<p><a href="10_general_robot_kinematics_and_jacobians.html#sec-serial-product-of-exponentials" class="quarto-xref"><span>Section 10.2</span></a> establishes the space-form pose calculation from fixed joint axes at the zero arrangement and the home end-effector pose. Recall that screw columns use linear-first ordering and that transformation products act on coordinate columns rightmost first. <a href="09_spatial_geometry_kernel_implementation.html#sec-spatial-kernel-se3-exponential" class="quarto-xref"><span>Section 9.10</span></a> implements the conversion from six exponential coordinates to a rigid displacement, and <a href="09_spatial_geometry_kernel_implementation.html#sec-spatial-kernel-composition-inversion" class="quarto-xref"><span>Section 9.4</span></a> implements ordered transformation composition.</p>
+</section>
+<section id="sec-general-kinematics-impl-joint-limits" class="level2" data-number="11.1">
+<h2 data-number="11.1" class="anchored" data-anchor-id="sec-general-kinematics-impl-joint-limits"><span class="header-section-number">11.1</span> Typed joint-coordinate limits</h2>
+<p>An allowed interval describes which coordinate values a caller may supply for one joint. For joint index <span class="math inline">\(j\)</span>, let <span class="math inline">\(q_j\in\mathbb R\)</span> be its coordinate, and let <span class="math inline">\(\mathcal Q_j\subseteq\mathbb R\)</span> be its allowed set, as in <a href="10_general_robot_kinematics_and_jacobians.html#sec-general-forward-kinematics" class="quarto-xref"><span>Section 10.1</span></a>. When both bounds are present, denote the lower bound by <span class="math inline">\(\ell_j\)</span> and the upper bound by <span class="math inline">\(u_j\)</span>, in the same unit as <span class="math inline">\(q_j\)</span>. The membership rule is</p>
+<p><span class="math display">\[
+q_j\in\mathcal Q_j
+\quad\Longleftrightarrow\quad
+\ell_j\leq q_j\leq u_j.
+\]</span></p>
+<p>The bounds are inclusive. Either side may be unbounded; in that case its inequality is omitted. The software accepts only finite coordinate values and requires every supplied bound to be finite. Construction checks that <span class="math inline">\(\ell_j\leq u_j\)</span> when both bounds exist. Equality describes an interval containing one value. Zero need not belong to the interval: a joint’s geometric zero reference can lie outside its allowed operating range.</p>
+<section id="representing-an-optional-bound" class="level3" data-number="11.1.1">
+<h3 data-number="11.1.1" class="anchored" data-anchor-id="representing-an-optional-bound"><span class="header-section-number">11.1.1</span> Representing an optional bound</h3>
+<p>The angular and displacement intervals use separate C++ types. Each stores two values that may be absent. The complete class declarations are:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;optional&gt;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> rigid_body_kinematics</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> RevoluteLimits</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span><span class="op">:</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">static</span> RevoluteLimits from_bounds<span class="op">(</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="bu">std::</span>optional<span class="op">&lt;</span><span class="dt">double</span><span class="op">&gt;</span> lower_bound_radians<span class="op">,</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="bu">std::</span>optional<span class="op">&lt;</span><span class="dt">double</span><span class="op">&gt;</span> upper_bound_radians<span class="op">);</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> <span class="bu">std::</span>optional<span class="op">&lt;</span><span class="dt">double</span><span class="op">&gt;</span> lower_bound_radians<span class="op">()</span> <span class="at">const</span> <span class="kw">noexcept</span><span class="op">;</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> <span class="bu">std::</span>optional<span class="op">&lt;</span><span class="dt">double</span><span class="op">&gt;</span> upper_bound_radians<span class="op">()</span> <span class="at">const</span> <span class="kw">noexcept</span><span class="op">;</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> <span class="dt">bool</span> contains<span class="op">(</span><span class="dt">double</span> angle_radians<span class="op">)</span> <span class="at">const</span> <span class="kw">noexcept</span><span class="op">;</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="kw">private</span><span class="op">:</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  RevoluteLimits<span class="op">(</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    <span class="bu">std::</span>optional<span class="op">&lt;</span><span class="dt">double</span><span class="op">&gt;</span> lower_bound_radians<span class="op">,</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    <span class="bu">std::</span>optional<span class="op">&lt;</span><span class="dt">double</span><span class="op">&gt;</span> upper_bound_radians<span class="op">);</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>  <span class="bu">std::</span>optional<span class="op">&lt;</span><span class="dt">double</span><span class="op">&gt;</span> <span class="va">lower_bound_radians_</span><span class="op">;</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>  <span class="bu">std::</span>optional<span class="op">&lt;</span><span class="dt">double</span><span class="op">&gt;</span> <span class="va">upper_bound_radians_</span><span class="op">;</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> PrismaticLimits</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span><span class="op">:</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>  <span class="at">static</span> PrismaticLimits from_bounds<span class="op">(</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>    <span class="bu">std::</span>optional<span class="op">&lt;</span><span class="dt">double</span><span class="op">&gt;</span> lower_bound_metres<span class="op">,</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>    <span class="bu">std::</span>optional<span class="op">&lt;</span><span class="dt">double</span><span class="op">&gt;</span> upper_bound_metres<span class="op">);</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>  <span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> <span class="bu">std::</span>optional<span class="op">&lt;</span><span class="dt">double</span><span class="op">&gt;</span> lower_bound_metres<span class="op">()</span> <span class="at">const</span> <span class="kw">noexcept</span><span class="op">;</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>  <span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> <span class="bu">std::</span>optional<span class="op">&lt;</span><span class="dt">double</span><span class="op">&gt;</span> upper_bound_metres<span class="op">()</span> <span class="at">const</span> <span class="kw">noexcept</span><span class="op">;</span></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>  <span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> <span class="dt">bool</span> contains<span class="op">(</span><span class="dt">double</span> displacement_metres<span class="op">)</span> <span class="at">const</span> <span class="kw">noexcept</span><span class="op">;</span></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a><span class="kw">private</span><span class="op">:</span></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>  PrismaticLimits<span class="op">(</span></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>    <span class="bu">std::</span>optional<span class="op">&lt;</span><span class="dt">double</span><span class="op">&gt;</span> lower_bound_metres<span class="op">,</span></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>    <span class="bu">std::</span>optional<span class="op">&lt;</span><span class="dt">double</span><span class="op">&gt;</span> upper_bound_metres<span class="op">);</span></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>  <span class="bu">std::</span>optional<span class="op">&lt;</span><span class="dt">double</span><span class="op">&gt;</span> <span class="va">lower_bound_metres_</span><span class="op">;</span></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>  <span class="bu">std::</span>optional<span class="op">&lt;</span><span class="dt">double</span><span class="op">&gt;</span> <span class="va">upper_bound_metres_</span><span class="op">;</span></span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a><span class="op">}</span>  <span class="co">// namespace rigid_body_kinematics</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>std::optional&lt;double&gt;</code> owns either one <code>double</code> or no value. Here a present value stores <span class="math inline">\(\ell_j\)</span> or <span class="math inline">\(u_j\)</span>; absence means that side imposes no bound. These two small declarations illustrate the storage alternatives:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="bu">std::</span>optional<span class="op">&lt;</span><span class="dt">double</span><span class="op">&gt;</span> supplied_bound<span class="op">{</span><span class="fl">0.2</span><span class="op">};</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="bu">std::</span>optional<span class="op">&lt;</span><span class="dt">double</span><span class="op">&gt;</span> absent_bound <span class="op">=</span> <span class="bu">std::</span>nullopt<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>supplied_bound</code> contains the number <code>0.2</code>. <code>absent_bound</code> contains no number: <code>std::nullopt</code> is the missing-value marker supplied by <code>&lt;optional&gt;</code>. An infinite number would be a present value and would be rejected during limits construction.</p>
+<p><code>RevoluteLimits</code> labels its stored numbers in radians, while <code>PrismaticLimits</code> labels them in metres. Keeping the classes distinct allows an interface to require the appropriate interval type. The scalar arguments are still ordinary <code>double</code> values, so callers must supply the declared units; the compiler cannot identify a number entered in degrees.</p>
+</section>
+<section id="validating-before-construction" class="level3" data-number="11.1.2">
+<h3 data-number="11.1.2" class="anchored" data-anchor-id="validating-before-construction"><span class="header-section-number">11.1.2</span> Validating before construction</h3>
+<p>Both interval types use one internal check because finiteness and bound ordering have the same numerical meaning for either unit. These are complete production helper definitions; their containing source includes <code>&lt;cmath&gt;</code>, <code>&lt;optional&gt;</code>, and the serial-chain exception declaration.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> rigid_body_kinematics</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> validate_bounds<span class="op">(</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> <span class="bu">std::</span>optional<span class="op">&lt;</span><span class="dt">double</span><span class="op">&gt;</span> <span class="op">&amp;</span> lower_bound<span class="op">,</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> <span class="bu">std::</span>optional<span class="op">&lt;</span><span class="dt">double</span><span class="op">&gt;</span> <span class="op">&amp;</span> upper_bound<span class="op">)</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">(</span>lower_bound<span class="op">.</span>has_value<span class="op">()</span> <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="bu">std::</span>isfinite<span class="op">(*</span>lower_bound<span class="op">))</span> <span class="op">||</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">(</span>upper_bound<span class="op">.</span>has_value<span class="op">()</span> <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="bu">std::</span>isfinite<span class="op">(*</span>upper_bound<span class="op">)))</span> <span class="op">{</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">throw</span> SerialChainException<span class="op">(</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>      SerialChainError<span class="op">::</span>invalid_joint_limits<span class="op">,</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Present joint-limit bounds must be finite."</span><span class="op">);</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    lower_bound<span class="op">.</span>has_value<span class="op">()</span> <span class="op">&amp;&amp;</span> upper_bound<span class="op">.</span>has_value<span class="op">()</span> <span class="op">&amp;&amp;</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>lower_bound <span class="op">&gt;</span> <span class="op">*</span>upper_bound<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">throw</span> SerialChainException<span class="op">(</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>      SerialChainError<span class="op">::</span>invalid_joint_limits<span class="op">,</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>      <span class="st">"The lower joint limit must not exceed the upper joint limit."</span><span class="op">);</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a><span class="dt">bool</span> interval_contains<span class="op">(</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> <span class="bu">std::</span>optional<span class="op">&lt;</span><span class="dt">double</span><span class="op">&gt;</span> <span class="op">&amp;</span> lower_bound<span class="op">,</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> <span class="bu">std::</span>optional<span class="op">&lt;</span><span class="dt">double</span><span class="op">&gt;</span> <span class="op">&amp;</span> upper_bound<span class="op">,</span> <span class="dt">double</span> value<span class="op">)</span> <span class="kw">noexcept</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(!</span><span class="bu">std::</span>isfinite<span class="op">(</span>value<span class="op">))</span> <span class="op">{</span></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="kw">false</span><span class="op">;</span></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="op">(!</span>lower_bound<span class="op">.</span>has_value<span class="op">()</span> <span class="op">||</span> <span class="op">*</span>lower_bound <span class="op">&lt;=</span> value<span class="op">)</span> <span class="op">&amp;&amp;</span></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>         <span class="op">(!</span>upper_bound<span class="op">.</span>has_value<span class="op">()</span> <span class="op">||</span> value <span class="op">&lt;=</span> <span class="op">*</span>upper_bound<span class="op">);</span></span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a><span class="op">}</span>  <span class="co">// namespace</span></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a><span class="op">}</span>  <span class="co">// namespace rigid_body_kinematics</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The unnamed namespace confines these helper names to the source file. Each <code>const std::optional&lt;double&gt; &amp;</code> parameter borrows an existing optional for the duration of the call; the helper neither copies nor modifies it. <code>lower_bound</code> and <code>upper_bound</code> represent the optional <span class="math inline">\(\ell_j\)</span> and <span class="math inline">\(u_j\)</span>. In <code>interval_contains</code>, <code>value</code> represents the supplied <span class="math inline">\(q_j\)</span>.</p>
+<p><code>has_value()</code> tests whether an optional contains a number, and unary <code>*</code> retrieves that number. The built-in logical operators evaluate from left to right and short-circuit: <code>&amp;&amp;</code> skips its right operand when the left is false, while <code>||</code> skips its right operand when the left is true. Consequently, the code never dereferences an absent optional. The same rules make an absent bound automatically satisfy its side of the membership test.</p>
+<p><code>std::isfinite</code>, supplied by <code>&lt;cmath&gt;</code>, rejects both NaN and infinity. Invalid construction throws <code>SerialChainException</code> with the category <code>SerialChainError::invalid_joint_limits</code> and a message. The exception leaves the factory before it can return a limits object. An out-of-range or non-finite membership query instead returns <code>false</code>: the already constructed interval remains valid even when a supplied coordinate is unsuitable.</p>
+<p>Membership uses the stored bounds directly. It adds no tolerance, wraps no angle, and clamps no displacement. A coordinate just outside a finite bound fails. An unbounded side permits arbitrarily large finite values as far as this interval check is concerned; it does not guarantee that a subsequent geometric calculation can represent their results.</p>
+<p>The angular factory, constructor, and membership method connect those helpers to the stored value. These complete function definitions are an excerpt from the implementation inside the <code>rigid_body_kinematics</code> namespace; the simple accessor definitions are omitted.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>RevoluteLimits RevoluteLimits<span class="op">::</span>from_bounds<span class="op">(</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="bu">std::</span>optional<span class="op">&lt;</span><span class="dt">double</span><span class="op">&gt;</span> lower_bound_radians<span class="op">,</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="bu">std::</span>optional<span class="op">&lt;</span><span class="dt">double</span><span class="op">&gt;</span> upper_bound_radians<span class="op">)</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  validate_bounds<span class="op">(</span>lower_bound_radians<span class="op">,</span> upper_bound_radians<span class="op">);</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> RevoluteLimits<span class="op">(</span>lower_bound_radians<span class="op">,</span> upper_bound_radians<span class="op">);</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>RevoluteLimits<span class="op">::</span>RevoluteLimits<span class="op">(</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>  <span class="bu">std::</span>optional<span class="op">&lt;</span><span class="dt">double</span><span class="op">&gt;</span> lower_bound_radians<span class="op">,</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>  <span class="bu">std::</span>optional<span class="op">&lt;</span><span class="dt">double</span><span class="op">&gt;</span> upper_bound_radians<span class="op">)</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="op">:</span> <span class="va">lower_bound_radians_</span><span class="op">(</span>lower_bound_radians<span class="op">),</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>  <span class="va">upper_bound_radians_</span><span class="op">(</span>upper_bound_radians<span class="op">)</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="dt">bool</span> RevoluteLimits<span class="op">::</span>contains<span class="op">(</span><span class="dt">double</span> angle_radians<span class="op">)</span> <span class="at">const</span> <span class="kw">noexcept</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> interval_contains<span class="op">(</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    <span class="va">lower_bound_radians_</span><span class="op">,</span> <span class="va">upper_bound_radians_</span><span class="op">,</span> angle_radians<span class="op">);</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>RevoluteLimits::</code> identifies an out-of-class definition as belonging to that class. The factory validates its parameters before calling the private constructor. The constructor’s member initializer list, introduced by <code>:</code>, initializes the two stored optionals directly from those parameters. The object owns those values after the factory returns; it does not retain references to the caller’s variables. <code>contains</code> forwards the stored interval and the current angle to the common membership helper. The displacement class follows the same sequence with its metre-labelled members and argument.</p>
+</section>
+<section id="using-an-interval" class="level3" data-number="11.1.3">
+<h3 data-number="11.1.3" class="anchored" data-anchor-id="using-an-interval"><span class="header-section-number">11.1.3</span> Using an interval</h3>
+<div class="callout callout-style-simple callout-note no-icon callout-titled" title="Example: A joint interval that excludes zero">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Example: A joint interval that excludes zero
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>An angular operating range can permit <span class="math inline">\(0.2\)</span> through <span class="math inline">\(1.0\)</span> radians while excluding the geometric zero reference. A separate displacement range can have only a lower bound. This usage example constructs both intervals and queries their membership:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="kw">auto</span> angular_limits <span class="op">=</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  rigid_body_kinematics<span class="op">::</span>RevoluteLimits<span class="op">::</span>from_bounds<span class="op">(</span><span class="fl">0.2</span><span class="op">,</span> <span class="fl">1.0</span><span class="op">);</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="dt">bool</span> lower_endpoint_allowed <span class="op">=</span> angular_limits<span class="op">.</span>contains<span class="op">(</span><span class="fl">0.2</span><span class="op">);</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="dt">bool</span> zero_allowed <span class="op">=</span> angular_limits<span class="op">.</span>contains<span class="op">(</span><span class="fl">0.0</span><span class="op">);</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="kw">auto</span> displacement_limits <span class="op">=</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  rigid_body_kinematics<span class="op">::</span>PrismaticLimits<span class="op">::</span>from_bounds<span class="op">(-</span><span class="fl">0.2</span><span class="op">,</span> <span class="bu">std::</span>nullopt<span class="op">);</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="dt">bool</span> extension_allowed <span class="op">=</span> displacement_limits<span class="op">.</span>contains<span class="op">(</span><span class="fl">0.5</span><span class="op">);</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>auto</code> deduces the type returned by each factory: <code>angular_limits</code> is a <code>RevoluteLimits</code> and <code>displacement_limits</code> is a <code>PrismaticLimits</code>. Supplying a <code>double</code> to an optional parameter constructs a present optional containing that number. <code>std::nullopt</code> constructs an absent upper bound. The three Boolean results are respectively <code>true</code>, <code>false</code>, and <code>true</code>: the angular lower endpoint is inclusive, zero is outside that angular range, and <span class="math inline">\(0.5\,\mathrm m\)</span> exceeds the displacement lower bound of <span class="math inline">\(-0.2\,\mathrm m\)</span>.</p>
+</div>
+</div>
+</section>
+<section id="verification-meaning" class="level3" data-number="11.1.4">
+<h3 data-number="11.1.4" class="anchored" data-anchor-id="verification-meaning"><span class="header-section-number">11.1.4</span> Verification meaning</h3>
+<p>The focused interval tests check an angular range that excludes zero while including both endpoints, displacement intervals with either side absent, and a revolute interval with neither bound present. Separate rejection cases check a NaN angular bound, an infinite displacement bound, and reversed angular bounds. The rejection tests inspect the exception category as well as requiring construction to fail. Together these cases exercise interval semantics and construction failure without depending on a robot pose calculation.</p>
+</section>
+</section>
+<section id="sec-general-kinematics-impl-joints" class="level2" data-number="11.2">
+<h2 data-number="11.2" class="anchored" data-anchor-id="sec-general-kinematics-impl-joints"><span class="header-section-number">11.2</span> Revolute and prismatic joints</h2>
+<p>A joint definition converts axis geometry into a fixed screw column that can be reused for many coordinate queries. For joint index <span class="math inline">\(j\)</span>, let <span class="math inline">\({}^{s}\mathbf s_j\in\mathbb R^3\)</span> be the dimensionless positive unit direction of its axis, expressed in the fixed space frame <span class="math inline">\(\{s\}\)</span> at the robot’s zero arrangement. For a revolute joint, let <span class="math inline">\({}^{s}\mathbf p_{\ell,j}\in\mathbb R^3\)</span> be the position of one point on its axis line relative to the space-frame origin, expressed in <span class="math inline">\(\{s\}\)</span> and measured in metres. The subscript <span class="math inline">\(\ell\)</span> identifies the axis line. From <a href="10_general_robot_kinematics_and_jacobians.html#sec-serial-product-of-exponentials" class="quarto-xref"><span>Section 10.2</span></a>, the linear-first space screw column <span class="math inline">\({}^{s}\mathbf S_j\in\mathbb R^6\)</span> is</p>
+<p><span class="math display">\[
+{}^{s}\mathbf S_j=
+\begin{cases}
+\begin{bmatrix}
+-{}^{s}\mathbf s_j\times{}^{s}\mathbf p_{\ell,j}\\
+{}^{s}\mathbf s_j
+\end{bmatrix}, &amp; \text{revolute},\\[1em]
+\begin{bmatrix}
+{}^{s}\mathbf s_j\\
+\mathbf 0_3
+\end{bmatrix}, &amp; \text{prismatic}.
+\end{cases}
+\]</span></p>
+<p>Here <span class="math inline">\(\times\)</span> is the three-dimensional cross product, and <span class="math inline">\(\mathbf 0_3\)</span> is the three-entry zero column. A positive revolute coordinate follows the right-hand rule about the declared direction; a positive prismatic coordinate translates along it. The revolute upper block is a linear displacement coefficient per radian of joint motion, while its lower block is the dimensionless rotation direction. The prismatic upper block is a dimensionless translation direction and its lower block is zero. Only the three-entry direction is normalized; normalizing the entire six-entry screw would change the joint’s coordinate scale and mix the blocks’ physical meanings.</p>
+<p>The screw column is not a transformation and is not a current velocity. It describes the joint’s unit motion relative to its geometric zero reference. Multiplication by an angle or displacement, followed by the spatial exponential, produces a finite active displacement. A prismatic joint needs no axis point because translating a rigid body along a direction does not depend on a selected line’s offset.</p>
+<section id="storing-geometry-and-typed-limits" class="level3" data-number="11.2.1">
+<h3 data-number="11.2.1" class="anchored" data-anchor-id="storing-geometry-and-typed-limits"><span class="header-section-number">11.2.1</span> Storing geometry and typed limits</h3>
+<p>The two joint classes own their geometry, the matching interval type, and the screw derived from that geometry. The complete declarations below omit only header guards; their project headers supply the interval types and the linear-first six-entry column type.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;Eigen/Core&gt;</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;variant&gt;</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">"rigid_body_kinematics/joint_limits.hpp"</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">"rigid_body_kinematics/lie_algebra.hpp"</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> rigid_body_kinematics</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> RevoluteJoint</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span><span class="op">:</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>  <span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> <span class="at">static</span> RevoluteJoint from_axis<span class="op">(</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> Eigen<span class="op">::</span>Vector3d <span class="op">&amp;</span> space_axis_direction<span class="op">,</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> Eigen<span class="op">::</span>Vector3d <span class="op">&amp;</span> space_axis_point_metres<span class="op">,</span> RevoluteLimits limits<span class="op">);</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>  <span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> <span class="at">const</span> Eigen<span class="op">::</span>Vector3d <span class="op">&amp;</span> space_axis_direction<span class="op">()</span> <span class="at">const</span> <span class="kw">noexcept</span><span class="op">;</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>  <span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> <span class="at">const</span> Eigen<span class="op">::</span>Vector3d <span class="op">&amp;</span> space_axis_point_metres<span class="op">()</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> <span class="kw">noexcept</span><span class="op">;</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>  <span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> <span class="at">const</span> Vector6LinearFirst <span class="op">&amp;</span> space_screw_axis<span class="op">()</span> <span class="at">const</span> <span class="kw">noexcept</span><span class="op">;</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>  <span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> <span class="at">const</span> RevoluteLimits <span class="op">&amp;</span> limits<span class="op">()</span> <span class="at">const</span> <span class="kw">noexcept</span><span class="op">;</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a><span class="kw">private</span><span class="op">:</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>  RevoluteJoint<span class="op">(</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>    Eigen<span class="op">::</span>Vector3d space_axis_direction<span class="op">,</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>    Eigen<span class="op">::</span>Vector3d space_axis_point_metres<span class="op">,</span> RevoluteLimits limits<span class="op">,</span></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>    Vector6LinearFirst space_screw_axis<span class="op">);</span></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>  Eigen<span class="op">::</span>Vector3d <span class="va">space_axis_direction_</span><span class="op">;</span></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>  Eigen<span class="op">::</span>Vector3d <span class="va">space_axis_point_metres_</span><span class="op">;</span></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>  RevoluteLimits <span class="va">limits_</span><span class="op">;</span></span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>  Vector6LinearFirst <span class="va">space_screw_axis_</span><span class="op">;</span></span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> PrismaticJoint</span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span><span class="op">:</span></span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>  <span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> <span class="at">static</span> PrismaticJoint from_axis<span class="op">(</span></span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> Eigen<span class="op">::</span>Vector3d <span class="op">&amp;</span> space_axis_direction<span class="op">,</span> PrismaticLimits limits<span class="op">);</span></span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a>  <span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> <span class="at">const</span> Eigen<span class="op">::</span>Vector3d <span class="op">&amp;</span> space_axis_direction<span class="op">()</span> <span class="at">const</span> <span class="kw">noexcept</span><span class="op">;</span></span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a>  <span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> <span class="at">const</span> Vector6LinearFirst <span class="op">&amp;</span> space_screw_axis<span class="op">()</span> <span class="at">const</span> <span class="kw">noexcept</span><span class="op">;</span></span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a>  <span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> <span class="at">const</span> PrismaticLimits <span class="op">&amp;</span> limits<span class="op">()</span> <span class="at">const</span> <span class="kw">noexcept</span><span class="op">;</span></span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a><span class="kw">private</span><span class="op">:</span></span>
+<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a>  PrismaticJoint<span class="op">(</span></span>
+<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a>    Eigen<span class="op">::</span>Vector3d space_axis_direction<span class="op">,</span> PrismaticLimits limits<span class="op">,</span></span>
+<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a>    Vector6LinearFirst space_screw_axis<span class="op">);</span></span>
+<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a>  Eigen<span class="op">::</span>Vector3d <span class="va">space_axis_direction_</span><span class="op">;</span></span>
+<span id="cb6-51"><a href="#cb6-51" aria-hidden="true" tabindex="-1"></a>  PrismaticLimits <span class="va">limits_</span><span class="op">;</span></span>
+<span id="cb6-52"><a href="#cb6-52" aria-hidden="true" tabindex="-1"></a>  Vector6LinearFirst <span class="va">space_screw_axis_</span><span class="op">;</span></span>
+<span id="cb6-53"><a href="#cb6-53" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span>
+<span id="cb6-54"><a href="#cb6-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-55"><a href="#cb6-55" aria-hidden="true" tabindex="-1"></a><span class="kw">using</span> JointDefinition <span class="op">=</span> <span class="bu">std::</span>variant<span class="op">&lt;</span>RevoluteJoint<span class="op">,</span> PrismaticJoint<span class="op">&gt;;</span></span>
+<span id="cb6-56"><a href="#cb6-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-57"><a href="#cb6-57" aria-hidden="true" tabindex="-1"></a><span class="op">}</span>  <span class="co">// namespace rigid_body_kinematics</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>Eigen::Vector3d</code> stores a fixed three-entry column of <code>double</code> values. <code>Vector6LinearFirst</code>, introduced by the spatial kernel, stores six <code>double</code> values with the linear block first. The direction parameter is allowed to be non-unit; the corresponding stored member contains the normalized direction. The revolute point member contains the supplied point in metres. Each <code>space_screw_axis_</code> member owns the derived <span class="math inline">\({}^{s}\mathbf S_j\)</span>, so evaluation need not repeat normalization or the cross product.</p>
+<p>The factories borrow their geometry inputs through <code>const</code> references and take the validated limits by value. Requiring <code>RevoluteLimits</code> for a revolute factory prevents accidentally passing a <code>PrismaticLimits</code> object, although callers still have to supply correctly labelled scalar units when constructing the limits. The private constructors receive already checked data. As with the interval classes, there are no individual setters, but ordinary copying and assignment can copy or replace complete joint values.</p>
+<p>The accessors return read-only references to stored members, not copies. A caller must not retain such a reference beyond the lifetime of its owning joint. Keeping the owner alive and unchanged also keeps the reference’s meaning stable.</p>
+<p>The <code>using</code> declaration gives the name <code>JointDefinition</code> to <code>std::variant&lt;RevoluteJoint, PrismaticJoint&gt;</code>. A variant stores one of its listed alternatives by value and records which alternative it holds. This permits one ordered collection to contain both joint types without separating the screw from the geometry and limits that give it meaning. The common container does not erase which unit its coordinate requires.</p>
+</section>
+<section id="normalizing-the-positive-direction" class="level3" data-number="11.2.2">
+<h3 data-number="11.2.2" class="anchored" data-anchor-id="normalizing-the-positive-direction"><span class="header-section-number">11.2.2</span> Normalizing the positive direction</h3>
+<p>Both joint factories need the same operation: divide a finite, nonzero direction by its Euclidean length. The complete internal helper is shown below. It is defined in an unnamed namespace inside the implementation namespace; the source includes <code>&lt;cmath&gt;</code> and the serial-chain exception declaration.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>Eigen<span class="op">::</span>Vector3d normalize_axis_direction<span class="op">(</span><span class="at">const</span> Eigen<span class="op">::</span>Vector3d <span class="op">&amp;</span> axis_direction<span class="op">)</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(!</span>axis_direction<span class="op">.</span>allFinite<span class="op">())</span> <span class="op">{</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">throw</span> SerialChainException<span class="op">(</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>      SerialChainError<span class="op">::</span>non_finite<span class="op">,</span> <span class="st">"Joint axis direction must be finite."</span><span class="op">);</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> <span class="dt">double</span> direction_norm <span class="op">=</span> axis_direction<span class="op">.</span>stableNorm<span class="op">();</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(</span>direction_norm <span class="op">==</span> <span class="fl">0.0</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">throw</span> SerialChainException<span class="op">(</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>      SerialChainError<span class="op">::</span>invalid_model<span class="op">,</span> <span class="st">"Joint axis direction must be nonzero."</span><span class="op">);</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(!</span><span class="bu">std::</span>isfinite<span class="op">(</span>direction_norm<span class="op">))</span> <span class="op">{</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">throw</span> SerialChainException<span class="op">(</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>      SerialChainError<span class="op">::</span>unsupported_magnitude<span class="op">,</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Joint axis direction cannot be normalized safely."</span><span class="op">);</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> Eigen<span class="op">::</span>Vector3d normalized_direction <span class="op">=</span> axis_direction <span class="op">/</span> direction_norm<span class="op">;</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(!</span>normalized_direction<span class="op">.</span>allFinite<span class="op">())</span> <span class="op">{</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">throw</span> SerialChainException<span class="op">(</span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>      SerialChainError<span class="op">::</span>unsupported_magnitude<span class="op">,</span></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Normalized joint axis direction is not finite."</span><span class="op">);</span></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> normalized_direction<span class="op">;</span></span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>allFinite()</code> checks all vector entries. <code>stableNorm()</code> computes the Euclidean length using scaling to reduce intermediate overflow and underflow, rather than directly summing unscaled squared entries. A finite input vector can still have a length too large to represent as a <code>double</code>; the explicit finiteness check therefore remains necessary. A zero direction has no orientation and cannot be repaired by choosing an arbitrary axis.</p>
+<p><code>direction_norm</code> is the length of the supplied direction, and <code>normalized_direction</code> is <span class="math inline">\({}^{s}\mathbf s_j\)</span>. Division by that positive length preserves the declared sign. Supplying a direction twice as long gives the same normalized direction; reversing its sign reverses the meaning of a positive joint coordinate. The final check rejects a non-finite computed direction instead of letting invalid geometry enter a joint object.</p>
+</section>
+<section id="constructing-a-revolute-screw" class="level3" data-number="11.2.3">
+<h3 data-number="11.2.3" class="anchored" data-anchor-id="constructing-a-revolute-screw"><span class="header-section-number">11.2.3</span> Constructing a revolute screw</h3>
+<p>The revolute factory checks the point, normalizes the direction, and forms the cross-product block. These complete production definitions appear inside the implementation namespace; <code>&lt;Eigen/Geometry&gt;</code> supplies the cross-product operation and <code>&lt;utility&gt;</code> supplies the move utility.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>RevoluteJoint RevoluteJoint<span class="op">::</span>from_axis<span class="op">(</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> Eigen<span class="op">::</span>Vector3d <span class="op">&amp;</span> space_axis_direction<span class="op">,</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> Eigen<span class="op">::</span>Vector3d <span class="op">&amp;</span> space_axis_point_metres<span class="op">,</span> RevoluteLimits limits<span class="op">)</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(!</span>space_axis_point_metres<span class="op">.</span>allFinite<span class="op">())</span> <span class="op">{</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">throw</span> SerialChainException<span class="op">(</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>      SerialChainError<span class="op">::</span>non_finite<span class="op">,</span> <span class="st">"Revolute axis point must be finite."</span><span class="op">);</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> Eigen<span class="op">::</span>Vector3d normalized_direction <span class="op">=</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    normalize_axis_direction<span class="op">(</span>space_axis_direction<span class="op">);</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> Eigen<span class="op">::</span>Vector3d linear_screw_block <span class="op">=</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    <span class="op">-</span>normalized_direction<span class="op">.</span>cross<span class="op">(</span>space_axis_point_metres<span class="op">);</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(!</span>linear_screw_block<span class="op">.</span>allFinite<span class="op">())</span> <span class="op">{</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">throw</span> SerialChainException<span class="op">(</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>      SerialChainError<span class="op">::</span>unsupported_magnitude<span class="op">,</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Revolute screw-axis calculation is not finite."</span><span class="op">);</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>  Vector6LinearFirst space_screw_axis<span class="op">;</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>  space_screw_axis<span class="op">.</span>head<span class="op">&lt;</span><span class="dv">3</span><span class="op">&gt;()</span> <span class="op">=</span> linear_screw_block<span class="op">;</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>  space_screw_axis<span class="op">.</span>tail<span class="op">&lt;</span><span class="dv">3</span><span class="op">&gt;()</span> <span class="op">=</span> normalized_direction<span class="op">;</span></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> RevoluteJoint<span class="op">(</span></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>    normalized_direction<span class="op">,</span> space_axis_point_metres<span class="op">,</span> <span class="bu">std::</span>move<span class="op">(</span>limits<span class="op">),</span></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>    space_screw_axis<span class="op">);</span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>RevoluteJoint<span class="op">::</span>RevoluteJoint<span class="op">(</span></span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>  Eigen<span class="op">::</span>Vector3d space_axis_direction<span class="op">,</span> Eigen<span class="op">::</span>Vector3d space_axis_point_metres<span class="op">,</span></span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>  RevoluteLimits limits<span class="op">,</span> Vector6LinearFirst space_screw_axis<span class="op">)</span></span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a><span class="op">:</span> <span class="va">space_axis_direction_</span><span class="op">(</span><span class="bu">std::</span>move<span class="op">(</span>space_axis_direction<span class="op">)),</span></span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>  <span class="va">space_axis_point_metres_</span><span class="op">(</span><span class="bu">std::</span>move<span class="op">(</span>space_axis_point_metres<span class="op">)),</span></span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>  <span class="va">limits_</span><span class="op">(</span><span class="bu">std::</span>move<span class="op">(</span>limits<span class="op">)),</span></span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>  <span class="va">space_screw_axis_</span><span class="op">(</span><span class="bu">std::</span>move<span class="op">(</span>space_screw_axis<span class="op">))</span></span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>linear_screw_block</code> represents <span class="math inline">\(-{}^{s}\mathbf s_j\times{}^{s}\mathbf p_{\ell,j}\)</span>. The leading minus sign applies to the whole cross product; swapping the cross-product operands would also change its sign. Even with finite operands, an intermediate calculation can exceed the representable range, so the factory checks the resulting block before constructing the joint.</p>
+<p><code>head&lt;3&gt;()</code> selects the first three entries and <code>tail&lt;3&gt;()</code> selects the last three. The angle-bracket argument fixes the block length at compile time. These expressions are writable views into <code>space_screw_axis</code>, so the assignments fill entries <span class="math inline">\(0,1,2\)</span> and <span class="math inline">\(3,4,5\)</span>, respectively. Both blocks are assigned before the six-entry column is used; the default declaration alone does not initialize its numerical entries.</p>
+<p>The constructor’s parameters are values owned by that call, and its initializer list initializes the object’s members. <code>std::move</code> marks a value as eligible for move construction; it does not itself transfer data. The selected type’s constructor determines whether storage can be transferred or entries must still be copied. In particular, moving a small fixed-size Eigen column is not a promise to avoid copying its scalar entries. The important ownership result is that the returned joint stores its own geometry and limits, with no references to the factory’s local variables.</p>
+<p>For example, a supplied direction <span class="math inline">\((0,0,5)^{\mathsf T}\)</span> and axis point <span class="math inline">\((2,0,0)^{\mathsf T}\,\mathrm m\)</span> produce the unit direction <span class="math inline">\((0,0,1)^{\mathsf T}\)</span> and linear block <span class="math inline">\((0,-2,0)^{\mathsf T}\)</span> in metres per radian. The stored screw is therefore <span class="math inline">\((0,-2,0,0,0,1)^{\mathsf T}\)</span>. The point is on a line parallel to the space <span class="math inline">\(z\)</span>-axis but displaced from the space origin; the upper block records that offset’s effect on the motion.</p>
+</section>
+<section id="constructing-a-prismatic-screw" class="level3" data-number="11.2.4">
+<h3 data-number="11.2.4" class="anchored" data-anchor-id="constructing-a-prismatic-screw"><span class="header-section-number">11.2.4</span> Constructing a prismatic screw</h3>
+<p>A prismatic factory uses the same direction normalization but puts the result in the linear block. These are its complete factory and constructor definitions in the implementation namespace.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>PrismaticJoint PrismaticJoint<span class="op">::</span>from_axis<span class="op">(</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> Eigen<span class="op">::</span>Vector3d <span class="op">&amp;</span> space_axis_direction<span class="op">,</span> PrismaticLimits limits<span class="op">)</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> Eigen<span class="op">::</span>Vector3d normalized_direction <span class="op">=</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    normalize_axis_direction<span class="op">(</span>space_axis_direction<span class="op">);</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  Vector6LinearFirst space_screw_axis<span class="op">;</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  space_screw_axis<span class="op">.</span>head<span class="op">&lt;</span><span class="dv">3</span><span class="op">&gt;()</span> <span class="op">=</span> normalized_direction<span class="op">;</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>  space_screw_axis<span class="op">.</span>tail<span class="op">&lt;</span><span class="dv">3</span><span class="op">&gt;().</span>setZero<span class="op">();</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> PrismaticJoint<span class="op">(</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    normalized_direction<span class="op">,</span> <span class="bu">std::</span>move<span class="op">(</span>limits<span class="op">),</span> space_screw_axis<span class="op">);</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>PrismaticJoint<span class="op">::</span>PrismaticJoint<span class="op">(</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>  Eigen<span class="op">::</span>Vector3d space_axis_direction<span class="op">,</span> PrismaticLimits limits<span class="op">,</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>  Vector6LinearFirst space_screw_axis<span class="op">)</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="op">:</span> <span class="va">space_axis_direction_</span><span class="op">(</span><span class="bu">std::</span>move<span class="op">(</span>space_axis_direction<span class="op">)),</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>  <span class="va">limits_</span><span class="op">(</span><span class="bu">std::</span>move<span class="op">(</span>limits<span class="op">)),</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>  <span class="va">space_screw_axis_</span><span class="op">(</span><span class="bu">std::</span>move<span class="op">(</span>space_screw_axis<span class="op">))</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>setZero()</code> fills the selected angular block with zeros. Thus a supplied direction <span class="math inline">\((0,-4,0)^{\mathsf T}\)</span> produces the screw <span class="math inline">\((0,-1,0,0,0,0)^{\mathsf T}\)</span>. Multiplying that screw by a displacement of <span class="math inline">\(0.4\,\mathrm m\)</span> gives a linear exponential-coordinate block <span class="math inline">\((0,-0.4,0)^{\mathsf T}\,\mathrm m\)</span> and zero rotation. Unlike a revolute screw, it has no axis-offset contribution.</p>
+<p>The following representative accessor definitions complete the ownership picture. The other declared accessors use the same direct return of their corresponding stored member.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> Vector6LinearFirst <span class="op">&amp;</span> RevoluteJoint<span class="op">::</span>space_screw_axis<span class="op">()</span> <span class="at">const</span> <span class="kw">noexcept</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="va">space_screw_axis_</span><span class="op">;</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> PrismaticLimits <span class="op">&amp;</span> PrismaticJoint<span class="op">::</span>limits<span class="op">()</span> <span class="at">const</span> <span class="kw">noexcept</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="va">limits_</span><span class="op">;</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Each returned reference refers to a member of the joint, not to a temporary created by the accessor. The caller can inspect that member but cannot modify it through the read-only reference.</p>
+</section>
+<section id="verification-meaning-1" class="level3" data-number="11.2.5">
+<h3 data-number="11.2.5" class="anchored" data-anchor-id="verification-meaning-1"><span class="header-section-number">11.2.5</span> Verification meaning</h3>
+<p>The joint tests check normalization together with the derived six entries for a displaced revolute axis and a negative-direction prismatic axis. A separate geometric test selects two points on the same oriented revolute line and checks that both definitions produce the same screw; it protects the distinction between the physical axis line and the arbitrary point chosen to describe it. Rejection tests exercise a zero direction, a non-finite direction, and a non-finite axis point, including their typed error categories.</p>
+</section>
+</section>
+<section id="sec-general-kinematics-impl-serial-model" class="level2" data-number="11.3">
+<h2 data-number="11.3" class="anchored" data-anchor-id="sec-general-kinematics-impl-serial-model"><span class="header-section-number">11.3</span> Serial-chain model</h2>
+<p>A fixed-base open serial chain needs one geometric reference pose and an ordered sequence of joint definitions. Let <span class="math inline">\(n\geq1\)</span> be the number of independent one-degree-of-freedom joints, ordered from the fixed base toward the selected end effector. Let <span class="math inline">\(\{e\}\)</span> be that end-effector frame. As in <a href="10_general_robot_kinematics_and_jacobians.html#sec-serial-product-of-exponentials" class="quarto-xref"><span>Section 10.2</span></a>, the home pose <span class="math inline">\(\mathbf M\in SE(3)\)</span> is</p>
+<p><span class="math display">\[
+\mathbf M:=\mathbf T_{se}(\mathbf 0_n)
+=\begin{bmatrix}
+\mathbf R_{se,0}&amp;{}^{s}\mathbf p_{e,0}\\
+\mathbf 0_3^{\mathsf T}&amp;1
+\end{bmatrix}.
+\]</span></p>
+<p>Here <span class="math inline">\(SE(3)\)</span> is the set of rigid transformations represented by <span class="math inline">\(4\times4\)</span> homogeneous matrices, <span class="math inline">\(\mathbf 0_n\)</span> is the all-zero joint-coordinate column, and <span class="math inline">\(\mathbf T_{se}\)</span> is the pose of <span class="math inline">\(\{e\}\)</span> relative to <span class="math inline">\(\{s\}\)</span>. The dimensionless <span class="math inline">\(3\times3\)</span> rotation block <span class="math inline">\(\mathbf R_{se,0}\)</span> gives the end-effector orientation at zero. The three-entry column <span class="math inline">\({}^{s}\mathbf p_{e,0}\)</span> gives the end-effector origin’s position relative to the space origin, expressed in <span class="math inline">\(\{s\}\)</span> and measured in metres. The superscript <span class="math inline">\(\mathsf T\)</span> transposes the zero column into a row. The matrix maps homogeneous end-effector point coordinates to space-frame coordinates by left multiplication.</p>
+<p>The model pairs <span class="math inline">\(\mathbf M\)</span> with the ordered joints and their <span class="math inline">\({}^{s}\mathbf S_j\)</span> columns. Every axis must describe the same zero arrangement and use the same space frame as <span class="math inline">\(\mathbf M\)</span>. This agreement is a caller precondition: finite numerical entries alone cannot establish which physical frame or robot arrangement they describe. The zero arrangement defines the geometry even when zero lies outside a joint’s operating interval; storing the home pose does not make a zero-coordinate query admissible.</p>
+<section id="owning-the-home-pose-and-ordered-joints" class="level3" data-number="11.3.1">
+<h3 data-number="11.3.1" class="anchored" data-anchor-id="owning-the-home-pose-and-ordered-joints"><span class="header-section-number">11.3.1</span> Owning the home pose and ordered joints</h3>
+<p>The complete class declaration is:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;cstddef&gt;</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;vector&gt;</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">"rigid_body_kinematics/joint_definition.hpp"</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">"rigid_body_kinematics/transform3.hpp"</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> rigid_body_kinematics</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> SerialChainModel</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span><span class="op">:</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>  <span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> <span class="at">static</span> SerialChainModel from_home_and_joints<span class="op">(</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>    Transform3 home_pose<span class="op">,</span> <span class="bu">std::</span>vector<span class="op">&lt;</span>JointDefinition<span class="op">&gt;</span> joint_definitions<span class="op">);</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>  <span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> <span class="at">const</span> Transform3 <span class="op">&amp;</span> home_pose<span class="op">()</span> <span class="at">const</span> <span class="kw">noexcept</span><span class="op">;</span></span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>  <span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> <span class="at">const</span> <span class="bu">std::</span>vector<span class="op">&lt;</span>JointDefinition<span class="op">&gt;</span> <span class="op">&amp;</span> joint_definitions<span class="op">()</span></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> <span class="kw">noexcept</span><span class="op">;</span></span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>  <span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> <span class="bu">std::</span>size_t joint_count<span class="op">()</span> <span class="at">const</span> <span class="kw">noexcept</span><span class="op">;</span></span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a><span class="kw">private</span><span class="op">:</span></span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>  SerialChainModel<span class="op">(</span></span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>    Transform3 home_pose<span class="op">,</span> <span class="bu">std::</span>vector<span class="op">&lt;</span>JointDefinition<span class="op">&gt;</span> joint_definitions<span class="op">);</span></span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>  Transform3 <span class="va">home_pose_</span><span class="op">;</span></span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>  <span class="bu">std::</span>vector<span class="op">&lt;</span>JointDefinition<span class="op">&gt;</span> <span class="va">joint_definitions_</span><span class="op">;</span></span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a><span class="op">}</span>  <span class="co">// namespace rigid_body_kinematics</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>home_pose_</code> owns the validated representation of <span class="math inline">\(\mathbf M\)</span>. <code>std::vector&lt;JointDefinition&gt;</code> is a variable-length, ordered container that owns its elements. Its first element is mathematical joint <span class="math inline">\(1\)</span>, and its last is joint <span class="math inline">\(n\)</span>. Each element retains its joint kind, geometry, limits, and screw together; separate arrays do not have to be kept in matching order. This C++ container is not the numerical joint-coordinate column.</p>
+<p><code>joint_count()</code> returns <code>std::size_t</code>, the unsigned integer type used for container sizes. Its value is <span class="math inline">\(n\)</span>. The other two accessors return read-only references, allowing repeated evaluation to borrow the stored model instead of copying all its joints. The model contains no current coordinate input or evaluation policy: changing the requested robot configuration does not require rebuilding the geometric reference.</p>
+</section>
+<section id="validating-construction-without-duplicating-nested-checks" class="level3" data-number="11.3.2">
+<h3 data-number="11.3.2" class="anchored" data-anchor-id="validating-construction-without-duplicating-nested-checks"><span class="header-section-number">11.3.2</span> Validating construction without duplicating nested checks</h3>
+<p>The complete model implementation below is an excerpt inside the implementation namespace. Its source also includes <code>&lt;utility&gt;</code> and the serial-chain exception declaration.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>SerialChainModel SerialChainModel<span class="op">::</span>from_home_and_joints<span class="op">(</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  Transform3 home_pose<span class="op">,</span> <span class="bu">std::</span>vector<span class="op">&lt;</span>JointDefinition<span class="op">&gt;</span> joint_definitions<span class="op">)</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(</span>joint_definitions<span class="op">.</span>empty<span class="op">())</span> <span class="op">{</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">throw</span> SerialChainException<span class="op">(</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>      SerialChainError<span class="op">::</span>invalid_model<span class="op">,</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>      <span class="st">"A serial-chain model must contain at least one joint."</span><span class="op">);</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> SerialChainModel<span class="op">(</span><span class="bu">std::</span>move<span class="op">(</span>home_pose<span class="op">),</span> <span class="bu">std::</span>move<span class="op">(</span>joint_definitions<span class="op">));</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>SerialChainModel<span class="op">::</span>SerialChainModel<span class="op">(</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>  Transform3 home_pose<span class="op">,</span> <span class="bu">std::</span>vector<span class="op">&lt;</span>JointDefinition<span class="op">&gt;</span> joint_definitions<span class="op">)</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a><span class="op">:</span> <span class="va">home_pose_</span><span class="op">(</span><span class="bu">std::</span>move<span class="op">(</span>home_pose<span class="op">)),</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>  <span class="va">joint_definitions_</span><span class="op">(</span><span class="bu">std::</span>move<span class="op">(</span>joint_definitions<span class="op">))</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> Transform3 <span class="op">&amp;</span> SerialChainModel<span class="op">::</span>home_pose<span class="op">()</span> <span class="at">const</span> <span class="kw">noexcept</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="va">home_pose_</span><span class="op">;</span></span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="bu">std::</span>vector<span class="op">&lt;</span>JointDefinition<span class="op">&gt;</span> <span class="op">&amp;</span> SerialChainModel<span class="op">::</span>joint_definitions<span class="op">()</span></span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> <span class="kw">noexcept</span></span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="va">joint_definitions_</span><span class="op">;</span></span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a><span class="bu">std::</span>size_t SerialChainModel<span class="op">::</span>joint_count<span class="op">()</span> <span class="at">const</span> <span class="kw">noexcept</span></span>
+<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="va">joint_definitions_</span><span class="op">.</span>size<span class="op">();</span></span>
+<span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>empty()</code> tests whether the supplied joint container has no elements. Rejecting that case enforces <span class="math inline">\(n\geq1\)</span>. The factory does not repeat rotation, axis, or interval checks: those properties were established when its input values were constructed. It neither sorts the list nor recalculates the screw columns, so the caller’s base-to-end-effector order is retained exactly.</p>
+<p>The factory receives its inputs by value. Passing an existing ordinary variable copies it into the parameter; explicitly moving a suitable variable permits move construction instead. The factory then moves its parameters into the private constructor, which moves them into the stored members. For the joint vector, move construction transfers ownership of its allocated element storage. This is different from keeping a reference to the caller’s vector: subsequently changing the caller’s original vector cannot edit the model’s stored joints.</p>
+<p>The accessors borrow the model’s members. Such references should be used while the model remains alive and unchanged; replacing or moving the owner can change or invalidate access to its former contents. The model itself remains an ordinary value that can be copied or replaced as a whole. Its public interface provides no operation to mutate an individual stored joint.</p>
+</section>
+<section id="verification-meaning-2" class="level3" data-number="11.3.3">
+<h3 data-number="11.3.3" class="anchored" data-anchor-id="verification-meaning-2"><span class="header-section-number">11.3.3</span> Verification meaning</h3>
+<p>The model tests check that construction retains a nonidentity home pose and a joint, rejects an empty sequence with the model-error category, and preserves a mixed revolute–prismatic order. The order check matters mathematically: exchanging two stored joints can change the transformation product even if each joint is independently valid. These tests check representation and construction, not the computed pose for a nonzero coordinate query.</p>
+</section>
+</section>
+<section id="sec-general-kinematics-impl-space-forward-kinematics" class="level2" data-number="11.4">
+<h2 data-number="11.4" class="anchored" data-anchor-id="sec-general-kinematics-impl-space-forward-kinematics"><span class="header-section-number">11.4</span> Space-form forward kinematics</h2>
+<p>Given the fixed model and a current coordinate column <span class="math inline">\(\mathbf q=(q_1,\ldots,q_n)^{\mathsf T}\)</span>, forward kinematics returns <span class="math inline">\(\mathbf T_{se}(\mathbf q)\in SE(3)\)</span>. Its allowed input set is <span class="math inline">\(\mathcal Q=\mathcal Q_1\times\cdots\times\mathcal Q_n\subseteq\mathbb R^n\)</span>, the Cartesian product of the declared joint intervals. Entry <span class="math inline">\(q_j\)</span> is in radians for a revolute joint or metres for a prismatic joint; the whole column has no single physical unit.</p>
+<p>Recall the space-form construction from <a href="10_general_robot_kinematics_and_jacobians.html#sec-serial-product-of-exponentials" class="quarto-xref"><span>Section 10.2</span></a>. For each joint, define its six-entry exponential-coordinate column <span class="math inline">\({}^{s}\boldsymbol\eta_j\)</span>, its active displacement <span class="math inline">\(\mathbf E_j(q_j)\in SE(3)\)</span>, and the resulting pose by</p>
+<p><span class="math display">\[
+{}^{s}\boldsymbol\eta_j:={}^{s}\mathbf S_jq_j,
+\qquad
+\mathbf E_j(q_j):=\exp\!\left(\widehat{{}^{s}\boldsymbol\eta_j}\right),
+\qquad
+\mathbf T_{se}(\mathbf q)=\mathbf E_1(q_1)\cdots\mathbf E_n(q_n)\mathbf M.
+\]</span></p>
+<p>The hat operator maps the linear-first six-entry column to its <span class="math inline">\(4\times4\)</span> Lie-algebra matrix, and <span class="math inline">\(\exp\)</span> is the matrix exponential implemented by the spatial kernel. The upper three entries of <span class="math inline">\({}^{s}\boldsymbol\eta_j\)</span> are linear exponential coordinates in metres; the lower three are angular exponential coordinates in radians, identically zero for a prismatic joint. The upper block is not generally the displacement transform’s translation column: the coupled rotation-and-translation calculation in <a href="09_spatial_geometry_kernel_implementation.html#sec-spatial-kernel-se3-exponential" class="quarto-xref"><span>Section 9.10</span></a> supplies that translation.</p>
+<p>The factors preserve base-to-end-effector joint order from left to right. They act rightmost first on coordinate columns, and each <span class="math inline">\(\mathbf E_j\)</span> is an active motion expressed in the fixed space frame. This factor order describes the final pose, not a time sequence for commanding the robot. The stored axes remain the zero-arrangement axes throughout evaluation; the ordered product accounts for the motion of the outward assembly.</p>
+<section id="public-input-and-output" class="level3" data-number="11.4.1">
+<h3 data-number="11.4.1" class="anchored" data-anchor-id="public-input-and-output"><span class="header-section-number">11.4.1</span> Public input and output</h3>
+<p>The public declaration is:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> rigid_body_kinematics</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> Transform3 space_form_forward_kinematics<span class="op">(</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> SerialChainModel <span class="op">&amp;</span> model<span class="op">,</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  Eigen<span class="op">::</span>Ref<span class="op">&lt;</span><span class="at">const</span> Eigen<span class="op">::</span>VectorXd<span class="op">&gt;</span> joint_coordinates<span class="op">,</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> NumericalPolicy <span class="op">&amp;</span> policy <span class="op">=</span> NumericalPolicy<span class="op">{});</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span>  <span class="co">// namespace rigid_body_kinematics</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>space_form_forward_kinematics</code> borrows <code>model</code> and returns an owned <code>Transform3</code> representing <span class="math inline">\(\mathbf T_{se}(\mathbf q)\)</span>. <code>Eigen::VectorXd</code> is a dynamically sized column of <code>double</code> values. <code>Eigen::Ref&lt;const Eigen::VectorXd&gt;</code> provides read-only access to a compatible column: an ordinary compatible vector can be borrowed without copying its entries. Some expression inputs require Eigen to evaluate temporary storage, so this parameter is not a guarantee that every possible caller expression avoids a copy. The evaluator retains no coordinate reference after it returns.</p>
+<p><code>joint_coordinates</code> represents <span class="math inline">\(\mathbf q\)</span>, and the mathematical entry <span class="math inline">\(q_j\)</span> appears at zero-based C++ index <span class="math inline">\(j-1\)</span>. <code>policy</code> supplies numerical evaluation thresholds rather than physical robot properties. The default argument <code>NumericalPolicy{}</code> constructs the policy with its declared member defaults when the caller omits the third argument; the temporary remains alive for the call. The return type is a transform rather than an optional partial answer. Invalid queries throw a typed serial-chain exception.</p>
+</section>
+<section id="accessing-either-joint-kind" class="level3" data-number="11.4.2">
+<h3 data-number="11.4.2" class="anchored" data-anchor-id="accessing-either-joint-kind"><span class="header-section-number">11.4.2</span> Accessing either joint kind</h3>
+<p>The following two helpers let the evaluator query either joint type without duplicating the calculation. Their complete definitions belong to an unnamed namespace inside the implementation namespace; the variant operations use <code>&lt;variant&gt;</code>. The separate policy-validation helper is omitted and its requirements are summarized with the evaluator’s other checks below.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="dt">bool</span> joint_contains<span class="op">(</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> JointDefinition <span class="op">&amp;</span> joint_definition<span class="op">,</span> <span class="dt">double</span> joint_coordinate<span class="op">)</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="bu">std::</span>visit<span class="op">(</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">[</span>joint_coordinate<span class="op">](</span><span class="at">const</span> <span class="kw">auto</span> <span class="op">&amp;</span> joint<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> joint<span class="op">.</span>limits<span class="op">().</span>contains<span class="op">(</span>joint_coordinate<span class="op">);</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">},</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>    joint_definition<span class="op">);</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> Vector6LinearFirst <span class="op">&amp;</span> space_screw_axis<span class="op">(</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> JointDefinition <span class="op">&amp;</span> joint_definition<span class="op">)</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="bu">std::</span>visit<span class="op">(</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">[](</span><span class="at">const</span> <span class="kw">auto</span> <span class="op">&amp;</span> joint<span class="op">)</span> <span class="op">-&gt;</span> <span class="at">const</span> Vector6LinearFirst <span class="op">&amp;</span> <span class="op">{</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> joint<span class="op">.</span>space_screw_axis<span class="op">();</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>    <span class="op">},</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>    joint_definition<span class="op">);</span></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="what-stdvisit-does" class="level4">
+<h4 class="anchored" data-anchor-id="what-stdvisit-does">What <code>std::visit</code> does</h4>
+<p>For one variant, the call has the following form. This is schematic syntax: the argument names are placeholders, not additional declarations in the implementation.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="bu">std::</span>visit<span class="op">(</span>visitor<span class="op">,</span> variant_value<span class="op">);</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ol type="1">
+<li><strong>What problem it solves:</strong> A variant can hold different types of objects, but holds only one at a time. For example, a joint definition holds either a revolute joint or a prismatic joint. <code>std::visit</code> lets you call a function with whichever joint is actually stored there.</li>
+<li><strong>First argument — what to do:</strong> <code>visitor</code> is the function you want to run on the stored object. A lambda lets you write that function directly inside the call, as in the helpers above.</li>
+<li><strong>Second argument — where the object is:</strong> <code>variant_value</code> is the variant holding the object. <code>std::visit</code> passes the object inside it to your function, not the whole variant.</li>
+<li><strong>Which object the function receives:</strong> If the variant holds a revolute joint, your function receives that revolute joint. If it holds a prismatic joint, your function receives that prismatic joint. Only one call happens, using the object currently stored.</li>
+<li><strong>What comes back:</strong> The answer from your function becomes the answer from <code>std::visit</code>. If your function checks a joint limit and returns <code>true</code>, <code>std::visit</code> returns <code>true</code> too. The function you supply performs the check; <code>std::visit</code> only connects it to the stored object and returns its answer.</li>
+</ol>
+</section>
+<section id="how-the-joint-helpers-use-it" class="level4">
+<h4 class="anchored" data-anchor-id="how-the-joint-helpers-use-it">How the joint helpers use it</h4>
+<ol type="1">
+<li><strong>Variant and contained joint:</strong> <code>joint_definition</code> is the variant containing a <code>RevoluteJoint</code> or a <code>PrismaticJoint</code>. In both helpers, the first argument to <code>std::visit</code> is the lambda, and the second is this variant. The lambda’s <code>joint</code> parameter refers to the actual stored joint.</li>
+<li><strong>Coordinate capture:</strong> In <code>joint_contains</code>, <code>[joint_coordinate]</code> captures a copy of the coordinate to check. This is separate from the parameter supplied by <code>std::visit</code>: the capture provides the query, while the parameter provides the joint whose interval is queried.</li>
+<li><strong>Joint parameter:</strong> <code>const auto &amp; joint</code> becomes <code>const RevoluteJoint &amp;</code> or <code>const PrismaticJoint &amp;</code> for the selected alternative. It borrows the joint without copying or modifying it. Both classes provide the operations used by the visitor; they do not need a common base class.</li>
+<li><strong>Membership result:</strong> <code>joint.limits().contains(joint_coordinate)</code> checks the appropriate interval and returns a <code>bool</code> for either joint type. The inner <code>return</code> passes that Boolean out of the lambda, <code>std::visit</code> returns it, and the outer <code>return</code> passes it out of <code>joint_contains</code>.</li>
+<li><strong>Screw result:</strong> In the screw helper, <code>[]</code> captures nothing because the supplied joint is the only input needed. The explicit <code>-&gt; const Vector6LinearFirst &amp;</code> makes the lambda return a read-only reference to that joint’s stored screw. Both alternatives return the same reference type.</li>
+<li><strong>Reference lifetime:</strong> The lambda’s <code>-&gt; const Vector6LinearFirst &amp;</code> makes it return a read-only reference to the screw stored in the joint. The outer helper also returns <code>const Vector6LinearFirst &amp;</code>, so the caller receives a reference to that same stored screw, usable while the joint remains alive and unchanged. If the lambda’s <code>-&gt; const Vector6LinearFirst &amp;</code> were removed, the lambda would instead return a copied <code>Vector6LinearFirst</code> value. The outer helper would still return <code>const Vector6LinearFirst &amp;</code>, but that reference would point to the temporary copy, not the joint’s stored screw. The temporary is destroyed during the helper’s return, leaving the caller with a <strong>dangling reference</strong> to an object that no longer exists.</li>
+</ol>
+</section>
+</section>
+<section id="evaluating-the-ordered-product" class="level3" data-number="11.4.3">
+<h3 data-number="11.4.3" class="anchored" data-anchor-id="evaluating-the-ordered-product"><span class="header-section-number">11.4.3</span> Evaluating the ordered product</h3>
+<p>The calculation has two stages: establish that the query is admissible, then accumulate the ordered displacements. The pseudocode includes the checks and failure behaviour so their role remains visible without reproducing every rejection branch.</p>
+<pre class="text"><code>Validate the numerical policy and coordinate count.
+Reject any non-finite coordinate.
+
+For each joint:
+    Check its coordinate against its limits.
+    For a revolute joint, check the supported angular magnitude.
+
+Start the accumulated transform at identity.
+For each joint in base-to-end-effector order:
+    Multiply its stored screw by its coordinate.
+    Reject non-finite exponential coordinates.
+    Convert those coordinates to a displacement.
+    Append the displacement on the right.
+
+Append the home pose on the right and return.
+On evaluation failure, report the error without returning a partial pose.</code></pre>
+<p><strong>Production excerpt — core accumulation, not a complete function.</strong> This excerpt uses the inputs from the public signature above after validation. The function wrapper, initial policy and coordinate checks, and surrounding exception-translation blocks are omitted and summarized below. Screw scaling, its finiteness check, exponential evaluation, and multiplication order are unchanged.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>Transform3 result <span class="op">=</span> Transform3<span class="op">::</span>identity<span class="op">();</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> <span class="op">(</span><span class="bu">std::</span>size_t index <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> index <span class="op">&lt;</span> model<span class="op">.</span>joint_count<span class="op">();</span> <span class="op">++</span>index<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> <span class="dt">double</span> coordinate <span class="op">=</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    joint_coordinates<span class="op">(</span><span class="kw">static_cast</span><span class="op">&lt;</span>Eigen<span class="op">::</span>Index<span class="op">&gt;(</span>index<span class="op">));</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> Vector6LinearFirst exponential_coordinates <span class="op">=</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    space_screw_axis<span class="op">(</span>model<span class="op">.</span>joint_definitions<span class="op">().</span>at<span class="op">(</span>index<span class="op">))</span> <span class="op">*</span> coordinate<span class="op">;</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(!</span>exponential_coordinates<span class="op">.</span>allFinite<span class="op">())</span> <span class="op">{</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">throw</span> SerialChainException<span class="op">(</span></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>      SerialChainError<span class="op">::</span>unsupported_magnitude<span class="op">,</span></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Joint "</span> <span class="op">+</span> <span class="bu">std::</span>to_string<span class="op">(</span>index <span class="op">+</span> <span class="dv">1</span><span class="op">)</span> <span class="op">+</span></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>        <span class="st">" produced non-finite exponential coordinates."</span><span class="op">);</span></span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> Transform3 joint_displacement <span class="op">=</span></span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>    Transform3<span class="op">::</span>from_exponential_coordinates<span class="op">(</span></span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>      exponential_coordinates<span class="op">,</span> policy<span class="op">);</span></span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>  result <span class="op">=</span> result<span class="op">.</span>compose<span class="op">(</span>joint_displacement<span class="op">);</span></span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> result<span class="op">.</span>compose<span class="op">(</span>model<span class="op">.</span>home_pose<span class="op">());</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The same zero-based <code>index</code> selects a coordinate and its joint definition, preserving their base-to-end-effector correspondence. The explicit conversion to <code>Eigen::Index</code> connects the container’s index type to Eigen’s signed indexing type. The earlier coordinate-count check establishes that there is exactly one coordinate for every stored joint. Error messages report <code>index + 1</code>, the mathematical joint index.</p>
+<p>After validation, <code>exponential_coordinates</code> is the owned column <span class="math inline">\({}^{s}\boldsymbol\eta_j={}^{s}\mathbf S_jq_j\)</span>, and <code>joint_displacement</code> is <span class="math inline">\(\mathbf E_j(q_j)\)</span>. The multiplication can overflow even when both factors are finite, which explains the check before calling the kernel. <code>Transform3::from_exponential_coordinates</code> performs the coupled spatial exponential; the evaluator does not construct a translation directly from the screw’s upper entries.</p>
+<p><code>result</code> starts as the identity transform <span class="math inline">\(\mathbf I_4\)</span>, the <span class="math inline">\(4\times4\)</span> identity matrix. Define <span class="math inline">\(\mathbf P_0=\mathbf I_4\)</span> and let <span class="math inline">\(\mathbf P_j\)</span> be the partial product after joint <span class="math inline">\(j\)</span>. The call <code>result.compose(joint_displacement)</code> implements</p>
+<p><span class="math display">\[
+\mathbf P_j=\mathbf P_{j-1}\mathbf E_j(q_j),
+\qquad j=1,\ldots,n.
+\]</span></p>
+<p>Consequently the loop builds <span class="math inline">\(\mathbf E_1\)</span>, then <span class="math inline">\(\mathbf E_1\mathbf E_2\)</span>, and finally <span class="math inline">\(\mathbf E_1\cdots\mathbf E_n\)</span>. The last composition appends <span class="math inline">\(\mathbf M\)</span> on the right. Starting from the home pose and using the same loop would instead place <span class="math inline">\(\mathbf M\)</span> on the left, which is generally a different pose. The identity initialization and final home-pose composition are therefore part of the equation-to-code mapping, not interchangeable setup choices.</p>
+<p>The omitted policy check requires both exponential thresholds to be finite. The small-angle series threshold must lie strictly between zero and <span class="math inline">\(\pi\)</span> radians, and the maximum supported angle must be at least <span class="math inline">\(\pi\)</span> radians. Their defaults are <span class="math inline">\(10^{-4}\)</span> and <span class="math inline">\(10^6\)</span> radians, respectively. The first selects the series calculation; the second bounds supported angular magnitude. These numerical thresholds are not physical joint limits, and unrelated policy fields used by other kernel operations are not checked here.</p>
+<p>The omitted coordinate checks reject a wrong-sized column and any non-finite entry before examining joint domains. Then, for each joint, they check interval membership and, for a revolute joint, the absolute angular magnitude against the supported maximum. The angular threshold does not constrain a prismatic displacement in metres. No check wraps an angle, clamps a coordinate, or changes the supplied values. An unbounded revolute interval still does not imply unlimited exponential-angle support.</p>
+<p>The omitted exception-translation blocks preserve the evaluator’s public failure contract. An invalid kernel policy remains an invalid-policy error; other kernel failures during a joint exponential or its composition become unsupported-magnitude errors with the joint index and underlying message. A failure when appending the home pose is reported separately as an unsupported-magnitude error identifying that final composition. Omitting these blocks from the excerpt does not remove them from the production operation.</p>
+<p>All intermediate transforms are local values. A thrown exception exits without returning the partially accumulated transform, and the borrowed model and coordinate input are not modified. Checking finiteness does not establish that an arbitrarily large finite query can be evaluated accurately; the angular bound and the kernel’s numerical rejection behaviour remain part of correct API use.</p>
+<div class="callout callout-style-simple callout-note no-icon callout-titled" title="Example: A rotating extension">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Example: A rotating extension
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Consider a revolute joint about the positive space <span class="math inline">\(z\)</span>-axis through the origin, followed by a prismatic joint along the positive space <span class="math inline">\(x\)</span>-direction at zero. The home end-effector orientation is the identity and its origin is at <span class="math inline">\((1,0,0)^{\mathsf T}\,\mathrm m\)</span>. Query a revolute angle of <span class="math inline">\(\pi/2\)</span> radians and a prismatic displacement of <span class="math inline">\(0.5\,\mathrm m\)</span>. This is a usage example, not part of the production evaluator; the statements below belong inside a caller function after including the public forward-kinematics header and <code>&lt;numbers&gt;</code>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> rbk <span class="op">=</span> rigid_body_kinematics<span class="op">;</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="kw">auto</span> revolute <span class="op">=</span> rbk<span class="op">::</span>RevoluteJoint<span class="op">::</span>from_axis<span class="op">(</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  Eigen<span class="op">::</span>Vector3d<span class="op">(</span><span class="fl">0.0</span><span class="op">,</span> <span class="fl">0.0</span><span class="op">,</span> <span class="fl">1.0</span><span class="op">),</span> Eigen<span class="op">::</span>Vector3d<span class="op">::</span>Zero<span class="op">(),</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>  rbk<span class="op">::</span>RevoluteLimits<span class="op">::</span>from_bounds<span class="op">(-</span><span class="bu">std::</span>numbers::pi<span class="op">,</span> <span class="bu">std::</span>numbers::pi<span class="op">));</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="kw">auto</span> prismatic <span class="op">=</span> rbk<span class="op">::</span>PrismaticJoint<span class="op">::</span>from_axis<span class="op">(</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>  Eigen<span class="op">::</span>Vector3d<span class="op">(</span><span class="fl">1.0</span><span class="op">,</span> <span class="fl">0.0</span><span class="op">,</span> <span class="fl">0.0</span><span class="op">),</span></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>  rbk<span class="op">::</span>PrismaticLimits<span class="op">::</span>from_bounds<span class="op">(-</span><span class="fl">10.0</span><span class="op">,</span> <span class="fl">10.0</span><span class="op">));</span></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>Eigen<span class="op">::</span>Matrix4d home_matrix <span class="op">=</span> Eigen<span class="op">::</span>Matrix4d<span class="op">::</span>Identity<span class="op">();</span></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>home_matrix<span class="op">(</span><span class="dv">0</span><span class="op">,</span> <span class="dv">3</span><span class="op">)</span> <span class="op">=</span> <span class="fl">1.0</span><span class="op">;</span></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="kw">auto</span> model <span class="op">=</span> rbk<span class="op">::</span>SerialChainModel<span class="op">::</span>from_home_and_joints<span class="op">(</span></span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>  rbk<span class="op">::</span>Transform3<span class="op">::</span>from_matrix<span class="op">(</span>home_matrix<span class="op">),</span> <span class="op">{</span>revolute<span class="op">,</span> prismatic<span class="op">});</span></span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>Eigen<span class="op">::</span>VectorXd joint_coordinates<span class="op">(</span><span class="dv">2</span><span class="op">);</span></span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>joint_coordinates <span class="op">&lt;&lt;</span> <span class="bu">std::</span>numbers::pi <span class="op">/</span> <span class="fl">2.0</span><span class="op">,</span> <span class="fl">0.5</span><span class="op">;</span></span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> rbk<span class="op">::</span>Transform3 pose <span class="op">=</span></span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a>  rbk<span class="op">::</span>space_form_forward_kinematics<span class="op">(</span>model<span class="op">,</span> joint_coordinates<span class="op">);</span></span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> Eigen<span class="op">::</span>Matrix4d pose_matrix <span class="op">=</span> pose<span class="op">.</span>matrix<span class="op">();</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>namespace rbk = rigid_body_kinematics</code> introduces a shorter namespace alias for this example; it does not create another implementation. <code>home_matrix(0, 3)</code> selects the first translation entry using zero-based row and column indices. The braced list <code>{revolute, prismatic}</code> initializes the factory’s vector parameter with copies of the two joint values in that order. Eigen’s <code>&lt;&lt;</code> comma initializer fills the two-entry coordinate column in the written order. <code>pose_matrix</code> is an owned matrix representation of the returned pose.</p>
+<p>An independent geometric calculation first extends the home position along its zero-arrangement <span class="math inline">\(x\)</span>-direction and then rotates the outward assembly. Writing <span class="math inline">\(\mathbf R_z(\pi/2)\)</span> for the positive quarter-turn rotation about the space <span class="math inline">\(z\)</span>-axis, the expected position is</p>
+<p><span class="math display">\[
+\mathbf R_z(\pi/2)
+\left(
+\begin{bmatrix}1\\0\\0\end{bmatrix}
++\begin{bmatrix}0.5\\0\\0\end{bmatrix}
+\right)
+=\begin{bmatrix}0\\1.5\\0\end{bmatrix}\ \mathrm m.
+\]</span></p>
+<p>The prismatic joint does not change orientation, so the expected complete matrix is</p>
+<p><span class="math display">\[
+\mathbf T_{se}(\mathbf q)=
+\begin{bmatrix}
+0&amp;-1&amp;0&amp;0\\
+1&amp;0&amp;0&amp;1.5\\
+0&amp;0&amp;1&amp;0\\
+0&amp;0&amp;0&amp;1
+\end{bmatrix}.
+\]</span></p>
+<p>The returned numerical entries should agree up to floating-point rounding. The translation lies along the rotated extension direction, not along the unchanged space <span class="math inline">\(x\)</span>-axis. This distinguishes the ordered product from simply adding the prismatic displacement to an already rotated home position in fixed space coordinates.</p>
+</div>
+</div>
+</section>
+<section id="verification-meaning-3" class="level3" data-number="11.4.4">
+<h3 data-number="11.4.4" class="anchored" data-anchor-id="verification-meaning-3"><span class="header-section-number">11.4.4</span> Verification meaning</h3>
+<p>The forward-pose tests exercise the home-pose identity at zero, a quarter turn about the space origin, rotation about an offset axis line, translation along a normalized negative direction, an out-of-plane rotation about the space <span class="math inline">\(x\)</span>-axis, and the mixed chain above. The offset-axis case checks the sign and role of the revolute screw’s upper block; the out-of-plane case guards against an accidentally planar implementation. The mixed chain checks that a proximal rotation carries the distal extension. The nonzero examples use independently specified expected matrices rather than another call to the same forward evaluator.</p>
+<p>Pose comparison uses the relative transform <span class="math inline">\(\mathbf T_{\mathrm{err}}=\mathbf T_{\mathrm{expected}}^{-1}\mathbf T_{\mathrm{actual}}\)</span>, where the subscripts identify the independently expected and computed poses. Its translation column measures position discrepancy along the expected end-effector axes. The angular block of its principal logarithm measures orientation discrepancy. The tests compare the translation norm with <span class="math inline">\(10^{-12}\,\mathrm m\)</span> and the angular norm with <span class="math inline">\(10^{-12}\)</span> radians separately; they do not combine metre and radian errors into one scalar norm. These cases provide evidence for their particular geometric properties, not a proof for every possible chain or numerical magnitude.</p>
+</section>
+</section>
+<section id="sec-general-kinematics-impl-cycle-connections" class="level2" data-number="11.5">
+<h2 data-number="11.5" class="anchored" data-anchor-id="sec-general-kinematics-impl-cycle-connections"><span class="header-section-number">11.5</span> How the classes and functions connect</h2>
+<p>The complete calculation connects a fixed geometric model to a changing coordinate query. The limits define the allowed values of each <span class="math inline">\(q_j\)</span>; the joint definitions supply the corresponding <span class="math inline">\({}^{s}\mathbf S_j\)</span>; and the home pose supplies <span class="math inline">\(\mathbf M\)</span>. The evaluator combines those stored values with the current <span class="math inline">\(\mathbf q\)</span> to return <span class="math inline">\(\mathbf T_{se}(\mathbf q)\)</span>. The diagram shows which inputs feed construction and evaluation; it does not prescribe a time order for moving the physical joints.</p>
+<pre class="text"><code>Bounds --&gt; RevoluteLimits / PrismaticLimits
+                         |
+Axis geometry -----------+
+                         v
+             RevoluteJoint / PrismaticJoint
+                         |
+                         v
+            Ordered JointDefinition values
+                         |
+Home pose: Transform3 ---+
+                         v
+                  SerialChainModel
+                         |
+q + NumericalPolicy -----+
+                         v
+           space_form_forward_kinematics
+                         |
+                         v
+             Current pose: Transform3</code></pre>
+<p>Construction starts with <code>RevoluteLimits::from_bounds</code> or <code>PrismaticLimits::from_bounds</code>. Each returns a validated interval with angular bounds in radians or displacement bounds in metres. The corresponding joint’s <code>from_axis</code> factory combines that interval with axis geometry expressed in the common space frame at the zero arrangement. It normalizes the direction, derives the screw, and returns a joint that owns its geometry, limits, and screw. A revolute joint also owns the supplied point on its axis line.</p>
+<p>Each <code>JointDefinition</code> contains one complete revolute or prismatic joint. The caller places these values in base-to-end-effector order and supplies the independently constructed home <code>Transform3</code>. <code>SerialChainModel::from_home_and_joints</code> checks that the joint sequence is nonempty and stores the home pose and ordered joints. The model therefore owns the whole fixed reference: its vector owns the variants, and each variant owns a joint with its interval and screw. The home pose is not derived from the limits or the joint list; it is a separate geometric input describing the selected end effector at zero.</p>
+<p>For each query, <code>space_form_forward_kinematics</code> borrows the model, accesses the current coordinate column read-only, and borrows the numerical policy. It checks the policy, coordinate count, finite entries, and per-joint admissibility. A variant visitor selects each stored joint’s <code>limits().contains(...)</code> operation, so the coordinate at each index is checked against that joint’s own interval. These checks do not alter the coordinates or the model.</p>
+<p>For each joint in the same stored order, another visitor borrows its screw. Multiplying that screw by the matching coordinate creates the local exponential-coordinate column <span class="math inline">\({}^{s}\boldsymbol\eta_j={}^{s}\mathbf S_jq_j\)</span>. <code>Transform3::from_exponential_coordinates</code> converts it to the active displacement <span class="math inline">\(\mathbf E_j(q_j)\)</span>, and <code>compose</code> appends that displacement to the local partial product. The final composition appends the model’s home pose on the right, producing <span class="math inline">\(\mathbf E_1(q_1)\cdots\mathbf E_n(q_n)\mathbf M\)</span>.</p>
+<p>The returned <code>Transform3</code> owns the current pose; it does not replace the home pose stored in the model. The same model can therefore serve another coordinate query without reconstructing its limits or joints. If validation or a numerical calculation fails, the operation throws without returning a partial pose. Construction establishes the fixed reference, while evaluation uses that reference to calculate one requested pose.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const toolbar = document.querySelector(".navbar .quarto-navbar-tools");
+
+  if (!toolbar || document.getElementById("left-sidebar-button")) {
+    return;
+  }
+
+  const controls = [
+    {
+      id: "left-sidebar-button",
+      className: "left-sidebar-hidden",
+      storageKey: "quarto-left-sidebar-hidden",
+      targetId: "quarto-sidebar",
+      noun: "chapter navigation",
+      icon: "bi-layout-sidebar"
+    },
+    {
+      id: "right-sidebar-button",
+      className: "right-sidebar-hidden",
+      storageKey: "quarto-right-sidebar-hidden",
+      targetId: "quarto-margin-sidebar",
+      noun: "table of contents",
+      icon: "bi-layout-sidebar-reverse"
+    }
+  ];
+
+  const storedState = (key) => {
+    try {
+      return window.localStorage.getItem(key) === "true";
+    } catch {
+      return false;
+    }
+  };
+
+  const storeState = (key, hidden) => {
+    try {
+      window.localStorage.setItem(key, String(hidden));
+    } catch {
+      // The controls still work when browser storage is unavailable.
+    }
+  };
+
+  controls.forEach((control) => {
+    document.body.classList.toggle(
+      control.className,
+      storedState(control.storageKey)
+    );
+
+    const button = document.createElement("button");
+    button.id = control.id;
+    button.type = "button";
+    button.className = "sidebar-toggle-button quarto-navigation-tool";
+    button.setAttribute("aria-controls", control.targetId);
+    button.innerHTML = `<i class="bi ${control.icon}" aria-hidden="true"></i>`;
+
+    const updateButton = () => {
+      const hidden = document.body.classList.contains(control.className);
+      const label = `${hidden ? "Show" : "Hide"} ${control.noun}`;
+
+      button.title = label;
+      button.setAttribute("aria-label", label);
+      button.setAttribute("aria-expanded", String(!hidden));
+    };
+
+    button.addEventListener("click", () => {
+      const hidden = document.body.classList.toggle(control.className);
+      storeState(control.storageKey, hidden);
+      updateButton();
+    });
+
+    toolbar.appendChild(button);
+    updateButton();
+  });
+});
+</script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../part_01_motion_mechanics_control/10_general_robot_kinematics_and_jacobians.html" class="pagination-link" aria-label="General Robot Kinematics and Jacobians">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">General Robot Kinematics and Jacobians</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../part_02_probability_estimation/finite_markov_chains.html" class="pagination-link" aria-label="Finite Markov Chains">
+        <span class="nav-page-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Finite Markov Chains</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

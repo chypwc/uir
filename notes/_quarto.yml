@@ -31,12 +31,14 @@ book:
         - part_01_motion_mechanics_control/08_screw_motion_se3_exponential_and_spatial_integration.qmd
         - part_01_motion_mechanics_control/09_spatial_geometry_kernel_implementation.qmd
         - part_01_motion_mechanics_control/10_general_robot_kinematics_and_jacobians.qmd
+        - part_01_motion_mechanics_control/11_general_robot_kinematics_and_jacobians_implementation.qmd
     - part: '[Part II:]{.content-visible when-format="html"} Probability and Estimation'
       chapters:
         - part_02_probability_estimation/finite_markov_chains.qmd
     - part: '[Part V:]{.content-visible when-format="html"} Optimisation, Planning, and Decisions'
       chapters:
         - part_05_optimisation_planning_decisions/finite_markov_decision_processes.qmd
+        - part_05_optimisation_planning_decisions/finite_mdp_implementation.qmd
 
 
 lang: en-AU
