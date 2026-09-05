@@ -10,6 +10,10 @@ namespace intelligence_foundations
 enum class FiniteMdpError
 {
   invalid_state_count,
+  invalid_action_count,
+  invalid_current_state,
+  invalid_action,
+  incompatible_outcome_state_count,
   invalid_probability_sum_tolerance,
   empty_outcome_distribution,
   invalid_next_state,
@@ -17,6 +21,12 @@ enum class FiniteMdpError
   invalid_probability,
   invalid_probability_sum,
   duplicate_outcome,
+  duplicate_state_action,
+  state_without_feasible_action,
+  infeasible_state_action,
+  invalid_terminal_state,
+  duplicate_terminal_state,
+  invalid_terminal_structure,
 };
 
 class FiniteMdpException : public std::invalid_argument

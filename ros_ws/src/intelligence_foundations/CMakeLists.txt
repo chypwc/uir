@@ -7,9 +7,9 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 find_package(ament_cmake REQUIRED)
 
-# The first capability is header-only. This target will become a compiled
-# library when the finite-MDP implementation gains source files.
+# Build the simulator-neutral finite-MDP foundations library.
 add_library(${PROJECT_NAME}
+  src/finite_mdp.cpp
   src/joint_outcome_distribution.cpp
 )
 
@@ -54,6 +54,14 @@ if(BUILD_TESTING)
 
   ament_add_gtest(test_joint_outcome_distribution
     test/test_joint_outcome_distribution.cpp
+  )
+
+  ament_add_gtest(test_finite_mdp
+    test/test_finite_mdp.cpp
+  )
+
+  target_link_libraries(test_finite_mdp
+    ${PROJECT_NAME}
   )
 
   target_link_libraries(test_joint_outcome_distribution

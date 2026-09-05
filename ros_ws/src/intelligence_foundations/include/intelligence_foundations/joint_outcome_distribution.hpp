@@ -27,6 +27,10 @@ public:
   [[nodiscard]] std::size_t state_count() const noexcept;
 
   [[nodiscard]] std::span<const OutcomeProbability> outcomes() const noexcept;
+
+  [[nodiscard]] std::vector<double> next_state_probabilities() const;
+
+  [[nodiscard]] double expected_reward() const noexcept;
 };
 
 }  // namespace intelligence_foundations

@@ -213,3 +213,39 @@ TEST(JointOutcomeDistributionTest, RejectsInvalidProbabilitySumTolerances)
     }
   }
 }
+
+TEST(
+  JointOutcomeDistributionTest,
+  ComputesDenseNextStateProbabilitiesBySummingOverRewards)
+{
+  const std::vector<OutcomeProbability> outcomes{
+    {StateIndex{0}, -1.0, 0.2},
+    {StateIndex{1}, 4.0, 0.3},
+    {StateIndex{1}, 5.0, 0.5},
+  };
+
+  const JointOutcomeDistribution distribution =
+    JointOutcomeDistribution::from_outcomes(3U, outcomes, 1.0e-12);
+
+  const std::vector<double> probabilities =
+    distribution.next_state_probabilities();
+
+  ASSERT_EQ(probabilities.size(), 3U);
+  EXPECT_NEAR(probabilities[0], 0.2, 1.0e-12);
+  EXPECT_NEAR(probabilities[1], 0.8, 1.0e-12);
+  EXPECT_NEAR(probabilities[2], 0.0, 1.0e-12);
+}
+
+TEST(JointOutcomeDistributionTest, ComputesExpectedOneStepReward)
+{
+  const std::vector<OutcomeProbability> outcomes{
+    {StateIndex{0}, -1.0, 0.2},
+    {StateIndex{1}, 4.0, 0.3},
+    {StateIndex{1}, 5.0, 0.5},
+  };
+
+  const JointOutcomeDistribution distribution =
+    JointOutcomeDistribution::from_outcomes(3U, outcomes, 1.0e-12);
+
+  EXPECT_NEAR(distribution.expected_reward(), 3.5, 1.0e-12);
+}

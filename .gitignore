@@ -19,6 +19,7 @@ textbooks/
 archive/
 /PLAN.md
 game-design.md
+docs/effort_log.md
 
 .pytest_cache/
 

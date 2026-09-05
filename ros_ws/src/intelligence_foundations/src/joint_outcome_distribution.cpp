@@ -123,4 +123,61 @@ std::span<const OutcomeProbability> JointOutcomeDistribution::outcomes()
   return std::span<const OutcomeProbability>{outcomes_};
 }
 
+std::vector<double> JointOutcomeDistribution::next_state_probabilities() const
+{
+  std::vector<double> probabilities(state_count_, 0.0);
+  std::vector<double> compensations(state_count_, 0.0);
+
+  // Sum p(s', r| s, a) over reward to get p(s'| s, a).
+  for (const OutcomeProbability & outcome : outcomes_) {
+    const std::size_t next_state_index = outcome.next_state.value();
+
+    /*
+    This is the Kahan correction for destination state (j), where j = next_state_index.
+    If the previous addition into probabilities[j] lost a small amount through rounding,
+    compensations[j] records that error.
+    Subtracting it adjusts the next probability before addition.
+    */
+    const double corrected_probability =
+      outcome.probability - compensations[next_state_index];
+
+    // This sum may incur rounding error.
+    const double updated_probability =
+      probabilities[next_state_index] + corrected_probability;
+
+    // (updated_probability - probabilities[next_state_index])
+    // recovers the amount that actually entered the floating-point sum.
+    // Comparing that amount with corrected_probability estimates the rounding error.
+    compensations[next_state_index] =
+      (updated_probability - probabilities[next_state_index]) -
+      corrected_probability;
+
+    probabilities[next_state_index] = updated_probability;
+  }
+
+  return probabilities;
+}
+
+double JointOutcomeDistribution::expected_reward() const noexcept
+{
+  double expected_reward = 0.0;
+  double compensation = 0.0;
+
+  for (const OutcomeProbability & outcome : outcomes_) {
+    const double weighted_reward = outcome.reward * outcome.probability;
+
+    const double corrected_weighted_reward = weighted_reward - compensation;
+
+    const double updated_expected_reward =
+      expected_reward + corrected_weighted_reward;
+
+    compensation =
+      (updated_expected_reward - expected_reward) - corrected_weighted_reward;
+
+    expected_reward = updated_expected_reward;
+  }
+
+  return expected_reward;
+}
+
 }  // namespace intelligence_foundations

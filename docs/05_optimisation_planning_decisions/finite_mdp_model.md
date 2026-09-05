@@ -136,7 +136,11 @@ Reward values use `double`. They are scalar task evaluations with no physical un
 
 The model shall store a set $\mathcal S_{\mathrm{term}}\subseteq\mathcal S$. Entering one of these states terminates the modelled episode after retaining the reward produced by that transition.
 
-For matrix calculations, each terminal state shall use one declared bookkeeping action whose only joint outcome is a probability-one, zero-reward self-transition. A bookkeeping action may be shared by several terminal states, but it shall not be feasible in a nonterminal state unless the model independently defines it there as a real action.
+For matrix calculations, construction shall generate one shared bookkeeping action whose only joint outcome at each terminal state is a probability-one, zero-reward self-transition. This generated action shall be feasible only at terminal states.
+
+`FiniteMdp::from_rows(state_count, task_action_count, rows, terminal_states = {})` shall accept only task-action rows, with action indices in `[0, task_action_count)`. If any terminal states are declared, construction shall append the bookkeeping action at `ActionIndex{task_action_count}` without renumbering task actions. The complete model's `action_count()` shall equal `task_action_count() + 1` in this case and `task_action_count()` otherwise. `bookkeeping_action()` shall return `std::optional<ActionIndex>` containing the generated index, or `std::nullopt` when there are no terminal states. Adding the action shall fail with `invalid_action_count` if the complete count cannot be represented by `std::size_t`.
+
+Construction shall reject every caller-supplied outgoing terminal row with `invalid_terminal_structure`, including a zero-reward self-transition. It shall generate exactly one row per declared terminal state using the shared bookkeeping action, with a probability-one, zero-reward self-transition. Generated rows shall enter the same canonical state--action order as supplied rows. Nonterminal feasibility is defined by supplied rows, and every nonterminal state must have at least one such row. Incoming transitions and their rewards shall remain unchanged. A zero task-action count is valid only when all states are terminal; otherwise construction shall fail with `invalid_action_count`. The state count must remain positive.
 
 An episode runner shall not request another real decision after termination. The absorbing row exists to keep stochastic-matrix and post-termination sequence calculations defined; it does not create another task decision.
 
@@ -163,7 +167,7 @@ Cycle 1 defines and validates this result contract but does not yet require stoc
 
 ### Validated construction
 
-Construction accepts the state count, action count, feasible-action lists, terminal-state set, sparse joint-outcome table, and a probability-sum tolerance. It returns one immutable valid model or an explicit construction failure. No partially valid model shall be observable.
+Construction accepts the state count, task-action count, nonterminal feasible-action rows, and terminal-state set. Each supplied row contains a joint distribution already validated with its declared probability-sum tolerance. Construction generates the bookkeeping action and terminal rows under the terminal-state contract and returns one immutable valid model or an explicit construction failure. No partially valid model shall be observable.
 
 The probability-sum tolerance shall be finite and satisfy $0<\varepsilon_p\leq10^{-12}$. This upper bound is a deliberate package validation policy: the tolerance accounts for floating-point summation error rather than permitting materially non-normalised probability data. For each feasible pair, construction shall calculate the row sum using a numerically stable summation method and require
 
@@ -176,6 +180,10 @@ $$
 
 Passing this check shall not cause the stored probabilities to be rescaled.
 
+### Terminal-membership query
+
+`FiniteMdp::is_terminal(StateIndex state) const` shall return `true` exactly when the valid queried state belongs to the declared terminal-state set, and `false` otherwise. An index outside `[0, state_count)` shall throw `FiniteMdpException` with code `invalid_current_state`, including when the terminal set is empty. The query shall be deterministic, shall not mutate the model, and shall use declared terminal membership rather than infer termination from self-transitions, rewards, or action counts.
+
 ### Controlled queries
 
 Given a valid model and a feasible pair $(s,a)$, the controlled-transition query shall return the $n$-entry row
@@ -187,6 +195,28 @@ p(s_1\mid s,a)&\cdots&p(s_n\mid s,a)
 $$
 
 and the expected-reward query shall return $\bar r(s,a)$. Both results shall accumulate directly from the validated joint-outcome records.
+
+### Dense compute view
+
+Repeated matrix--vector calculations shall not reconstruct controlled rows from sparse joint outcomes on every use. A deterministic one-time conversion shall produce an immutable dense compute view. Here $m$ is the complete model's `action_count()`, including the generated bookkeeping action when present; policy dimensions use the same count. For state index $i\in\{0,\ldots,n-1\}$ and action index $\ell\in\{0,\ldots,m-1\}$, define the flattened row index
+
+$$
+k=im+\ell.
+$$
+
+The view shall contain a row-major controlled-transition matrix $\mathbf P_{\mathrm{ctl}}\in\mathbb R^{(nm)\times n}$, an expected-reward vector $\bar{\mathbf r}_{\mathrm{ctl}}\in\mathbb R^{nm}$, a feasible-action mask $\mathbf f\in\{0,1\}^{nm}$, and a terminal-state mask $\mathbf d\in\{0,1\}^{n}$. For every feasible pair $(s_i,a_\ell)$,
+
+$$
+\begin{aligned}
+[\mathbf P_{\mathrm{ctl}}]_{k,j}
+&=p(s_j\mid s_i,a_\ell),\\
+[\bar{\mathbf r}_{\mathrm{ctl}}]_k
+&=\bar r(s_i,a_\ell),\\
+f_k&=1.
+\end{aligned}
+$$
+
+For an infeasible pair, $f_k=0$ and the corresponding transition and reward storage shall be zero-filled deterministic padding. These zeros are not an environment response and shall never be queried, maximised over, or used in a policy-induced calculation without applying the feasible-action mask. The view shall declare `double` scalar storage, row-major layout, ownership, and lifetime; its conversion shall preserve the validated sparse model and introduce no random sampling. Cycle 1 verifies this representation and its equations but does not require threaded, SIMD, or GPU execution.
 
 ### Policy-induced calculation
 
@@ -204,22 +234,22 @@ The operation shall average only feasible controlled rows with their declared po
 
 Construction or calculation shall fail explicitly for:
 
-1. zero states or zero global actions;
-2. an invalid, duplicate, or missing state--action row;
+1. zero states, zero task actions when a nonterminal state exists, or overflow of the complete action count;
+2. an invalid or duplicate state--action row, or a nonterminal state with no supplied feasible row;
 3. an empty feasible-action list or duplicate feasible action;
 4. an outcome containing an invalid next state, non-finite reward, non-finite probability, non-positive stored probability, or probability greater than one;
 5. duplicate exact $(s',r)$ outcomes in one row;
 6. a joint-outcome row whose probability sum violates $\varepsilon_p$;
-7. an invalid terminal-state identifier or an invalid terminal absorbing row;
+7. an invalid or duplicate terminal-state identifier, or any caller-supplied outgoing terminal row;
 8. an invalid probability-sum tolerance;
 9. a policy with incompatible dimensions, non-finite entries, entries outside $[0,1]$, nonzero probability on an infeasible action, or an invalid row sum; or
 10. a query containing an invalid state, invalid action, or infeasible state--action pair.
 
-Failures shall distinguish invalid domain identifiers, invalid model structure, invalid probabilities, invalid terminal structure, and invalid policy structure. The implementation shall not clamp probabilities, discard invalid outcomes, create missing rows, insert actions, normalise rows, replace non-finite values, or return a numeric result alongside a failure.
+Failures shall distinguish invalid domain identifiers, invalid model structure, invalid probabilities, invalid terminal structure, and invalid policy structure. The implementation shall not clamp probabilities, discard invalid outcomes, normalise rows, replace non-finite values, or return a numeric result alongside a failure. The only permitted action and row generation is the terminal completion above; missing nonterminal dynamics shall not be invented.
 
 ## Frozen finite-MDP fixture
 
-The `synthetic_intelligence_engine` package shall own one frozen fixture with states $(s_1,s_2,s_\dagger)$, global actions $(a_1,a_2,a_\bot)$, and terminal set $\{s_\dagger\}$. Its positive joint outcomes are:
+The `synthetic_intelligence_engine` package shall own one frozen fixture with states $(s_1,s_2,s_\dagger)$, task actions $(a_1,a_2)$, and terminal set $\{s_\dagger\}$. Construction receives `task_action_count = 2` and only the nonterminal rows. It appends $a_\bot$ at action index 2, giving the complete global action order $(a_1,a_2,a_\bot)$. The completed model's positive joint outcomes are listed below; the final row is generated, not supplied:
 
 | Current state | Action | Next state | Reward | Probability |
 |---|---|---|---:|---:|
@@ -250,8 +280,11 @@ This fixture is an exact mathematical acceptance case. Fixture labels and task m
 |---|---|
 | IF-MDP-MOD-001 | The model shall represent every finite domain, feasible-action list, terminal state, and positive joint outcome declared by a valid input table. |
 | IF-MDP-MOD-002 | The model shall remain immutable after successful validation. |
+| IF-MDP-MOD-003 | Construction shall automatically append one terminal-only bookkeeping action when needed, generate all terminal rows, reject supplied terminal rows, and preserve task-action indices and incoming rewards while exposing task and complete action counts. |
+| IF-MDP-MOD-004 | The terminal-membership query shall report declared membership for valid states and explicitly reject invalid state indices. |
 | IF-MDP-CAL-001 | Controlled-transition queries shall marginalise the joint kernel over reward. |
 | IF-MDP-CAL-002 | Expected-reward queries shall calculate the probability-weighted reward over all joint outcomes. |
+| IF-MDP-CAL-003 | One deterministic conversion shall produce the declared dense controlled-transition, expected-reward, feasible-action-mask, and terminal-mask representation without assigning dynamics to infeasible pairs. |
 | IF-MDP-POL-001 | Policy validation shall enforce dimensions, probability bounds, feasibility, terminal bookkeeping, and row normalization. |
 | IF-MDP-POL-002 | Policy-induced calculations shall implement the action-weighted transition and reward equations in declared state order. |
 | IF-MDP-EP-001 | The shared step result shall preserve reward, termination, and truncation as separate fields with the declared meanings. |
@@ -266,7 +299,7 @@ Use the frozen fixture and $\varepsilon_p=10^{-12}$ unless a case states otherwi
 
 | ID | Case | Expected result |
 |---|---|---|
-| IF-MDP-ACC-001 | Construct the complete frozen fixture. | Construction succeeds and preserves three states, three global actions, all feasible pairs, six positive joint outcomes, and one terminal state. |
+| IF-MDP-ACC-001 | Construct the frozen fixture from two task actions and its nonterminal rows. | Construction succeeds with three states, two task actions, three complete global actions, all feasible pairs, six positive joint outcomes, and one terminal state. |
 | IF-MDP-ACC-002 | Query $(s_1,a_1)$. | The controlled-transition row is $[0.5\;0.5\;0]$ and $\bar r(s_1,a_1)=0.5$. |
 | IF-MDP-ACC-003 | Apply the frozen policy. | $\mathbf P^\pi=\begin{bmatrix}0.30&0.30&0.40\\0.25&0&0.75\\0&0&1\end{bmatrix}$ and $\bar{\mathbf r}^{\,\pi}=[1.10\;2.75\;0]$. |
 | IF-MDP-ACC-004 | Multiply the factors for the declared two-step event $s_1,a_1,1,s_2,a_2,-1,s_1$. | The independently calculated trajectory probability is $0.075$. |
@@ -276,6 +309,12 @@ Use the frozen fixture and $\varepsilon_p=10^{-12}$ unless a case states otherwi
 | IF-MDP-ACC-008 | Give a policy positive mass on an infeasible action or an invalid row sum. | Policy validation fails and no induced matrix or reward row is returned. |
 | IF-MDP-ACC-009 | Query an invalid state, invalid action, or infeasible pair. | The query fails explicitly and returns no probability or reward result. |
 | IF-MDP-ACC-010 | Repeat a valid policy-induced calculation. | Every returned entry is identical across calls on the same platform and configuration. |
+| IF-MDP-ACC-011 | Convert the frozen sparse model to the dense compute view. | Every feasible transition and reward entry equals its direct sparse query in flattened order $k=im+\ell$; terminal and feasible masks match the model; infeasible storage is zero padding and remains excluded from calculations. |
+| IF-MDP-ACC-012 | Construct with terminal states and only nonterminal rows, including an incoming terminal reward; repeat with shuffled rows and terminal indices and with multiple terminals. | Exactly one shared action is appended at the task-action count; each terminal gets an exact zero-reward, probability-one self-loop in canonical order. Task-action indices and every incoming outcome are preserved. The generated action is infeasible at nonterminals, and task actions are infeasible at terminals. |
+| IF-MDP-ACC-013 | Supply an outgoing terminal row (including an absorbing one), use the generated index in a supplied nonterminal row, or append to the maximum representable task-action count. | Construction rejects with `invalid_terminal_structure`, `invalid_action`, or `invalid_action_count`, respectively, without replacing supplied data or overflowing. |
+| IF-MDP-ACC-014 | Declare no terminal states; separately omit nonterminal rows in a model with a terminal state. | Without terminals, no action is appended and `bookkeeping_action()` is empty. Missing nonterminal feasibility still fails rather than generating nonterminal rows. |
+| IF-MDP-ACC-015 | Declare every state terminal with zero task actions and no supplied rows; separately leave a nonterminal state with zero task actions. | The all-terminal model has task-action count zero, complete action count one, bookkeeping index zero, and one generated self-loop per state. The nonterminal case fails with `invalid_action_count`. |
+| IF-MDP-ACC-016 | Query terminal and nonterminal states in a mixed model, valid states in empty-terminal and all-terminal models, and indices at or beyond the state count (including with no terminals). | Results match declared membership; a nonterminal zero-reward self-loop remains nonterminal. Every invalid index fails with `invalid_current_state`; repeated valid queries leave model data unchanged. |
 
 Floating-point comparisons shall use the tolerance declared by each test. Tests shall compare the fixture results with the analytic values above rather than with a second implementation of the same production calculation.
 
@@ -297,9 +336,11 @@ These operations belong to later declared cycles and shall not expand the first 
 
 | Requirement | Reviewed theory | Planned verification |
 |---|---|---|
-| IF-MDP-MOD-001, IF-MDP-CAL-001, IF-MDP-CAL-002 | Controlled transition probabilities and joint rewards in the finite-MDP chapter | IF-MDP-ACC-001 and IF-MDP-ACC-002 |
+| IF-MDP-MOD-001, IF-MDP-CAL-001, IF-MDP-CAL-002, IF-MDP-CAL-003 | Controlled transition probabilities and joint rewards in the finite-MDP chapter | IF-MDP-ACC-001, IF-MDP-ACC-002, and IF-MDP-ACC-011 |
 | IF-MDP-POL-001, IF-MDP-POL-002 | Policies and policy-induced dynamics | IF-MDP-ACC-003, IF-MDP-ACC-008, and IF-MDP-ACC-010 |
 | IF-MDP-EP-001 | Termination, absorbing extensions, truncation, and horizons | IF-MDP-ACC-005 and IF-MDP-ACC-006 |
+| IF-MDP-MOD-003 | Terminal absorbing extension and the automatic factory completion contract | IF-MDP-ACC-012 through IF-MDP-ACC-015 |
+| IF-MDP-MOD-004 | Declared terminal-state set and the distinction between terminal and absorbing states | IF-MDP-ACC-016 |
 | IF-MDP-VAL-001, IF-MDP-VAL-002 | Probability and model validity conditions | IF-MDP-ACC-007 through IF-MDP-ACC-009 |
 | IF-MDP-API-001, IF-MDP-API-002 | Intelligence-track package boundary and reproducibility rules | Interface review and installed-target consumer test |
 
