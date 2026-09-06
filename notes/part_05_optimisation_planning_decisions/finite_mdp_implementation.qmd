@@ -280,13 +280,13 @@ Checking probability normalisation, calculating next-state marginals, and calcul
 
 For this numerical discussion, assume IEEE 754 binary64 `double` arithmetic with rounding to nearest, ties to even, and without compiler reassociation that treats floating-point addition as associative. Let $\operatorname{fl}(z)$ denote the stored floating-point rounding of the exact real result $z$.
 
-Given finite summands $x_1,\ldots,x_N$, where $N$ is their number, the exact desired sum is $\sum_{k=1}^{N}x_k$. A straightforward loop starts from $b_0=0$ and stores
+Given finite summands $\text{term}_1,\ldots,\text{term}_N$, where $N$ is their number, the exact desired sum is $\sum_{k=1}^{N}\text{term}_k$. A straightforward loop starts from $\text{sum}_0=0$ and stores
 
 $$
-b_k=\operatorname{fl}(b_{k-1}+x_k).
+\text{sum}_k=\operatorname{fl}(\text{sum}_{k-1}+\text{term}_k).
 $$
 
-Each addition rounds before the next iteration. A small positive $x_k$ may therefore leave the stored sum unchanged. Rounding can also increase the stored result: it is not always a loss in the downward direction.
+Each addition rounds before the next iteration. A small positive $\text{term}_k$ may therefore leave the stored sum unchanged. Rounding can also increase the stored result: it is not always a loss in the downward direction.
 
 ::: {.callout-note title="Example: Losing two small increments" appearance="simple" icon=false}
 
@@ -320,43 +320,59 @@ for (const OutcomeProbability & outcome : outcomes) {
 }
 ```
 
-To interpret one iteration, let $b$ be the old `probability_sum`, $c$ the old `compensation`, and $x$ the current `outcome.probability`. Both $b$ and $c$ start at zero. Define $y$ as `corrected_probability`, $t$ as `updated_sum`, and $c_{\mathrm{new}}$ as the replacement correction. The actual rounded operations are
+For one iteration, $\text{sum}_{\mathrm{old}}$ and $\text{correction}_{\mathrm{old}}$ are the values of `probability_sum` and `compensation` before the update; both are initialised to zero before the loop. Let $\text{probability}$ denote the current `outcome.probability`.
+
+The corrected $\text{increment}$ is `corrected_probability`, $\text{sum}_{\mathrm{new}}$ is `updated_sum`, and $\text{correction}_{\mathrm{new}}$ is the replacement value of `compensation`. The rounded calculations are
 
 $$
 \begin{aligned}
-y&=\operatorname{fl}(x-c),\\
-t&=\operatorname{fl}(b+y),\\
-c_{\mathrm{new}}
+\text{increment}
+&=\operatorname{fl}(\text{probability}-\text{correction}_{\mathrm{old}}),\\
+\text{sum}_{\mathrm{new}}
+&=\operatorname{fl}(\text{sum}_{\mathrm{old}}+\text{increment}),\\
+\text{correction}_{\mathrm{new}}
 &=\operatorname{fl}\!\left(
-  \operatorname{fl}(t-b)-y
-\right),\\
-b_{\mathrm{new}}&=t.
+  \operatorname{fl}(\text{sum}_{\mathrm{new}}-\text{sum}_{\mathrm{old}})
+  -\text{increment}
+\right).
 \end{aligned}
 $$
 
-The final line is an assignment of the already computed value, not another addition. The correction is calculated while `probability_sum` still contains the old $b$. Replacing $b$ by $t$ too soon would destroy the information needed by `updated_sum - probability_sum`.
+Finally, `probability_sum = updated_sum` stores $\text{sum}_{\mathrm{new}}$ for the next iteration; it performs no further addition. The correction must be calculated first, while `probability_sum` still holds $\text{sum}_{\mathrm{old}}$. Updating it too soon would destroy the information needed by `updated_sum - probability_sum`.
 
-Why this sign? Temporarily suppose the two subtractions used to recover the residual introduce no error, and write the rounded addition as $t=b+y+e$, where $e$ is its signed rounding error. Then
+Why subtract the correction? Let $\text{rounding error}$ mean the stored addition result minus the exact addition result. Thus
 
 $$
-(t-b)-y=(b+y+e-b)-y=e.
+\text{sum}_{\mathrm{new}}
+=\text{sum}_{\mathrm{old}}+\text{increment}+\text{rounding error}.
 $$
 
-Under those simplifying conditions, $c_{\mathrm{new}}=e$: it measures “stored result minus the desired addition result”. The next iteration uses $x_{\mathrm{next}}-c_{\mathrm{new}}$. If the previous addition rounded downward, then $e<0$, so subtracting $e$ increases the next increment. If it rounded upward, then $e>0$, and the next increment is reduced. Real subtraction also rounds, so the code computes a residual estimate rather than a universally exact error.
+Temporarily suppose the two subtractions used to recover that error introduce no further rounding. Subtracting the old sum, then the increment, gives
+
+$$
+\begin{aligned}
+\text{sum}_{\mathrm{new}}-\text{sum}_{\mathrm{old}}
+&=\text{increment}+\text{rounding error},\\
+(\text{sum}_{\mathrm{new}}-\text{sum}_{\mathrm{old}})-\text{increment}
+&=\text{rounding error}.
+\end{aligned}
+$$
+
+Under those simplifying conditions, $\text{correction}_{\mathrm{new}}=\text{rounding error}$. The next iteration subtracts this correction from the next input probability. If the previous addition rounded downward, the correction is negative, so subtracting it increases the next increment. If it rounded upward, the correction is positive, so subtracting it reduces the next increment. Real subtraction also rounds, so the code computes a residual estimate rather than a universally exact error.
 
 This explains why the correction is applied to the **next summand** rather than by repeatedly trying to add a tiny residual directly to the same large sum. The correction can combine with the next input into an increment large enough to affect the stored result. The supplied `outcome.probability` is never assigned to or changed.
 
 ### A complete binary64 trace
 
-Use the earlier sequence $(1,h,h)$ to see how the small amount is recovered. This is an addition example, not a normalised probability row. Starting from $b=0$ and $c=0$, the four-operation update gives:
+Use the earlier sequence $(1,h,h)$ to see how the small amount is recovered. This is an addition example, not a normalised probability row. Starting with both the sum and correction at zero, the four-operation update gives:
 
-| Input $x$ | Corrected increment $y$ | New sum $t$ | New correction |
+| Input | Corrected increment | New sum | New correction |
 |---|---|---|---|
 | $1$ | $1$ | $1$ | $0$ |
 | $h$ | $h$ | $1$ | $-h$ |
 | $h$ | $2h$ | $1+2h$ | $0$ |
 
-For the second input, the addition rounds to $t=1$, so the correction is $(1-1)-h=-h$. For the third input, $y=h-(-h)=2h=2^{-52}$; that increment is representable at the scale of $1$. The final stored value is therefore `1.0000000000000002`, whereas the ordinary loop returns `1`.
+For the second input, the new sum rounds to $1$, so the correction is $(1-1)-h=-h$. For the third input, the corrected increment is $h-(-h)=2h=2^{-52}$; that increment is representable at the scale of $1$. The final stored value is therefore `1.0000000000000002`, whereas the ordinary loop returns `1`.
 
 The example also shows why `compensation` should not be described as “the total error so far” or “a positive amount that was rounded up”. It is a signed correction passed between consecutive updates, and its sign is essential.
 

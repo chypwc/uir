@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>12&nbsp; Finite Markov Decision Processes – Understanding Intelligence Through Robotics</title>
+<title>13&nbsp; Finite Markov Decision Processes – Understanding Intelligence Through Robotics</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -33,6 +33,7 @@ ul.task-list li input[type="checkbox"] {
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
+<link href="../part_05_optimisation_planning_decisions/finite_mdp_implementation.html" rel="next">
 <link href="../part_02_probability_estimation/finite_markov_chains.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
@@ -294,7 +295,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part_05_optimisation_planning_decisions/finite_markov_decision_processes.html"><span>Part V:</span> Optimisation, Planning, and Decisions</a></li><li class="breadcrumb-item"><a href="../part_05_optimisation_planning_decisions/finite_markov_decision_processes.html"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Finite Markov Decision Processes</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part_05_optimisation_planning_decisions/finite_markov_decision_processes.html"><span>Part V:</span> Optimisation, Planning, and Decisions</a></li><li class="breadcrumb-item"><a href="../part_05_optimisation_planning_decisions/finite_markov_decision_processes.html"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Finite Markov Decision Processes</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -387,6 +388,12 @@ window.Quarto = {
  <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">General Robot Kinematics and Jacobians</span></span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part_01_motion_mechanics_control/11_general_robot_kinematics_and_jacobians_implementation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">General Robot Kinematics and Jacobians Implementation</span></span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -401,7 +408,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part_02_probability_estimation/finite_markov_chains.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Finite Markov Chains</span></span></a>
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Finite Markov Chains</span></span></a>
   </div>
 </li>
       </ul>
@@ -418,7 +425,13 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part_05_optimisation_planning_decisions/finite_markov_decision_processes.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Finite Markov Decision Processes</span></span></a>
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Finite Markov Decision Processes</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part_05_optimisation_planning_decisions/finite_mdp_implementation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Finite-MDP Model Implementation</span></span></a>
   </div>
 </li>
       </ul>
@@ -435,36 +448,36 @@ window.Quarto = {
   <ul>
   <li><a href="#prerequisites" id="toc-prerequisites" class="nav-link active" data-scroll-target="#prerequisites">Prerequisites</a></li>
   <li><a href="#sec-controlled-dynamics-purpose" id="toc-sec-controlled-dynamics-purpose" class="nav-link" data-scroll-target="#sec-controlled-dynamics-purpose">Why add control to stochastic dynamics?</a></li>
-  <li><a href="#sec-mdp-actions-feasible-sets" id="toc-sec-mdp-actions-feasible-sets" class="nav-link" data-scroll-target="#sec-mdp-actions-feasible-sets"><span class="header-section-number">12.1</span> Actions and feasible action sets</a></li>
-  <li><a href="#sec-controlled-markov-property" id="toc-sec-controlled-markov-property" class="nav-link" data-scroll-target="#sec-controlled-markov-property"><span class="header-section-number">12.2</span> The controlled Markov property</a></li>
-  <li><a href="#sec-controlled-transition-probabilities" id="toc-sec-controlled-transition-probabilities" class="nav-link" data-scroll-target="#sec-controlled-transition-probabilities"><span class="header-section-number">12.3</span> Controlled transition probabilities</a></li>
-  <li><a href="#sec-uncontrolled-versus-controlled-dynamics" id="toc-sec-uncontrolled-versus-controlled-dynamics" class="nav-link" data-scroll-target="#sec-uncontrolled-versus-controlled-dynamics"><span class="header-section-number">12.4</span> Uncontrolled and controlled dynamics are different objects</a>
+  <li><a href="#sec-mdp-actions-feasible-sets" id="toc-sec-mdp-actions-feasible-sets" class="nav-link" data-scroll-target="#sec-mdp-actions-feasible-sets"><span class="header-section-number">13.1</span> Actions and feasible action sets</a></li>
+  <li><a href="#sec-controlled-markov-property" id="toc-sec-controlled-markov-property" class="nav-link" data-scroll-target="#sec-controlled-markov-property"><span class="header-section-number">13.2</span> The controlled Markov property</a></li>
+  <li><a href="#sec-controlled-transition-probabilities" id="toc-sec-controlled-transition-probabilities" class="nav-link" data-scroll-target="#sec-controlled-transition-probabilities"><span class="header-section-number">13.3</span> Controlled transition probabilities</a></li>
+  <li><a href="#sec-uncontrolled-versus-controlled-dynamics" id="toc-sec-uncontrolled-versus-controlled-dynamics" class="nav-link" data-scroll-target="#sec-uncontrolled-versus-controlled-dynamics"><span class="header-section-number">13.4</span> Uncontrolled and controlled dynamics are different objects</a>
   <ul class="collapse">
   <li><a href="#quick-test-actions-and-controlled-transitions" id="toc-quick-test-actions-and-controlled-transitions" class="nav-link" data-scroll-target="#quick-test-actions-and-controlled-transitions">Quick test: actions and controlled transitions</a></li>
   </ul></li>
-  <li><a href="#sec-mdp-rewards-joint-dynamics" id="toc-sec-mdp-rewards-joint-dynamics" class="nav-link" data-scroll-target="#sec-mdp-rewards-joint-dynamics"><span class="header-section-number">12.5</span> Rewards and joint one-step dynamics</a>
+  <li><a href="#sec-mdp-rewards-joint-dynamics" id="toc-sec-mdp-rewards-joint-dynamics" class="nav-link" data-scroll-target="#sec-mdp-rewards-joint-dynamics"><span class="header-section-number">13.5</span> Rewards and joint one-step dynamics</a>
   <ul class="collapse">
   <li><a href="#quick-test-rewards-and-joint-dynamics" id="toc-quick-test-rewards-and-joint-dynamics" class="nav-link" data-scroll-target="#quick-test-rewards-and-joint-dynamics">Quick test: rewards and joint dynamics</a></li>
   </ul></li>
-  <li><a href="#sec-mdp-policies-induced-dynamics" id="toc-sec-mdp-policies-induced-dynamics" class="nav-link" data-scroll-target="#sec-mdp-policies-induced-dynamics"><span class="header-section-number">12.6</span> Policies and policy-induced dynamics</a>
+  <li><a href="#sec-mdp-policies-induced-dynamics" id="toc-sec-mdp-policies-induced-dynamics" class="nav-link" data-scroll-target="#sec-mdp-policies-induced-dynamics"><span class="header-section-number">13.6</span> Policies and policy-induced dynamics</a>
   <ul class="collapse">
-  <li><a href="#sec-policy-induced-transition-matrix" id="toc-sec-policy-induced-transition-matrix" class="nav-link" data-scroll-target="#sec-policy-induced-transition-matrix"><span class="header-section-number">12.6.1</span> The policy-induced transition matrix</a></li>
-  <li><a href="#sec-policy-induced-joint-rewards" id="toc-sec-policy-induced-joint-rewards" class="nav-link" data-scroll-target="#sec-policy-induced-joint-rewards"><span class="header-section-number">12.6.2</span> Policy-induced joint outcomes and rewards</a></li>
+  <li><a href="#sec-policy-induced-transition-matrix" id="toc-sec-policy-induced-transition-matrix" class="nav-link" data-scroll-target="#sec-policy-induced-transition-matrix"><span class="header-section-number">13.6.1</span> The policy-induced transition matrix</a></li>
+  <li><a href="#sec-policy-induced-joint-rewards" id="toc-sec-policy-induced-joint-rewards" class="nav-link" data-scroll-target="#sec-policy-induced-joint-rewards"><span class="header-section-number">13.6.2</span> Policy-induced joint outcomes and rewards</a></li>
   <li><a href="#quick-test-policies-and-induced-dynamics" id="toc-quick-test-policies-and-induced-dynamics" class="nav-link" data-scroll-target="#quick-test-policies-and-induced-dynamics">Quick test: policies and induced dynamics</a></li>
   </ul></li>
-  <li><a href="#sec-mdp-termination-truncation" id="toc-sec-mdp-termination-truncation" class="nav-link" data-scroll-target="#sec-mdp-termination-truncation"><span class="header-section-number">12.7</span> Episode endings: termination and truncation</a>
+  <li><a href="#sec-mdp-termination-truncation" id="toc-sec-mdp-termination-truncation" class="nav-link" data-scroll-target="#sec-mdp-termination-truncation"><span class="header-section-number">13.7</span> Episode endings: termination and truncation</a>
   <ul class="collapse">
-  <li><a href="#a-terminal-state-ends-the-modelled-task" id="toc-a-terminal-state-ends-the-modelled-task" class="nav-link" data-scroll-target="#a-terminal-state-ends-the-modelled-task"><span class="header-section-number">12.7.1</span> A terminal state ends the modelled task</a></li>
-  <li><a href="#an-absorbing-extension-represents-the-stopped-episode" id="toc-an-absorbing-extension-represents-the-stopped-episode" class="nav-link" data-scroll-target="#an-absorbing-extension-represents-the-stopped-episode"><span class="header-section-number">12.7.2</span> An absorbing extension represents the stopped episode</a></li>
-  <li><a href="#truncation-stops-the-record-not-the-task" id="toc-truncation-stops-the-record-not-the-task" class="nav-link" data-scroll-target="#truncation-stops-the-record-not-the-task"><span class="header-section-number">12.7.3</span> Truncation stops the record, not the task</a></li>
-  <li><a href="#a-time-limit-can-belong-inside-or-outside-the-task" id="toc-a-time-limit-can-belong-inside-or-outside-the-task" class="nav-link" data-scroll-target="#a-time-limit-can-belong-inside-or-outside-the-task"><span class="header-section-number">12.7.4</span> A time limit can belong inside or outside the task</a></li>
+  <li><a href="#a-terminal-state-ends-the-modelled-task" id="toc-a-terminal-state-ends-the-modelled-task" class="nav-link" data-scroll-target="#a-terminal-state-ends-the-modelled-task"><span class="header-section-number">13.7.1</span> A terminal state ends the modelled task</a></li>
+  <li><a href="#an-absorbing-extension-represents-the-stopped-episode" id="toc-an-absorbing-extension-represents-the-stopped-episode" class="nav-link" data-scroll-target="#an-absorbing-extension-represents-the-stopped-episode"><span class="header-section-number">13.7.2</span> An absorbing extension represents the stopped episode</a></li>
+  <li><a href="#truncation-stops-the-record-not-the-task" id="toc-truncation-stops-the-record-not-the-task" class="nav-link" data-scroll-target="#truncation-stops-the-record-not-the-task"><span class="header-section-number">13.7.3</span> Truncation stops the record, not the task</a></li>
+  <li><a href="#a-time-limit-can-belong-inside-or-outside-the-task" id="toc-a-time-limit-can-belong-inside-or-outside-the-task" class="nav-link" data-scroll-target="#a-time-limit-can-belong-inside-or-outside-the-task"><span class="header-section-number">13.7.4</span> A time limit can belong inside or outside the task</a></li>
   <li><a href="#quick-test-termination-and-truncation" id="toc-quick-test-termination-and-truncation" class="nav-link" data-scroll-target="#quick-test-termination-and-truncation">Quick test: termination and truncation</a></li>
   </ul></li>
-  <li><a href="#sec-finite-mdp-task-settings" id="toc-sec-finite-mdp-task-settings" class="nav-link" data-scroll-target="#sec-finite-mdp-task-settings"><span class="header-section-number">12.8</span> The finite MDP and its task settings</a>
+  <li><a href="#sec-finite-mdp-task-settings" id="toc-sec-finite-mdp-task-settings" class="nav-link" data-scroll-target="#sec-finite-mdp-task-settings"><span class="header-section-number">13.8</span> The finite MDP and its task settings</a>
   <ul class="collapse">
-  <li><a href="#the-finite-mdp-specifies-controlled-one-step-outcomes" id="toc-the-finite-mdp-specifies-controlled-one-step-outcomes" class="nav-link" data-scroll-target="#the-finite-mdp-specifies-controlled-one-step-outcomes"><span class="header-section-number">12.8.1</span> The finite MDP specifies controlled one-step outcomes</a></li>
-  <li><a href="#initial-conditions-policies-and-task-endings-add-distinct-information" id="toc-initial-conditions-policies-and-task-endings-add-distinct-information" class="nav-link" data-scroll-target="#initial-conditions-policies-and-task-endings-add-distinct-information"><span class="header-section-number">12.8.2</span> Initial conditions, policies, and task endings add distinct information</a></li>
-  <li><a href="#cumulative-reward-gives-discounting-a-purpose" id="toc-cumulative-reward-gives-discounting-a-purpose" class="nav-link" data-scroll-target="#cumulative-reward-gives-discounting-a-purpose"><span class="header-section-number">12.8.3</span> Cumulative reward gives discounting a purpose</a></li>
+  <li><a href="#the-finite-mdp-specifies-controlled-one-step-outcomes" id="toc-the-finite-mdp-specifies-controlled-one-step-outcomes" class="nav-link" data-scroll-target="#the-finite-mdp-specifies-controlled-one-step-outcomes"><span class="header-section-number">13.8.1</span> The finite MDP specifies controlled one-step outcomes</a></li>
+  <li><a href="#initial-conditions-policies-and-task-endings-add-distinct-information" id="toc-initial-conditions-policies-and-task-endings-add-distinct-information" class="nav-link" data-scroll-target="#initial-conditions-policies-and-task-endings-add-distinct-information"><span class="header-section-number">13.8.2</span> Initial conditions, policies, and task endings add distinct information</a></li>
+  <li><a href="#cumulative-reward-gives-discounting-a-purpose" id="toc-cumulative-reward-gives-discounting-a-purpose" class="nav-link" data-scroll-target="#cumulative-reward-gives-discounting-a-purpose"><span class="header-section-number">13.8.3</span> Cumulative reward gives discounting a purpose</a></li>
   <li><a href="#quick-test-the-finite-mdp-and-task-settings" id="toc-quick-test-the-finite-mdp-and-task-settings" class="nav-link" data-scroll-target="#quick-test-the-finite-mdp-and-task-settings">Quick test: the finite MDP and task settings</a></li>
   </ul></li>
   <li><a href="#cumulative-chapter-test" id="toc-cumulative-chapter-test" class="nav-link" data-scroll-target="#cumulative-chapter-test">Cumulative chapter test</a>
@@ -479,9 +492,9 @@ window.Quarto = {
 <main class="content" id="quarto-document-content">
 
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part_05_optimisation_planning_decisions/finite_markov_decision_processes.html"><span>Part V:</span> Optimisation, Planning, and Decisions</a></li><li class="breadcrumb-item"><a href="../part_05_optimisation_planning_decisions/finite_markov_decision_processes.html"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Finite Markov Decision Processes</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part_05_optimisation_planning_decisions/finite_markov_decision_processes.html"><span>Part V:</span> Optimisation, Planning, and Decisions</a></li><li class="breadcrumb-item"><a href="../part_05_optimisation_planning_decisions/finite_markov_decision_processes.html"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Finite Markov Decision Processes</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span id="sec-finite-markov-decision-processes" class="quarto-section-identifier"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Finite Markov Decision Processes</span></span></h1>
+<h1 class="title"><span id="sec-finite-markov-decision-processes" class="quarto-section-identifier"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Finite Markov Decision Processes</span></span></h1>
 </div>
 
 
@@ -500,7 +513,7 @@ window.Quarto = {
 
 <section id="prerequisites" class="level2 unnumbered">
 <h2 class="unnumbered anchored" data-anchor-id="prerequisites">Prerequisites</h2>
-<p>This chapter extends the finite Markov-chain model from <a href="../part_02_probability_estimation/finite_markov_chains.html" class="quarto-xref"><span>Chapter 11</span></a>. That chapter defined the finite state set <span class="math inline">\(\mathcal S=\{s_1,\ldots,s_n\}\)</span>, the random state <span class="math inline">\(S_t\)</span>, the row state-distribution vector <span class="math inline">\(\mathbf p_t\)</span>, and the row-stochastic transition matrix <span class="math inline">\(\mathbf P\)</span>.</p>
+<p>This chapter extends the finite Markov-chain model from <a href="../part_02_probability_estimation/finite_markov_chains.html" class="quarto-xref"><span>Chapter 12</span></a>. That chapter defined the finite state set <span class="math inline">\(\mathcal S=\{s_1,\ldots,s_n\}\)</span>, the random state <span class="math inline">\(S_t\)</span>, the row state-distribution vector <span class="math inline">\(\mathbf p_t\)</span>, and the row-stochastic transition matrix <span class="math inline">\(\mathbf P\)</span>.</p>
 </section>
 <section id="sec-controlled-dynamics-purpose" class="level2 unnumbered">
 <h2 class="unnumbered anchored" data-anchor-id="sec-controlled-dynamics-purpose">Why add control to stochastic dynamics?</h2>
@@ -519,8 +532,8 @@ window.Quarto = {
 \]</span></p>
 <p>The action identifies which transition law applies. The probabilities within that law describe the environment’s stochastic response after the choice has been made.</p>
 </section>
-<section id="sec-mdp-actions-feasible-sets" class="level2" data-number="12.1">
-<h2 data-number="12.1" class="anchored" data-anchor-id="sec-mdp-actions-feasible-sets"><span class="header-section-number">12.1</span> Actions and feasible action sets</h2>
+<section id="sec-mdp-actions-feasible-sets" class="level2" data-number="13.1">
+<h2 data-number="13.1" class="anchored" data-anchor-id="sec-mdp-actions-feasible-sets"><span class="header-section-number">13.1</span> Actions and feasible action sets</h2>
 <p>Let the finite <strong>action set</strong> be</p>
 <p><span class="math display">\[
 \boxed{
@@ -542,15 +555,15 @@ window.Quarto = {
 \]</span></p>
 <p>The set <span class="math inline">\(\mathcal A(s)\)</span> contains exactly the actions admitted when the current state is <span class="math inline">\(s\)</span>. The state-dependent set is needed because a physically or logically meaningful action in one state may be unavailable in another. For example, an action called open may be feasible for a closed container but unavailable for a container that is already open.</p>
 <p>Assume that every global action label is feasible in at least one state, so <span class="math inline">\(\mathcal A=\bigcup_{s\in\mathcal S}\mathcal A(s)\)</span>. This convention prevents the global set from containing an action that can never be used.</p>
-<p>On the sample space <span class="math inline">\(\Omega\)</span> introduced in <a href="../part_02_probability_estimation/finite_markov_chains.html#sec-finite-stochastic-state-sequence" class="quarto-xref"><span>Section 11.1</span></a>, represent the action at time <span class="math inline">\(t\)</span> by the discrete random variable</p>
+<p>On the sample space <span class="math inline">\(\Omega\)</span> introduced in <a href="../part_02_probability_estimation/finite_markov_chains.html#sec-finite-stochastic-state-sequence" class="quarto-xref"><span>Section 12.1</span></a>, represent the action at time <span class="math inline">\(t\)</span> by the discrete random variable</p>
 <p><span class="math display">\[
 A_t:\Omega\rightarrow\mathcal A.
 \]</span></p>
 <p>For any <span class="math inline">\(a\in\mathcal A\)</span>, the event <span class="math inline">\(A_t=a\)</span> says that action <span class="math inline">\(a\)</span> is realised at time <span class="math inline">\(t\)</span>. The random-variable representation allows actions to differ across possible trajectories. The variable records the selected action, while the action-selection mechanism is a separate mathematical object. Once a particular trajectory is considered, the realised value <span class="math inline">\(a\)</span> is the control input supplied to the environment.</p>
 <p>A state–action pair <span class="math inline">\((s,a)\)</span> is <strong>feasible</strong> when <span class="math inline">\(s\in\mathcal S\)</span> and <span class="math inline">\(a\in\mathcal A(s)\)</span>. An unavailable pair with <span class="math inline">\(a\notin\mathcal A(s)\)</span> is outside the controlled model’s domain. Its transition probabilities are therefore undefined; they must not be invented as a row of zeros, because a zero row is not a probability distribution.</p>
 </section>
-<section id="sec-controlled-markov-property" class="level2" data-number="12.2">
-<h2 data-number="12.2" class="anchored" data-anchor-id="sec-controlled-markov-property"><span class="header-section-number">12.2</span> The controlled Markov property</h2>
+<section id="sec-controlled-markov-property" class="level2" data-number="13.2">
+<h2 data-number="13.2" class="anchored" data-anchor-id="sec-controlled-markov-property"><span class="header-section-number">13.2</span> The controlled Markov property</h2>
 <p>Before action <span class="math inline">\(A_t\)</span> is applied, define <span class="math inline">\(H_0:=(S_0)\)</span>. For <span class="math inline">\(t\in\mathbb N\)</span>, the observed interaction history through state <span class="math inline">\(S_t\)</span> is the tuple</p>
 <p><span class="math display">\[
 H_t
@@ -567,8 +580,8 @@ H_t
 \]</span></p>
 <p>The left-hand side conditions on the complete state–action history and the current action. The right-hand side retains only the current state and current action. Their equality means that <span class="math inline">\((S_t,A_t)\)</span> contains the information needed for the one-step prediction. As with an uncontrolled Markov chain, this is a modelling claim about the chosen state representation. If two histories ending in the same state–action pair imply different next-state distributions, the state representation has discarded relevant information.</p>
 </section>
-<section id="sec-controlled-transition-probabilities" class="level2" data-number="12.3">
-<h2 data-number="12.3" class="anchored" data-anchor-id="sec-controlled-transition-probabilities"><span class="header-section-number">12.3</span> Controlled transition probabilities</h2>
+<section id="sec-controlled-transition-probabilities" class="level2" data-number="13.3">
+<h2 data-number="13.3" class="anchored" data-anchor-id="sec-controlled-transition-probabilities"><span class="header-section-number">13.3</span> Controlled transition probabilities</h2>
 <p>Time homogeneity answers whether the same feasible state–action pair obeys the same one-step law at different times. At each time <span class="math inline">\(t\in\mathbb N_0\)</span>, let <span class="math inline">\(p_t(s'\mid s,a)\)</span> denote the next-state probability that the controlled model assigns to <span class="math inline">\(s'\in\mathcal S\)</span> after feasible pair <span class="math inline">\((s,a)\)</span>. Whenever <span class="math inline">\(\Pr(S_t=s,A_t=a)&gt;0\)</span>, this model probability agrees with the elementary conditional probability</p>
 <p><span class="math display">\[
 p_t(s'\mid s,a)
@@ -612,7 +625,7 @@ p(s_j\mid s_i,a),
 \mathbf P^{(a)}\in[0,1]^{n\times n}.
 }
 \]</span></p>
-<p>The indices <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> now have a strictly representational role: they select a row and column after the semantic states <span class="math inline">\(s_i\)</span> and <span class="math inline">\(s_j\)</span> have been placed in the declared global state order. Each <span class="math inline">\(\mathbf P^{(a)}\)</span> is row-stochastic. If action <span class="math inline">\(a\)</span> is deliberately applied regardless of the current state, the row-vector convention from <a href="../part_02_probability_estimation/finite_markov_chains.html#sec-time-homogeneous-transition-matrix" class="quarto-xref"><span>Section 11.3</span></a> gives</p>
+<p>The indices <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> now have a strictly representational role: they select a row and column after the semantic states <span class="math inline">\(s_i\)</span> and <span class="math inline">\(s_j\)</span> have been placed in the declared global state order. Each <span class="math inline">\(\mathbf P^{(a)}\)</span> is row-stochastic. If action <span class="math inline">\(a\)</span> is deliberately applied regardless of the current state, the row-vector convention from <a href="../part_02_probability_estimation/finite_markov_chains.html#sec-time-homogeneous-transition-matrix" class="quarto-xref"><span>Section 12.3</span></a> gives</p>
 <p><span class="math display">\[
 \mathbf p_{t+1}
 =
@@ -620,8 +633,8 @@ p(s_j\mid s_i,a),
 \]</span></p>
 <p>If <span class="math inline">\(a\)</span> is unavailable in any state, <span class="math inline">\(\mathbf P^{(a)}\)</span> is not a complete transition matrix because the corresponding infeasible row is outside the model’s domain. The kernel <span class="math inline">\(p(s'\mid s,a)\)</span> on feasible triples <span class="math inline">\((s,a,s')\)</span> remains the general representation.</p>
 </section>
-<section id="sec-uncontrolled-versus-controlled-dynamics" class="level2" data-number="12.4">
-<h2 data-number="12.4" class="anchored" data-anchor-id="sec-uncontrolled-versus-controlled-dynamics"><span class="header-section-number">12.4</span> Uncontrolled and controlled dynamics are different objects</h2>
+<section id="sec-uncontrolled-versus-controlled-dynamics" class="level2" data-number="13.4">
+<h2 data-number="13.4" class="anchored" data-anchor-id="sec-uncontrolled-versus-controlled-dynamics"><span class="header-section-number">13.4</span> Uncontrolled and controlled dynamics are different objects</h2>
 <p>An uncontrolled Markov chain contains one transition matrix <span class="math inline">\(\mathbf P\)</span>. Once the current state distribution is known, that matrix alone determines the next-state distribution. A controlled transition model instead contains one probability row for every feasible state–action pair. The current state alone does not determine which row will govern the next transition because the action must also be supplied.</p>
 <p>The controlled model is not one uncontrolled Markov chain with a single transition matrix. Choosing one fixed action <span class="math inline">\(a\)</span> produces the special matrix <span class="math inline">\(\mathbf P^{(a)}\)</span> when that action is feasible in every state. A state-dependent action-selection rule instead combines the controlled rows according to the actions selected in each state. Keeping these objects distinct prevents the environment’s stochastic response from being confused with the agent’s method for choosing actions.</p>
 <div class="callout callout-style-simple callout-note no-icon callout-titled" title="Example: One state with two possible transition laws">
@@ -712,8 +725,8 @@ p(s_3\mid s_2,a_1)
 </section>
 </section>
 </section>
-<section id="sec-mdp-rewards-joint-dynamics" class="level2" data-number="12.5">
-<h2 data-number="12.5" class="anchored" data-anchor-id="sec-mdp-rewards-joint-dynamics"><span class="header-section-number">12.5</span> Rewards and joint one-step dynamics</h2>
+<section id="sec-mdp-rewards-joint-dynamics" class="level2" data-number="13.5">
+<h2 data-number="13.5" class="anchored" data-anchor-id="sec-mdp-rewards-joint-dynamics"><span class="header-section-number">13.5</span> Rewards and joint one-step dynamics</h2>
 <p>The controlled transition kernel describes where the process may move after an action, but different transitions can have different consequences. A <strong>reward</strong> is a real-valued scalar produced by the environment to evaluate one step of interaction. The known inputs for the one-step reward model are a feasible current state–action pair and the possible joint outcomes consisting of a next state and a reward. The required outputs are the probability of each joint outcome, the next-state probabilities, and the expected one-step reward.</p>
 <pre><code>(feasible current state, feasible action)
                     |
@@ -940,8 +953,8 @@ p(s_3\mid s_2,a_1)
 </section>
 </section>
 </section>
-<section id="sec-mdp-policies-induced-dynamics" class="level2" data-number="12.6">
-<h2 data-number="12.6" class="anchored" data-anchor-id="sec-mdp-policies-induced-dynamics"><span class="header-section-number">12.6</span> Policies and policy-induced dynamics</h2>
+<section id="sec-mdp-policies-induced-dynamics" class="level2" data-number="13.6">
+<h2 data-number="13.6" class="anchored" data-anchor-id="sec-mdp-policies-induced-dynamics"><span class="header-section-number">13.6</span> Policies and policy-induced dynamics</h2>
 <p>The controlled environment assigns a next-outcome distribution to every feasible state–action pair. To obtain one distribution for what happens from a state, the agent must also specify the probability with which it selects each feasible action in that state.</p>
 <p>A <strong>stationary Markov stochastic policy</strong> assigns a probability mass function to the feasible action set of every state. For each state <span class="math inline">\(s\in\mathcal S\)</span>, this function is</p>
 <p><span class="math display">\[
@@ -1107,8 +1120,8 @@ p_0(s)\pi(a\mid s)p(s',r\mid s,a).
 a\in\mathcal A(s).
 \]</span></p>
 <p>Thus a stochastic policy can randomise among several feasible actions, whereas a deterministic policy assigns all probability to one feasible action.</p>
-<section id="sec-policy-induced-transition-matrix" class="level3" data-number="12.6.1">
-<h3 data-number="12.6.1" class="anchored" data-anchor-id="sec-policy-induced-transition-matrix"><span class="header-section-number">12.6.1</span> The policy-induced transition matrix</h3>
+<section id="sec-policy-induced-transition-matrix" class="level3" data-number="13.6.1">
+<h3 data-number="13.6.1" class="anchored" data-anchor-id="sec-policy-induced-transition-matrix"><span class="header-section-number">13.6.1</span> The policy-induced transition matrix</h3>
 <p>Fix current state <span class="math inline">\(s\in\mathcal S\)</span> and possible next state <span class="math inline">\(s'\in\mathcal S\)</span>. Under policy <span class="math inline">\(\pi\)</span>, each action <span class="math inline">\(a\in\mathcal A(s)\)</span> may be selected with probability <span class="math inline">\(\pi(a\mid s)\)</span>, after which the environment reaches <span class="math inline">\(s'\)</span> with probability <span class="math inline">\(p(s'\mid s,a)\)</span>. When <span class="math inline">\(\Pr_\pi(S_t=s)&gt;0\)</span>, the events <span class="math inline">\(A_t=a\)</span> over <span class="math inline">\(a\in\mathcal A(s)\)</span> partition the possible action outcomes conditional on <span class="math inline">\(S_t=s\)</span>. The conditional law of total probability and the product rule therefore give</p>
 <p><span class="math display">\[
 \begin{aligned}
@@ -1219,8 +1232,8 @@ p(s'\mid s,\mu(s)).
 \]</span></p>
 <p>A deterministic policy therefore selects one controlled next-state distribution in each state instead of averaging several distributions. Its matrix representation satisfies <span class="math inline">\([\mathbf P^\mu]_{ij}=p_\mu(s_j\mid s_i)\)</span>.</p>
 </section>
-<section id="sec-policy-induced-joint-rewards" class="level3" data-number="12.6.2">
-<h3 data-number="12.6.2" class="anchored" data-anchor-id="sec-policy-induced-joint-rewards"><span class="header-section-number">12.6.2</span> Policy-induced joint outcomes and rewards</h3>
+<section id="sec-policy-induced-joint-rewards" class="level3" data-number="13.6.2">
+<h3 data-number="13.6.2" class="anchored" data-anchor-id="sec-policy-induced-joint-rewards"><span class="header-section-number">13.6.2</span> Policy-induced joint outcomes and rewards</h3>
 <p>The same action averaging applies to the joint next-state–reward law. Define the <strong>policy-induced joint outcome probability</strong></p>
 <p><span class="math display">\[
 p_\pi(s',r\mid s)
@@ -1412,8 +1425,8 @@ p_\pi(s_3\mid s_2)
 </section>
 </section>
 </section>
-<section id="sec-mdp-termination-truncation" class="level2" data-number="12.7">
-<h2 data-number="12.7" class="anchored" data-anchor-id="sec-mdp-termination-truncation"><span class="header-section-number">12.7</span> Episode endings: termination and truncation</h2>
+<section id="sec-mdp-termination-truncation" class="level2" data-number="13.7">
+<h2 data-number="13.7" class="anchored" data-anchor-id="sec-mdp-termination-truncation"><span class="header-section-number">13.7</span> Episode endings: termination and truncation</h2>
 <p>A finite interaction record can end because the modelled task has ended or because an external collector has stopped recording. The distinction is useful because later return and value calculations must know whether future task rewards truly cease or merely become unobserved.</p>
 <p>The known inputs are the task’s state and transition definitions, the realised next state and reward, and any stopping rule imposed outside the task. The required outputs are two separate facts: whether the task terminated and whether collection was truncated. Their relationship is</p>
 <p><span class="math display">\[
@@ -1424,8 +1437,8 @@ p_\pi(s_3\mid s_2)
 &amp;\longrightarrow \text{truncation}.
 \end{aligned}
 \]</span></p>
-<section id="a-terminal-state-ends-the-modelled-task" class="level3" data-number="12.7.1">
-<h3 data-number="12.7.1" class="anchored" data-anchor-id="a-terminal-state-ends-the-modelled-task"><span class="header-section-number">12.7.1</span> A terminal state ends the modelled task</h3>
+<section id="a-terminal-state-ends-the-modelled-task" class="level3" data-number="13.7.1">
+<h3 data-number="13.7.1" class="anchored" data-anchor-id="a-terminal-state-ends-the-modelled-task"><span class="header-section-number">13.7.1</span> A terminal state ends the modelled task</h3>
 <p>Let <span class="math inline">\(\mathcal S_{\mathrm{term}}\subseteq\mathcal S\)</span> be the set of <strong>terminal states</strong>, possibly empty, and define the set of nonterminal <strong>decision states</strong> by</p>
 <p><span class="math display">\[
 \mathcal S_{\mathrm{dec}}
@@ -1435,8 +1448,8 @@ p_\pi(s_3\mid s_2)
 <p>A state-based transition terminates the task when its realised next state satisfies <span class="math inline">\(S_{t+1}\in\mathcal S_{\mathrm{term}}\)</span>. The reward <span class="math inline">\(R_{t+1}\)</span> belongs to that completed transition and is retained. No action <span class="math inline">\(A_{t+1}\)</span> is selected within the completed episode. A later reset starts a new episode by sampling a new initial state according to <span class="math inline">\(p_0\)</span>; reset is not a continuation of the terminated trajectory.</p>
 <p>For a state-based finite MDP, the next state must contain enough information to determine whether termination has occurred. If two physically different outcomes share one state label but only one ends the task, that state representation is not sufficient for the declared termination rule and must be enlarged.</p>
 </section>
-<section id="an-absorbing-extension-represents-the-stopped-episode" class="level3" data-number="12.7.2">
-<h3 data-number="12.7.2" class="anchored" data-anchor-id="an-absorbing-extension-represents-the-stopped-episode"><span class="header-section-number">12.7.2</span> An absorbing extension represents the stopped episode</h3>
+<section id="an-absorbing-extension-represents-the-stopped-episode" class="level3" data-number="13.7.2">
+<h3 data-number="13.7.2" class="anchored" data-anchor-id="an-absorbing-extension-represents-the-stopped-episode"><span class="header-section-number">13.7.2</span> An absorbing extension represents the stopped episode</h3>
 <p>A terminal state and an absorbing state answer different questions. <em>Terminal</em> means that the task-defined interaction stops. <em>Absorbing</em> means that a transition model keeps returning to the same state. A terminal state therefore has no real post-terminal action, whereas an absorbing state is defined through a transition law.</p>
 <p>It is often useful to represent a terminal state <span class="math inline">\(s_\dagger\in\mathcal S_{\mathrm{term}}\)</span> as an absorbing state so that ordinary state-sequence and matrix equations remain valid after the episode ends. This is a deliberate mathematical extension: introduce one bookkeeping action <span class="math inline">\(a_\bot\in\mathcal A\)</span>, include <span class="math inline">\(0\)</span> in <span class="math inline">\(\mathcal R\)</span> if necessary, and define a zero-reward self-transition</p>
 <p><span class="math display">\[
@@ -1446,8 +1459,8 @@ p(s_\dagger,0\mid s_\dagger,a_\bot)=1.
 \]</span></p>
 <p>All other next-state–reward outcomes from <span class="math inline">\((s_\dagger,a_\bot)\)</span> then have probability zero. The extended sequence remains in <span class="math inline">\(s_\dagger\)</span> and receives only zero rewards, but an episode interface still stops before requesting <span class="math inline">\(a_\bot\)</span>. The bookkeeping row is fixed by the absorbing convention; it is not an arbitrary transition row invented for an infeasible physical action.</p>
 </section>
-<section id="truncation-stops-the-record-not-the-task" class="level3" data-number="12.7.3">
-<h3 data-number="12.7.3" class="anchored" data-anchor-id="truncation-stops-the-record-not-the-task"><span class="header-section-number">12.7.3</span> Truncation stops the record, not the task</h3>
+<section id="truncation-stops-the-record-not-the-task" class="level3" data-number="13.7.3">
+<h3 data-number="13.7.3" class="anchored" data-anchor-id="truncation-stops-the-record-not-the-task"><span class="header-section-number">13.7.3</span> Truncation stops the record, not the task</h3>
 <p>A <strong>truncation</strong> occurs when a rule outside the MDP stops the current interaction record even though the modelled task may continue. Examples include a data-collection length cap, a wall-clock budget, or an exhausted external resource. In a pure truncation, the final recorded state is a nonterminal state in <span class="math inline">\(\mathcal S_{\mathrm{dec}}\)</span>, and the MDP still defines feasible subsequent actions and their outcome probabilities.</p>
 <p>Termination and truncation must therefore be recorded separately. A termination flag states a fact about the task model. A truncation flag states a fact about the collection procedure. Stopping the current episode record requires a reset after either flag, but resetting after truncation does not imply that the underlying task had reached a terminal state. The two flags describe different conditions and need not be treated as logical complements.</p>
 <table class="caption-top table">
@@ -1477,8 +1490,8 @@ p(s_\dagger,0\mid s_\dagger,a_\bot)=1.
 </tbody>
 </table>
 </section>
-<section id="a-time-limit-can-belong-inside-or-outside-the-task" class="level3" data-number="12.7.4">
-<h3 data-number="12.7.4" class="anchored" data-anchor-id="a-time-limit-can-belong-inside-or-outside-the-task"><span class="header-section-number">12.7.4</span> A time limit can belong inside or outside the task</h3>
+<section id="a-time-limit-can-belong-inside-or-outside-the-task" class="level3" data-number="13.7.4">
+<h3 data-number="13.7.4" class="anchored" data-anchor-id="a-time-limit-can-belong-inside-or-outside-the-task"><span class="header-section-number">13.7.4</span> A time limit can belong inside or outside the task</h3>
 <p>Let a task-defined finite horizon be <span class="math inline">\(N\in\mathbb N\)</span> decision steps, with actions selected at times <span class="math inline">\(t\in\{0,\ldots,N-1\}\)</span>. The transition to <span class="math inline">\(S_N\)</span> completes the task because the horizon is part of its definition. This is termination, not truncation. If the transition and decision laws can depend on the number of decision steps remaining, a stationary Markov representation must include that information. Define the augmented state space and state by</p>
 <p><span class="math display">\[
 \widetilde{\mathcal S}
@@ -1531,11 +1544,11 @@ p(s_\dagger,0\mid s_\dagger,a_\bot)=1.
 </section>
 </section>
 </section>
-<section id="sec-finite-mdp-task-settings" class="level2" data-number="12.8">
-<h2 data-number="12.8" class="anchored" data-anchor-id="sec-finite-mdp-task-settings"><span class="header-section-number">12.8</span> The finite MDP and its task settings</h2>
+<section id="sec-finite-mdp-task-settings" class="level2" data-number="13.8">
+<h2 data-number="13.8" class="anchored" data-anchor-id="sec-finite-mdp-task-settings"><span class="header-section-number">13.8</span> The finite MDP and its task settings</h2>
 <p>The preceding sections provide all components needed to separate three questions: what outcomes the controlled environment permits, where an episode starts and ends, and how rewards at different decision steps are weighted. This separation is useful because changing a policy, initial distribution, horizon, discount, or collection limit does not necessarily change the environment dynamics.</p>
-<section id="the-finite-mdp-specifies-controlled-one-step-outcomes" class="level3" data-number="12.8.1">
-<h3 data-number="12.8.1" class="anchored" data-anchor-id="the-finite-mdp-specifies-controlled-one-step-outcomes"><span class="header-section-number">12.8.1</span> The finite MDP specifies controlled one-step outcomes</h3>
+<section id="the-finite-mdp-specifies-controlled-one-step-outcomes" class="level3" data-number="13.8.1">
+<h3 data-number="13.8.1" class="anchored" data-anchor-id="the-finite-mdp-specifies-controlled-one-step-outcomes"><span class="header-section-number">13.8.1</span> The finite MDP specifies controlled one-step outcomes</h3>
 <p>In this book, the <strong>finite Markov decision process</strong> is the controlled environment model</p>
 <p><span class="math display">\[
 \mathcal M
@@ -1552,8 +1565,8 @@ p
 <p>The word <em>finite</em> describes the cardinalities of the state, action, and reward sets. It does not mean that every trajectory has a finite number of decision steps. A finite MDP may define a continuing task with no terminal state and no fixed horizon.</p>
 <p>This tuple convention keeps the initial distribution <span class="math inline">\(p_0\)</span>, policy <span class="math inline">\(\pi\)</span>, and reward-weighting objective separate from the controlled environment. Some texts include <span class="math inline">\(p_0\)</span> or a discount factor in the object they call an MDP, so the declared tuple must be checked when comparing notation.</p>
 </section>
-<section id="initial-conditions-policies-and-task-endings-add-distinct-information" class="level3" data-number="12.8.2">
-<h3 data-number="12.8.2" class="anchored" data-anchor-id="initial-conditions-policies-and-task-endings-add-distinct-information"><span class="header-section-number">12.8.2</span> Initial conditions, policies, and task endings add distinct information</h3>
+<section id="initial-conditions-policies-and-task-endings-add-distinct-information" class="level3" data-number="13.8.2">
+<h3 data-number="13.8.2" class="anchored" data-anchor-id="initial-conditions-policies-and-task-endings-add-distinct-information"><span class="header-section-number">13.8.2</span> Initial conditions, policies, and task endings add distinct information</h3>
 <p>The initial distribution <span class="math inline">\(p_0\)</span> states where trajectories begin. The policy <span class="math inline">\(\pi\)</span> states how actions are selected. Combining <span class="math inline">\(p_0\)</span>, <span class="math inline">\(\pi\)</span>, and <span class="math inline">\(\mathcal M\)</span> produces the trajectory law <span class="math inline">\(\Pr_\pi\)</span>. Changing <span class="math inline">\(p_0\)</span> or <span class="math inline">\(\pi\)</span> generally changes trajectory probabilities without changing the controlled kernel <span class="math inline">\(p(s',r\mid s,a)\)</span>.</p>
 <p>The terminal set <span class="math inline">\(\mathcal S_{\mathrm{term}}\)</span> and a task-defined horizon specify when task rewards cease. Let</p>
 <p><span class="math display">\[
@@ -1561,8 +1574,8 @@ N\in\mathbb N\cup\{\infty\},
 \]</span></p>
 <p>where finite <span class="math inline">\(N\)</span> denotes a fixed maximum of <span class="math inline">\(N\)</span> decision steps and <span class="math inline">\(N=\infty\)</span> denotes the absence of a fixed horizon. A trajectory may still terminate before a finite horizon by entering <span class="math inline">\(\mathcal S_{\mathrm{term}}\)</span>, and it may terminate after a random number of decision steps when <span class="math inline">\(N=\infty\)</span>. An external truncation rule is not part of <span class="math inline">\(\mathcal M\)</span> or the task horizon because it stops data collection rather than the modelled task.</p>
 </section>
-<section id="cumulative-reward-gives-discounting-a-purpose" class="level3" data-number="12.8.3">
-<h3 data-number="12.8.3" class="anchored" data-anchor-id="cumulative-reward-gives-discounting-a-purpose"><span class="header-section-number">12.8.3</span> Cumulative reward gives discounting a purpose</h3>
+<section id="cumulative-reward-gives-discounting-a-purpose" class="level3" data-number="13.8.3">
+<h3 data-number="13.8.3" class="anchored" data-anchor-id="cumulative-reward-gives-discounting-a-purpose"><span class="header-section-number">13.8.3</span> Cumulative reward gives discounting a purpose</h3>
 <p>The one-step reward <span class="math inline">\(R_{t+1}\)</span> evaluates only the transition from time <span class="math inline">\(t\)</span> to time <span class="math inline">\(t+1\)</span>, but the chosen action can also affect later rewards. To compare such consequences, combine the reward sequence into one scalar. Choose a dimensionless <strong>discount factor</strong> <span class="math inline">\(\gamma\in[0,1]\)</span>.</p>
 <p>Define the <strong>discounted return</strong> from decision epoch <span class="math inline">\(t\)</span> by</p>
 <p><span class="math display">\[
@@ -1585,7 +1598,7 @@ G_t
 <img src="../figures/discounted_return_timeline.png" class="img-fluid figure-img" style="width:60.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-discounted-return-timeline-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;12.1: Decision timing and discount weights for the return <span class="math inline">\(G_t\)</span>.
+Figure&nbsp;13.1: Decision timing and discount weights for the return <span class="math inline">\(G_t\)</span>.
 </figcaption>
 </figure>
 </div>
@@ -2309,10 +2322,13 @@ document.addEventListener("DOMContentLoaded", () => {
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
       <a href="../part_02_probability_estimation/finite_markov_chains.html" class="pagination-link" aria-label="Finite Markov Chains">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Finite Markov Chains</span></span>
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Finite Markov Chains</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
+      <a href="../part_05_optimisation_planning_decisions/finite_mdp_implementation.html" class="pagination-link" aria-label="Finite-MDP Model Implementation">
+        <span class="nav-page-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Finite-MDP Model Implementation</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
   </div>
 </nav>
 </div> <!-- /content -->

@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>11&nbsp; Finite Markov Chains – Understanding Intelligence Through Robotics</title>
+<title>12&nbsp; Finite Markov Chains – Understanding Intelligence Through Robotics</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -34,7 +34,7 @@ ul.task-list li input[type="checkbox"] {
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
 <link href="../part_05_optimisation_planning_decisions/finite_markov_decision_processes.html" rel="next">
-<link href="../part_01_motion_mechanics_control/10_general_robot_kinematics_and_jacobians.html" rel="prev">
+<link href="../part_01_motion_mechanics_control/11_general_robot_kinematics_and_jacobians_implementation.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
@@ -295,7 +295,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part_02_probability_estimation/finite_markov_chains.html"><span>Part II:</span> Probability and Estimation</a></li><li class="breadcrumb-item"><a href="../part_02_probability_estimation/finite_markov_chains.html"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Finite Markov Chains</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part_02_probability_estimation/finite_markov_chains.html"><span>Part II:</span> Probability and Estimation</a></li><li class="breadcrumb-item"><a href="../part_02_probability_estimation/finite_markov_chains.html"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Finite Markov Chains</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -388,6 +388,12 @@ window.Quarto = {
  <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">General Robot Kinematics and Jacobians</span></span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part_01_motion_mechanics_control/11_general_robot_kinematics_and_jacobians_implementation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">General Robot Kinematics and Jacobians Implementation</span></span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -402,7 +408,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part_02_probability_estimation/finite_markov_chains.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Finite Markov Chains</span></span></a>
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Finite Markov Chains</span></span></a>
   </div>
 </li>
       </ul>
@@ -419,7 +425,13 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part_05_optimisation_planning_decisions/finite_markov_decision_processes.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Finite Markov Decision Processes</span></span></a>
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Finite Markov Decision Processes</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part_05_optimisation_planning_decisions/finite_mdp_implementation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Finite-MDP Model Implementation</span></span></a>
   </div>
 </li>
       </ul>
@@ -436,11 +448,11 @@ window.Quarto = {
   <ul>
   <li><a href="#prerequisites" id="toc-prerequisites" class="nav-link active" data-scroll-target="#prerequisites">Prerequisites</a></li>
   <li><a href="#sec-markov-chain-purpose" id="toc-sec-markov-chain-purpose" class="nav-link" data-scroll-target="#sec-markov-chain-purpose">Why model an uncontrolled state sequence?</a></li>
-  <li><a href="#sec-finite-stochastic-state-sequence" id="toc-sec-finite-stochastic-state-sequence" class="nav-link" data-scroll-target="#sec-finite-stochastic-state-sequence"><span class="header-section-number">11.1</span> A finite stochastic state sequence</a></li>
-  <li><a href="#sec-first-order-markov-property" id="toc-sec-first-order-markov-property" class="nav-link" data-scroll-target="#sec-first-order-markov-property"><span class="header-section-number">11.2</span> The first-order Markov property</a></li>
-  <li><a href="#sec-time-homogeneous-transition-matrix" id="toc-sec-time-homogeneous-transition-matrix" class="nav-link" data-scroll-target="#sec-time-homogeneous-transition-matrix"><span class="header-section-number">11.3</span> Time-homogeneous transition probabilities</a></li>
-  <li><a href="#sec-markov-distribution-propagation" id="toc-sec-markov-distribution-propagation" class="nav-link" data-scroll-target="#sec-markov-distribution-propagation"><span class="header-section-number">11.4</span> Propagating the state distribution</a></li>
-  <li><a href="#sec-markov-trajectories-absorbing" id="toc-sec-markov-trajectories-absorbing" class="nav-link" data-scroll-target="#sec-markov-trajectories-absorbing"><span class="header-section-number">11.5</span> Trajectory probabilities and absorbing states</a></li>
+  <li><a href="#sec-finite-stochastic-state-sequence" id="toc-sec-finite-stochastic-state-sequence" class="nav-link" data-scroll-target="#sec-finite-stochastic-state-sequence"><span class="header-section-number">12.1</span> A finite stochastic state sequence</a></li>
+  <li><a href="#sec-first-order-markov-property" id="toc-sec-first-order-markov-property" class="nav-link" data-scroll-target="#sec-first-order-markov-property"><span class="header-section-number">12.2</span> The first-order Markov property</a></li>
+  <li><a href="#sec-time-homogeneous-transition-matrix" id="toc-sec-time-homogeneous-transition-matrix" class="nav-link" data-scroll-target="#sec-time-homogeneous-transition-matrix"><span class="header-section-number">12.3</span> Time-homogeneous transition probabilities</a></li>
+  <li><a href="#sec-markov-distribution-propagation" id="toc-sec-markov-distribution-propagation" class="nav-link" data-scroll-target="#sec-markov-distribution-propagation"><span class="header-section-number">12.4</span> Propagating the state distribution</a></li>
+  <li><a href="#sec-markov-trajectories-absorbing" id="toc-sec-markov-trajectories-absorbing" class="nav-link" data-scroll-target="#sec-markov-trajectories-absorbing"><span class="header-section-number">12.5</span> Trajectory probabilities and absorbing states</a></li>
   <li><a href="#quick-test-finite-markov-chains" id="toc-quick-test-finite-markov-chains" class="nav-link" data-scroll-target="#quick-test-finite-markov-chains">Quick test: finite Markov chains</a>
   <ul class="collapse">
   <li><a href="#answers-and-hints" id="toc-answers-and-hints" class="nav-link" data-scroll-target="#answers-and-hints">Answers and hints</a></li>
@@ -453,9 +465,9 @@ window.Quarto = {
 <main class="content" id="quarto-document-content">
 
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part_02_probability_estimation/finite_markov_chains.html"><span>Part II:</span> Probability and Estimation</a></li><li class="breadcrumb-item"><a href="../part_02_probability_estimation/finite_markov_chains.html"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Finite Markov Chains</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part_02_probability_estimation/finite_markov_chains.html"><span>Part II:</span> Probability and Estimation</a></li><li class="breadcrumb-item"><a href="../part_02_probability_estimation/finite_markov_chains.html"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Finite Markov Chains</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span id="sec-finite-markov-chains" class="quarto-section-identifier"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Finite Markov Chains</span></span></h1>
+<h1 class="title"><span id="sec-finite-markov-chains" class="quarto-section-identifier"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Finite Markov Chains</span></span></h1>
 </div>
 
 
@@ -494,8 +506,8 @@ window.Quarto = {
 \]</span></p>
 <p>The first two objects say what information the model retains. The matrix records the resulting one-step law. Matrix multiplication and the probability product rule then produce predictions over multiple possible paths.</p>
 </section>
-<section id="sec-finite-stochastic-state-sequence" class="level2" data-number="11.1">
-<h2 data-number="11.1" class="anchored" data-anchor-id="sec-finite-stochastic-state-sequence"><span class="header-section-number">11.1</span> A finite stochastic state sequence</h2>
+<section id="sec-finite-stochastic-state-sequence" class="level2" data-number="12.1">
+<h2 data-number="12.1" class="anchored" data-anchor-id="sec-finite-stochastic-state-sequence"><span class="header-section-number">12.1</span> A finite stochastic state sequence</h2>
 <p>Consider a process observed at discrete times <span class="math inline">\(t\in\mathbb N_0=\{0,1,2,\ldots\}\)</span>. At time <span class="math inline">\(t\)</span>, the process occupies exactly one state from the finite <strong>state set</strong></p>
 <p><span class="math display">\[
 \boxed{
@@ -550,8 +562,8 @@ p_t(s_1)&amp;p_t(s_2)&amp;\cdots&amp;p_t(s_n)
 \]</span></p>
 <p>The function <span class="math inline">\(p_t\)</span> and vector <span class="math inline">\(\mathbf p_t\)</span> describe uncertainty about the current state; neither is itself a state from <span class="math inline">\(\mathcal S\)</span>. If the current state is known to be <span class="math inline">\(s_k\)</span>, then <span class="math inline">\(p_t(s_k)=1\)</span> and every other state has probability zero.</p>
 </section>
-<section id="sec-first-order-markov-property" class="level2" data-number="11.2">
-<h2 data-number="11.2" class="anchored" data-anchor-id="sec-first-order-markov-property"><span class="header-section-number">11.2</span> The first-order Markov property</h2>
+<section id="sec-first-order-markov-property" class="level2" data-number="12.2">
+<h2 data-number="12.2" class="anchored" data-anchor-id="sec-first-order-markov-property"><span class="header-section-number">12.2</span> The first-order Markov property</h2>
 <p>A general stochastic sequence may need its entire history to predict the next state. A first-order Markov model makes a more specific claim: once the current state is known, earlier states provide no additional information about the next-state distribution.</p>
 <p>Formally, the sequence <span class="math inline">\((S_0,S_1,\ldots)\)</span> has the <strong>first-order Markov property</strong> when, for every time <span class="math inline">\(t\in\mathbb N_0\)</span>, realised history <span class="math inline">\(x_0,\ldots,x_t\in\mathcal S\)</span>, and possible next state <span class="math inline">\(s'\in\mathcal S\)</span> satisfying</p>
 <p><span class="math display">\[
@@ -573,8 +585,8 @@ S_t=x_t,S_{t-1}=x_{t-1},\ldots,S_0=x_0
 <p>The word <em>first-order</em> refers to dependence on one immediately preceding state. It does not mean that the physical process has no memory. Instead, it means that the modelled state already contains the memory needed for prediction. For example, a position alone is generally not a Markov state for inertial motion because the next position also depends on velocity. The pair consisting of position and velocity can be Markov under a suitable motion model because the missing predictive information has been added to the state.</p>
 <p>The Markov property belongs to the chosen state representation and transition model, not to a name assigned to the physical system. If two histories produce the same state label but imply different next-state distributions, that label is not a Markov state for the model. One remedy is to enlarge the state so that the histories with different predictive consequences no longer collapse into the same state.</p>
 </section>
-<section id="sec-time-homogeneous-transition-matrix" class="level2" data-number="11.3">
-<h2 data-number="11.3" class="anchored" data-anchor-id="sec-time-homogeneous-transition-matrix"><span class="header-section-number">11.3</span> Time-homogeneous transition probabilities</h2>
+<section id="sec-time-homogeneous-transition-matrix" class="level2" data-number="12.3">
+<h2 data-number="12.3" class="anchored" data-anchor-id="sec-time-homogeneous-transition-matrix"><span class="header-section-number">12.3</span> Time-homogeneous transition probabilities</h2>
 <p>The Markov property removes unnecessary dependence on earlier states. A second assumption removes explicit dependence on time. A Markov chain is <strong>time-homogeneous</strong> when the probability of moving from any current state <span class="math inline">\(s\in\mathcal S\)</span> to any next state <span class="math inline">\(s'\in\mathcal S\)</span> is the same at every time step. Define the one-step <strong>transition kernel</strong></p>
 <p><span class="math display">\[
 \boxed{
@@ -605,8 +617,8 @@ p(s_j\mid s_i),
 <p>Row <span class="math inline">\(i\)</span> contains the complete next-state distribution <span class="math inline">\(p(\,\cdot\mid s_i)\)</span>. Thus every entry is non-negative and every row sums to one. A matrix satisfying these two conditions is <strong>row-stochastic</strong>. Row stochasticity is not a numerical convenience; it expresses that, from each current state, the process must enter exactly one of the declared next states. A negative entry cannot be a probability, and a row sum different from one leaves probability missing or assigns probability more than once.</p>
 <p>This book deliberately stores state distributions as row vectors and current states along matrix rows. Under this convention, distributions propagate by right multiplication. A column-vector convention would instead use a transposed matrix or reverse the multiplication order. Either convention can be correct, but mixing them changes the model.</p>
 </section>
-<section id="sec-markov-distribution-propagation" class="level2" data-number="11.4">
-<h2 data-number="11.4" class="anchored" data-anchor-id="sec-markov-distribution-propagation"><span class="header-section-number">11.4</span> Propagating the state distribution</h2>
+<section id="sec-markov-distribution-propagation" class="level2" data-number="12.4">
+<h2 data-number="12.4" class="anchored" data-anchor-id="sec-markov-distribution-propagation"><span class="header-section-number">12.4</span> Propagating the state distribution</h2>
 <p>Suppose the state distribution <span class="math inline">\(p_t\)</span> and transition kernel <span class="math inline">\(p(s'\mid s)\)</span> are known. To find the probability of a possible next state <span class="math inline">\(s'\in\mathcal S\)</span>, partition the possibilities according to the current state. The finite law of total probability gives</p>
 <p><span class="math display">\[
 p_{t+1}(s')
@@ -658,8 +670,8 @@ p_t(s)
 \]</span></p>
 <p>where <span class="math inline">\(\mathbf P^k\)</span> is the product of <span class="math inline">\(k\)</span> copies of <span class="math inline">\(\mathbf P\)</span>. The formula follows by repeated substitution: <span class="math inline">\(\mathbf p_{t+2}=(\mathbf p_t\mathbf P)\mathbf P=\mathbf p_t\mathbf P^2\)</span>, and the same argument continues for later steps.</p>
 </section>
-<section id="sec-markov-trajectories-absorbing" class="level2" data-number="11.5">
-<h2 data-number="11.5" class="anchored" data-anchor-id="sec-markov-trajectories-absorbing"><span class="header-section-number">11.5</span> Trajectory probabilities and absorbing states</h2>
+<section id="sec-markov-trajectories-absorbing" class="level2" data-number="12.5">
+<h2 data-number="12.5" class="anchored" data-anchor-id="sec-markov-trajectories-absorbing"><span class="header-section-number">12.5</span> Trajectory probabilities and absorbing states</h2>
 <p>A distribution prediction sums over all paths that can reach a future state. Sometimes the required output is instead the probability of one declared path. Let <span class="math inline">\(T\in\mathbb N\)</span> be a finite final time, and choose realised state values <span class="math inline">\(x_0,x_1,\ldots,x_T\in\mathcal S\)</span>. The corresponding trajectory event is</p>
 <p><span class="math display">\[
 S_0=x_0,S_1=x_1,\ldots,S_T=x_T.
@@ -1283,13 +1295,13 @@ document.addEventListener("DOMContentLoaded", () => {
   </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="../part_01_motion_mechanics_control/10_general_robot_kinematics_and_jacobians.html" class="pagination-link" aria-label="General Robot Kinematics and Jacobians">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">General Robot Kinematics and Jacobians</span></span>
+      <a href="../part_01_motion_mechanics_control/11_general_robot_kinematics_and_jacobians_implementation.html" class="pagination-link" aria-label="General Robot Kinematics and Jacobians Implementation">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">General Robot Kinematics and Jacobians Implementation</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
       <a href="../part_05_optimisation_planning_decisions/finite_markov_decision_processes.html" class="pagination-link" aria-label="Finite Markov Decision Processes">
-        <span class="nav-page-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Finite Markov Decision Processes</span></span> <i class="bi bi-arrow-right-short"></i>
+        <span class="nav-page-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Finite Markov Decision Processes</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

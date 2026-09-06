@@ -563,7 +563,7 @@ window.Quarto = {
 
 <section id="prerequisites" class="level2 unnumbered">
 <h2 class="unnumbered anchored" data-anchor-id="prerequisites">Prerequisites</h2>
-<p>The feasible action sets in <a href="finite_markov_decision_processes.html#sec-mdp-actions-feasible-sets" class="quarto-xref"><span>Section 12.1</span></a> distinguish a global action label from an action available in one state. The joint transition–reward kernel in <a href="finite_markov_decision_processes.html#sec-mdp-rewards-joint-dynamics" class="quarto-xref"><span>Section 12.5</span></a> assigns a probability to each possible next-state–reward event; summing those probabilities gives the next-state marginal, and weighting them by reward gives the expected one-step reward. The absorbing extension in <a href="finite_markov_decision_processes.html#sec-mdp-termination-truncation" class="quarto-xref"><span>Section 12.7</span></a> retains the reward on entering a terminal state and assigns zero reward to subsequent self-transitions.</p>
+<p>The feasible action sets in <a href="finite_markov_decision_processes.html#sec-mdp-actions-feasible-sets" class="quarto-xref"><span>Section 13.1</span></a> distinguish a global action label from an action available in one state. The joint transition–reward kernel in <a href="finite_markov_decision_processes.html#sec-mdp-rewards-joint-dynamics" class="quarto-xref"><span>Section 13.5</span></a> assigns a probability to each possible next-state–reward event; summing those probabilities gives the next-state marginal, and weighting them by reward gives the expected one-step reward. The absorbing extension in <a href="finite_markov_decision_processes.html#sec-mdp-termination-truncation" class="quarto-xref"><span>Section 13.7</span></a> retains the reward on entering a terminal state and assigns zero reward to subsequent self-transitions.</p>
 </section>
 <section id="sec-finite-mdp-impl-domains" class="level2" data-number="14.1">
 <h2 data-number="14.1" class="anchored" data-anchor-id="sec-finite-mdp-impl-domains"><span class="header-section-number">14.1</span> Identifying states and actions</h2>
@@ -808,11 +808,11 @@ window.Quarto = {
 <section id="why-ordinary-addition-loses-information" class="level3" data-number="14.3.1">
 <h3 data-number="14.3.1" class="anchored" data-anchor-id="why-ordinary-addition-loses-information"><span class="header-section-number">14.3.1</span> Why ordinary addition loses information</h3>
 <p>For this numerical discussion, assume IEEE 754 binary64 <code>double</code> arithmetic with rounding to nearest, ties to even, and without compiler reassociation that treats floating-point addition as associative. Let <span class="math inline">\(\operatorname{fl}(z)\)</span> denote the stored floating-point rounding of the exact real result <span class="math inline">\(z\)</span>.</p>
-<p>Given finite summands <span class="math inline">\(x_1,\ldots,x_N\)</span>, where <span class="math inline">\(N\)</span> is their number, the exact desired sum is <span class="math inline">\(\sum_{k=1}^{N}x_k\)</span>. A straightforward loop starts from <span class="math inline">\(b_0=0\)</span> and stores</p>
+<p>Given finite summands <span class="math inline">\(\text{term}_1,\ldots,\text{term}_N\)</span>, where <span class="math inline">\(N\)</span> is their number, the exact desired sum is <span class="math inline">\(\sum_{k=1}^{N}\text{term}_k\)</span>. A straightforward loop starts from <span class="math inline">\(\text{sum}_0=0\)</span> and stores</p>
 <p><span class="math display">\[
-b_k=\operatorname{fl}(b_{k-1}+x_k).
+\text{sum}_k=\operatorname{fl}(\text{sum}_{k-1}+\text{term}_k).
 \]</span></p>
-<p>Each addition rounds before the next iteration. A small positive <span class="math inline">\(x_k\)</span> may therefore leave the stored sum unchanged. Rounding can also increase the stored result: it is not always a loss in the downward direction.</p>
+<p>Each addition rounds before the next iteration. A small positive <span class="math inline">\(\text{term}_k\)</span> may therefore leave the stored sum unchanged. Rounding can also increase the stored result: it is not always a loss in the downward direction.</p>
 <div class="callout callout-style-simple callout-note no-icon callout-titled" title="Example: Losing two small increments">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -847,35 +847,48 @@ b_k=\operatorname{fl}(b_{k-1}+x_k).
 <span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">(</span>updated_sum <span class="op">-</span> probability_sum<span class="op">)</span> <span class="op">-</span> corrected_probability<span class="op">;</span></span>
 <span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>  probability_sum <span class="op">=</span> updated_sum<span class="op">;</span></span>
 <span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>To interpret one iteration, let <span class="math inline">\(b\)</span> be the old <code>probability_sum</code>, <span class="math inline">\(c\)</span> the old <code>compensation</code>, and <span class="math inline">\(x\)</span> the current <code>outcome.probability</code>. Both <span class="math inline">\(b\)</span> and <span class="math inline">\(c\)</span> start at zero. Define <span class="math inline">\(y\)</span> as <code>corrected_probability</code>, <span class="math inline">\(t\)</span> as <code>updated_sum</code>, and <span class="math inline">\(c_{\mathrm{new}}\)</span> as the replacement correction. The actual rounded operations are</p>
+<p>For one iteration, <span class="math inline">\(\text{sum}_{\mathrm{old}}\)</span> and <span class="math inline">\(\text{correction}_{\mathrm{old}}\)</span> are the values of <code>probability_sum</code> and <code>compensation</code> before the update; both are initialised to zero before the loop. Let <span class="math inline">\(\text{probability}\)</span> denote the current <code>outcome.probability</code>.</p>
+<p>The corrected <span class="math inline">\(\text{increment}\)</span> is <code>corrected_probability</code>, <span class="math inline">\(\text{sum}_{\mathrm{new}}\)</span> is <code>updated_sum</code>, and <span class="math inline">\(\text{correction}_{\mathrm{new}}\)</span> is the replacement value of <code>compensation</code>. The rounded calculations are</p>
 <p><span class="math display">\[
 \begin{aligned}
-y&amp;=\operatorname{fl}(x-c),\\
-t&amp;=\operatorname{fl}(b+y),\\
-c_{\mathrm{new}}
+\text{increment}
+&amp;=\operatorname{fl}(\text{probability}-\text{correction}_{\mathrm{old}}),\\
+\text{sum}_{\mathrm{new}}
+&amp;=\operatorname{fl}(\text{sum}_{\mathrm{old}}+\text{increment}),\\
+\text{correction}_{\mathrm{new}}
 &amp;=\operatorname{fl}\!\left(
-  \operatorname{fl}(t-b)-y
-\right),\\
-b_{\mathrm{new}}&amp;=t.
+  \operatorname{fl}(\text{sum}_{\mathrm{new}}-\text{sum}_{\mathrm{old}})
+  -\text{increment}
+\right).
 \end{aligned}
 \]</span></p>
-<p>The final line is an assignment of the already computed value, not another addition. The correction is calculated while <code>probability_sum</code> still contains the old <span class="math inline">\(b\)</span>. Replacing <span class="math inline">\(b\)</span> by <span class="math inline">\(t\)</span> too soon would destroy the information needed by <code>updated_sum - probability_sum</code>.</p>
-<p>Why this sign? Temporarily suppose the two subtractions used to recover the residual introduce no error, and write the rounded addition as <span class="math inline">\(t=b+y+e\)</span>, where <span class="math inline">\(e\)</span> is its signed rounding error. Then</p>
+<p>Finally, <code>probability_sum = updated_sum</code> stores <span class="math inline">\(\text{sum}_{\mathrm{new}}\)</span> for the next iteration; it performs no further addition. The correction must be calculated first, while <code>probability_sum</code> still holds <span class="math inline">\(\text{sum}_{\mathrm{old}}\)</span>. Updating it too soon would destroy the information needed by <code>updated_sum - probability_sum</code>.</p>
+<p>Why subtract the correction? Let <span class="math inline">\(\text{rounding error}\)</span> mean the stored addition result minus the exact addition result. Thus</p>
 <p><span class="math display">\[
-(t-b)-y=(b+y+e-b)-y=e.
+\text{sum}_{\mathrm{new}}
+=\text{sum}_{\mathrm{old}}+\text{increment}+\text{rounding error}.
 \]</span></p>
-<p>Under those simplifying conditions, <span class="math inline">\(c_{\mathrm{new}}=e\)</span>: it measures “stored result minus the desired addition result”. The next iteration uses <span class="math inline">\(x_{\mathrm{next}}-c_{\mathrm{new}}\)</span>. If the previous addition rounded downward, then <span class="math inline">\(e&lt;0\)</span>, so subtracting <span class="math inline">\(e\)</span> increases the next increment. If it rounded upward, then <span class="math inline">\(e&gt;0\)</span>, and the next increment is reduced. Real subtraction also rounds, so the code computes a residual estimate rather than a universally exact error.</p>
+<p>Temporarily suppose the two subtractions used to recover that error introduce no further rounding. Subtracting the old sum, then the increment, gives</p>
+<p><span class="math display">\[
+\begin{aligned}
+\text{sum}_{\mathrm{new}}-\text{sum}_{\mathrm{old}}
+&amp;=\text{increment}+\text{rounding error},\\
+(\text{sum}_{\mathrm{new}}-\text{sum}_{\mathrm{old}})-\text{increment}
+&amp;=\text{rounding error}.
+\end{aligned}
+\]</span></p>
+<p>Under those simplifying conditions, <span class="math inline">\(\text{correction}_{\mathrm{new}}=\text{rounding error}\)</span>. The next iteration subtracts this correction from the next input probability. If the previous addition rounded downward, the correction is negative, so subtracting it increases the next increment. If it rounded upward, the correction is positive, so subtracting it reduces the next increment. Real subtraction also rounds, so the code computes a residual estimate rather than a universally exact error.</p>
 <p>This explains why the correction is applied to the <strong>next summand</strong> rather than by repeatedly trying to add a tiny residual directly to the same large sum. The correction can combine with the next input into an increment large enough to affect the stored result. The supplied <code>outcome.probability</code> is never assigned to or changed.</p>
 </section>
 <section id="a-complete-binary64-trace" class="level3" data-number="14.3.3">
 <h3 data-number="14.3.3" class="anchored" data-anchor-id="a-complete-binary64-trace"><span class="header-section-number">14.3.3</span> A complete binary64 trace</h3>
-<p>Use the earlier sequence <span class="math inline">\((1,h,h)\)</span> to see how the small amount is recovered. This is an addition example, not a normalised probability row. Starting from <span class="math inline">\(b=0\)</span> and <span class="math inline">\(c=0\)</span>, the four-operation update gives:</p>
+<p>Use the earlier sequence <span class="math inline">\((1,h,h)\)</span> to see how the small amount is recovered. This is an addition example, not a normalised probability row. Starting with both the sum and correction at zero, the four-operation update gives:</p>
 <table class="caption-top table">
 <thead>
 <tr class="header">
-<th>Input <span class="math inline">\(x\)</span></th>
-<th>Corrected increment <span class="math inline">\(y\)</span></th>
-<th>New sum <span class="math inline">\(t\)</span></th>
+<th>Input</th>
+<th>Corrected increment</th>
+<th>New sum</th>
 <th>New correction</th>
 </tr>
 </thead>
@@ -900,7 +913,7 @@ b_{\mathrm{new}}&amp;=t.
 </tr>
 </tbody>
 </table>
-<p>For the second input, the addition rounds to <span class="math inline">\(t=1\)</span>, so the correction is <span class="math inline">\((1-1)-h=-h\)</span>. For the third input, <span class="math inline">\(y=h-(-h)=2h=2^{-52}\)</span>; that increment is representable at the scale of <span class="math inline">\(1\)</span>. The final stored value is therefore <code>1.0000000000000002</code>, whereas the ordinary loop returns <code>1</code>.</p>
+<p>For the second input, the new sum rounds to <span class="math inline">\(1\)</span>, so the correction is <span class="math inline">\((1-1)-h=-h\)</span>. For the third input, the corrected increment is <span class="math inline">\(h-(-h)=2h=2^{-52}\)</span>; that increment is representable at the scale of <span class="math inline">\(1\)</span>. The final stored value is therefore <code>1.0000000000000002</code>, whereas the ordinary loop returns <code>1</code>.</p>
 <p>The example also shows why <code>compensation</code> should not be described as “the total error so far” or “a positive amount that was rounded up”. It is a signed correction passed between consecutive updates, and its sign is essential.</p>
 </section>
 <section id="validation-remains-a-tolerance-test" class="level3" data-number="14.3.4">
@@ -917,7 +930,7 @@ b_{\mathrm{new}}&amp;=t.
 </section>
 <section id="sec-finite-mdp-impl-controlled-queries" class="level2" data-number="14.4">
 <h2 data-number="14.4" class="anchored" data-anchor-id="sec-finite-mdp-impl-controlled-queries"><span class="header-section-number">14.4</span> Marginal probabilities and expected reward</h2>
-<p>Given a validated joint distribution, the two queries produce the probability of each next state and the expected one-step reward. The record-based forms of the equations from <a href="finite_markov_decision_processes.html#sec-mdp-rewards-joint-dynamics" class="quarto-xref"><span>Section 12.5</span></a> determine which terms each loop accumulator receives.</p>
+<p>Given a validated joint distribution, the two queries produce the probability of each next state and the expected one-step reward. The record-based forms of the equations from <a href="finite_markov_decision_processes.html#sec-mdp-rewards-joint-dynamics" class="quarto-xref"><span>Section 13.5</span></a> determine which terms each loop accumulator receives.</p>
 <section id="one-accumulator-per-destination" class="level3" data-number="14.4.1">
 <h3 data-number="14.4.1" class="anchored" data-anchor-id="one-accumulator-per-destination"><span class="header-section-number">14.4.1</span> One accumulator per destination</h3>
 <p>For a destination <span class="math inline">\(s'\in\mathcal S\)</span>, marginalisation sums over all reward values. Since omitted events have zero probability, the sum can be written using the stored records:</p>
