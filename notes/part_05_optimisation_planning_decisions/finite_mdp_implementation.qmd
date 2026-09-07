@@ -1151,15 +1151,16 @@ An attempt from the start can fail or make progress. Two outcomes reach the same
 ```text
 Supplied task transitions (p = probability, r = reward):
 
-s_1 -- a_1 --> +-- p=0.25, r=-2 --> s_1
-               +-- p=0.25, r= 1 --> s_2
-               +-- p=0.50, r= 3 --> s_2
+s_1: start -- a_1: attempt --> +-- p=0.25, r=-2 --> s_1: start
+                               +-- p=0.25, r= 1 --> s_2: in progress
+                               +-- p=0.50, r= 3 --> s_2: in progress
 
-s_1 -- a_2 --> p=1, r=0 --> s_3
-s_2 -- a_1 --> p=1, r=6 --> s_3
+s_1: start -- a_2: quit --> p=1, r=0 --> s_3: finished
+
+s_2: in progress -- a_1: attempt --> p=1, r=6 --> s_3: finished
 
 Generated terminal continuation:
-s_3 -- a_bot --> p=1, r=0 --> s_3
+s_3: finished -- a_bot --> p=1, r=0 --> s_3: finished
 ```
 
 ### Calculating the expected results

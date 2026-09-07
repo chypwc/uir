@@ -509,8 +509,8 @@ window.Quarto = {
   <li><a href="#accessing-either-joint-kind" id="toc-accessing-either-joint-kind" class="nav-link" data-scroll-target="#accessing-either-joint-kind"><span class="header-section-number">11.4.2</span> Accessing either joint kind</a></li>
   <li><a href="#evaluating-the-ordered-product" id="toc-evaluating-the-ordered-product" class="nav-link" data-scroll-target="#evaluating-the-ordered-product"><span class="header-section-number">11.4.3</span> Evaluating the ordered product</a></li>
   <li><a href="#verification-meaning-3" id="toc-verification-meaning-3" class="nav-link" data-scroll-target="#verification-meaning-3"><span class="header-section-number">11.4.4</span> Verification meaning</a></li>
+  <li><a href="#sec-general-kinematics-impl-cycle-connections" id="toc-sec-general-kinematics-impl-cycle-connections" class="nav-link" data-scroll-target="#sec-general-kinematics-impl-cycle-connections"><span class="header-section-number">11.4.5</span> How the classes and functions connect</a></li>
   </ul></li>
-  <li><a href="#sec-general-kinematics-impl-cycle-connections" id="toc-sec-general-kinematics-impl-cycle-connections" class="nav-link" data-scroll-target="#sec-general-kinematics-impl-cycle-connections"><span class="header-section-number">11.5</span> How the classes and functions connect</a></li>
   </ul>
 </nav>
     </div>
@@ -829,7 +829,7 @@ q_j\in\mathcal Q_j
 <span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> normalized_direction<span class="op">;</span></span>
 <span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><code>allFinite()</code> checks all vector entries. <code>stableNorm()</code> computes the Euclidean length using scaling to reduce intermediate overflow and underflow, rather than directly summing unscaled squared entries. A finite input vector can still have a length too large to represent as a <code>double</code>; the explicit finiteness check therefore remains necessary. A zero direction has no orientation and cannot be repaired by choosing an arbitrary axis.</p>
-<p><code>direction_norm</code> is the length of the supplied direction, and <code>normalized_direction</code> is <span class="math inline">\({}^{s}\mathbf s_j\)</span>. Division by that positive length preserves the declared sign. Supplying a direction twice as long gives the same normalized direction; reversing its sign reverses the meaning of a positive joint coordinate. The final check rejects a non-finite computed direction instead of letting invalid geometry enter a joint object.</p>
+<p><code>direction_norm</code> is the length of the supplied direction, and <code>normalized_direction</code> is <span class="math inline">\({}^{s}\mathbf s_j\)</span>. Division by that positive length preserves the declared sign. The final check rejects a non-finite computed direction instead of letting invalid geometry enter a joint object.</p>
 </section>
 <section id="constructing-a-revolute-screw" class="level3" data-number="11.2.3">
 <h3 data-number="11.2.3" class="anchored" data-anchor-id="constructing-a-revolute-screw"><span class="header-section-number">11.2.3</span> Constructing a revolute screw</h3>
@@ -875,7 +875,12 @@ q_j\in\mathcal Q_j
 <span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><code>linear_screw_block</code> represents <span class="math inline">\(-{}^{s}\mathbf s_j\times{}^{s}\mathbf p_{\ell,j}\)</span>. The leading minus sign applies to the whole cross product; swapping the cross-product operands would also change its sign. Even with finite operands, an intermediate calculation can exceed the representable range, so the factory checks the resulting block before constructing the joint.</p>
 <p><code>head&lt;3&gt;()</code> selects the first three entries and <code>tail&lt;3&gt;()</code> selects the last three. The angle-bracket argument fixes the block length at compile time. These expressions are writable views into <code>space_screw_axis</code>, so the assignments fill entries <span class="math inline">\(0,1,2\)</span> and <span class="math inline">\(3,4,5\)</span>, respectively. Both blocks are assigned before the six-entry column is used; the default declaration alone does not initialize its numerical entries.</p>
-<p>The constructor’s parameters are values owned by that call, and its initializer list initializes the object’s members. <code>std::move</code> marks a value as eligible for move construction; it does not itself transfer data. The selected type’s constructor determines whether storage can be transferred or entries must still be copied. In particular, moving a small fixed-size Eigen column is not a promise to avoid copying its scalar entries. The important ownership result is that the returned joint stores its own geometry and limits, with no references to the factory’s local variables.</p>
+<p>The constructor code stores the checked geometry and limits in the new joint through three parts:</p>
+<ol type="1">
+<li><strong>Constructor (<code>RevoluteJoint::RevoluteJoint</code>):</strong> This special member function initializes a new joint. The factory (<code>RevoluteJoint::from_axis</code>) calls it after checking the inputs and calculating the screw.</li>
+<li><strong>Member initializer list (the part after <code>:</code>):</strong> This is not a separate function. It initializes the joint’s stored members before the constructor body runs. For example, <code>space_axis_direction_(std::move(space_axis_direction))</code> initializes the stored direction from the direction parameter.</li>
+<li><strong>Move utility (<code>std::move</code>):</strong> <code>std::move</code> marks an existing object as available for move construction: creating a new object that can reuse the original object’s data instead of copying it, when the type supports this. In <code>space_axis_direction_(std::move(space_axis_direction))</code>, the stored member is initialized from the direction parameter. <code>std::move</code> allows C++ to use the type’s move constructor, but this fixed-size Eigen vector may still copy its three numbers. The joint keeps its own direction, axis point, limits, and screw; these remain available after the factory and constructor finish.</li>
+</ol>
 <p>For example, a supplied direction <span class="math inline">\((0,0,5)^{\mathsf T}\)</span> and axis point <span class="math inline">\((2,0,0)^{\mathsf T}\,\mathrm m\)</span> produce the unit direction <span class="math inline">\((0,0,1)^{\mathsf T}\)</span> and linear block <span class="math inline">\((0,-2,0)^{\mathsf T}\)</span> in metres per radian. The stored screw is therefore <span class="math inline">\((0,-2,0,0,0,1)^{\mathsf T}\)</span>. The point is on a line parallel to the space <span class="math inline">\(z\)</span>-axis but displaced from the space origin; the upper block records that offset’s effect on the motion.</p>
 </section>
 <section id="constructing-a-prismatic-screw" class="level3" data-number="11.2.4">
@@ -931,8 +936,24 @@ q_j\in\mathcal Q_j
 \mathbf 0_3^{\mathsf T}&amp;1
 \end{bmatrix}.
 \]</span></p>
-<p>Here <span class="math inline">\(SE(3)\)</span> is the set of rigid transformations represented by <span class="math inline">\(4\times4\)</span> homogeneous matrices, <span class="math inline">\(\mathbf 0_n\)</span> is the all-zero joint-coordinate column, and <span class="math inline">\(\mathbf T_{se}\)</span> is the pose of <span class="math inline">\(\{e\}\)</span> relative to <span class="math inline">\(\{s\}\)</span>. The dimensionless <span class="math inline">\(3\times3\)</span> rotation block <span class="math inline">\(\mathbf R_{se,0}\)</span> gives the end-effector orientation at zero. The three-entry column <span class="math inline">\({}^{s}\mathbf p_{e,0}\)</span> gives the end-effector origin’s position relative to the space origin, expressed in <span class="math inline">\(\{s\}\)</span> and measured in metres. The superscript <span class="math inline">\(\mathsf T\)</span> transposes the zero column into a row. The matrix maps homogeneous end-effector point coordinates to space-frame coordinates by left multiplication.</p>
-<p>The model pairs <span class="math inline">\(\mathbf M\)</span> with the ordered joints and their <span class="math inline">\({}^{s}\mathbf S_j\)</span> columns. Every axis must describe the same zero arrangement and use the same space frame as <span class="math inline">\(\mathbf M\)</span>. This agreement is a caller precondition: finite numerical entries alone cannot establish which physical frame or robot arrangement they describe. The zero arrangement defines the geometry even when zero lies outside a joint’s operating interval; storing the home pose does not make a zero-coordinate query admissible.</p>
+<p>Here <span class="math inline">\(SE(3)\)</span> is the set of rigid transformations represented by <span class="math inline">\(4\times4\)</span> homogeneous matrices, <span class="math inline">\(\mathbf 0_n\)</span> is the all-zero joint-coordinate column, and <span class="math inline">\(\mathbf T_{se}\)</span> is the pose of <span class="math inline">\(\{e\}\)</span> relative to <span class="math inline">\(\{s\}\)</span>. The dimensionless <span class="math inline">\(3\times3\)</span> rotation block <span class="math inline">\(\mathbf R_{se,0}\)</span> gives the end-effector frame’s orientation relative to the space frame when all joint coordinates are zero. The three-entry column <span class="math inline">\({}^{s}\mathbf p_{e,0}\)</span> gives the end-effector origin’s position relative to the space origin, expressed in <span class="math inline">\(\{s\}\)</span> and measured in metres. The superscript <span class="math inline">\(\mathsf T\)</span> transposes the zero column into a row. The matrix maps homogeneous end-effector point coordinates to space-frame coordinates by left multiplication.</p>
+<p>The <strong>geometric forward-kinematics model</strong> collects the fixed data needed to calculate the selected end effector’s pose. As defined in Equation <a href="10_general_robot_kinematics_and_jacobians.html#eq-serial-geometric-model" class="quarto-xref">Equation&nbsp;<span>10.8</span></a>, it is the ordered pair</p>
+<p><span class="math display">\[
+\mathcal M
+:=
+\left(
+\mathbf M,\;
+({}^{s}\mathbf S_j)_{j=1}^{n}
+\right),
+\]</span></p>
+<p>where:</p>
+<ul>
+<li><span class="math inline">\(\mathbf M\)</span> is the home end-effector pose relative to the fixed space frame <span class="math inline">\(\{s\}\)</span>.</li>
+<li><span class="math inline">\(({}^{s}\mathbf S_j)_{j=1}^{n}\)</span> is the ordered sequence of space screw columns, from joint <span class="math inline">\(1\)</span> at the base to joint <span class="math inline">\(n\)</span> nearest the end effector, all expressed in <span class="math inline">\(\{s\}\)</span> at the same zero arrangement.</li>
+<li><span class="math inline">\(n\)</span> is the number of joints.</li>
+</ul>
+<p>The software’s <strong>serial-chain model</strong> stores this geometric description together with the information needed to construct and validate it. It contains the home pose and ordered joint definitions; each joint definition retains its type, axis geometry, coordinate limits, and derived screw column. These are fixed reference data, not the current joint coordinates: the same model can be used to calculate poses for different coordinate inputs.</p>
+<p>Every axis must describe the same zero arrangement and use the same space frame as <span class="math inline">\(\mathbf M\)</span>. This agreement is a caller precondition: finite numerical entries alone cannot establish which physical frame or robot arrangement they describe. The zero arrangement defines the geometry even when zero lies outside a joint’s operating interval; storing the home pose does not make a zero-coordinate query admissible.</p>
 <section id="owning-the-home-pose-and-ordered-joints" class="level3" data-number="11.3.1">
 <h3 data-number="11.3.1" class="anchored" data-anchor-id="owning-the-home-pose-and-ordered-joints"><span class="header-section-number">11.3.1</span> Owning the home pose and ordered joints</h3>
 <p>The complete class declaration is:</p>
@@ -1007,7 +1028,7 @@ q_j\in\mathcal Q_j
 <span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><code>empty()</code> tests whether the supplied joint container has no elements. Rejecting that case enforces <span class="math inline">\(n\geq1\)</span>. The factory does not repeat rotation, axis, or interval checks: those properties were established when its input values were constructed. It neither sorts the list nor recalculates the screw columns, so the caller’s base-to-end-effector order is retained exactly.</p>
 <p>The factory receives its inputs by value. Passing an existing ordinary variable copies it into the parameter; explicitly moving a suitable variable permits move construction instead. The factory then moves its parameters into the private constructor, which moves them into the stored members. For the joint vector, move construction transfers ownership of its allocated element storage. This is different from keeping a reference to the caller’s vector: subsequently changing the caller’s original vector cannot edit the model’s stored joints.</p>
-<p>The accessors borrow the model’s members. Such references should be used while the model remains alive and unchanged; replacing or moving the owner can change or invalidate access to its former contents. The model itself remains an ordinary value that can be copied or replaced as a whole. Its public interface provides no operation to mutate an individual stored joint.</p>
+<p>The accessors, <code>joint_definitions()</code> and <code>joint_count</code>, borrow the model’s members. Such references should be used while the model remains alive and unchanged; replacing or moving the owner can change or invalidate access to its former contents. The model itself remains an ordinary value that can be copied or replaced as a whole. Its public interface provides no operation to mutate an individual stored joint.</p>
 </section>
 <section id="verification-meaning-2" class="level3" data-number="11.3.3">
 <h3 data-number="11.3.3" class="anchored" data-anchor-id="verification-meaning-2"><span class="header-section-number">11.3.3</span> Verification meaning</h3>
@@ -1025,7 +1046,26 @@ q_j\in\mathcal Q_j
 \qquad
 \mathbf T_{se}(\mathbf q)=\mathbf E_1(q_1)\cdots\mathbf E_n(q_n)\mathbf M.
 \]</span></p>
-<p>The hat operator maps the linear-first six-entry column to its <span class="math inline">\(4\times4\)</span> Lie-algebra matrix, and <span class="math inline">\(\exp\)</span> is the matrix exponential implemented by the spatial kernel. The upper three entries of <span class="math inline">\({}^{s}\boldsymbol\eta_j\)</span> are linear exponential coordinates in metres; the lower three are angular exponential coordinates in radians, identically zero for a prismatic joint. The upper block is not generally the displacement transform’s translation column: the coupled rotation-and-translation calculation in <a href="09_spatial_geometry_kernel_implementation.html#sec-spatial-kernel-se3-exponential" class="quarto-xref"><span>Section 9.10</span></a> supplies that translation.</p>
+<p>The hat operator maps the linear-first six-entry column to its <span class="math inline">\(4\times4\)</span> Lie-algebra matrix, and <span class="math inline">\(\exp\)</span> is the matrix exponential implemented by the spatial kernel.</p>
+<p>Write <span class="math inline">\({}^{s}\boldsymbol\eta_j=[\boldsymbol\rho_j^{\mathsf T}\;\boldsymbol\phi_j^{\mathsf T}]^{\mathsf T}\)</span>, where the three-entry blocks <span class="math inline">\(\boldsymbol\rho_j\)</span> and <span class="math inline">\(\boldsymbol\phi_j\)</span> are linear exponential coordinates in metres and angular exponential coordinates in radians, respectively, expressed in <span class="math inline">\(\{s\}\)</span>. Recall that</p>
+<p><span class="math display">\[
+\widehat{{}^{s}\boldsymbol\eta_j}
+=
+\begin{bmatrix}
+\widehat{\boldsymbol\phi_j}&amp;\boldsymbol\rho_j\\
+\mathbf 0_3^{\mathsf T}&amp;0
+\end{bmatrix}
+\in\mathfrak{se}(3),
+\qquad
+\exp\!\left(\widehat{{}^{s}\boldsymbol\eta_j}\right)
+=
+\begin{bmatrix}
+\exp(\widehat{\boldsymbol\phi_j})&amp;\mathbf t_j\\
+\mathbf 0_3^{\mathsf T}&amp;1
+\end{bmatrix}
+\in SE(3).
+\]</span></p>
+<p>Here <span class="math inline">\(\widehat{\boldsymbol\phi_j}\)</span> is the <span class="math inline">\(3\times3\)</span> skew-symmetric cross-product matrix of <span class="math inline">\(\boldsymbol\phi_j\)</span>, and <span class="math inline">\(\mathbf 0_3\)</span> is the three-entry zero column. The three-entry translation column <span class="math inline">\(\mathbf t_j\)</span>, expressed in <span class="math inline">\(\{s\}\)</span> and measured in metres, is calculated by the spatial exponential; it need not equal <span class="math inline">\(\boldsymbol\rho_j\)</span> when rotation is present.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></p>
 <p>The factors preserve base-to-end-effector joint order from left to right. They act rightmost first on coordinate columns, and each <span class="math inline">\(\mathbf E_j\)</span> is an active motion expressed in the fixed space frame. This factor order describes the final pose, not a time sequence for commanding the robot. The stored axes remain the zero-arrangement axes throughout evaluation; the ordered product accounts for the motion of the outward assembly.</p>
 <section id="public-input-and-output" class="level3" data-number="11.4.1">
 <h3 data-number="11.4.1" class="anchored" data-anchor-id="public-input-and-output"><span class="header-section-number">11.4.1</span> Public input and output</h3>
@@ -1044,7 +1084,7 @@ q_j\in\mathcal Q_j
 </section>
 <section id="accessing-either-joint-kind" class="level3" data-number="11.4.2">
 <h3 data-number="11.4.2" class="anchored" data-anchor-id="accessing-either-joint-kind"><span class="header-section-number">11.4.2</span> Accessing either joint kind</h3>
-<p>The following two helpers let the evaluator query either joint type without duplicating the calculation. Their complete definitions belong to an unnamed namespace inside the implementation namespace; the variant operations use <code>&lt;variant&gt;</code>. The separate policy-validation helper is omitted and its requirements are summarized with the evaluator’s other checks below.</p>
+<p>The following two helpers let the evaluator query either joint type without duplicating the calculation. Their complete definitions belong to an unnamed namespace inside the implementation namespace; the variant operations use <code>&lt;variant&gt;</code>. The separate policy-validation helper is omitted.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="dt">bool</span> joint_contains<span class="op">(</span></span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> JointDefinition <span class="op">&amp;</span> joint_definition<span class="op">,</span> <span class="dt">double</span> joint_coordinate<span class="op">)</span></span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
@@ -1107,31 +1147,51 @@ For each joint in base-to-end-effector order:
 
 Append the home pose on the right and return.
 On evaluation failure, report the error without returning a partial pose.</code></pre>
-<p><strong>Production excerpt — core accumulation, not a complete function.</strong> This excerpt uses the inputs from the public signature above after validation. The function wrapper, initial policy and coordinate checks, and surrounding exception-translation blocks are omitted and summarized below. Screw scaling, its finiteness check, exponential evaluation, and multiplication order are unchanged.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>Transform3 result <span class="op">=</span> Transform3<span class="op">::</span>identity<span class="op">();</span></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> <span class="op">(</span><span class="bu">std::</span>size_t index <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> index <span class="op">&lt;</span> model<span class="op">.</span>joint_count<span class="op">();</span> <span class="op">++</span>index<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> <span class="dt">double</span> coordinate <span class="op">=</span></span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    joint_coordinates<span class="op">(</span><span class="kw">static_cast</span><span class="op">&lt;</span>Eigen<span class="op">::</span>Index<span class="op">&gt;(</span>index<span class="op">));</span></span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> Vector6LinearFirst exponential_coordinates <span class="op">=</span></span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    space_screw_axis<span class="op">(</span>model<span class="op">.</span>joint_definitions<span class="op">().</span>at<span class="op">(</span>index<span class="op">))</span> <span class="op">*</span> coordinate<span class="op">;</span></span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(!</span>exponential_coordinates<span class="op">.</span>allFinite<span class="op">())</span> <span class="op">{</span></span>
-<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">throw</span> SerialChainException<span class="op">(</span></span>
-<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>      SerialChainError<span class="op">::</span>unsupported_magnitude<span class="op">,</span></span>
-<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Joint "</span> <span class="op">+</span> <span class="bu">std::</span>to_string<span class="op">(</span>index <span class="op">+</span> <span class="dv">1</span><span class="op">)</span> <span class="op">+</span></span>
-<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>        <span class="st">" produced non-finite exponential coordinates."</span><span class="op">);</span></span>
-<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
-<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> Transform3 joint_displacement <span class="op">=</span></span>
-<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>    Transform3<span class="op">::</span>from_exponential_coordinates<span class="op">(</span></span>
-<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>      exponential_coordinates<span class="op">,</span> policy<span class="op">);</span></span>
-<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>  result <span class="op">=</span> result<span class="op">.</span>compose<span class="op">(</span>joint_displacement<span class="op">);</span></span>
-<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
-<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> result<span class="op">.</span>compose<span class="op">(</span>model<span class="op">.</span>home_pose<span class="op">());</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Production excerpt — joint-limit validation.</strong> After checking the numerical policy, coordinate count, and finiteness, the evaluator checks each coordinate against its joint’s limits. Those earlier checks and the function wrapper are omitted here. The revolute angular-magnitude check, which follows the limit check inside the same production loop, is also omitted.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> <span class="op">(</span><span class="bu">std::</span>size_t index <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> index <span class="op">&lt;</span> model<span class="op">.</span>joint_count<span class="op">();</span> <span class="op">++</span>index<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> <span class="dt">double</span> coordinate <span class="op">=</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    joint_coordinates<span class="op">(</span><span class="kw">static_cast</span><span class="op">&lt;</span>Eigen<span class="op">::</span>Index<span class="op">&gt;(</span>index<span class="op">));</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> JointDefinition <span class="op">&amp;</span> joint_definition <span class="op">=</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    model<span class="op">.</span>joint_definitions<span class="op">().</span>at<span class="op">(</span>index<span class="op">);</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(!</span>joint_contains<span class="op">(</span>joint_definition<span class="op">,</span> coordinate<span class="op">))</span> <span class="op">{</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">throw</span> SerialChainException<span class="op">(</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>      SerialChainError<span class="op">::</span>joint_out_of_domain<span class="op">,</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Joint "</span> <span class="op">+</span> <span class="bu">std::</span>to_string<span class="op">(</span>index <span class="op">+</span> <span class="dv">1</span><span class="op">)</span> <span class="op">+</span></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>        <span class="st">" is outside its declared limits."</span><span class="op">);</span></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li>The same <code>index</code> selects a joint definition and its coordinate.</li>
+<li><code>joint_contains</code> uses <code>std::visit</code> to check that coordinate against the selected joint’s angular or displacement limits.</li>
+<li>If the coordinate is outside its limits, the exception stops evaluation before any joint exponential is calculated.</li>
+</ul>
+<p><strong>Production excerpt — core accumulation, not a complete function.</strong> This excerpt uses the inputs from the public signature above after all validation has passed. The function wrapper, preceding validation code, and surrounding exception-translation blocks are omitted from this excerpt. Screw scaling, its finiteness check, exponential evaluation, and multiplication order are unchanged.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>Transform3 result <span class="op">=</span> Transform3<span class="op">::</span>identity<span class="op">();</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> <span class="op">(</span><span class="bu">std::</span>size_t index <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> index <span class="op">&lt;</span> model<span class="op">.</span>joint_count<span class="op">();</span> <span class="op">++</span>index<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> <span class="dt">double</span> coordinate <span class="op">=</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    joint_coordinates<span class="op">(</span><span class="kw">static_cast</span><span class="op">&lt;</span>Eigen<span class="op">::</span>Index<span class="op">&gt;(</span>index<span class="op">));</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> Vector6LinearFirst exponential_coordinates <span class="op">=</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>    space_screw_axis<span class="op">(</span>model<span class="op">.</span>joint_definitions<span class="op">().</span>at<span class="op">(</span>index<span class="op">))</span> <span class="op">*</span> coordinate<span class="op">;</span></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(!</span>exponential_coordinates<span class="op">.</span>allFinite<span class="op">())</span> <span class="op">{</span></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">throw</span> SerialChainException<span class="op">(</span></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>      SerialChainError<span class="op">::</span>unsupported_magnitude<span class="op">,</span></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Joint "</span> <span class="op">+</span> <span class="bu">std::</span>to_string<span class="op">(</span>index <span class="op">+</span> <span class="dv">1</span><span class="op">)</span> <span class="op">+</span></span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>        <span class="st">" produced non-finite exponential coordinates."</span><span class="op">);</span></span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> Transform3 joint_displacement <span class="op">=</span></span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>    Transform3<span class="op">::</span>from_exponential_coordinates<span class="op">(</span></span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>      exponential_coordinates<span class="op">,</span> policy<span class="op">);</span></span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a>  result <span class="op">=</span> result<span class="op">.</span>compose<span class="op">(</span>joint_displacement<span class="op">);</span></span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> result<span class="op">.</span>compose<span class="op">(</span>model<span class="op">.</span>home_pose<span class="op">());</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The same zero-based <code>index</code> selects a coordinate and its joint definition, preserving their base-to-end-effector correspondence. The explicit conversion to <code>Eigen::Index</code> connects the container’s index type to Eigen’s signed indexing type. The earlier coordinate-count check establishes that there is exactly one coordinate for every stored joint. Error messages report <code>index + 1</code>, the mathematical joint index.</p>
 <p>After validation, <code>exponential_coordinates</code> is the owned column <span class="math inline">\({}^{s}\boldsymbol\eta_j={}^{s}\mathbf S_jq_j\)</span>, and <code>joint_displacement</code> is <span class="math inline">\(\mathbf E_j(q_j)\)</span>. The multiplication can overflow even when both factors are finite, which explains the check before calling the kernel. <code>Transform3::from_exponential_coordinates</code> performs the coupled spatial exponential; the evaluator does not construct a translation directly from the screw’s upper entries.</p>
 <p><code>result</code> starts as the identity transform <span class="math inline">\(\mathbf I_4\)</span>, the <span class="math inline">\(4\times4\)</span> identity matrix. Define <span class="math inline">\(\mathbf P_0=\mathbf I_4\)</span> and let <span class="math inline">\(\mathbf P_j\)</span> be the partial product after joint <span class="math inline">\(j\)</span>. The call <code>result.compose(joint_displacement)</code> implements</p>
@@ -1140,10 +1200,7 @@ On evaluation failure, report the error without returning a partial pose.</code>
 \qquad j=1,\ldots,n.
 \]</span></p>
 <p>Consequently the loop builds <span class="math inline">\(\mathbf E_1\)</span>, then <span class="math inline">\(\mathbf E_1\mathbf E_2\)</span>, and finally <span class="math inline">\(\mathbf E_1\cdots\mathbf E_n\)</span>. The last composition appends <span class="math inline">\(\mathbf M\)</span> on the right. Starting from the home pose and using the same loop would instead place <span class="math inline">\(\mathbf M\)</span> on the left, which is generally a different pose. The identity initialization and final home-pose composition are therefore part of the equation-to-code mapping, not interchangeable setup choices.</p>
-<p>The omitted policy check requires both exponential thresholds to be finite. The small-angle series threshold must lie strictly between zero and <span class="math inline">\(\pi\)</span> radians, and the maximum supported angle must be at least <span class="math inline">\(\pi\)</span> radians. Their defaults are <span class="math inline">\(10^{-4}\)</span> and <span class="math inline">\(10^6\)</span> radians, respectively. The first selects the series calculation; the second bounds supported angular magnitude. These numerical thresholds are not physical joint limits, and unrelated policy fields used by other kernel operations are not checked here.</p>
-<p>The omitted coordinate checks reject a wrong-sized column and any non-finite entry before examining joint domains. Then, for each joint, they check interval membership and, for a revolute joint, the absolute angular magnitude against the supported maximum. The angular threshold does not constrain a prismatic displacement in metres. No check wraps an angle, clamps a coordinate, or changes the supplied values. An unbounded revolute interval still does not imply unlimited exponential-angle support.</p>
-<p>The omitted exception-translation blocks preserve the evaluator’s public failure contract. An invalid kernel policy remains an invalid-policy error; other kernel failures during a joint exponential or its composition become unsupported-magnitude errors with the joint index and underlying message. A failure when appending the home pose is reported separately as an unsupported-magnitude error identifying that final composition. Omitting these blocks from the excerpt does not remove them from the production operation.</p>
-<p>All intermediate transforms are local values. A thrown exception exits without returning the partially accumulated transform, and the borrowed model and coordinate input are not modified. Checking finiteness does not establish that an arbitrarily large finite query can be evaluated accurately; the angular bound and the kernel’s numerical rejection behaviour remain part of correct API use.</p>
+<p>Additional validation checks and error handling are omitted here for clarity; they remain in the production implementation.</p>
 <div class="callout callout-style-simple callout-note no-icon callout-titled" title="Example: A rotating extension">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -1155,29 +1212,29 @@ On evaluation failure, report the error without returning a partial pose.</code>
 </div>
 <div class="callout-body-container callout-body">
 <p>Consider a revolute joint about the positive space <span class="math inline">\(z\)</span>-axis through the origin, followed by a prismatic joint along the positive space <span class="math inline">\(x\)</span>-direction at zero. The home end-effector orientation is the identity and its origin is at <span class="math inline">\((1,0,0)^{\mathsf T}\,\mathrm m\)</span>. Query a revolute angle of <span class="math inline">\(\pi/2\)</span> radians and a prismatic displacement of <span class="math inline">\(0.5\,\mathrm m\)</span>. This is a usage example, not part of the production evaluator; the statements below belong inside a caller function after including the public forward-kinematics header and <code>&lt;numbers&gt;</code>.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> rbk <span class="op">=</span> rigid_body_kinematics<span class="op">;</span></span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="kw">auto</span> revolute <span class="op">=</span> rbk<span class="op">::</span>RevoluteJoint<span class="op">::</span>from_axis<span class="op">(</span></span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  Eigen<span class="op">::</span>Vector3d<span class="op">(</span><span class="fl">0.0</span><span class="op">,</span> <span class="fl">0.0</span><span class="op">,</span> <span class="fl">1.0</span><span class="op">),</span> Eigen<span class="op">::</span>Vector3d<span class="op">::</span>Zero<span class="op">(),</span></span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>  rbk<span class="op">::</span>RevoluteLimits<span class="op">::</span>from_bounds<span class="op">(-</span><span class="bu">std::</span>numbers::pi<span class="op">,</span> <span class="bu">std::</span>numbers::pi<span class="op">));</span></span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="kw">auto</span> prismatic <span class="op">=</span> rbk<span class="op">::</span>PrismaticJoint<span class="op">::</span>from_axis<span class="op">(</span></span>
-<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>  Eigen<span class="op">::</span>Vector3d<span class="op">(</span><span class="fl">1.0</span><span class="op">,</span> <span class="fl">0.0</span><span class="op">,</span> <span class="fl">0.0</span><span class="op">),</span></span>
-<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>  rbk<span class="op">::</span>PrismaticLimits<span class="op">::</span>from_bounds<span class="op">(-</span><span class="fl">10.0</span><span class="op">,</span> <span class="fl">10.0</span><span class="op">));</span></span>
-<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>Eigen<span class="op">::</span>Matrix4d home_matrix <span class="op">=</span> Eigen<span class="op">::</span>Matrix4d<span class="op">::</span>Identity<span class="op">();</span></span>
-<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>home_matrix<span class="op">(</span><span class="dv">0</span><span class="op">,</span> <span class="dv">3</span><span class="op">)</span> <span class="op">=</span> <span class="fl">1.0</span><span class="op">;</span></span>
-<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="kw">auto</span> model <span class="op">=</span> rbk<span class="op">::</span>SerialChainModel<span class="op">::</span>from_home_and_joints<span class="op">(</span></span>
-<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>  rbk<span class="op">::</span>Transform3<span class="op">::</span>from_matrix<span class="op">(</span>home_matrix<span class="op">),</span> <span class="op">{</span>revolute<span class="op">,</span> prismatic<span class="op">});</span></span>
-<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>Eigen<span class="op">::</span>VectorXd joint_coordinates<span class="op">(</span><span class="dv">2</span><span class="op">);</span></span>
-<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>joint_coordinates <span class="op">&lt;&lt;</span> <span class="bu">std::</span>numbers::pi <span class="op">/</span> <span class="fl">2.0</span><span class="op">,</span> <span class="fl">0.5</span><span class="op">;</span></span>
-<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> rbk<span class="op">::</span>Transform3 pose <span class="op">=</span></span>
-<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a>  rbk<span class="op">::</span>space_form_forward_kinematics<span class="op">(</span>model<span class="op">,</span> joint_coordinates<span class="op">);</span></span>
-<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> Eigen<span class="op">::</span>Matrix4d pose_matrix <span class="op">=</span> pose<span class="op">.</span>matrix<span class="op">();</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> rbk <span class="op">=</span> rigid_body_kinematics<span class="op">;</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="kw">auto</span> revolute <span class="op">=</span> rbk<span class="op">::</span>RevoluteJoint<span class="op">::</span>from_axis<span class="op">(</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  Eigen<span class="op">::</span>Vector3d<span class="op">(</span><span class="fl">0.0</span><span class="op">,</span> <span class="fl">0.0</span><span class="op">,</span> <span class="fl">1.0</span><span class="op">),</span> Eigen<span class="op">::</span>Vector3d<span class="op">::</span>Zero<span class="op">(),</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>  rbk<span class="op">::</span>RevoluteLimits<span class="op">::</span>from_bounds<span class="op">(-</span><span class="bu">std::</span>numbers::pi<span class="op">,</span> <span class="bu">std::</span>numbers::pi<span class="op">));</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="kw">auto</span> prismatic <span class="op">=</span> rbk<span class="op">::</span>PrismaticJoint<span class="op">::</span>from_axis<span class="op">(</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>  Eigen<span class="op">::</span>Vector3d<span class="op">(</span><span class="fl">1.0</span><span class="op">,</span> <span class="fl">0.0</span><span class="op">,</span> <span class="fl">0.0</span><span class="op">),</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>  rbk<span class="op">::</span>PrismaticLimits<span class="op">::</span>from_bounds<span class="op">(-</span><span class="fl">10.0</span><span class="op">,</span> <span class="fl">10.0</span><span class="op">));</span></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>Eigen<span class="op">::</span>Matrix4d home_matrix <span class="op">=</span> Eigen<span class="op">::</span>Matrix4d<span class="op">::</span>Identity<span class="op">();</span></span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>home_matrix<span class="op">(</span><span class="dv">0</span><span class="op">,</span> <span class="dv">3</span><span class="op">)</span> <span class="op">=</span> <span class="fl">1.0</span><span class="op">;</span></span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="kw">auto</span> model <span class="op">=</span> rbk<span class="op">::</span>SerialChainModel<span class="op">::</span>from_home_and_joints<span class="op">(</span></span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>  rbk<span class="op">::</span>Transform3<span class="op">::</span>from_matrix<span class="op">(</span>home_matrix<span class="op">),</span> <span class="op">{</span>revolute<span class="op">,</span> prismatic<span class="op">});</span></span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>Eigen<span class="op">::</span>VectorXd joint_coordinates<span class="op">(</span><span class="dv">2</span><span class="op">);</span></span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>joint_coordinates <span class="op">&lt;&lt;</span> <span class="bu">std::</span>numbers::pi <span class="op">/</span> <span class="fl">2.0</span><span class="op">,</span> <span class="fl">0.5</span><span class="op">;</span></span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> rbk<span class="op">::</span>Transform3 pose <span class="op">=</span></span>
+<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a>  rbk<span class="op">::</span>space_form_forward_kinematics<span class="op">(</span>model<span class="op">,</span> joint_coordinates<span class="op">);</span></span>
+<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> Eigen<span class="op">::</span>Matrix4d pose_matrix <span class="op">=</span> pose<span class="op">.</span>matrix<span class="op">();</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><code>namespace rbk = rigid_body_kinematics</code> introduces a shorter namespace alias for this example; it does not create another implementation. <code>home_matrix(0, 3)</code> selects the first translation entry using zero-based row and column indices. The braced list <code>{revolute, prismatic}</code> initializes the factory’s vector parameter with copies of the two joint values in that order. Eigen’s <code>&lt;&lt;</code> comma initializer fills the two-entry coordinate column in the written order. <code>pose_matrix</code> is an owned matrix representation of the returned pose.</p>
 <p>An independent geometric calculation first extends the home position along its zero-arrangement <span class="math inline">\(x\)</span>-direction and then rotates the outward assembly. Writing <span class="math inline">\(\mathbf R_z(\pi/2)\)</span> for the positive quarter-turn rotation about the space <span class="math inline">\(z\)</span>-axis, the expected position is</p>
 <p><span class="math display">\[
@@ -1207,36 +1264,105 @@ On evaluation failure, report the error without returning a partial pose.</code>
 <p>The forward-pose tests exercise the home-pose identity at zero, a quarter turn about the space origin, rotation about an offset axis line, translation along a normalized negative direction, an out-of-plane rotation about the space <span class="math inline">\(x\)</span>-axis, and the mixed chain above. The offset-axis case checks the sign and role of the revolute screw’s upper block; the out-of-plane case guards against an accidentally planar implementation. The mixed chain checks that a proximal rotation carries the distal extension. The nonzero examples use independently specified expected matrices rather than another call to the same forward evaluator.</p>
 <p>Pose comparison uses the relative transform <span class="math inline">\(\mathbf T_{\mathrm{err}}=\mathbf T_{\mathrm{expected}}^{-1}\mathbf T_{\mathrm{actual}}\)</span>, where the subscripts identify the independently expected and computed poses. Its translation column measures position discrepancy along the expected end-effector axes. The angular block of its principal logarithm measures orientation discrepancy. The tests compare the translation norm with <span class="math inline">\(10^{-12}\,\mathrm m\)</span> and the angular norm with <span class="math inline">\(10^{-12}\)</span> radians separately; they do not combine metre and radian errors into one scalar norm. These cases provide evidence for their particular geometric properties, not a proof for every possible chain or numerical magnitude.</p>
 </section>
+<section id="sec-general-kinematics-impl-cycle-connections" class="level3" data-number="11.4.5">
+<h3 data-number="11.4.5" class="anchored" data-anchor-id="sec-general-kinematics-impl-cycle-connections"><span class="header-section-number">11.4.5</span> How the classes and functions connect</h3>
+<p>The diagrams pair code names with their mathematical meaning. Arrows show construction or calculation steps, not the order of physical robot motion. Only the relevant contents and checks are shown.</p>
+<section id="construct-the-fixed-model" class="level4">
+<h4 class="anchored" data-anchor-id="construct-the-fixed-model">Construct the fixed model</h4>
+<p><span class="math display">\[
+\begin{gathered}
+\boxed{\begin{gathered}
+\texttt{RevoluteLimits / PrismaticLimits}\\
+\texttt{from\_bounds}\\
+\ell_j,\ u_j\ \longmapsto\ \mathcal Q_j\\
+\text{Either bound may be absent}
+\end{gathered}}\\[0.1em]
+\Big\downarrow\\[0.1em]
+\boxed{\begin{gathered}
+\texttt{RevoluteJoint / PrismaticJoint}\\
+\texttt{from\_axis}\\
+\text{Combine limits with supplied axis geometry}\\
+{}^{s}\mathbf S_j=
+\begin{cases}
+\begin{bmatrix}
+-{}^{s}\mathbf s_j\times{}^{s}\mathbf p_{\ell,j}\\
+{}^{s}\mathbf s_j
+\end{bmatrix},&amp;\text{revolute},\\[1em]
+\begin{bmatrix}{}^{s}\mathbf s_j\\\mathbf 0_3\end{bmatrix},
+&amp;\text{prismatic}
+\end{cases}\\
+\text{The factory normalizes the direction }{}^{s}\mathbf s_j
+\end{gathered}}\\[0.1em]
+\Big\downarrow\\[0.1em]
+\boxed{\begin{gathered}
+\texttt{Ordered JointDefinition values}\\
+({}^{s}\mathbf S_j)_{j=1}^{n},\quad(\mathcal Q_j)_{j=1}^{n}\\
+\text{One complete joint per entry, from base to end effector}\\[0.1em]
+\text{Separate input: home pose }\texttt{Transform3}\\
+\mathbf M=\mathbf T_{se}(\mathbf 0_n)
+\end{gathered}}\\[0.1em]
+\Big\downarrow\\[0.1em]
+\boxed{\begin{gathered}
+\texttt{SerialChainModel::from\_home\_and\_joints}\\
+\mathcal M=\left(\mathbf M,({}^{s}\mathbf S_j)_{j=1}^{n}\right)\\
+\text{Stores the home pose and ordered joint definitions,}\\
+\text{including their geometry and limits}
+\end{gathered}}
+\end{gathered}
+\]</span></p>
+<p>The model owns its home pose and joint definitions. The axis geometry and the separately supplied home pose describe the same zero arrangement in <span class="math inline">\(\{s\}\)</span>.</p>
 </section>
-<section id="sec-general-kinematics-impl-cycle-connections" class="level2" data-number="11.5">
-<h2 data-number="11.5" class="anchored" data-anchor-id="sec-general-kinematics-impl-cycle-connections"><span class="header-section-number">11.5</span> How the classes and functions connect</h2>
-<p>The complete calculation connects a fixed geometric model to a changing coordinate query. The limits define the allowed values of each <span class="math inline">\(q_j\)</span>; the joint definitions supply the corresponding <span class="math inline">\({}^{s}\mathbf S_j\)</span>; and the home pose supplies <span class="math inline">\(\mathbf M\)</span>. The evaluator combines those stored values with the current <span class="math inline">\(\mathbf q\)</span> to return <span class="math inline">\(\mathbf T_{se}(\mathbf q)\)</span>. The diagram shows which inputs feed construction and evaluation; it does not prescribe a time order for moving the physical joints.</p>
-<pre class="text"><code>Bounds --&gt; RevoluteLimits / PrismaticLimits
-                         |
-Axis geometry -----------+
-                         v
-             RevoluteJoint / PrismaticJoint
-                         |
-                         v
-            Ordered JointDefinition values
-                         |
-Home pose: Transform3 ---+
-                         v
-                  SerialChainModel
-                         |
-q + NumericalPolicy -----+
-                         v
-           space_form_forward_kinematics
-                         |
-                         v
-             Current pose: Transform3</code></pre>
-<p>Construction starts with <code>RevoluteLimits::from_bounds</code> or <code>PrismaticLimits::from_bounds</code>. Each returns a validated interval with angular bounds in radians or displacement bounds in metres. The corresponding joint’s <code>from_axis</code> factory combines that interval with axis geometry expressed in the common space frame at the zero arrangement. It normalizes the direction, derives the screw, and returns a joint that owns its geometry, limits, and screw. A revolute joint also owns the supplied point on its axis line.</p>
-<p>Each <code>JointDefinition</code> contains one complete revolute or prismatic joint. The caller places these values in base-to-end-effector order and supplies the independently constructed home <code>Transform3</code>. <code>SerialChainModel::from_home_and_joints</code> checks that the joint sequence is nonempty and stores the home pose and ordered joints. The model therefore owns the whole fixed reference: its vector owns the variants, and each variant owns a joint with its interval and screw. The home pose is not derived from the limits or the joint list; it is a separate geometric input describing the selected end effector at zero.</p>
-<p>For each query, <code>space_form_forward_kinematics</code> borrows the model, accesses the current coordinate column read-only, and borrows the numerical policy. It checks the policy, coordinate count, finite entries, and per-joint admissibility. A variant visitor selects each stored joint’s <code>limits().contains(...)</code> operation, so the coordinate at each index is checked against that joint’s own interval. These checks do not alter the coordinates or the model.</p>
-<p>For each joint in the same stored order, another visitor borrows its screw. Multiplying that screw by the matching coordinate creates the local exponential-coordinate column <span class="math inline">\({}^{s}\boldsymbol\eta_j={}^{s}\mathbf S_jq_j\)</span>. <code>Transform3::from_exponential_coordinates</code> converts it to the active displacement <span class="math inline">\(\mathbf E_j(q_j)\)</span>, and <code>compose</code> appends that displacement to the local partial product. The final composition appends the model’s home pose on the right, producing <span class="math inline">\(\mathbf E_1(q_1)\cdots\mathbf E_n(q_n)\mathbf M\)</span>.</p>
-<p>The returned <code>Transform3</code> owns the current pose; it does not replace the home pose stored in the model. The same model can therefore serve another coordinate query without reconstructing its limits or joints. If validation or a numerical calculation fails, the operation throws without returning a partial pose. Construction establishes the fixed reference, while evaluation uses that reference to calculate one requested pose.</p>
+<section id="sec-general-kinematics-impl-latex-diagram" class="level4">
+<h4 class="anchored" data-anchor-id="sec-general-kinematics-impl-latex-diagram">Evaluate a current pose</h4>
+<p>The joint-loop box is repeated in joint order; validation and failure handling are summarized rather than drawn as separate branches.</p>
+<p><span class="math display">\[
+\begin{gathered}
+\boxed{\begin{gathered}
+\texttt{SerialChainModel}\\
+\mathbf M,\quad({}^{s}\mathbf S_j)_{j=1}^{n},\quad(\mathcal Q_j)_{j=1}^{n}\\
+\text{Current input: }\mathbf q\quad\text{and}\quad\texttt{NumericalPolicy}
+\end{gathered}}\\[0.1em]
+\Big\downarrow\\[0.1em]
+\boxed{\begin{gathered}
+\texttt{space\_form\_forward\_kinematics}\\
+\text{Validate the query, then initialize}\\
+\texttt{Transform3::identity()}\\
+\mathbf P_0=\mathbf I_4
+\end{gathered}}\\[0.1em]
+\Big\downarrow\\[0.1em]
+\boxed{\begin{gathered}
+\text{For each joint }j=1,\ldots,n\\
+\texttt{space\_screw\_axis}\qquad{}^{s}\boldsymbol\eta_j={}^{s}\mathbf S_jq_j\\
+\texttt{Transform3::from\_exponential\_coordinates}\\
+\mathbf E_j(q_j)=\exp\!\left(\widehat{{}^{s}\boldsymbol\eta_j}\right)\\
+\texttt{result.compose(joint\_displacement)}\\
+\mathbf P_j=\mathbf P_{j-1}\mathbf E_j(q_j)
+\end{gathered}}\\[0.1em]
+\Big\downarrow\\[0.1em]
+\boxed{\begin{gathered}
+\texttt{result.compose(model.home\_pose())}\\
+\mathbf T_{se}(\mathbf q)=\mathbf P_n\mathbf M\\
+\text{Return the current pose as an owned }\texttt{Transform3}
+\end{gathered}}
+\end{gathered}
+\]</span></p>
+<p>Evaluation reads the model and coordinates without changing them and returns an owned pose. A failed query throws instead of returning a partial result.</p>
 
 
+</section>
+</section>
+</section>
+<section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn1"><p>For a revolute motion, let <span class="math inline">\(\mathbf p\in\mathbb R^3\)</span> be a point on the rotation axis, and let <span class="math inline">\(\mathbf x,\mathbf x'\in\mathbb R^3\)</span> be a point’s positions before and after the motion. All positions are measured from the space-frame origin, expressed in <span class="math inline">\(\{s\}\)</span>, and given in metres. Let <span class="math inline">\(\mathbf R\in SO(3)\)</span> be the dimensionless rotation matrix. Rotation around that offset axis acts as</p>
+<p><span class="math display">\[
+\mathbf x'
+=\mathbf R(\mathbf x-\mathbf p)+\mathbf p
+=\mathbf R\mathbf x+\underbrace{(\mathbf p-\mathbf R\mathbf p)}_{\mathbf t}.
+\]</span></p>
+<p>Thus the translation column is <span class="math inline">\(\mathbf t=\mathbf p-\mathbf R\mathbf p\)</span>, measured in metres.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
 </section>
 
 </main> <!-- /main -->

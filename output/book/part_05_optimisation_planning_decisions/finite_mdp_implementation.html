@@ -1618,15 +1618,16 @@ p(s'\mid s,a)=\sum_r p(s',r\mid s,a)\\[3pt]
 <p>An attempt from the start can fail or make progress. Two outcomes reach the same in-progress state with different rewards. Quitting ends the task with reward zero; an attempt from the in-progress state completes it with reward six. The diagram uses the mathematical state and action labels, with <code>a_bot</code> denoting <span class="math inline">\(a_\bot\)</span>. In C++, states <span class="math inline">\(s_1,s_2,s_3\)</span> have indices <span class="math inline">\(0,1,2\)</span>, and actions <span class="math inline">\(a_1,a_2,a_\bot\)</span> have indices <span class="math inline">\(0,1,2\)</span>.</p>
 <pre class="text"><code>Supplied task transitions (p = probability, r = reward):
 
-s_1 -- a_1 --&gt; +-- p=0.25, r=-2 --&gt; s_1
-               +-- p=0.25, r= 1 --&gt; s_2
-               +-- p=0.50, r= 3 --&gt; s_2
+s_1: start -- a_1: attempt --&gt; +-- p=0.25, r=-2 --&gt; s_1: start
+                               +-- p=0.25, r= 1 --&gt; s_2: in progress
+                               +-- p=0.50, r= 3 --&gt; s_2: in progress
 
-s_1 -- a_2 --&gt; p=1, r=0 --&gt; s_3
-s_2 -- a_1 --&gt; p=1, r=6 --&gt; s_3
+s_1: start -- a_2: quit --&gt; p=1, r=0 --&gt; s_3: finished
+
+s_2: in progress -- a_1: attempt --&gt; p=1, r=6 --&gt; s_3: finished
 
 Generated terminal continuation:
-s_3 -- a_bot --&gt; p=1, r=0 --&gt; s_3</code></pre>
+s_3: finished -- a_bot --&gt; p=1, r=0 --&gt; s_3: finished</code></pre>
 </section>
 <section id="calculating-the-expected-results" class="level3" data-number="14.9.2">
 <h3 data-number="14.9.2" class="anchored" data-anchor-id="calculating-the-expected-results"><span class="header-section-number">14.9.2</span> Calculating the expected results</h3>
