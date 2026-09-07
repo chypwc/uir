@@ -833,6 +833,170 @@ The returned numerical entries should agree up to floating-point rounding. The t
 
 :::
 
+### Worked example: spatial two-revolute-joint motion {#sec-general-kinematics-impl-spatial-2r}
+
+This example supplies an independent geometric reference for a two-joint arm whose motion leaves its home plane. It applies the ordered-rotation construction in @sec-serial-product-of-exponentials: rotate the distal link about the elbow, then rotate the resulting arrangement about the base. This is a calculation order, not a requirement to move the joints one at a time; the same construction underlies the space-form product in Lynch and Park, *Modern Robotics*, Chapter 4, Section 4.1.1.
+
+Let the link lengths be $L_1=2\,\mathrm m$ and $L_2=1\,\mathrm m$. Both links initially point along $+x_s$, and the base is the origin of the fixed space frame $\{s\}$, identified with `world` for this example. Joint 1 rotates about $+z_s$ through the base. Joint 2 rotates about an axis that points along $+y_s$ through the elbow at home; joint 1 carries that physical axis with it. The joint angles $q_1$ and $q_2$ are in radians, with positive angles following the right-hand rule. Both lie in $[-\pi,\pi]$.
+
+All position and link-vector columns below have three entries expressed along $\{s\}$ axes, with lengths in metres. Positions are measured from the base; the link vector is the difference between the end-effector and elbow positions. The dimensionless $3\times3$ rotation matrices act actively on columns. The end-effector frame $\{e\}$ is attached to the tip of link 2 and aligned with $\{s\}$ when both angles are zero.
+
+#### Rotate the second link about the elbow
+
+First hold joint 1 at zero. The elbow position is ${}^{s}\mathbf p_{\ell,0}$, where $\ell$ denotes the elbow and $0$ its home position. The vector from the elbow to the end effector at home is ${}^{s}\mathbf r_0$:
+
+$$
+{}^{s}\mathbf p_{\ell,0}=\begin{bmatrix}L_1\\0\\0\end{bmatrix},
+\qquad
+{}^{s}\mathbf r_0=\begin{bmatrix}L_2\\0\\0\end{bmatrix}.
+$$
+
+With joint 1 held at zero, the second joint's axis points along $+y_s$. Its active right-handed rotation matrix is
+
+$$
+\mathbf R_y(q_2)=
+\begin{bmatrix}
+\cos q_2&0&\sin q_2\\
+0&1&0\\
+-\sin q_2&0&\cos q_2
+\end{bmatrix}.
+$$
+
+Joint 2 rotates the link vector about the elbow:
+
+$$
+\mathbf R_y(q_2){}^{s}\mathbf r_0
+=
+\begin{bmatrix}
+L_2\cos q_2\\0\\-L_2\sin q_2
+\end{bmatrix}.
+$$
+
+Write ${}^{s}\mathbf p_e(q_1,q_2)\in\mathbb R^3$ for the end-effector origin's position relative to the base when joint 1 has angle $q_1$ and joint 2 has angle $q_2$. The subscript $e$ identifies the end effector; the superscript $s$ says that the three position components are expressed along frame $\{s\}$ axes, in metres. The parentheses contain the two input angles, not position components. Thus ${}^{s}\mathbf p_e(0,q_2)$ means the same position function evaluated with $q_1=0$ and joint 2 at angle $q_2$.
+
+Adding the elbow position to the rotated link vector gives
+
+$$
+{}^{s}\mathbf p_e(0,q_2)
+={}^s\mathbf p_{\ell,0}+\mathbf R_y(q_2){}^{s}\mathbf r_0
+=
+\begin{bmatrix}
+L_1+L_2\cos q_2\\0\\-L_2\sin q_2
+\end{bmatrix}.
+$$
+
+The elbow position is added after rotating the link vector because joint 2 rotates about the elbow, not the base. The negative sign in the last entry follows from the right-hand rule: a positive rotation about $+y_s$ carries a vector initially along $+x_s$ toward $-z_s$. A negative second-joint angle therefore lifts the link toward $+z_s$.
+
+#### Rotate the whole arrangement about the base
+
+Joint 1 rotates both the first link and the bent second link about $+z_s$, using
+
+$$
+\mathbf R_z(q_1)=
+\begin{bmatrix}
+\cos q_1&-\sin q_1&0\\
+\sin q_1&\cos q_1&0\\
+0&0&1
+\end{bmatrix}.
+$$
+
+Because the base is the space-frame origin, this rotation needs no additional offset translation. Applying it to the preceding position gives
+
+$$
+\begin{aligned}
+{}^{s}\mathbf p_e(q_1,q_2)
+&=\mathbf R_z(q_1){}^{s}\mathbf p_e(0,q_2)\\
+&=
+\begin{bmatrix}
+(L_1+L_2\cos q_2)\cos q_1\\
+(L_1+L_2\cos q_2)\sin q_1\\
+-L_2\sin q_2
+\end{bmatrix}.
+\end{aligned}
+$$
+
+Substituting the two link lengths yields
+
+$$
+\boxed{
+{}^{s}\mathbf p_e(q_1,q_2)=
+\begin{bmatrix}
+(2+\cos q_2)\cos q_1\\
+(2+\cos q_2)\sin q_1\\
+-\sin q_2
+\end{bmatrix}\mathrm m.
+}
+$$
+
+The same base rotation gives the elbow position:
+
+$$
+{}^{s}\mathbf p_\ell(q_1)
+=\mathbf R_z(q_1){}^{s}\mathbf p_{\ell,0}
+=\begin{bmatrix}L_1\cos q_1\\L_1\sin q_1\\0\end{bmatrix}.
+$$
+
+To calculate orientation, let $\mathbf R_{se}(q_1,q_2)$ be the dimensionless $3\times3$ matrix whose columns are the end-effector axes expressed in $\{s\}$. At home, those axes are aligned with $\{s\}$. With joint 1 held at zero, joint 2 rotates them by $\mathbf R_y(q_2)$. Joint 1 then rotates each resulting axis by $\mathbf R_z(q_1)$. Applying these rotations to each column gives
+
+$$
+\begin{aligned}
+\mathbf R_{se}(q_1,q_2)
+&=\mathbf R_z(q_1)\mathbf R_y(q_2)\\
+&=
+\begin{bmatrix}
+\cos q_1&-\sin q_1&0\\
+\sin q_1&\cos q_1&0\\
+0&0&1
+\end{bmatrix}
+\begin{bmatrix}
+\cos q_2&0&\sin q_2\\
+0&1&0\\
+-\sin q_2&0&\cos q_2
+\end{bmatrix}\\
+&=
+\begin{bmatrix}
+\cos q_1\cos q_2&-\sin q_1&\cos q_1\sin q_2\\
+\sin q_1\cos q_2&\cos q_1&\sin q_1\sin q_2\\
+-\sin q_2&0&\cos q_2
+\end{bmatrix}.
+\end{aligned}
+$$
+
+The multiplication order accounts for joint 1 carrying joint 2's axis; the second joint does not keep rotating about the unchanged world $y$-axis after the base turns. The elbow offset affects position, but not the orientation of the end-effector axes.
+
+#### A bounded motion and its endpoint
+
+Let the dimensionless scalar $u\in[0,1]$ select the joint-coordinate column
+
+$$
+\mathbf q(u)=
+u\begin{bmatrix}\pi/2\\-\pi/2\end{bmatrix}\mathrm{rad}.
+$$
+
+At $u=0$, the elbow is at $(2,0,0)\,\mathrm m$, the end effector is at $(3,0,0)\,\mathrm m$, and its orientation is the $3\times3$ identity matrix $\mathbf I_3$. At $u=1$, substituting $q_1=\pi/2$ and $q_2=-\pi/2$ gives
+
+$$
+{}^{s}\mathbf p_\ell=\begin{bmatrix}0\\2\\0\end{bmatrix}\mathrm m,
+\qquad
+{}^{s}\mathbf p_e=
+\begin{bmatrix}(2+0)\,0\\(2+0)\,1\\-(-1)\end{bmatrix}\mathrm m
+=\begin{bmatrix}0\\2\\1\end{bmatrix}\mathrm m.
+$$
+
+For orientation, the same angles give $\cos q_1=0$, $\sin q_1=1$, $\cos q_2=0$, and $\sin q_2=-1$. Substituting into the derived rotation matrix yields
+
+$$
+\mathbf R_{se}(\pi/2,-\pi/2)
+=\begin{bmatrix}
+0\cdot0&-1&0\cdot(-1)\\
+1\cdot0&0&1\cdot(-1)\\
+-(-1)&0&0
+\end{bmatrix}
+=\begin{bmatrix}0&-1&0\\0&0&-1\\1&0&0\end{bmatrix}.
+$$
+
+Choosing $q_2=+\pi/2$ instead would put the end effector at $(0,2,-1)\,\mathrm m$. In the stated motion, the arm swings sideways and lifts its second link while the end-effector orientation changes. These closed-form values provide an independent reference for pose and display-coordinate comparisons; they do not replace the general product-of-exponentials calculation.
+
 ### Verification meaning
 
 The forward-pose tests exercise the home-pose identity at zero, a quarter turn about the space origin, rotation about an offset axis line, translation along a normalized negative direction, an out-of-plane rotation about the space $x$-axis, and the mixed chain above. The offset-axis case checks the sign and role of the revolute screw's upper block; the out-of-plane case guards against an accidentally planar implementation. The mixed chain checks that a proximal rotation carries the distal extension. The nonzero examples use independently specified expected matrices rather than another call to the same forward evaluator.

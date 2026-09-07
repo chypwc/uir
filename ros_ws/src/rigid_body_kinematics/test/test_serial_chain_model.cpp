@@ -38,9 +38,8 @@ TEST(SerialChainModelTest, StoresHomePoseAndOneJoint)
 
   ASSERT_EQ(model.joint_definitions().size(), 1U);
 
-  EXPECT_TRUE(
-    std::holds_alternative<rigid_body_kinematics::PrismaticJoint>(
-      model.joint_definitions().front()));
+  EXPECT_TRUE(std::holds_alternative<rigid_body_kinematics::PrismaticJoint>(
+    model.joint_definitions().front()));
 
   constexpr double tolerance = 1.0e-12;
   EXPECT_TRUE(model.home_pose().matrix().isApprox(home_matrix, tolerance));
@@ -90,11 +89,9 @@ TEST(SerialChainModelTest, PreservesMixedJointOrder)
 
   ASSERT_EQ(model.joint_count(), 2U);
 
-  EXPECT_TRUE(
-    std::holds_alternative<rigid_body_kinematics::RevoluteJoint>(
-      model.joint_definitions().at(0)));
+  EXPECT_TRUE(std::holds_alternative<rigid_body_kinematics::RevoluteJoint>(
+    model.joint_definitions().at(0)));
 
-  EXPECT_TRUE(
-    std::holds_alternative<rigid_body_kinematics::PrismaticJoint>(
-      model.joint_definitions().at(1)));
+  EXPECT_TRUE(std::holds_alternative<rigid_body_kinematics::PrismaticJoint>(
+    model.joint_definitions().at(1)));
 }

@@ -130,9 +130,12 @@ TEST(Se3AdjointTest, ReportsUnsupportedMagnitudeWhenAdjointOverflows)
   // R_ab = R_x(pi/4) and p_b^a = [0, M, M]^T, where M is the largest
   // finite double. Every transform entry is finite.
   Eigen::Matrix4d matrix_ab;
-  matrix_ab << 1.0, 0.0, 0.0, 0.0, 0.0, cosine_quarter_turn,
-    -cosine_quarter_turn, largest_finite, 0.0, cosine_quarter_turn,
-    cosine_quarter_turn, largest_finite, 0.0, 0.0, 0.0, 1.0;
+  // clang-format off
+  matrix_ab <<
+    1.0, 0.0, 0.0, 0.0,
+    0.0, cosine_quarter_turn, -cosine_quarter_turn, largest_finite,
+    0.0, cosine_quarter_turn, cosine_quarter_turn, largest_finite,
+    0.0, 0.0, 0.0, 1.0;
   // clang-format on
 
   const rigid_body_kinematics::Transform3 transform_ab =

@@ -1,6 +1,7 @@
 ---
 Language: Cpp
 BasedOnStyle: Google
+Standard: c++20
 
 AccessModifierOffset: -2
 AlignAfterOpenBracket: AlwaysBreak

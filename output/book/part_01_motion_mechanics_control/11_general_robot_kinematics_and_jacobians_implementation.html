@@ -508,8 +508,9 @@ window.Quarto = {
   <li><a href="#public-input-and-output" id="toc-public-input-and-output" class="nav-link" data-scroll-target="#public-input-and-output"><span class="header-section-number">11.4.1</span> Public input and output</a></li>
   <li><a href="#accessing-either-joint-kind" id="toc-accessing-either-joint-kind" class="nav-link" data-scroll-target="#accessing-either-joint-kind"><span class="header-section-number">11.4.2</span> Accessing either joint kind</a></li>
   <li><a href="#evaluating-the-ordered-product" id="toc-evaluating-the-ordered-product" class="nav-link" data-scroll-target="#evaluating-the-ordered-product"><span class="header-section-number">11.4.3</span> Evaluating the ordered product</a></li>
-  <li><a href="#verification-meaning-3" id="toc-verification-meaning-3" class="nav-link" data-scroll-target="#verification-meaning-3"><span class="header-section-number">11.4.4</span> Verification meaning</a></li>
-  <li><a href="#sec-general-kinematics-impl-cycle-connections" id="toc-sec-general-kinematics-impl-cycle-connections" class="nav-link" data-scroll-target="#sec-general-kinematics-impl-cycle-connections"><span class="header-section-number">11.4.5</span> How the classes and functions connect</a></li>
+  <li><a href="#sec-general-kinematics-impl-spatial-2r" id="toc-sec-general-kinematics-impl-spatial-2r" class="nav-link" data-scroll-target="#sec-general-kinematics-impl-spatial-2r"><span class="header-section-number">11.4.4</span> Worked example: spatial two-revolute-joint motion</a></li>
+  <li><a href="#verification-meaning-3" id="toc-verification-meaning-3" class="nav-link" data-scroll-target="#verification-meaning-3"><span class="header-section-number">11.4.5</span> Verification meaning</a></li>
+  <li><a href="#sec-general-kinematics-impl-cycle-connections" id="toc-sec-general-kinematics-impl-cycle-connections" class="nav-link" data-scroll-target="#sec-general-kinematics-impl-cycle-connections"><span class="header-section-number">11.4.6</span> How the classes and functions connect</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -1259,13 +1260,150 @@ On evaluation failure, report the error without returning a partial pose.</code>
 </div>
 </div>
 </section>
-<section id="verification-meaning-3" class="level3" data-number="11.4.4">
-<h3 data-number="11.4.4" class="anchored" data-anchor-id="verification-meaning-3"><span class="header-section-number">11.4.4</span> Verification meaning</h3>
+<section id="sec-general-kinematics-impl-spatial-2r" class="level3" data-number="11.4.4">
+<h3 data-number="11.4.4" class="anchored" data-anchor-id="sec-general-kinematics-impl-spatial-2r"><span class="header-section-number">11.4.4</span> Worked example: spatial two-revolute-joint motion</h3>
+<p>This example supplies an independent geometric reference for a two-joint arm whose motion leaves its home plane. It applies the ordered-rotation construction in <a href="10_general_robot_kinematics_and_jacobians.html#sec-serial-product-of-exponentials" class="quarto-xref"><span>Section 10.2</span></a>: rotate the distal link about the elbow, then rotate the resulting arrangement about the base. This is a calculation order, not a requirement to move the joints one at a time; the same construction underlies the space-form product in Lynch and Park, <em>Modern Robotics</em>, Chapter 4, Section 4.1.1.</p>
+<p>Let the link lengths be <span class="math inline">\(L_1=2\,\mathrm m\)</span> and <span class="math inline">\(L_2=1\,\mathrm m\)</span>. Both links initially point along <span class="math inline">\(+x_s\)</span>, and the base is the origin of the fixed space frame <span class="math inline">\(\{s\}\)</span>, identified with <code>world</code> for this example. Joint 1 rotates about <span class="math inline">\(+z_s\)</span> through the base. Joint 2 rotates about an axis that points along <span class="math inline">\(+y_s\)</span> through the elbow at home; joint 1 carries that physical axis with it. The joint angles <span class="math inline">\(q_1\)</span> and <span class="math inline">\(q_2\)</span> are in radians, with positive angles following the right-hand rule. Both lie in <span class="math inline">\([-\pi,\pi]\)</span>.</p>
+<p>All position and link-vector columns below have three entries expressed along <span class="math inline">\(\{s\}\)</span> axes, with lengths in metres. Positions are measured from the base; the link vector is the difference between the end-effector and elbow positions. The dimensionless <span class="math inline">\(3\times3\)</span> rotation matrices act actively on columns. The end-effector frame <span class="math inline">\(\{e\}\)</span> is attached to the tip of link 2 and aligned with <span class="math inline">\(\{s\}\)</span> when both angles are zero.</p>
+<section id="rotate-the-second-link-about-the-elbow" class="level4">
+<h4 class="anchored" data-anchor-id="rotate-the-second-link-about-the-elbow">Rotate the second link about the elbow</h4>
+<p>First hold joint 1 at zero. The elbow position is <span class="math inline">\({}^{s}\mathbf p_{\ell,0}\)</span>, where <span class="math inline">\(\ell\)</span> denotes the elbow and <span class="math inline">\(0\)</span> its home position. The vector from the elbow to the end effector at home is <span class="math inline">\({}^{s}\mathbf r_0\)</span>:</p>
+<p><span class="math display">\[
+{}^{s}\mathbf p_{\ell,0}=\begin{bmatrix}L_1\\0\\0\end{bmatrix},
+\qquad
+{}^{s}\mathbf r_0=\begin{bmatrix}L_2\\0\\0\end{bmatrix}.
+\]</span></p>
+<p>With joint 1 held at zero, the second joint’s axis points along <span class="math inline">\(+y_s\)</span>. Its active right-handed rotation matrix is</p>
+<p><span class="math display">\[
+\mathbf R_y(q_2)=
+\begin{bmatrix}
+\cos q_2&amp;0&amp;\sin q_2\\
+0&amp;1&amp;0\\
+-\sin q_2&amp;0&amp;\cos q_2
+\end{bmatrix}.
+\]</span></p>
+<p>Joint 2 rotates the link vector about the elbow:</p>
+<p><span class="math display">\[
+\mathbf R_y(q_2){}^{s}\mathbf r_0
+=
+\begin{bmatrix}
+L_2\cos q_2\\0\\-L_2\sin q_2
+\end{bmatrix}.
+\]</span></p>
+<p>Write <span class="math inline">\({}^{s}\mathbf p_e(q_1,q_2)\in\mathbb R^3\)</span> for the end-effector origin’s position relative to the base when joint 1 has angle <span class="math inline">\(q_1\)</span> and joint 2 has angle <span class="math inline">\(q_2\)</span>. The subscript <span class="math inline">\(e\)</span> identifies the end effector; the superscript <span class="math inline">\(s\)</span> says that the three position components are expressed along frame <span class="math inline">\(\{s\}\)</span> axes, in metres. The parentheses contain the two input angles, not position components. Thus <span class="math inline">\({}^{s}\mathbf p_e(0,q_2)\)</span> means the same position function evaluated with <span class="math inline">\(q_1=0\)</span> and joint 2 at angle <span class="math inline">\(q_2\)</span>.</p>
+<p>Adding the elbow position to the rotated link vector gives</p>
+<p><span class="math display">\[
+{}^{s}\mathbf p_e(0,q_2)
+={}^s\mathbf p_{\ell,0}+\mathbf R_y(q_2){}^{s}\mathbf r_0
+=
+\begin{bmatrix}
+L_1+L_2\cos q_2\\0\\-L_2\sin q_2
+\end{bmatrix}.
+\]</span></p>
+<p>The elbow position is added after rotating the link vector because joint 2 rotates about the elbow, not the base. The negative sign in the last entry follows from the right-hand rule: a positive rotation about <span class="math inline">\(+y_s\)</span> carries a vector initially along <span class="math inline">\(+x_s\)</span> toward <span class="math inline">\(-z_s\)</span>. A negative second-joint angle therefore lifts the link toward <span class="math inline">\(+z_s\)</span>.</p>
+</section>
+<section id="rotate-the-whole-arrangement-about-the-base" class="level4">
+<h4 class="anchored" data-anchor-id="rotate-the-whole-arrangement-about-the-base">Rotate the whole arrangement about the base</h4>
+<p>Joint 1 rotates both the first link and the bent second link about <span class="math inline">\(+z_s\)</span>, using</p>
+<p><span class="math display">\[
+\mathbf R_z(q_1)=
+\begin{bmatrix}
+\cos q_1&amp;-\sin q_1&amp;0\\
+\sin q_1&amp;\cos q_1&amp;0\\
+0&amp;0&amp;1
+\end{bmatrix}.
+\]</span></p>
+<p>Because the base is the space-frame origin, this rotation needs no additional offset translation. Applying it to the preceding position gives</p>
+<p><span class="math display">\[
+\begin{aligned}
+{}^{s}\mathbf p_e(q_1,q_2)
+&amp;=\mathbf R_z(q_1){}^{s}\mathbf p_e(0,q_2)\\
+&amp;=
+\begin{bmatrix}
+(L_1+L_2\cos q_2)\cos q_1\\
+(L_1+L_2\cos q_2)\sin q_1\\
+-L_2\sin q_2
+\end{bmatrix}.
+\end{aligned}
+\]</span></p>
+<p>Substituting the two link lengths yields</p>
+<p><span class="math display">\[
+\boxed{
+{}^{s}\mathbf p_e(q_1,q_2)=
+\begin{bmatrix}
+(2+\cos q_2)\cos q_1\\
+(2+\cos q_2)\sin q_1\\
+-\sin q_2
+\end{bmatrix}\mathrm m.
+}
+\]</span></p>
+<p>The same base rotation gives the elbow position:</p>
+<p><span class="math display">\[
+{}^{s}\mathbf p_\ell(q_1)
+=\mathbf R_z(q_1){}^{s}\mathbf p_{\ell,0}
+=\begin{bmatrix}L_1\cos q_1\\L_1\sin q_1\\0\end{bmatrix}.
+\]</span></p>
+<p>To calculate orientation, let <span class="math inline">\(\mathbf R_{se}(q_1,q_2)\)</span> be the dimensionless <span class="math inline">\(3\times3\)</span> matrix whose columns are the end-effector axes expressed in <span class="math inline">\(\{s\}\)</span>. At home, those axes are aligned with <span class="math inline">\(\{s\}\)</span>. With joint 1 held at zero, joint 2 rotates them by <span class="math inline">\(\mathbf R_y(q_2)\)</span>. Joint 1 then rotates each resulting axis by <span class="math inline">\(\mathbf R_z(q_1)\)</span>. Applying these rotations to each column gives</p>
+<p><span class="math display">\[
+\begin{aligned}
+\mathbf R_{se}(q_1,q_2)
+&amp;=\mathbf R_z(q_1)\mathbf R_y(q_2)\\
+&amp;=
+\begin{bmatrix}
+\cos q_1&amp;-\sin q_1&amp;0\\
+\sin q_1&amp;\cos q_1&amp;0\\
+0&amp;0&amp;1
+\end{bmatrix}
+\begin{bmatrix}
+\cos q_2&amp;0&amp;\sin q_2\\
+0&amp;1&amp;0\\
+-\sin q_2&amp;0&amp;\cos q_2
+\end{bmatrix}\\
+&amp;=
+\begin{bmatrix}
+\cos q_1\cos q_2&amp;-\sin q_1&amp;\cos q_1\sin q_2\\
+\sin q_1\cos q_2&amp;\cos q_1&amp;\sin q_1\sin q_2\\
+-\sin q_2&amp;0&amp;\cos q_2
+\end{bmatrix}.
+\end{aligned}
+\]</span></p>
+<p>The multiplication order accounts for joint 1 carrying joint 2’s axis; the second joint does not keep rotating about the unchanged world <span class="math inline">\(y\)</span>-axis after the base turns. The elbow offset affects position, but not the orientation of the end-effector axes.</p>
+</section>
+<section id="a-bounded-motion-and-its-endpoint" class="level4">
+<h4 class="anchored" data-anchor-id="a-bounded-motion-and-its-endpoint">A bounded motion and its endpoint</h4>
+<p>Let the dimensionless scalar <span class="math inline">\(u\in[0,1]\)</span> select the joint-coordinate column</p>
+<p><span class="math display">\[
+\mathbf q(u)=
+u\begin{bmatrix}\pi/2\\-\pi/2\end{bmatrix}\mathrm{rad}.
+\]</span></p>
+<p>At <span class="math inline">\(u=0\)</span>, the elbow is at <span class="math inline">\((2,0,0)\,\mathrm m\)</span>, the end effector is at <span class="math inline">\((3,0,0)\,\mathrm m\)</span>, and its orientation is the <span class="math inline">\(3\times3\)</span> identity matrix <span class="math inline">\(\mathbf I_3\)</span>. At <span class="math inline">\(u=1\)</span>, substituting <span class="math inline">\(q_1=\pi/2\)</span> and <span class="math inline">\(q_2=-\pi/2\)</span> gives</p>
+<p><span class="math display">\[
+{}^{s}\mathbf p_\ell=\begin{bmatrix}0\\2\\0\end{bmatrix}\mathrm m,
+\qquad
+{}^{s}\mathbf p_e=
+\begin{bmatrix}(2+0)\,0\\(2+0)\,1\\-(-1)\end{bmatrix}\mathrm m
+=\begin{bmatrix}0\\2\\1\end{bmatrix}\mathrm m.
+\]</span></p>
+<p>For orientation, the same angles give <span class="math inline">\(\cos q_1=0\)</span>, <span class="math inline">\(\sin q_1=1\)</span>, <span class="math inline">\(\cos q_2=0\)</span>, and <span class="math inline">\(\sin q_2=-1\)</span>. Substituting into the derived rotation matrix yields</p>
+<p><span class="math display">\[
+\mathbf R_{se}(\pi/2,-\pi/2)
+=\begin{bmatrix}
+0\cdot0&amp;-1&amp;0\cdot(-1)\\
+1\cdot0&amp;0&amp;1\cdot(-1)\\
+-(-1)&amp;0&amp;0
+\end{bmatrix}
+=\begin{bmatrix}0&amp;-1&amp;0\\0&amp;0&amp;-1\\1&amp;0&amp;0\end{bmatrix}.
+\]</span></p>
+<p>Choosing <span class="math inline">\(q_2=+\pi/2\)</span> instead would put the end effector at <span class="math inline">\((0,2,-1)\,\mathrm m\)</span>. In the stated motion, the arm swings sideways and lifts its second link while the end-effector orientation changes. These closed-form values provide an independent reference for pose and display-coordinate comparisons; they do not replace the general product-of-exponentials calculation.</p>
+</section>
+</section>
+<section id="verification-meaning-3" class="level3" data-number="11.4.5">
+<h3 data-number="11.4.5" class="anchored" data-anchor-id="verification-meaning-3"><span class="header-section-number">11.4.5</span> Verification meaning</h3>
 <p>The forward-pose tests exercise the home-pose identity at zero, a quarter turn about the space origin, rotation about an offset axis line, translation along a normalized negative direction, an out-of-plane rotation about the space <span class="math inline">\(x\)</span>-axis, and the mixed chain above. The offset-axis case checks the sign and role of the revolute screw’s upper block; the out-of-plane case guards against an accidentally planar implementation. The mixed chain checks that a proximal rotation carries the distal extension. The nonzero examples use independently specified expected matrices rather than another call to the same forward evaluator.</p>
 <p>Pose comparison uses the relative transform <span class="math inline">\(\mathbf T_{\mathrm{err}}=\mathbf T_{\mathrm{expected}}^{-1}\mathbf T_{\mathrm{actual}}\)</span>, where the subscripts identify the independently expected and computed poses. Its translation column measures position discrepancy along the expected end-effector axes. The angular block of its principal logarithm measures orientation discrepancy. The tests compare the translation norm with <span class="math inline">\(10^{-12}\,\mathrm m\)</span> and the angular norm with <span class="math inline">\(10^{-12}\)</span> radians separately; they do not combine metre and radian errors into one scalar norm. These cases provide evidence for their particular geometric properties, not a proof for every possible chain or numerical magnitude.</p>
 </section>
-<section id="sec-general-kinematics-impl-cycle-connections" class="level3" data-number="11.4.5">
-<h3 data-number="11.4.5" class="anchored" data-anchor-id="sec-general-kinematics-impl-cycle-connections"><span class="header-section-number">11.4.5</span> How the classes and functions connect</h3>
+<section id="sec-general-kinematics-impl-cycle-connections" class="level3" data-number="11.4.6">
+<h3 data-number="11.4.6" class="anchored" data-anchor-id="sec-general-kinematics-impl-cycle-connections"><span class="header-section-number">11.4.6</span> How the classes and functions connect</h3>
 <p>The diagrams pair code names with their mathematical meaning. Arrows show construction or calculation steps, not the order of physical robot motion. Only the relevant contents and checks are shown.</p>
 <section id="construct-the-fixed-model" class="level4">
 <h4 class="anchored" data-anchor-id="construct-the-fixed-model">Construct the fixed model</h4>
