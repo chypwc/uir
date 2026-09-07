@@ -194,8 +194,9 @@ std::span<const StateActionDistribution> FiniteMdp::rows() const noexcept
   return rows_;
 }
 
-const JointOutcomeDistribution & FiniteMdp::outcome_distribution(
-  StateIndex state, ActionIndex action) const
+std::optional<std::reference_wrapper<const JointOutcomeDistribution>>
+FiniteMdp::find_outcome_distribution(
+  const StateIndex state, const ActionIndex action) const
 {
   if (state.value() >= state_count_) {
     throw FiniteMdpException{
@@ -238,12 +239,10 @@ const JointOutcomeDistribution & FiniteMdp::outcome_distribution(
     });
 
   if (row == rows_.end() || row->state != state || row->action != action) {
-    throw FiniteMdpException{
-      FiniteMdpError::infeasible_state_action,
-      "The queried action is not feasible in the current state."};
+    return std::nullopt;
   }
 
-  return row->outcome_distribution;
+  return std::cref(row->outcome_distribution);
 }
 
 bool FiniteMdp::is_terminal(StateIndex state) const

@@ -85,11 +85,11 @@ These compile-time checks establish the intended conversion contract: integer-to
 
 ## Storing a joint-outcome distribution {#sec-finite-mdp-impl-joint-distribution}
 
-For one feasible current pair $(s,a)$, we need to store the possible next states together with their rewards and probabilities. Keeping the destination and reward in the same record preserves their relationship.
+For one feasible current pair $(s,a)$, we need to store the possible next states together with their rewards and probabilities. Keeping the next state and reward in the same record preserves their relationship.
 
 ### Mathematical records and their representation
 
-Let $K\geq1$ be the number of positive-probability events for the fixed pair. For record $k\in\{1,\ldots,K\}$, let $s'_k\in\mathcal S$ be the destination, $r_k\in\mathbb R$ the reward, and $q_k=p(s'_k,r_k\mid s,a)$ the joint probability. Distinct records represent distinct pairs $(s'_k,r_k)$, with
+Let $K\geq1$ be the number of positive-probability events for the fixed pair. For record $k\in\{1,\ldots,K\}$, let $s'_k\in\mathcal S$ be the next state, $r_k\in\mathbb R$ the reward, and $q_k=p(s'_k,r_k\mid s,a)$ the joint probability. Distinct records represent distinct pairs $(s'_k,r_k)$, with
 
 $$
 0<q_k\leq1,
@@ -108,11 +108,11 @@ struct OutcomeProbability
 };
 ```
 
-The fields `next_state`, `reward`, and `probability` represent $s'_k$, $r_k$, and $q_k$ respectively. The current state and action are absent because every record in one distribution shares that conditioning pair.
+The field `next_state` stores the next-state index representing $s'_k$; `reward` and `probability` store $r_k$ and $q_k$ respectively. The current state and action are absent because every record in one distribution shares that conditioning pair.
 
-::: {.callout-note title="Example: Recording two rewards at the same destination" appearance="simple" icon=false}
+::: {.callout-note title="Example: Recording two rewards for the same next state" appearance="simple" icon=false}
 
-The same destination may have several different rewards. These records show how to retain both events in a three-state domain:
+The same next state may have several different rewards. These records show how to retain both events in a three-state domain:
 
 ```cpp
 #include <vector>
@@ -124,7 +124,7 @@ const std::vector<OutcomeProbability> outcomes{
 };
 ```
 
-The vector stores the events $(s_1,-1)$, $(s_2,4)$, and $(s_2,5)$ with probabilities $0.2,0.3,0.5$. The last two records are different events even though they share a destination. No event reaches $s_3$ from this pair.
+The vector stores the events $(s_1,-1)$, $(s_2,4)$, and $(s_2,5)$ with probabilities $0.2,0.3,0.5$. The last two records are different events even though they share a next state. No event reaches $s_3$ from this pair.
 
 :::
 
@@ -154,7 +154,7 @@ public:
 };
 ```
 
-`JointOutcomeDistribution` owns the outcome vector in `outcomes_` and the size of the full destination domain in `state_count_`. The domain can contain states absent from the positive-probability records.
+`JointOutcomeDistribution` owns the outcome vector in `outcomes_` and the size of the full state space in `state_count_`. The domain can contain states absent from the positive-probability records.
 
 `from_outcomes` creates a validated distribution; `outcomes()` exposes its records; `next_state_probabilities()` calculates a marginal vector; and `expected_reward()` calculates the expected one-step reward. The private constructor prevents callers from directly storing an unchecked vector.
 
@@ -185,7 +185,7 @@ JointOutcomeDistribution::JointOutcomeDistribution(
 
 The **factory** `from_outcomes` creates a distribution from the state-domain size, the outcome records, and the allowed probability-sum error.
 
-The helper `validate_distribution` establishes the mathematical conditions before the private constructor runs. It checks valid destination indices, finite rewards, unique events, positive finite probabilities, and the row sum. A failed condition raises an exception and construction produces no distribution; accepted probabilities are not repaired or renormalised.
+The helper `validate_distribution` establishes the mathematical conditions before the private constructor runs. It checks valid next-state indices, finite rewards, unique events, positive finite probabilities, and the row sum. A failed condition raises an exception and construction produces no distribution; accepted probabilities are not repaired or renormalised.
 
 The vector parameter is passed by value. Passing a named vector copies it into the local parameter; an eligible temporary or moved vector can transfer storage. `std::move` permits the receiving constructor to take ownership of that local vector's storage. It does not itself move elements or validate them. The constructor's initialiser list stores the state count and transfers the records into `outcomes_`.
 
@@ -206,7 +206,7 @@ The records satisfy the construction conditions, including a probability sum of 
 
 ### Recognising repeated events
 
-The destination and reward form the event's identity. During construction, the following excerpt records those identities and rejects repetition:
+The next state and reward form the event's identity. During construction, the following excerpt records those identities and rejects repetition:
 
 ```cpp
 #include <set>
@@ -226,9 +226,9 @@ for (const OutcomeProbability & outcome : outcomes) {
 }
 ```
 
-This excerpt shows the event-identity operation; construction checks reward finiteness before inserting each key. A `std::pair<StateIndex, double>` is a two-field key for $(s',r)$, holding the destination followed by the reward. The surrounding `std::set` holds unique keys in comparison order. The loop attempts to insert each record's event key.
+This excerpt shows the event-identity operation; construction checks reward finiteness before inserting each key. A `std::pair<StateIndex, double>` is a two-field key for $(s',r)$, holding the next-state index followed by the reward. The surrounding `std::set` holds unique keys in comparison order. The loop attempts to insert each record's event key.
 
-`emplace` constructs a candidate key from the destination and reward. It returns another pair: an iterator to the stored key and a Boolean insertion flag. The final `.second` selects that flag, not the event's reward. If the key already exists, the flag is false and the set remains unchanged.
+`emplace` constructs a candidate key from the next-state index and reward. It returns another pair: an iterator to the stored key and a Boolean insertion flag. The final `.second` selects that flag, not the event's reward. If the key already exists, the flag is false and the set remains unchanged.
 
 Repeated keys raise `FiniteMdpException` with category `FiniteMdpError::duplicate_outcome`: two records claim to be the same event.
 
@@ -250,15 +250,15 @@ std::set<std::pair<StateIndex, double>> events;
 const auto first = events.emplace(StateIndex{1}, 4.0);
 const auto again = events.emplace(StateIndex{1}, 4.0);
 
-const StateIndex destination = first.first->first;
+const StateIndex next_state_index = first.first->first;
 const double reward_value = first.first->second;
 ```
 
-`first.second` is true and `again.second` is false. Their `.first` members are iterators to the same key. `first.first->first` retrieves the key's destination and `first.first->second` retrieves its reward, giving state index $1$ and reward $4$. Inserting a reward of $5$ at that destination would create a different event.
+`first.second` is true and `again.second` is false. Their `.first` members are iterators to the same key. `first.first->first` retrieves the key's next-state index and `first.first->second` retrieves its reward. Thus `next_state_index` contains $1$ and `reward_value` contains $4$. Inserting a reward of $5$ with the same next-state index would create a different event.
 
 :::
 
-The ordering compares destination first and reward second. Two keys are equivalent when neither precedes the other. Finite reward values are compared exactly, not using a tolerance; positive and negative floating-point zero compare equal. Rejecting non-finite rewards before insertion prevents NaN, the floating-point marker for “not a number”, from invalidating the ordering.
+The ordering compares next-state indices first and reward second. Two keys are equivalent when neither precedes the other. Finite reward values are compared exactly, not using a tolerance; positive and negative floating-point zero compare equal. Rejecting non-finite rewards before insertion prevents NaN, the floating-point marker for “not a number”, from invalidating the ordering.
 
 ### Reading records without copying them
 
@@ -396,9 +396,9 @@ Kahan compensation reduces addition error; it does not make every sum exact, rem
 
 Given a validated joint distribution, the two queries produce the probability of each next state and the expected one-step reward. The record-based forms of the equations from @sec-mdp-rewards-joint-dynamics determine which terms each loop accumulator receives.
 
-### One accumulator per destination
+### One accumulator per next state
 
-For a destination $s'\in\mathcal S$, marginalisation sums over all reward values. Since omitted events have zero probability, the sum can be written using the stored records:
+For a next state $s'\in\mathcal S$, marginalisation sums over all reward values. Since omitted events have zero probability, the sum can be written using the stored records:
 
 $$
 p(s'\mid s,a)
@@ -441,9 +441,9 @@ std::vector<double> JointOutcomeDistribution::next_state_probabilities() const
 
 A `std::vector<double>` has no built-in row/column orientation; its declared interpretation here is a row in the state order. If `next_state_index` has value $j\in\{0,\ldots,n-1\}$, then `probabilities[next_state_index]` accumulates $p(s_{j+1}\mid s,a)$.
 
-Both vectors start with `state_count_` zero entries. The next-state index chooses which destination's accumulator receives $q_k$.
+Both vectors start with `state_count_` zero entries. The next-state index chooses which next-state accumulator receives $q_k$.
 
-Each destination needs its own correction because it has its own running sum and rounding history. Applying a correction from destination $s_1$ to an addition for $s_2$ would mix two different marginal probabilities. Initial zero entries also represent destinations with no stored incoming outcome from this pair.
+Each next state needs its own correction because it has its own running sum and rounding history. Applying a correction for next state $s_1$ to an addition for $s_2$ would mix two different marginal probabilities. Initial zero entries also represent next states with no stored outcome from this pair.
 
 ### One accumulator for the expected reward
 
@@ -481,7 +481,7 @@ double JointOutcomeDistribution::expected_reward() const noexcept
 
 `weighted_reward` is the floating-point product corresponding to $r_kq_k$. `corrected_weighted_reward` is the Kahan increment, and `expected_reward` is the running approximation to $\bar r(s,a)$. Since probabilities are dimensionless, every accumulator here has the same reward scale as $r_k$. Unlike probability accumulation, the summands can be negative. Compensation is applied to the products after they have been rounded; it does not recover rounding lost in multiplication.
 
-::: {.callout-note title="Example: Querying two rewards at the same destination" appearance="simple" icon=false}
+::: {.callout-note title="Example: Querying two rewards for the same next state" appearance="simple" icon=false}
 
 This example shows how the two queries use the same joint records differently:
 
@@ -497,7 +497,7 @@ const auto probabilities = distribution.next_state_probabilities();
 const double reward = distribution.expected_reward();
 ```
 
-The factory receives three records in a three-state domain. The two calls calculate `probabilities` and `reward` from the accepted distribution. Independently summing the probabilities by destination gives
+The factory receives three records in a three-state domain. The two calls calculate `probabilities` and `reward` from the accepted distribution. Independently summing the probabilities by next state gives
 
 $$
 \begin{bmatrix}0.2&0.3+0.5&0\end{bmatrix}
@@ -551,28 +551,29 @@ const double result = extreme.expected_reward();
 
 Kahan compensation does not increase the floating-point range. A reward scale with numerical headroom is necessary, and a caller requiring a finite result must check it rather than infer it from input finiteness.
 
-### Data-flow summary: records and distribution queries {.unnumbered}
-
-The record type, factory, and queries form one connected path:
-
-```text
-state count + vector<OutcomeProbability> + sum tolerance
-    |
-    v
-JointOutcomeDistribution::from_outcomes(...)
-    |
-    v
-JointOutcomeDistribution owns state_count_ and outcomes_
-    |-- outcomes() -----------------> read-only span of records
-    |-- next_state_probabilities() -> owning probability vector
-    +-- expected_reward() ---------> scalar expected reward
-```
-
-Each record combines a destination index, a reward, and its probability. The factory checks the records before storing them. A span borrows that storage; the marginal vector and expected-reward scalar are calculated values. Each marginal accumulator sums the probabilities for one destination, whereas the expected-reward accumulator sums the probability-weighted rewards across all records.
-
 ## Constructing the complete finite MDP {#sec-finite-mdp-impl-construction}
 
 An outcome distribution specifies the possible responses to one decision. To represent the whole MDP, we must attach each distribution to its current state and action, collect the feasible pairs, and supply the absorbing continuation at terminal states.
+
+Collect the environment data into the **finite-MDP tuple**
+
+$$
+\mathcal M:=\left(
+\mathcal S,\mathcal A,\{\mathcal A(s)\}_{s\in\mathcal S},
+\mathcal R,p,\mathcal S_{\mathrm{term}}
+\right),
+$$
+
+where:
+
+- $\mathcal S$ is the finite state set.
+- $\mathcal A$ is the complete finite action set, including the bookkeeping action when terminal states exist.
+- $\{\mathcal A(s)\}_{s\in\mathcal S}$ specifies the nonempty feasible action set $\mathcal A(s)\subseteq\mathcal A$ for every state.
+- $\mathcal R\subset\mathbb R$ is the finite set of possible reward values, including zero for the absorbing continuation when terminal states exist.
+- $p$ is the time-homogeneous joint transition--reward law: $p(s',r\mid s,a)$ assigns a probability to next state $s'$ and reward $r$ for each feasible current pair $(s,a)$.
+- $\mathcal S_{\mathrm{term}}\subseteq\mathcal S$ is the declared terminal set.
+
+This tuple describes the environment. A policy and discount factor are specified separately for control and value calculations. The feasible sets and joint law are the objects defined in @sec-mdp-actions-feasible-sets and @sec-mdp-rewards-joint-dynamics.
 
 ### Attaching a distribution to its current pair
 
@@ -587,9 +588,11 @@ struct StateActionDistribution
 };
 ```
 
-`StateActionDistribution` is an aggregate with three fields. `state` identifies the current state, `action` identifies the decision, and `outcome_distribution` owns the possible joint outcomes. This is why an individual `OutcomeProbability` needs only a destination, reward, and probability: the enclosing row supplies the conditioning pair.
+`StateActionDistribution` has three fields: `state` stores the current-state index, `action` stores the action index, and `outcome_distribution` owns the possible joint outcomes. This is why an individual `OutcomeProbability` needs only a next-state index, reward, and probability: the enclosing row supplies the conditioning pair.
 
 ### Task actions and the absorbing extension
+
+Define the **task-action set** $\mathcal A_{\mathrm{task}}$ as the finite set of caller-declared action labels for task decisions, excluding bookkeeping after termination. Its size is $m_{\mathrm{task}}:=|\mathcal A_{\mathrm{task}}|$.
 
 Let $\mathcal S_{\mathrm{term}}\subseteq\mathcal S$ be the declared terminal set. If it is nonempty, introduce one fresh action label $a_\bot\notin\mathcal A_{\mathrm{task}}$ for bookkeeping after termination. The symbol $\bot$ marks that artificial role. The complete action space is
 
@@ -628,6 +631,7 @@ For a nonterminal state $s$, its feasible set is a nonempty subset of $\mathcal 
 ### The model class
 
 ```cpp
+#include <functional>
 #include <optional>
 
 class FiniteMdp
@@ -659,8 +663,9 @@ public:
 
   [[nodiscard]] std::span<const StateActionDistribution> rows() const noexcept;
 
-  [[nodiscard]] const JointOutcomeDistribution & outcome_distribution(
-    StateIndex state, ActionIndex action) const;
+  [[nodiscard]]
+  std::optional<std::reference_wrapper<const JointOutcomeDistribution>>
+  find_outcome_distribution(StateIndex state, ActionIndex action) const;
 
   [[nodiscard]] bool is_terminal(StateIndex state) const;
 };
@@ -668,66 +673,87 @@ public:
 
 `FiniteMdp` owns four pieces of data. `state_count_` represents $n$, `task_action_count_` represents $m_{\mathrm{task}}$, `rows_` stores the feasible state--action distributions, and `terminal_states_` stores terminal indices. No independent complete-action count is stored: it can be derived from the task-action count and whether any terminals exist.
 
-The public factory `from_rows` receives those four inputs. The final parameter's default `{}` supplies an empty terminal vector when the caller omits it. The count queries return scalar sizes; `rows()` exposes a read-only span; `outcome_distribution` returns a const reference to one stored distribution; and `is_terminal` returns a Boolean membership answer. The type `std::optional<ActionIndex>` allows `bookkeeping_action()` to return an action index or no value.
+The public factory `from_rows` receives those four inputs. The final parameter's default `{}` supplies an empty terminal vector when the caller omits it. The count queries return scalar sizes; `rows()` exposes a read-only span; `find_outcome_distribution` returns an optional read-only reference wrapper for one stored distribution; and `is_terminal` returns a Boolean membership answer. The type `std::optional<ActionIndex>` allows `bookkeeping_action()` to return an action index or no value. The distribution lookup instead contains a wrapper that refers to model-owned data; its access and lifetime rules are explained in @sec-finite-mdp-impl-lookup.
 
-The private constructor is the point where accepted local data becomes owned model storage. The factory accepts only rows originating at nonterminal states and generates outgoing terminal rows itself. It checks that supplied distributions use the same destination-domain size and that each current state--action key is unique. Thus the model establishes relationships among already-checked distributions rather than repeating every probability calculation.
+The private constructor is the point where accepted local data becomes owned model storage. *The factory accepts only rows originating at nonterminal states and generates outgoing terminal rows itself.* It checks that supplied distributions use the same state-space size and that each current state--action key is unique. Thus the model establishes relationships among already-checked distributions rather than repeating every probability calculation.
 
-### Generating terminal rows
+### Completing and ordering the model rows
 
-After validating the terminal indices, the factory puts them in increasing order:
+Construction adds the absorbing continuation to the supplied nonterminal rows, then orders the complete collection for lookup. The stages are:
+
+```text
+1. Check the state count and terminal indices; sort the terminal indices.
+2. Check the task-action count and supplied nonterminal rows.
+3. Generate one zero-reward self-transition per terminal state.
+4. Check that every state has a feasible row.
+5. Sort the completed rows by current-state index, then action index.
+6. Return the model owning the rows and terminal indices.
+7. If any check fails, raise an exception without returning a model.
+```
+
+The following production excerpt combines terminal-row generation and final row ordering inside the factory signature. Validation branches, per-state feasible-row counting, and production comments are omitted; the comments below are teaching annotations. This is not a complete replacement function.
 
 ```cpp
 #include <algorithm>
 
-std::ranges::sort(terminal_states);
-```
+FiniteMdp FiniteMdp::from_rows(
+  std::size_t state_count, std::size_t task_action_count,
+  std::vector<StateActionDistribution> rows,
+  std::vector<StateIndex> terminal_states)
+{
+  // Omitted: validate the state count and terminal indices.
+  std::ranges::sort(terminal_states);
 
-This factory excerpt uses the comparison already defined for `StateIndex`. Sorting changes the vector's order, not the declared terminal set. Thus different input orders lead to the same stored terminal order.
+  // Omitted: validate the task-action count and supplied nonterminal rows.
 
-Once the supplied rows and terminal declarations have been checked, the following factory excerpt appends one absorbing row per terminal state:
+  // Generate the absorbing continuations.
+  for (const StateIndex state : terminal_states) {
+    rows.push_back(StateActionDistribution{
+      state,
+      ActionIndex{task_action_count},
+      JointOutcomeDistribution::from_outcomes(
+        state_count, {{state, 0.0, 1.0}}, 1.0e-12),
+    });
+  }
 
-```cpp
-for (const StateIndex state : terminal_states) {
-  rows.push_back(StateActionDistribution{
-    state,
-    ActionIndex{task_action_count},
-    JointOutcomeDistribution::from_outcomes(
-      state_count, {{state, 0.0, 1.0}}, 1.0e-12),
-  });
+  // Omitted: reject the model if any state has no feasible row.
+
+  // Order the completed rows for lookup.
+  std::ranges::sort(
+    rows, [](
+            const StateActionDistribution & left,
+            const StateActionDistribution & right) {
+      if (left.state != right.state) {
+        return left.state < right.state;
+      }
+
+      return left.action < right.action;
+    });
+
+  return FiniteMdp{
+    state_count,
+    task_action_count,
+    std::move(rows),
+    std::move(terminal_states),
+  };
 }
 ```
 
-The range-based loop visits the terminal vector. `rows.push_back` appends a complete row to the row vector; appending there does not disturb traversal of the separate terminal vector. The generated row's current state and sole destination are the same `state`, while its reward and probability are exactly zero and one.
+### Generating terminal rows
 
-The expression `ActionIndex{task_action_count}` assigns the bookkeeping label the first index after all task-action indices. Every terminal uses that same action index. The supplied task-action range is the half-open interval `[0, task_action_count)`: indices are nonnegative and strictly less than the count. If the count is zero, this range is empty. The generated index is not a caller-supplied task action.
+The initial `std::ranges::sort(terminal_states)` uses the comparison already defined for `StateIndex`. Sorting changes the vector's order, not the declared terminal set. Thus different input orders lead to the same stored terminal order.
 
-After completion, every state needs at least one feasible row. A terminal has its generated row; a nonterminal needs a supplied row. Zero task actions are consequently possible only when all states are terminal. Before generating an action, construction also checks that increasing the action count by one will not wrap around the unsigned integer range.
+The range-based loop visits the terminal vector. `rows.push_back` appends a complete row to the row vector; appending there does not disturb traversal of the separate terminal vector. The generated row's current-state and next-state indices both equal `state`, while its reward and probability are exactly zero and one.
+
+The expression `ActionIndex{task_action_count}` assigns the bookkeeping label the first index after all task-action indices. Every terminal uses that same action index. The supplied task-action indices are integers from zero through `task_action_count - 1`. If `task_action_count` is zero, there are no task-action indices. The generated index is not a caller-supplied task action.
+
+After completion, every state needs at least one feasible row. A terminal has its generated row; a nonterminal needs a supplied row. Zero task actions are consequently possible only when all states are terminal.
+
+The action count uses `std::size_t`, an unsigned integer type with a largest representable value. Adding one to that largest representable value produces zero under unsigned integer arithmetic; this is called **wraparound**. The model would then incorrectly report zero actions instead of the task actions plus the bookkeeping action. To prevent this, the factory rejects construction when terminal states are declared and `task_action_count` already equals that largest value, before generating the bookkeeping action.
 
 ### Establishing the row order
 
-The model stores rows in increasing current-state order, with increasing action order within each state. This final factory excerpt orders the completed rows and transfers them to the model:
-
-```cpp
-std::ranges::sort(
-  rows, [](
-          const StateActionDistribution & left,
-          const StateActionDistribution & right) {
-    if (left.state != right.state) {
-      return left.state < right.state;
-    }
-
-    return left.action < right.action;
-  });
-
-return FiniteMdp{
-  state_count,
-  task_action_count,
-  std::move(rows),
-  std::move(terminal_states),
-};
-```
-
-The comparator supplied to `std::ranges::sort` orders rows by state first, then by action when the states match. This lexicographic ordering puts all rows for a state together and orders the actions within that group.
+The second sorting operation, `std::ranges::sort(rows, ...)`, runs after terminal completion and the feasible-row check. Its comparator orders rows by current-state index first, then by action index when the states match. This lexicographic ordering puts all rows for a state together and orders the actions within that group.
 
 Sorting happens before the final `return` transfers the local vectors to the model. The receiving constructor stores them as follows:
 
@@ -744,7 +770,7 @@ FiniteMdp::FiniteMdp(
 }
 ```
 
-The initialiser list stores the two counts and transfers ownership of the two vectors. The finished model does not borrow those local vectors. A moved-from model should be reconstructed or replaced before being used as a validated mathematical model, since moving its vectors does not preserve its original owned rows.
+The initialiser list stores the two counts and transfers ownership of the two vectors. The finished model does not borrow those local vectors.
 
 ### Complete-action and bookkeeping queries
 
@@ -770,35 +796,41 @@ In the optional-returning query, `std::nullopt` represents absence of a bookkeep
 
 ## Finding a distribution and checking terminal membership {#sec-finite-mdp-impl-lookup}
 
-A distribution query receives a current state and action and must select exactly their stored row. Terminal membership receives a state and must decide whether it belongs to the declared terminal set. The sorted storage supports both operations.
+A distribution query receives $s\in\mathcal S$ and $a\in\mathcal A$. If $a\in\mathcal A(s)$, it returns access to the stored joint distribution $p(s',r\mid s,a)$; otherwise, it reports absence without inventing dynamics. Indices outside the state or global action domain are errors, not ordinary absence. Terminal membership receives a state and decides whether it belongs to the declared terminal set. The sorted storage supports both operations.
 
 ### Searching for a state--action row
 
-After the query indices have been checked against the model's domains, the distribution lookup uses the following core:
+The following production excerpt includes the function signature and lookup logic. It omits the initial state- and action-index range checks and the production comments; the teaching comment marks where those checks occur. This excerpt is not a complete replacement function.
 
 ```cpp
-const std::pair<StateIndex, ActionIndex> target{state, action};
+std::optional<std::reference_wrapper<const JointOutcomeDistribution>>
+FiniteMdp::find_outcome_distribution(
+  const StateIndex state, const ActionIndex action) const
+{
+  // Omitted: reject state or action indices outside the model's domains.
+  const std::pair<StateIndex, ActionIndex> target{state, action};
 
-const auto row = std::lower_bound(
-  rows_.begin(), rows_.end(), target,
-  [](
-    const StateActionDistribution & candidate,
-    const std::pair<StateIndex, ActionIndex> & key) {
-    if (candidate.state != key.first) {
-      return candidate.state < key.first;
-    }
+  const auto row = std::lower_bound(
+    rows_.begin(), rows_.end(), target,
+    [](
+      const StateActionDistribution & candidate,
+      const std::pair<StateIndex, ActionIndex> & key) {
+      if (candidate.state != key.first) {
+        return candidate.state < key.first;
+      }
 
-    return candidate.action < key.second;
-  });
+      return candidate.action < key.second;
+    });
 
-if (row == rows_.end() || row->state != state || row->action != action) {
-  throw FiniteMdpException{
-    FiniteMdpError::infeasible_state_action,
-    "The queried action is not feasible in the current state."};
+  if (row == rows_.end() || row->state != state || row->action != action) {
+    return std::nullopt;
+  }
+
+  return std::cref(row->outcome_distribution);
 }
-
-return row->outcome_distribution;
 ```
+
+`std::optional<T>` contains a value of type `T` or is empty; `std::nullopt` represents the empty case. Here the contained value is a `std::reference_wrapper<const JointOutcomeDistribution>`: a small object that refers to an existing distribution without copying it or allowing modification through the wrapper. `std::cref(row->outcome_distribution)` creates that read-only wrapper for the matching row. The function therefore returns either borrowed access to the exact distribution or an empty optional. The next subsection explains how to access the result and keep the borrowed reference valid.
 
 `target` holds the requested state and action as one pair. `std::lower_bound` receives four arguments: the beginning of the range, the excluded end of the range, the requested value, and the comparison operation. In this call:
 
@@ -815,17 +847,72 @@ Since the rows use this same ordering, comparison results form a run of true val
 
 ::: {.callout-note title="Example: Searching for a missing state–action pair" appearance="simple" icon=false}
 
-This trace shows why the search result still needs an equality check. For the sorted keys $(0,0),(0,2),(1,0)$, one search trace for $(0,1)$ is:
+This trace shows why the search result still needs an equality check. The target is $(0,1)$: current-state index $0$ and action index $1$. We want the stored outcome distribution for that exact pair. The stored rows have these keys:
 
-1. Examine the middle key $(0,2)$. The states match, but $2<1$ is false. The first false position is this candidate or lies to its left.
-2. Examine $(0,0)$ in the remaining left range. The action comparison $0<1$ is true, so the desired boundary lies to its right.
-3. Return the position of $(0,2)$.
+```text
+Row index:       0        1        2
+Stored key:    (0,0)    (0,2)    (1,0)
 
-The candidate is greater than the requested key, not equal to it. The explicit equality check after the search therefore rejects the pair. Requesting $(0,2)$ produces the same candidate and passes the check; requesting $(1,2)$ reaches the end.
+Target:        (0,1) — not stored
+```
+
+`lower_bound` finds the **first key that is not smaller than the target**, rather than guaranteeing an exact match. One search trace is:
+
+1. **Compare the middle key $(0,2)$ with $(0,1)$.** Their state indices match, so compare actions: $2<1$ is false. This row could be the first key that is not smaller, but an earlier row might also qualify. Search left.
+2. **Compare $(0,0)$ with $(0,1)$.** Their state indices match, and $0<1$ is true. This key is smaller than the target, so discard it and search to its right.
+3. **The search ends at $(0,2)$.** It is the first key that is not smaller than $(0,1)$.
+
+The final equality check then asks: **is $(0,2)$ exactly $(0,1)$?** No—the action indices differ. Therefore, the requested state--action pair is absent, and the function returns `std::nullopt`. Both indices are valid; only their combination is infeasible.
 
 :::
 
-The `||` operator stops evaluating as soon as one operand is true. If `row == rows_.end()`, neither member access is evaluated, so the code never dereferences the end iterator. Otherwise, checking both state and action establishes an exact match. The final `return` borrows the selected distribution through the const-reference return type already shown in the class declaration. The model and its row storage must remain valid while the reference is used.
+The `||` operator stops evaluating as soon as one operand is true. If `row == rows_.end()`, neither member access is evaluated, so the code never dereferences the end iterator. Otherwise, checking both state and action establishes an exact match. A failed match returns an empty optional; an exact match returns a wrapper referring to the selected distribution.
+
+### Accessing an optional borrowed distribution
+
+The following access pattern assumes a previously constructed model and current-state and action indices within its domains:
+
+```cpp
+const auto result = mdp.find_outcome_distribution(current, action);
+
+if (result.has_value()) {
+  const JointOutcomeDistribution & selected = result->get();
+
+  // Alternative spellings for the same borrowed access:
+  const JointOutcomeDistribution & also_selected = (*result).get();
+  const JointOutcomeDistribution & checked_selected = result.value().get();
+}
+```
+
+The return type combines two standard-library objects:
+
+- `std::optional<T>` contains a value of type `T` or is empty. `std::nullopt` supplies the empty case. `has_value()` checks presence; `.value()` accesses the contained value and throws `std::bad_optional_access` if empty. Dereferencing with `*` or accessing a member with `->` requires a nonempty optional.
+- `std::reference_wrapper<T>` is a copyable object that refers to an existing `T`. Its `.get()` operation returns that object's reference. Copying the wrapper does not copy the referenced object or extend its lifetime.
+- `std::cref(object)` creates a read-only reference wrapper. Here it refers to the stored `JointOutcomeDistribution`, and the returned optional contains that wrapper without copying the distribution. `<functional>` declares the wrapper and `std::cref`; `<optional>` declares the optional type and `std::nullopt`.
+
+C++20 does not allow an optional to contain a reference directly. The wrapper supplies an object that the optional can contain while still borrowing the distribution. The model's stored distribution must remain alive and its reference valid throughout use; destroying or replacing the owning storage invalidates the borrowed access.
+
+::: {.callout-note title="Example: Reading a distribution when present" appearance="simple" icon=false}
+
+This one-state model has one feasible action with a certain reward of two:
+
+```cpp
+const auto distribution = JointOutcomeDistribution::from_outcomes(
+  1U, {{StateIndex{0}, 2.0, 1.0}}, 1.0e-12);
+const auto mdp = FiniteMdp::from_rows(
+  1U, 1U, {{StateIndex{0}, ActionIndex{0}, distribution}});
+
+const auto result =
+  mdp.find_outcome_distribution(StateIndex{0}, ActionIndex{0});
+
+if (result.has_value()) {
+  const double reward = result->get().expected_reward();
+}
+```
+
+`result` is nonempty because the pair was supplied. In `result->get()`, `->` accesses the wrapper inside the optional, and `get()` returns the referenced distribution. Thus `get()` belongs to the wrapper, not the optional. The expected reward is $1\times2=2$, which is the value of `reward`. The model remains alive throughout this access.
+
+:::
 
 ### Reading the terminal declaration
 
@@ -852,7 +939,7 @@ Take a model with state indices $0,1,2$, terminal declarations $\{2,0\}$, and a 
 
 :::
 
-## Model usage and data-flow summary {#sec-finite-mdp-impl-data-flow}
+## Model usage {#sec-finite-mdp-impl-data-flow}
 
 The individual types now have defined roles. A complete example shows how construction combines them and how a query retrieves information without executing an environment transition.
 
@@ -886,15 +973,17 @@ These are separate values, not a chain of borrowed references. Constructing `row
 ### Queries produce calculated values
 
 ```cpp
-const JointOutcomeDistribution & selected =
-  mdp.outcome_distribution(current, action);
+const auto result = mdp.find_outcome_distribution(current, action);
 
-const std::vector<double> probabilities =
-  selected.next_state_probabilities();
-const double reward = selected.expected_reward();
+if (result.has_value()) {
+  const JointOutcomeDistribution & selected = result->get();
+  const std::vector<double> probabilities =
+    selected.next_state_probabilities();
+  const double reward = selected.expected_reward();
+}
 ```
 
-`selected` borrows the matching distribution inside `mdp`. The next two calls calculate an owning vector `probabilities` and a scalar `reward`. Applying the marginal and expectation formulas to the two supplied events gives
+The supplied pair makes `result` nonempty. Inside the presence check, `selected` borrows the matching distribution inside `mdp`. The next two calls calculate an owning vector `probabilities` and a scalar `reward`. Applying the marginal and expectation formulas to the two supplied events gives
 
 $$
 \begin{aligned}
@@ -916,101 +1005,261 @@ const auto bookkeeping = mdp.bookkeeping_action();
 
 if (bookkeeping.has_value()) {
   const ActionIndex generated_action = *bookkeeping;
-  const auto & absorbing =
-    mdp.outcome_distribution(terminal, generated_action);
-  const double terminal_reward = absorbing.expected_reward();
+  const auto result =
+    mdp.find_outcome_distribution(terminal, generated_action);
+  if (result.has_value()) {
+    const auto & absorbing = result->get();
+    const double terminal_reward = absorbing.expected_reward();
+  }
 }
 ```
 
-`has_value()` checks that the optional contains an index. Once this is true, `*bookkeeping` extracts that index without removing it. Here `generated_action` contains one, `absorbing` refers to the generated terminal distribution, and `terminal_reward` is zero. Its next-state row is $[0\;1]$ because the destination remains $s_2$.
+The first `has_value()` checks that the bookkeeping optional contains an index. Once this is true, `*bookkeeping` extracts that index without removing it. The second check establishes that the distribution lookup contains a wrapper before accessing it. Here `generated_action` contains one, `absorbing` refers to the generated terminal distribution, and `terminal_reward` is zero. Its next-state row is $[0\;1]$ because the next state remains $s_2$.
 
 :::
 
-### Data-flow summary: model construction and lookup {.unnumbered}
+## How the classes and functions connect {#sec-finite-mdp-impl-connections}
 
-Each row associates a distribution with its current state and action. The model owns the resulting rows:
+The diagrams separate construction from later queries. Arrows show inputs passed to an operation or results produced by it; the word **owns** identifies stored data, not another calculation. The model remains fixed during every query.
+
+### Constructing distributions and model rows
+
+Typed indices identify states and actions. `StateIndex::value()` and `ActionIndex::value()` recover their integer indices; their comparison operators supply the order used for event keys, model rows, and terminal indices. An outcome record uses a next-state index, whereas a model row supplies the current-state and action indices.
+
+$$
+\begin{array}{c}
+\boxed{\begin{array}{c}
+\text{Inputs for one distribution}\\
+\texttt{OutcomeProbability}\text{ records: }(s'_k,r_k,q_k)\\
+\texttt{next\_state}:\ \texttt{StateIndex},\quad
+\texttt{reward}:r_k,\quad\texttt{probability}:q_k\\
+\text{State count }n\text{ and sum tolerance }\varepsilon_p
+\end{array}}\\[4pt]
+\downarrow\\[4pt]
+\boxed{\begin{array}{c}
+\texttt{JointOutcomeDistribution::from\_outcomes(...)}\\
+\texttt{validate\_distribution(...)}\\
+\text{Check domains, finite values, unique events, and row sum}\\
+\text{Kahan sum: }|\widehat q-1|\leq\varepsilon_p
+\end{array}}\\[4pt]
+\begin{array}{c}\downarrow\\\text{if valid}\end{array}\\[4pt]
+\boxed{\begin{array}{c}
+\text{Private constructor: }\texttt{JointOutcomeDistribution(...)}\\
+\text{Owns }\texttt{state\_count\_}\text{ and }\texttt{outcomes\_}\\
+\text{One stored joint-outcome distribution}
+\end{array}}
+\end{array}
+$$
+
+The distribution does not store its conditioning pair. Attaching a current state and action gives that distribution its role in the complete model:
+
+$$
+\begin{array}{c}
+\boxed{\begin{array}{c}
+\texttt{StateActionDistribution}\text{ supplied rows}\\
+\texttt{state}:\ \texttt{StateIndex}\ (s),\quad
+\texttt{action}:\ \texttt{ActionIndex}\ (a)\\
+\text{Each row owns an }\texttt{outcome\_distribution}\\
+\text{representing }p(s',r\mid s,a)\\
+\text{Additional inputs: }n,\ m_{\mathrm{task}},\ \mathcal S_{\mathrm{term}}
+\end{array}}\\[4pt]
+\downarrow\\[4pt]
+\boxed{\begin{array}{c}
+\texttt{FiniteMdp::from\_rows(...)}\\
+\text{Validate and sort terminal declarations; check supplied rows}\\
+\text{Generate terminal rows using }\texttt{from\_outcomes(...)}\\
+p(s_\dagger,0\mid s_\dagger,a_\bot)=1\\
+\text{Check feasible-row coverage; sort completed rows}
+\end{array}}\\[4pt]
+\begin{array}{c}\downarrow\\\text{if valid}\end{array}\\[4pt]
+\boxed{\begin{array}{c}
+\text{Private constructor: }\texttt{FiniteMdp(...)}\\
+\text{Owns }\texttt{state\_count\_},\ \texttt{task\_action\_count\_},\\
+\texttt{rows\_},\ \texttt{terminal\_states\_}\\
+\texttt{rows\_}\text{ owns rows; each row owns its distribution;}\\
+\text{each distribution owns its outcome records}
+\end{array}}
+\end{array}
+$$
+
+At either factory, a failed validation raises `FiniteMdpException` with a `FiniteMdpError` category instead of producing an object. Construction does not renormalise accepted probabilities or generate missing nonterminal dynamics.
+
+### Looking up and evaluating a distribution
+
+The model is fixed input. Each call supplies only a current-state index and an action index; the lookup borrows an existing distribution rather than constructing a new one.
+
+$$
+\begin{array}{c}
+\boxed{\begin{array}{c}
+\text{Fixed storage: }\texttt{FiniteMdp}\text{ and its sorted }\texttt{rows\_}\\
+\text{Per-call inputs: }\texttt{StateIndex}\ (s),\ \texttt{ActionIndex}\ (a)
+\end{array}}\\[4pt]
+\downarrow\\[4pt]
+\boxed{\begin{array}{c}
+\texttt{find\_outcome\_distribution(state, action)}\\
+\text{Check index domains; }\texttt{std::lower\_bound}\text{ and exact match}\\
+\text{Infeasible pair: }\texttt{std::nullopt}\\
+\text{Feasible pair: }\texttt{std::cref}\text{ of the stored distribution}
+\end{array}}\\[4pt]
+\begin{array}{c}\downarrow\\\text{if the optional is nonempty}\end{array}\\[4pt]
+\boxed{\begin{array}{c}
+\texttt{result->get()}\\
+\text{Borrowed read-only }\texttt{JointOutcomeDistribution}\\
+\texttt{state\_count()}\ \longrightarrow\ n\\
+\texttt{outcomes()}\ \longrightarrow\ \text{borrowed read-only record span}\\[3pt]
+\texttt{next\_state\_probabilities()}\ \longrightarrow\ \text{owning vector}\\
+\bigl[p(s_1\mid s,a),\ldots,p(s_n\mid s,a)\bigr],\quad
+p(s'\mid s,a)=\sum_r p(s',r\mid s,a)\\[3pt]
+\texttt{expected\_reward()}\ \longrightarrow\ \text{scalar }\bar r(s,a)\\
+\bar r(s,a)=\sum_{s',r}r\,p(s',r\mid s,a)
+\end{array}}
+\end{array}
+$$
+
+Invalid lookup indices raise a domain exception rather than returning an empty optional. The marginal and reward methods use Kahan accumulation; they return calculated values, not borrowed storage. The wrapper and record span require valid owner storage, while the calculated vector and scalar do not. The expected-reward overflow caution in @sec-finite-mdp-impl-controlled-queries still applies.
+
+### Inspecting the model itself
+
+These methods read model structure without selecting an outcome distribution. Only terminal membership needs a per-call state index.
+
+$$
+\begin{array}{c}
+\boxed{\text{Fixed storage: }\texttt{FiniteMdp}}\\[4pt]
+\downarrow\\[4pt]
+\boxed{\begin{array}{rcl}
+\texttt{state\_count()}&\longrightarrow&n\\
+\texttt{task\_action\_count()}&\longrightarrow&m_{\mathrm{task}}\\
+\texttt{action\_count()}&\longrightarrow&m=|\mathcal A|\\
+\texttt{bookkeeping\_action()}&\longrightarrow&
+\text{optional index of }a_\bot\\
+\texttt{rows()}&\longrightarrow&\text{borrowed read-only row span}\\
+\texttt{is\_terminal(state)}&\longrightarrow&s\in\mathcal S_{\mathrm{term}}
+\end{array}}
+\end{array}
+$$
+
+The bookkeeping optional is empty exactly when no terminal states are declared. Terminal membership uses the sorted declaration and rejects an invalid state index. None of these calls samples an outcome, chooses an action, or advances an environment.
+
+## Analytic examples {#sec-finite-mdp-impl-tests}
+
+### A task with uncertain progress
+
+Consider three states in the order $\mathcal S=\{s_1,s_2,s_3\}$: **start**, **in progress**, and **finished**. Only $s_3$ is terminal. The task actions are $\mathcal A_{\mathrm{task}}=\{a_1,a_2\}$, where $a_1$ means **attempt** and $a_2$ means **quit**. Both actions are feasible at the start, but only attempt is feasible in progress.
+
+An attempt from the start can fail or make progress. Two outcomes reach the same in-progress state with different rewards. Quitting ends the task with reward zero; an attempt from the in-progress state completes it with reward six. The diagram uses the mathematical state and action labels, with `a_bot` denoting $a_\bot$. In C++, states $s_1,s_2,s_3$ have indices $0,1,2$, and actions $a_1,a_2,a_\bot$ have indices $0,1,2$.
 
 ```text
-FiniteMdp
-|-- state_count_, task_action_count_
-|-- terminal_states_: vector<StateIndex>
-+-- rows_: vector<StateActionDistribution>
-    |-- state: StateIndex
-    |-- action: ActionIndex
-    +-- outcome_distribution: JointOutcomeDistribution
+Supplied task transitions (p = probability, r = reward):
+
+s_1 -- a_1 --> +-- p=0.25, r=-2 --> s_1
+               +-- p=0.25, r= 1 --> s_2
+               +-- p=0.50, r= 3 --> s_2
+
+s_1 -- a_2 --> p=1, r=0 --> s_3
+s_2 -- a_1 --> p=1, r=6 --> s_3
+
+Generated terminal continuation:
+s_3 -- a_bot --> p=1, r=0 --> s_3
 ```
 
-`state` is the current-state index and `action` is the action index for that row. The owned distribution contains possible next-state--reward events and supports the queries summarised in @sec-finite-mdp-impl-controlled-queries. The row's action conditions every event in its distribution; it is not converted into an outcome.
+### Calculating the expected results
 
-The function calls connect these stored objects to their consumers:
+For an attempt from the start, combine the two events reaching the in-progress state to obtain the next-state marginal:
 
-```text
-state/task-action counts + supplied rows + terminal indices
-    |
-    v
-FiniteMdp::from_rows(...)
-    |
-    v
-FiniteMdp owns supplied and generated terminal rows
-    |-- outcome_distribution(state, action)
-    |       -> const reference to one stored distribution
-    |-- bookkeeping_action()
-    |       -> optional generated action index
-    +-- is_terminal(state)
-            -> Boolean declared-membership answer
-```
+$$
+\begin{aligned}
+p(s_1\mid s_1,a_1)&=0.25,\\
+p(s_2\mid s_1,a_1)&=0.25+0.50=0.75,\\
+p(s_3\mid s_1,a_1)&=0.
+\end{aligned}
+$$
 
-Construction owns the accepted rows; distribution lookup borrows one row's distribution; its marginal and reward queries return calculated values. These calls inspect a model rather than execute a trajectory: no query samples a destination or advances an environment.
+The expected reward must retain the different rewards of the two progress events:
 
-## Analytic examples and focused test meaning {#sec-finite-mdp-impl-tests}
+$$
+\bar r(s_1,a_1)
+=(-2)(0.25)+(1)(0.25)+(3)(0.50)
+=1.25.
+$$
 
-A useful test compares a calculated result with an independently known answer. The three-event distribution has marginal $[0.2\;0.8\;0]$ and expected reward $3.5$. The terminal example requires a different distinction: the entering task reward must be retained while the generated outgoing reward is zero.
+The remaining rows each contain one certain outcome. All expected results are:
 
-### Retaining the entering reward
+| Current state | Action | Next-state probability row | Expected reward |
+|---|---|---|---:|
+| Start | Attempt | $[0.25\;0.75\;0]$ | $1.25$ |
+| Start | Quit | $[0\;0\;1]$ | $0$ |
+| In progress | Attempt | $[0\;0\;1]$ | $6$ |
+| Finished | Bookkeeping | $[0\;0\;1]$ | $0$ |
+
+Construction produces three states, two task actions, three complete action labels, and four feasible rows. The reward six belongs to entering the finished state; the generated continuation contributes zero afterward.
+
+### Constructing the model
 
 ```cpp
-const auto incoming = JointOutcomeDistribution::from_outcomes(
-  2U, {{StateIndex{1}, 7.0, 1.0}}, 1.0e-12);
+const StateIndex start{0};
+const StateIndex in_progress{1};
+const StateIndex finished{2};
+const ActionIndex attempt{0};
+const ActionIndex quit{1};
+
+const auto attempt_from_start = JointOutcomeDistribution::from_outcomes(
+  3U,
+  {{start, -2.0, 0.25},
+   {in_progress, 1.0, 0.25},
+   {in_progress, 3.0, 0.50}},
+  1.0e-12);
+
+const auto quit_from_start = JointOutcomeDistribution::from_outcomes(
+  3U, {{finished, 0.0, 1.0}}, 1.0e-12);
+
+const auto complete_task = JointOutcomeDistribution::from_outcomes(
+  3U, {{finished, 6.0, 1.0}}, 1.0e-12);
 
 const auto mdp = FiniteMdp::from_rows(
-  2U, 1U,
-  {{StateIndex{0}, ActionIndex{0}, incoming}},
-  {StateIndex{1}});
-
-EXPECT_EQ(mdp.task_action_count(), 1U);
-EXPECT_EQ(mdp.action_count(), 2U);
-EXPECT_FALSE(mdp.is_terminal(StateIndex{0}));
-EXPECT_TRUE(mdp.is_terminal(StateIndex{1}));
-
-EXPECT_DOUBLE_EQ(
-  mdp.outcome_distribution(StateIndex{0}, ActionIndex{0}).expected_reward(),
-  7.0);
-EXPECT_DOUBLE_EQ(
-  mdp.outcome_distribution(StateIndex{1}, ActionIndex{1}).expected_reward(),
-  0.0);
+  3U, 2U,
+  {{start, attempt, attempt_from_start},
+   {start, quit, quit_from_start},
+   {in_progress, attempt, complete_task}},
+  {finished});
 ```
 
-The first construction defines a certain transition from state index zero to terminal-state index one with reward seven. The assertions compare the model's two action counts and two terminal-membership answers, then check the incoming and outgoing expected rewards separately.
+`attempt_from_start` stores all three joint events, including both rewards for `in_progress`. The rows passed to `from_rows` attach each distribution to its current state and action. No terminal row is supplied: the factory generates it with bookkeeping action index two. No row is supplied for quitting from `in_progress`, so that pair remains infeasible.
 
-`EXPECT_EQ` compares values and records a failure without stopping the test function. `EXPECT_TRUE` and `EXPECT_FALSE` check Boolean results. `EXPECT_DOUBLE_EQ` allows a difference of up to four units in the last place rather than requiring bitwise equality. A **unit in the last place** is a local floating-point spacing, which changes with magnitude. These macros make the intended comparisons visible without repeating the production calculation. [GoogleTest assertion reference](https://google.github.io/googletest/reference/assertions.html).
-
-### Checking structure before reading an element
+### Reading the model
 
 ```cpp
-const auto outcomes =
-  mdp.outcome_distribution(StateIndex{1}, ActionIndex{1}).outcomes();
+const auto result = mdp.find_outcome_distribution(start, attempt);
 
-ASSERT_EQ(outcomes.size(), 1U);
-EXPECT_EQ(outcomes[0].next_state, StateIndex{1});
-EXPECT_DOUBLE_EQ(outcomes[0].probability, 1.0);
+if (result.has_value()) {
+  const auto probabilities = result->get().next_state_probabilities();
+  const double reward = result->get().expected_reward();
+}
+
+const auto unavailable =
+  mdp.find_outcome_distribution(in_progress, quit);
+
+const auto bookkeeping = mdp.bookkeeping_action();
+if (bookkeeping.has_value()) {
+  const auto terminal_result =
+    mdp.find_outcome_distribution(finished, *bookkeeping);
+
+  if (terminal_result.has_value()) {
+    const auto terminal_probabilities =
+      terminal_result->get().next_state_probabilities();
+    const double terminal_reward =
+      terminal_result->get().expected_reward();
+  }
+}
 ```
 
-`outcomes` is a span into the generated terminal row. `ASSERT_EQ` stops the current test function if the size is not one, protecting the following element access. Once that assertion succeeds, the two expectations check the destination and the probability-one self-transition. The size check matters here because the mathematical terminal convention is a single certain outcome, not an arbitrary distribution.
+The first lookup is nonempty: `probabilities` is $[0.25\;0.75\;0]$ and `reward` is $1.25$, matching the hand calculation. `unavailable` is empty because quit is a valid global action but is not feasible in the in-progress state. The bookkeeping query contains action index two; its terminal distribution yields `terminal_probabilities` equal to $[0\;0\;1]$ and `terminal_reward` equal to zero.
+
+The two events reaching the in-progress state remain distinct in the stored distribution but combine in the marginal vector. Terminal completion preserves the reward for finishing, and the optional lookup distinguishes an unavailable action from a stored transition.
 
 ## References {.unnumbered}
 
 - Sutton, R. S., and Barto, A. G. *Reinforcement Learning: An Introduction*, second-edition draft, 2014--2015. Chapter 3, especially Sections 3.4 and 3.6, supplies the absorbing-episode convention and the joint-kernel, marginal, and reward formulas. The draft's $r(s,a)$ is written $\bar r(s,a)$ here to distinguish an expectation from a realised reward.
 - Bertsekas, D. P. *A Course in Reinforcement Learning*, second edition, 2026 editorial version. Section 1.3.1, printed pp. 28--29, supplies the state-dependent control-set and random-disturbance viewpoint. Its state $x_k$ and control $u_k$ play the roles of $s$ and $a$; its $U_k(x_k)$ is the feasible control set.
 - Goldberg, D. “What Every Computer Scientist Should Know About Floating-Point Arithmetic.” *ACM Computing Surveys*, 23(1), 1991. Theorem 8 and “Errors In Summation”; [reproduced in Oracle's Numerical Computation Guide](https://docs.oracle.com/cd/E19422-01/819-3693/ncg_goldberg.html).
-- [C++ standard draft: binary-search algorithms](https://eel.is/c++draft/alg.binary.search), for search preconditions and return meanings; and [GoogleTest assertions](https://google.github.io/googletest/reference/assertions.html), for fatal, nonfatal, and floating-point assertions.
+- [C++ standard draft: binary-search algorithms](https://eel.is/c++draft/alg.binary.search), for search preconditions and return meanings.
 - The companion's code excerpts follow the [public headers]({{< var repository-url >}}/tree/{{< var repository-branch >}}/ros_ws/src/intelligence_foundations/include/intelligence_foundations), [compiled operations]({{< var repository-url >}}/tree/{{< var repository-branch >}}/ros_ws/src/intelligence_foundations/src), and [focused tests]({{< var repository-url >}}/tree/{{< var repository-branch >}}/ros_ws/src/intelligence_foundations/test) of the C++20 foundations library.

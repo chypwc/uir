@@ -504,35 +504,43 @@ window.Quarto = {
   </ul></li>
   <li><a href="#sec-finite-mdp-impl-controlled-queries" id="toc-sec-finite-mdp-impl-controlled-queries" class="nav-link" data-scroll-target="#sec-finite-mdp-impl-controlled-queries"><span class="header-section-number">14.4</span> Marginal probabilities and expected reward</a>
   <ul class="collapse">
-  <li><a href="#one-accumulator-per-destination" id="toc-one-accumulator-per-destination" class="nav-link" data-scroll-target="#one-accumulator-per-destination"><span class="header-section-number">14.4.1</span> One accumulator per destination</a></li>
+  <li><a href="#one-accumulator-per-next-state" id="toc-one-accumulator-per-next-state" class="nav-link" data-scroll-target="#one-accumulator-per-next-state"><span class="header-section-number">14.4.1</span> One accumulator per next state</a></li>
   <li><a href="#one-accumulator-for-the-expected-reward" id="toc-one-accumulator-for-the-expected-reward" class="nav-link" data-scroll-target="#one-accumulator-for-the-expected-reward"><span class="header-section-number">14.4.2</span> One accumulator for the expected reward</a></li>
   <li><a href="#finite-inputs-do-not-guarantee-a-finite-computed-reward" id="toc-finite-inputs-do-not-guarantee-a-finite-computed-reward" class="nav-link" data-scroll-target="#finite-inputs-do-not-guarantee-a-finite-computed-reward"><span class="header-section-number">14.4.3</span> Finite inputs do not guarantee a finite computed reward</a></li>
-  <li><a href="#data-flow-summary-records-and-distribution-queries" id="toc-data-flow-summary-records-and-distribution-queries" class="nav-link" data-scroll-target="#data-flow-summary-records-and-distribution-queries">Data-flow summary: records and distribution queries</a></li>
   </ul></li>
   <li><a href="#sec-finite-mdp-impl-construction" id="toc-sec-finite-mdp-impl-construction" class="nav-link" data-scroll-target="#sec-finite-mdp-impl-construction"><span class="header-section-number">14.5</span> Constructing the complete finite MDP</a>
   <ul class="collapse">
   <li><a href="#attaching-a-distribution-to-its-current-pair" id="toc-attaching-a-distribution-to-its-current-pair" class="nav-link" data-scroll-target="#attaching-a-distribution-to-its-current-pair"><span class="header-section-number">14.5.1</span> Attaching a distribution to its current pair</a></li>
   <li><a href="#task-actions-and-the-absorbing-extension" id="toc-task-actions-and-the-absorbing-extension" class="nav-link" data-scroll-target="#task-actions-and-the-absorbing-extension"><span class="header-section-number">14.5.2</span> Task actions and the absorbing extension</a></li>
   <li><a href="#the-model-class" id="toc-the-model-class" class="nav-link" data-scroll-target="#the-model-class"><span class="header-section-number">14.5.3</span> The model class</a></li>
-  <li><a href="#generating-terminal-rows" id="toc-generating-terminal-rows" class="nav-link" data-scroll-target="#generating-terminal-rows"><span class="header-section-number">14.5.4</span> Generating terminal rows</a></li>
-  <li><a href="#establishing-the-row-order" id="toc-establishing-the-row-order" class="nav-link" data-scroll-target="#establishing-the-row-order"><span class="header-section-number">14.5.5</span> Establishing the row order</a></li>
-  <li><a href="#complete-action-and-bookkeeping-queries" id="toc-complete-action-and-bookkeeping-queries" class="nav-link" data-scroll-target="#complete-action-and-bookkeeping-queries"><span class="header-section-number">14.5.6</span> Complete-action and bookkeeping queries</a></li>
+  <li><a href="#completing-and-ordering-the-model-rows" id="toc-completing-and-ordering-the-model-rows" class="nav-link" data-scroll-target="#completing-and-ordering-the-model-rows"><span class="header-section-number">14.5.4</span> Completing and ordering the model rows</a></li>
+  <li><a href="#generating-terminal-rows" id="toc-generating-terminal-rows" class="nav-link" data-scroll-target="#generating-terminal-rows"><span class="header-section-number">14.5.5</span> Generating terminal rows</a></li>
+  <li><a href="#establishing-the-row-order" id="toc-establishing-the-row-order" class="nav-link" data-scroll-target="#establishing-the-row-order"><span class="header-section-number">14.5.6</span> Establishing the row order</a></li>
+  <li><a href="#complete-action-and-bookkeeping-queries" id="toc-complete-action-and-bookkeeping-queries" class="nav-link" data-scroll-target="#complete-action-and-bookkeeping-queries"><span class="header-section-number">14.5.7</span> Complete-action and bookkeeping queries</a></li>
   </ul></li>
   <li><a href="#sec-finite-mdp-impl-lookup" id="toc-sec-finite-mdp-impl-lookup" class="nav-link" data-scroll-target="#sec-finite-mdp-impl-lookup"><span class="header-section-number">14.6</span> Finding a distribution and checking terminal membership</a>
   <ul class="collapse">
   <li><a href="#searching-for-a-stateaction-row" id="toc-searching-for-a-stateaction-row" class="nav-link" data-scroll-target="#searching-for-a-stateaction-row"><span class="header-section-number">14.6.1</span> Searching for a state–action row</a></li>
-  <li><a href="#reading-the-terminal-declaration" id="toc-reading-the-terminal-declaration" class="nav-link" data-scroll-target="#reading-the-terminal-declaration"><span class="header-section-number">14.6.2</span> Reading the terminal declaration</a></li>
+  <li><a href="#accessing-an-optional-borrowed-distribution" id="toc-accessing-an-optional-borrowed-distribution" class="nav-link" data-scroll-target="#accessing-an-optional-borrowed-distribution"><span class="header-section-number">14.6.2</span> Accessing an optional borrowed distribution</a></li>
+  <li><a href="#reading-the-terminal-declaration" id="toc-reading-the-terminal-declaration" class="nav-link" data-scroll-target="#reading-the-terminal-declaration"><span class="header-section-number">14.6.3</span> Reading the terminal declaration</a></li>
   </ul></li>
-  <li><a href="#sec-finite-mdp-impl-data-flow" id="toc-sec-finite-mdp-impl-data-flow" class="nav-link" data-scroll-target="#sec-finite-mdp-impl-data-flow"><span class="header-section-number">14.7</span> Model usage and data-flow summary</a>
+  <li><a href="#sec-finite-mdp-impl-data-flow" id="toc-sec-finite-mdp-impl-data-flow" class="nav-link" data-scroll-target="#sec-finite-mdp-impl-data-flow"><span class="header-section-number">14.7</span> Model usage</a>
   <ul class="collapse">
   <li><a href="#construction-from-individual-events" id="toc-construction-from-individual-events" class="nav-link" data-scroll-target="#construction-from-individual-events"><span class="header-section-number">14.7.1</span> Construction from individual events</a></li>
   <li><a href="#queries-produce-calculated-values" id="toc-queries-produce-calculated-values" class="nav-link" data-scroll-target="#queries-produce-calculated-values"><span class="header-section-number">14.7.2</span> Queries produce calculated values</a></li>
-  <li><a href="#data-flow-summary-model-construction-and-lookup" id="toc-data-flow-summary-model-construction-and-lookup" class="nav-link" data-scroll-target="#data-flow-summary-model-construction-and-lookup">Data-flow summary: model construction and lookup</a></li>
   </ul></li>
-  <li><a href="#sec-finite-mdp-impl-tests" id="toc-sec-finite-mdp-impl-tests" class="nav-link" data-scroll-target="#sec-finite-mdp-impl-tests"><span class="header-section-number">14.8</span> Analytic examples and focused test meaning</a>
+  <li><a href="#sec-finite-mdp-impl-connections" id="toc-sec-finite-mdp-impl-connections" class="nav-link" data-scroll-target="#sec-finite-mdp-impl-connections"><span class="header-section-number">14.8</span> How the classes and functions connect</a>
   <ul class="collapse">
-  <li><a href="#retaining-the-entering-reward" id="toc-retaining-the-entering-reward" class="nav-link" data-scroll-target="#retaining-the-entering-reward"><span class="header-section-number">14.8.1</span> Retaining the entering reward</a></li>
-  <li><a href="#checking-structure-before-reading-an-element" id="toc-checking-structure-before-reading-an-element" class="nav-link" data-scroll-target="#checking-structure-before-reading-an-element"><span class="header-section-number">14.8.2</span> Checking structure before reading an element</a></li>
+  <li><a href="#constructing-distributions-and-model-rows" id="toc-constructing-distributions-and-model-rows" class="nav-link" data-scroll-target="#constructing-distributions-and-model-rows"><span class="header-section-number">14.8.1</span> Constructing distributions and model rows</a></li>
+  <li><a href="#looking-up-and-evaluating-a-distribution" id="toc-looking-up-and-evaluating-a-distribution" class="nav-link" data-scroll-target="#looking-up-and-evaluating-a-distribution"><span class="header-section-number">14.8.2</span> Looking up and evaluating a distribution</a></li>
+  <li><a href="#inspecting-the-model-itself" id="toc-inspecting-the-model-itself" class="nav-link" data-scroll-target="#inspecting-the-model-itself"><span class="header-section-number">14.8.3</span> Inspecting the model itself</a></li>
+  </ul></li>
+  <li><a href="#sec-finite-mdp-impl-tests" id="toc-sec-finite-mdp-impl-tests" class="nav-link" data-scroll-target="#sec-finite-mdp-impl-tests"><span class="header-section-number">14.9</span> Analytic examples</a>
+  <ul class="collapse">
+  <li><a href="#a-task-with-uncertain-progress" id="toc-a-task-with-uncertain-progress" class="nav-link" data-scroll-target="#a-task-with-uncertain-progress"><span class="header-section-number">14.9.1</span> A task with uncertain progress</a></li>
+  <li><a href="#calculating-the-expected-results" id="toc-calculating-the-expected-results" class="nav-link" data-scroll-target="#calculating-the-expected-results"><span class="header-section-number">14.9.2</span> Calculating the expected results</a></li>
+  <li><a href="#constructing-the-model" id="toc-constructing-the-model" class="nav-link" data-scroll-target="#constructing-the-model"><span class="header-section-number">14.9.3</span> Constructing the model</a></li>
+  <li><a href="#reading-the-model" id="toc-reading-the-model" class="nav-link" data-scroll-target="#reading-the-model"><span class="header-section-number">14.9.4</span> Reading the model</a></li>
   </ul></li>
   <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
   </ul>
@@ -639,10 +647,10 @@ window.Quarto = {
 </section>
 <section id="sec-finite-mdp-impl-joint-distribution" class="level2" data-number="14.2">
 <h2 data-number="14.2" class="anchored" data-anchor-id="sec-finite-mdp-impl-joint-distribution"><span class="header-section-number">14.2</span> Storing a joint-outcome distribution</h2>
-<p>For one feasible current pair <span class="math inline">\((s,a)\)</span>, we need to store the possible next states together with their rewards and probabilities. Keeping the destination and reward in the same record preserves their relationship.</p>
+<p>For one feasible current pair <span class="math inline">\((s,a)\)</span>, we need to store the possible next states together with their rewards and probabilities. Keeping the next state and reward in the same record preserves their relationship.</p>
 <section id="mathematical-records-and-their-representation" class="level3" data-number="14.2.1">
 <h3 data-number="14.2.1" class="anchored" data-anchor-id="mathematical-records-and-their-representation"><span class="header-section-number">14.2.1</span> Mathematical records and their representation</h3>
-<p>Let <span class="math inline">\(K\geq1\)</span> be the number of positive-probability events for the fixed pair. For record <span class="math inline">\(k\in\{1,\ldots,K\}\)</span>, let <span class="math inline">\(s'_k\in\mathcal S\)</span> be the destination, <span class="math inline">\(r_k\in\mathbb R\)</span> the reward, and <span class="math inline">\(q_k=p(s'_k,r_k\mid s,a)\)</span> the joint probability. Distinct records represent distinct pairs <span class="math inline">\((s'_k,r_k)\)</span>, with</p>
+<p>Let <span class="math inline">\(K\geq1\)</span> be the number of positive-probability events for the fixed pair. For record <span class="math inline">\(k\in\{1,\ldots,K\}\)</span>, let <span class="math inline">\(s'_k\in\mathcal S\)</span> be the next state, <span class="math inline">\(r_k\in\mathbb R\)</span> the reward, and <span class="math inline">\(q_k=p(s'_k,r_k\mid s,a)\)</span> the joint probability. Distinct records represent distinct pairs <span class="math inline">\((s'_k,r_k)\)</span>, with</p>
 <p><span class="math display">\[
 0&lt;q_k\leq1,
 \qquad
@@ -655,18 +663,18 @@ window.Quarto = {
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">double</span> reward<span class="op">;</span></span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">double</span> probability<span class="op">;</span></span>
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>The fields <code>next_state</code>, <code>reward</code>, and <code>probability</code> represent <span class="math inline">\(s'_k\)</span>, <span class="math inline">\(r_k\)</span>, and <span class="math inline">\(q_k\)</span> respectively. The current state and action are absent because every record in one distribution shares that conditioning pair.</p>
-<div class="callout callout-style-simple callout-note no-icon callout-titled" title="Example: Recording two rewards at the same destination">
+<p>The field <code>next_state</code> stores the next-state index representing <span class="math inline">\(s'_k\)</span>; <code>reward</code> and <code>probability</code> store <span class="math inline">\(r_k\)</span> and <span class="math inline">\(q_k\)</span> respectively. The current state and action are absent because every record in one distribution shares that conditioning pair.</p>
+<div class="callout callout-style-simple callout-note no-icon callout-titled" title="Example: Recording two rewards for the same next state">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon no-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>Example: Recording two rewards at the same destination
+<span class="screen-reader-only">Note</span>Example: Recording two rewards for the same next state
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>The same destination may have several different rewards. These records show how to retain both events in a three-state domain:</p>
+<p>The same next state may have several different rewards. These records show how to retain both events in a three-state domain:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;vector&gt;</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="bu">std::</span>vector<span class="op">&lt;</span>OutcomeProbability<span class="op">&gt;</span> outcomes<span class="op">{</span></span>
@@ -674,7 +682,7 @@ window.Quarto = {
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">{</span>StateIndex<span class="op">{</span><span class="dv">1</span><span class="op">},</span> <span class="fl">4.0</span><span class="op">,</span> <span class="fl">0.3</span><span class="op">},</span></span>
 <span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="op">{</span>StateIndex<span class="op">{</span><span class="dv">1</span><span class="op">},</span> <span class="fl">5.0</span><span class="op">,</span> <span class="fl">0.5</span><span class="op">},</span></span>
 <span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>The vector stores the events <span class="math inline">\((s_1,-1)\)</span>, <span class="math inline">\((s_2,4)\)</span>, and <span class="math inline">\((s_2,5)\)</span> with probabilities <span class="math inline">\(0.2,0.3,0.5\)</span>. The last two records are different events even though they share a destination. No event reaches <span class="math inline">\(s_3\)</span> from this pair.</p>
+<p>The vector stores the events <span class="math inline">\((s_1,-1)\)</span>, <span class="math inline">\((s_2,4)\)</span>, and <span class="math inline">\((s_2,5)\)</span> with probabilities <span class="math inline">\(0.2,0.3,0.5\)</span>. The last two records are different events even though they share a next state. No event reaches <span class="math inline">\(s_3\)</span> from this pair.</p>
 </div>
 </div>
 </section>
@@ -701,7 +709,7 @@ window.Quarto = {
 <span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>  <span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> <span class="bu">std::</span>vector<span class="op">&lt;</span><span class="dt">double</span><span class="op">&gt;</span> next_state_probabilities<span class="op">()</span> <span class="at">const</span><span class="op">;</span></span>
 <span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>  <span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> <span class="dt">double</span> expected_reward<span class="op">()</span> <span class="at">const</span> <span class="kw">noexcept</span><span class="op">;</span></span>
 <span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p><code>JointOutcomeDistribution</code> owns the outcome vector in <code>outcomes_</code> and the size of the full destination domain in <code>state_count_</code>. The domain can contain states absent from the positive-probability records.</p>
+<p><code>JointOutcomeDistribution</code> owns the outcome vector in <code>outcomes_</code> and the size of the full state space in <code>state_count_</code>. The domain can contain states absent from the positive-probability records.</p>
 <p><code>from_outcomes</code> creates a validated distribution; <code>outcomes()</code> exposes its records; <code>next_state_probabilities()</code> calculates a marginal vector; and <code>expected_reward()</code> calculates the expected one-step reward. The private constructor prevents callers from directly storing an unchecked vector.</p>
 <p>The returned span borrows the distribution’s records, so it depends on their owner’s lifetime. The calculated probability vector and expected reward can be used independently of the distribution.</p>
 </section>
@@ -725,7 +733,7 @@ window.Quarto = {
 <span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
 <span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The <strong>factory</strong> <code>from_outcomes</code> creates a distribution from the state-domain size, the outcome records, and the allowed probability-sum error.</p>
-<p>The helper <code>validate_distribution</code> establishes the mathematical conditions before the private constructor runs. It checks valid destination indices, finite rewards, unique events, positive finite probabilities, and the row sum. A failed condition raises an exception and construction produces no distribution; accepted probabilities are not repaired or renormalised.</p>
+<p>The helper <code>validate_distribution</code> establishes the mathematical conditions before the private constructor runs. It checks valid next-state indices, finite rewards, unique events, positive finite probabilities, and the row sum. A failed condition raises an exception and construction produces no distribution; accepted probabilities are not repaired or renormalised.</p>
 <p>The vector parameter is passed by value. Passing a named vector copies it into the local parameter; an eligible temporary or moved vector can transfer storage. <code>std::move</code> permits the receiving constructor to take ownership of that local vector’s storage. It does not itself move elements or validate them. The constructor’s initialiser list stores the state count and transfers the records into <code>outcomes_</code>.</p>
 <div class="callout callout-style-simple callout-note no-icon callout-titled" title="Example: Constructing a distribution from the records">
 <div class="callout-header d-flex align-content-center">
@@ -747,7 +755,7 @@ window.Quarto = {
 </section>
 <section id="recognising-repeated-events" class="level3" data-number="14.2.4">
 <h3 data-number="14.2.4" class="anchored" data-anchor-id="recognising-repeated-events"><span class="header-section-number">14.2.4</span> Recognising repeated events</h3>
-<p>The destination and reward form the event’s identity. During construction, the following excerpt records those identities and rejects repetition:</p>
+<p>The next state and reward form the event’s identity. During construction, the following excerpt records those identities and rejects repetition:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;set&gt;</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;utility&gt;</span></span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -763,8 +771,8 @@ window.Quarto = {
 <span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>      <span class="st">"A joint outcome distribution contains a duplicate event."</span><span class="op">};</span></span>
 <span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
 <span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>This excerpt shows the event-identity operation; construction checks reward finiteness before inserting each key. A <code>std::pair&lt;StateIndex, double&gt;</code> is a two-field key for <span class="math inline">\((s',r)\)</span>, holding the destination followed by the reward. The surrounding <code>std::set</code> holds unique keys in comparison order. The loop attempts to insert each record’s event key.</p>
-<p><code>emplace</code> constructs a candidate key from the destination and reward. It returns another pair: an iterator to the stored key and a Boolean insertion flag. The final <code>.second</code> selects that flag, not the event’s reward. If the key already exists, the flag is false and the set remains unchanged.</p>
+<p>This excerpt shows the event-identity operation; construction checks reward finiteness before inserting each key. A <code>std::pair&lt;StateIndex, double&gt;</code> is a two-field key for <span class="math inline">\((s',r)\)</span>, holding the next-state index followed by the reward. The surrounding <code>std::set</code> holds unique keys in comparison order. The loop attempts to insert each record’s event key.</p>
+<p><code>emplace</code> constructs a candidate key from the next-state index and reward. It returns another pair: an iterator to the stored key and a Boolean insertion flag. The final <code>.second</code> selects that flag, not the event’s reward. If the key already exists, the flag is false and the set remains unchanged.</p>
 <p>Repeated keys raise <code>FiniteMdpException</code> with category <code>FiniteMdpError::duplicate_outcome</code>: two records claim to be the same event.</p>
 <p>To name both insertion results, the same call can instead be written:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="kw">auto</span> <span class="op">[</span>iterator<span class="op">,</span> inserted<span class="op">]</span> <span class="op">=</span></span>
@@ -785,12 +793,12 @@ window.Quarto = {
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="kw">auto</span> first <span class="op">=</span> events<span class="op">.</span>emplace<span class="op">(</span>StateIndex<span class="op">{</span><span class="dv">1</span><span class="op">},</span> <span class="fl">4.0</span><span class="op">);</span></span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="kw">auto</span> again <span class="op">=</span> events<span class="op">.</span>emplace<span class="op">(</span>StateIndex<span class="op">{</span><span class="dv">1</span><span class="op">},</span> <span class="fl">4.0</span><span class="op">);</span></span>
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> StateIndex destination <span class="op">=</span> first<span class="op">.</span>first<span class="op">-&gt;</span>first<span class="op">;</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> StateIndex next_state_index <span class="op">=</span> first<span class="op">.</span>first<span class="op">-&gt;</span>first<span class="op">;</span></span>
 <span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="dt">double</span> reward_value <span class="op">=</span> first<span class="op">.</span>first<span class="op">-&gt;</span>second<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p><code>first.second</code> is true and <code>again.second</code> is false. Their <code>.first</code> members are iterators to the same key. <code>first.first-&gt;first</code> retrieves the key’s destination and <code>first.first-&gt;second</code> retrieves its reward, giving state index <span class="math inline">\(1\)</span> and reward <span class="math inline">\(4\)</span>. Inserting a reward of <span class="math inline">\(5\)</span> at that destination would create a different event.</p>
+<p><code>first.second</code> is true and <code>again.second</code> is false. Their <code>.first</code> members are iterators to the same key. <code>first.first-&gt;first</code> retrieves the key’s next-state index and <code>first.first-&gt;second</code> retrieves its reward. Thus <code>next_state_index</code> contains <span class="math inline">\(1\)</span> and <code>reward_value</code> contains <span class="math inline">\(4\)</span>. Inserting a reward of <span class="math inline">\(5\)</span> with the same next-state index would create a different event.</p>
 </div>
 </div>
-<p>The ordering compares destination first and reward second. Two keys are equivalent when neither precedes the other. Finite reward values are compared exactly, not using a tolerance; positive and negative floating-point zero compare equal. Rejecting non-finite rewards before insertion prevents NaN, the floating-point marker for “not a number”, from invalidating the ordering.</p>
+<p>The ordering compares next-state indices first and reward second. Two keys are equivalent when neither precedes the other. Finite reward values are compared exactly, not using a tolerance; positive and negative floating-point zero compare equal. Rejecting non-finite rewards before insertion prevents NaN, the floating-point marker for “not a number”, from invalidating the ordering.</p>
 </section>
 <section id="reading-records-without-copying-them" class="level3" data-number="14.2.5">
 <h3 data-number="14.2.5" class="anchored" data-anchor-id="reading-records-without-copying-them"><span class="header-section-number">14.2.5</span> Reading records without copying them</h3>
@@ -931,9 +939,9 @@ window.Quarto = {
 <section id="sec-finite-mdp-impl-controlled-queries" class="level2" data-number="14.4">
 <h2 data-number="14.4" class="anchored" data-anchor-id="sec-finite-mdp-impl-controlled-queries"><span class="header-section-number">14.4</span> Marginal probabilities and expected reward</h2>
 <p>Given a validated joint distribution, the two queries produce the probability of each next state and the expected one-step reward. The record-based forms of the equations from <a href="finite_markov_decision_processes.html#sec-mdp-rewards-joint-dynamics" class="quarto-xref"><span>Section 13.5</span></a> determine which terms each loop accumulator receives.</p>
-<section id="one-accumulator-per-destination" class="level3" data-number="14.4.1">
-<h3 data-number="14.4.1" class="anchored" data-anchor-id="one-accumulator-per-destination"><span class="header-section-number">14.4.1</span> One accumulator per destination</h3>
-<p>For a destination <span class="math inline">\(s'\in\mathcal S\)</span>, marginalisation sums over all reward values. Since omitted events have zero probability, the sum can be written using the stored records:</p>
+<section id="one-accumulator-per-next-state" class="level3" data-number="14.4.1">
+<h3 data-number="14.4.1" class="anchored" data-anchor-id="one-accumulator-per-next-state"><span class="header-section-number">14.4.1</span> One accumulator per next state</h3>
+<p>For a next state <span class="math inline">\(s'\in\mathcal S\)</span>, marginalisation sums over all reward values. Since omitted events have zero probability, the sum can be written using the stored records:</p>
 <p><span class="math display">\[
 p(s'\mid s,a)
 =\sum_{r\in\mathcal R}p(s',r\mid s,a)
@@ -968,8 +976,8 @@ p(s_1\mid s,a)&amp;\cdots&amp;p(s_n\mid s,a)
 <span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> probabilities<span class="op">;</span></span>
 <span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>A <code>std::vector&lt;double&gt;</code> has no built-in row/column orientation; its declared interpretation here is a row in the state order. If <code>next_state_index</code> has value <span class="math inline">\(j\in\{0,\ldots,n-1\}\)</span>, then <code>probabilities[next_state_index]</code> accumulates <span class="math inline">\(p(s_{j+1}\mid s,a)\)</span>.</p>
-<p>Both vectors start with <code>state_count_</code> zero entries. The next-state index chooses which destination’s accumulator receives <span class="math inline">\(q_k\)</span>.</p>
-<p>Each destination needs its own correction because it has its own running sum and rounding history. Applying a correction from destination <span class="math inline">\(s_1\)</span> to an addition for <span class="math inline">\(s_2\)</span> would mix two different marginal probabilities. Initial zero entries also represent destinations with no stored incoming outcome from this pair.</p>
+<p>Both vectors start with <code>state_count_</code> zero entries. The next-state index chooses which next-state accumulator receives <span class="math inline">\(q_k\)</span>.</p>
+<p>Each next state needs its own correction because it has its own running sum and rounding history. Applying a correction for next state <span class="math inline">\(s_1\)</span> to an addition for <span class="math inline">\(s_2\)</span> would mix two different marginal probabilities. Initial zero entries also represent next states with no stored outcome from this pair.</p>
 </section>
 <section id="one-accumulator-for-the-expected-reward" class="level3" data-number="14.4.2">
 <h3 data-number="14.4.2" class="anchored" data-anchor-id="one-accumulator-for-the-expected-reward"><span class="header-section-number">14.4.2</span> One accumulator for the expected reward</h3>
@@ -1000,13 +1008,13 @@ p(s_1\mid s,a)&amp;\cdots&amp;p(s_n\mid s,a)
 <span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> expected_reward<span class="op">;</span></span>
 <span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><code>weighted_reward</code> is the floating-point product corresponding to <span class="math inline">\(r_kq_k\)</span>. <code>corrected_weighted_reward</code> is the Kahan increment, and <code>expected_reward</code> is the running approximation to <span class="math inline">\(\bar r(s,a)\)</span>. Since probabilities are dimensionless, every accumulator here has the same reward scale as <span class="math inline">\(r_k\)</span>. Unlike probability accumulation, the summands can be negative. Compensation is applied to the products after they have been rounded; it does not recover rounding lost in multiplication.</p>
-<div class="callout callout-style-simple callout-note no-icon callout-titled" title="Example: Querying two rewards at the same destination">
+<div class="callout callout-style-simple callout-note no-icon callout-titled" title="Example: Querying two rewards for the same next state">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon no-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>Example: Querying two rewards at the same destination
+<span class="screen-reader-only">Note</span>Example: Querying two rewards for the same next state
 </div>
 </div>
 <div class="callout-body-container callout-body">
@@ -1020,7 +1028,7 @@ p(s_1\mid s,a)&amp;\cdots&amp;p(s_n\mid s,a)
 <span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="kw">auto</span> probabilities <span class="op">=</span> distribution<span class="op">.</span>next_state_probabilities<span class="op">();</span></span>
 <span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="dt">double</span> reward <span class="op">=</span> distribution<span class="op">.</span>expected_reward<span class="op">();</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>The factory receives three records in a three-state domain. The two calls calculate <code>probabilities</code> and <code>reward</code> from the accepted distribution. Independently summing the probabilities by destination gives</p>
+<p>The factory receives three records in a three-state domain. The two calls calculate <code>probabilities</code> and <code>reward</code> from the accepted distribution. Independently summing the probabilities by next state gives</p>
 <p><span class="math display">\[
 \begin{bmatrix}0.2&amp;0.3+0.5&amp;0\end{bmatrix}
 =\begin{bmatrix}0.2&amp;0.8&amp;0\end{bmatrix}.
@@ -1070,38 +1078,41 @@ p(s_1\mid s,a)&amp;\cdots&amp;p(s_n\mid s,a)
 </div>
 <p>Kahan compensation does not increase the floating-point range. A reward scale with numerical headroom is necessary, and a caller requiring a finite result must check it rather than infer it from input finiteness.</p>
 </section>
-<section id="data-flow-summary-records-and-distribution-queries" class="level3 unnumbered">
-<h3 class="unnumbered anchored" data-anchor-id="data-flow-summary-records-and-distribution-queries">Data-flow summary: records and distribution queries</h3>
-<p>The record type, factory, and queries form one connected path:</p>
-<pre class="text"><code>state count + vector&lt;OutcomeProbability&gt; + sum tolerance
-    |
-    v
-JointOutcomeDistribution::from_outcomes(...)
-    |
-    v
-JointOutcomeDistribution owns state_count_ and outcomes_
-    |-- outcomes() -----------------&gt; read-only span of records
-    |-- next_state_probabilities() -&gt; owning probability vector
-    +-- expected_reward() ---------&gt; scalar expected reward</code></pre>
-<p>Each record combines a destination index, a reward, and its probability. The factory checks the records before storing them. A span borrows that storage; the marginal vector and expected-reward scalar are calculated values. Each marginal accumulator sums the probabilities for one destination, whereas the expected-reward accumulator sums the probability-weighted rewards across all records.</p>
-</section>
 </section>
 <section id="sec-finite-mdp-impl-construction" class="level2" data-number="14.5">
 <h2 data-number="14.5" class="anchored" data-anchor-id="sec-finite-mdp-impl-construction"><span class="header-section-number">14.5</span> Constructing the complete finite MDP</h2>
 <p>An outcome distribution specifies the possible responses to one decision. To represent the whole MDP, we must attach each distribution to its current state and action, collect the feasible pairs, and supply the absorbing continuation at terminal states.</p>
+<p>Collect the environment data into the <strong>finite-MDP tuple</strong></p>
+<p><span class="math display">\[
+\mathcal M:=\left(
+\mathcal S,\mathcal A,\{\mathcal A(s)\}_{s\in\mathcal S},
+\mathcal R,p,\mathcal S_{\mathrm{term}}
+\right),
+\]</span></p>
+<p>where:</p>
+<ul>
+<li><span class="math inline">\(\mathcal S\)</span> is the finite state set.</li>
+<li><span class="math inline">\(\mathcal A\)</span> is the complete finite action set, including the bookkeeping action when terminal states exist.</li>
+<li><span class="math inline">\(\{\mathcal A(s)\}_{s\in\mathcal S}\)</span> specifies the nonempty feasible action set <span class="math inline">\(\mathcal A(s)\subseteq\mathcal A\)</span> for every state.</li>
+<li><span class="math inline">\(\mathcal R\subset\mathbb R\)</span> is the finite set of possible reward values, including zero for the absorbing continuation when terminal states exist.</li>
+<li><span class="math inline">\(p\)</span> is the time-homogeneous joint transition–reward law: <span class="math inline">\(p(s',r\mid s,a)\)</span> assigns a probability to next state <span class="math inline">\(s'\)</span> and reward <span class="math inline">\(r\)</span> for each feasible current pair <span class="math inline">\((s,a)\)</span>.</li>
+<li><span class="math inline">\(\mathcal S_{\mathrm{term}}\subseteq\mathcal S\)</span> is the declared terminal set.</li>
+</ul>
+<p>This tuple describes the environment. A policy and discount factor are specified separately for control and value calculations. The feasible sets and joint law are the objects defined in <a href="finite_markov_decision_processes.html#sec-mdp-actions-feasible-sets" class="quarto-xref"><span>Section 13.1</span></a> and <a href="finite_markov_decision_processes.html#sec-mdp-rewards-joint-dynamics" class="quarto-xref"><span>Section 13.5</span></a>.</p>
 <section id="attaching-a-distribution-to-its-current-pair" class="level3" data-number="14.5.1">
 <h3 data-number="14.5.1" class="anchored" data-anchor-id="attaching-a-distribution-to-its-current-pair"><span class="header-section-number">14.5.1</span> Attaching a distribution to its current pair</h3>
 <p>Mathematically, one row associates a feasible pair <span class="math inline">\((s,a)\)</span> with the conditional distribution <span class="math inline">\(p(s',r\mid s,a)\)</span>. The current pair is fixed for that row; the next state and reward vary across its outcomes.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> StateActionDistribution</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  StateIndex state<span class="op">;</span></span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  ActionIndex action<span class="op">;</span></span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>  JointOutcomeDistribution outcome_distribution<span class="op">;</span></span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p><code>StateActionDistribution</code> is an aggregate with three fields. <code>state</code> identifies the current state, <code>action</code> identifies the decision, and <code>outcome_distribution</code> owns the possible joint outcomes. This is why an individual <code>OutcomeProbability</code> needs only a destination, reward, and probability: the enclosing row supplies the conditioning pair.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> StateActionDistribution</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  StateIndex state<span class="op">;</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  ActionIndex action<span class="op">;</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>  JointOutcomeDistribution outcome_distribution<span class="op">;</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>StateActionDistribution</code> has three fields: <code>state</code> stores the current-state index, <code>action</code> stores the action index, and <code>outcome_distribution</code> owns the possible joint outcomes. This is why an individual <code>OutcomeProbability</code> needs only a next-state index, reward, and probability: the enclosing row supplies the conditioning pair.</p>
 </section>
 <section id="task-actions-and-the-absorbing-extension" class="level3" data-number="14.5.2">
 <h3 data-number="14.5.2" class="anchored" data-anchor-id="task-actions-and-the-absorbing-extension"><span class="header-section-number">14.5.2</span> Task actions and the absorbing extension</h3>
+<p>Define the <strong>task-action set</strong> <span class="math inline">\(\mathcal A_{\mathrm{task}}\)</span> as the finite set of caller-declared action labels for task decisions, excluding bookkeeping after termination. Its size is <span class="math inline">\(m_{\mathrm{task}}:=|\mathcal A_{\mathrm{task}}|\)</span>.</p>
 <p>Let <span class="math inline">\(\mathcal S_{\mathrm{term}}\subseteq\mathcal S\)</span> be the declared terminal set. If it is nonempty, introduce one fresh action label <span class="math inline">\(a_\bot\notin\mathcal A_{\mathrm{task}}\)</span> for bookkeeping after termination. The symbol <span class="math inline">\(\bot\)</span> marks that artificial role. The complete action space is</p>
 <p><span class="math display">\[
 \mathcal A=
@@ -1132,146 +1143,178 @@ p(s_\dagger,0\mid s_\dagger,a_\bot)=1.
 </section>
 <section id="the-model-class" class="level3" data-number="14.5.3">
 <h3 data-number="14.5.3" class="anchored" data-anchor-id="the-model-class"><span class="header-section-number">14.5.3</span> The model class</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;optional&gt;</span></span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> FiniteMdp</span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="kw">private</span><span class="op">:</span></span>
-<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>  FiniteMdp<span class="op">(</span></span>
-<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">std::</span>size_t state_count<span class="op">,</span> <span class="bu">std::</span>size_t task_action_count<span class="op">,</span></span>
-<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">std::</span>vector<span class="op">&lt;</span>StateActionDistribution<span class="op">&gt;</span> rows<span class="op">,</span></span>
-<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>    <span class="bu">std::</span>vector<span class="op">&lt;</span>StateIndex<span class="op">&gt;</span> terminal_states<span class="op">);</span></span>
-<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>  <span class="bu">std::</span>size_t <span class="va">state_count_</span><span class="op">;</span></span>
-<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>  <span class="bu">std::</span>size_t <span class="va">task_action_count_</span><span class="op">;</span></span>
-<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>  <span class="bu">std::</span>vector<span class="op">&lt;</span>StateActionDistribution<span class="op">&gt;</span> <span class="va">rows_</span><span class="op">;</span></span>
-<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>  <span class="bu">std::</span>vector<span class="op">&lt;</span>StateIndex<span class="op">&gt;</span> <span class="va">terminal_states_</span><span class="op">;</span></span>
-<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span><span class="op">:</span></span>
-<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>  <span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> <span class="at">static</span> FiniteMdp from_rows<span class="op">(</span></span>
-<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>    <span class="bu">std::</span>size_t state_count<span class="op">,</span> <span class="bu">std::</span>size_t task_action_count<span class="op">,</span></span>
-<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a>    <span class="bu">std::</span>vector<span class="op">&lt;</span>StateActionDistribution<span class="op">&gt;</span> rows<span class="op">,</span></span>
-<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a>    <span class="bu">std::</span>vector<span class="op">&lt;</span>StateIndex<span class="op">&gt;</span> terminal_states <span class="op">=</span> <span class="op">{});</span></span>
-<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a>  <span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> <span class="bu">std::</span>size_t state_count<span class="op">()</span> <span class="at">const</span> <span class="kw">noexcept</span><span class="op">;</span></span>
-<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a>  <span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> <span class="bu">std::</span>size_t task_action_count<span class="op">()</span> <span class="at">const</span> <span class="kw">noexcept</span><span class="op">;</span></span>
-<span id="cb21-25"><a href="#cb21-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-26"><a href="#cb21-26" aria-hidden="true" tabindex="-1"></a>  <span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> <span class="bu">std::</span>size_t action_count<span class="op">()</span> <span class="at">const</span> <span class="kw">noexcept</span><span class="op">;</span></span>
-<span id="cb21-27"><a href="#cb21-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-28"><a href="#cb21-28" aria-hidden="true" tabindex="-1"></a>  <span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> <span class="bu">std::</span>optional<span class="op">&lt;</span>ActionIndex<span class="op">&gt;</span> bookkeeping_action<span class="op">()</span> <span class="at">const</span> <span class="kw">noexcept</span><span class="op">;</span></span>
-<span id="cb21-29"><a href="#cb21-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-30"><a href="#cb21-30" aria-hidden="true" tabindex="-1"></a>  <span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> <span class="bu">std::</span>span<span class="op">&lt;</span><span class="at">const</span> StateActionDistribution<span class="op">&gt;</span> rows<span class="op">()</span> <span class="at">const</span> <span class="kw">noexcept</span><span class="op">;</span></span>
-<span id="cb21-31"><a href="#cb21-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-32"><a href="#cb21-32" aria-hidden="true" tabindex="-1"></a>  <span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> <span class="at">const</span> JointOutcomeDistribution <span class="op">&amp;</span> outcome_distribution<span class="op">(</span></span>
-<span id="cb21-33"><a href="#cb21-33" aria-hidden="true" tabindex="-1"></a>    StateIndex state<span class="op">,</span> ActionIndex action<span class="op">)</span> <span class="at">const</span><span class="op">;</span></span>
-<span id="cb21-34"><a href="#cb21-34" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-35"><a href="#cb21-35" aria-hidden="true" tabindex="-1"></a>  <span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> <span class="dt">bool</span> is_terminal<span class="op">(</span>StateIndex state<span class="op">)</span> <span class="at">const</span><span class="op">;</span></span>
-<span id="cb21-36"><a href="#cb21-36" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;functional&gt;</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;optional&gt;</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> FiniteMdp</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="kw">private</span><span class="op">:</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>  FiniteMdp<span class="op">(</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">std::</span>size_t state_count<span class="op">,</span> <span class="bu">std::</span>size_t task_action_count<span class="op">,</span></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>    <span class="bu">std::</span>vector<span class="op">&lt;</span>StateActionDistribution<span class="op">&gt;</span> rows<span class="op">,</span></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>    <span class="bu">std::</span>vector<span class="op">&lt;</span>StateIndex<span class="op">&gt;</span> terminal_states<span class="op">);</span></span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>  <span class="bu">std::</span>size_t <span class="va">state_count_</span><span class="op">;</span></span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>  <span class="bu">std::</span>size_t <span class="va">task_action_count_</span><span class="op">;</span></span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>  <span class="bu">std::</span>vector<span class="op">&lt;</span>StateActionDistribution<span class="op">&gt;</span> <span class="va">rows_</span><span class="op">;</span></span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>  <span class="bu">std::</span>vector<span class="op">&lt;</span>StateIndex<span class="op">&gt;</span> <span class="va">terminal_states_</span><span class="op">;</span></span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span><span class="op">:</span></span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>  <span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> <span class="at">static</span> FiniteMdp from_rows<span class="op">(</span></span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>    <span class="bu">std::</span>size_t state_count<span class="op">,</span> <span class="bu">std::</span>size_t task_action_count<span class="op">,</span></span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>    <span class="bu">std::</span>vector<span class="op">&lt;</span>StateActionDistribution<span class="op">&gt;</span> rows<span class="op">,</span></span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a>    <span class="bu">std::</span>vector<span class="op">&lt;</span>StateIndex<span class="op">&gt;</span> terminal_states <span class="op">=</span> <span class="op">{});</span></span>
+<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a>  <span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> <span class="bu">std::</span>size_t state_count<span class="op">()</span> <span class="at">const</span> <span class="kw">noexcept</span><span class="op">;</span></span>
+<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a>  <span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> <span class="bu">std::</span>size_t task_action_count<span class="op">()</span> <span class="at">const</span> <span class="kw">noexcept</span><span class="op">;</span></span>
+<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-27"><a href="#cb20-27" aria-hidden="true" tabindex="-1"></a>  <span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> <span class="bu">std::</span>size_t action_count<span class="op">()</span> <span class="at">const</span> <span class="kw">noexcept</span><span class="op">;</span></span>
+<span id="cb20-28"><a href="#cb20-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-29"><a href="#cb20-29" aria-hidden="true" tabindex="-1"></a>  <span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> <span class="bu">std::</span>optional<span class="op">&lt;</span>ActionIndex<span class="op">&gt;</span> bookkeeping_action<span class="op">()</span> <span class="at">const</span> <span class="kw">noexcept</span><span class="op">;</span></span>
+<span id="cb20-30"><a href="#cb20-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-31"><a href="#cb20-31" aria-hidden="true" tabindex="-1"></a>  <span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> <span class="bu">std::</span>span<span class="op">&lt;</span><span class="at">const</span> StateActionDistribution<span class="op">&gt;</span> rows<span class="op">()</span> <span class="at">const</span> <span class="kw">noexcept</span><span class="op">;</span></span>
+<span id="cb20-32"><a href="#cb20-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-33"><a href="#cb20-33" aria-hidden="true" tabindex="-1"></a>  <span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span></span>
+<span id="cb20-34"><a href="#cb20-34" aria-hidden="true" tabindex="-1"></a>  <span class="bu">std::</span>optional<span class="op">&lt;</span><span class="bu">std::</span>reference_wrapper<span class="op">&lt;</span><span class="at">const</span> JointOutcomeDistribution<span class="op">&gt;&gt;</span></span>
+<span id="cb20-35"><a href="#cb20-35" aria-hidden="true" tabindex="-1"></a>  find_outcome_distribution<span class="op">(</span>StateIndex state<span class="op">,</span> ActionIndex action<span class="op">)</span> <span class="at">const</span><span class="op">;</span></span>
+<span id="cb20-36"><a href="#cb20-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-37"><a href="#cb20-37" aria-hidden="true" tabindex="-1"></a>  <span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> <span class="dt">bool</span> is_terminal<span class="op">(</span>StateIndex state<span class="op">)</span> <span class="at">const</span><span class="op">;</span></span>
+<span id="cb20-38"><a href="#cb20-38" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><code>FiniteMdp</code> owns four pieces of data. <code>state_count_</code> represents <span class="math inline">\(n\)</span>, <code>task_action_count_</code> represents <span class="math inline">\(m_{\mathrm{task}}\)</span>, <code>rows_</code> stores the feasible state–action distributions, and <code>terminal_states_</code> stores terminal indices. No independent complete-action count is stored: it can be derived from the task-action count and whether any terminals exist.</p>
-<p>The public factory <code>from_rows</code> receives those four inputs. The final parameter’s default <code>{}</code> supplies an empty terminal vector when the caller omits it. The count queries return scalar sizes; <code>rows()</code> exposes a read-only span; <code>outcome_distribution</code> returns a const reference to one stored distribution; and <code>is_terminal</code> returns a Boolean membership answer. The type <code>std::optional&lt;ActionIndex&gt;</code> allows <code>bookkeeping_action()</code> to return an action index or no value.</p>
-<p>The private constructor is the point where accepted local data becomes owned model storage. The factory accepts only rows originating at nonterminal states and generates outgoing terminal rows itself. It checks that supplied distributions use the same destination-domain size and that each current state–action key is unique. Thus the model establishes relationships among already-checked distributions rather than repeating every probability calculation.</p>
+<p>The public factory <code>from_rows</code> receives those four inputs. The final parameter’s default <code>{}</code> supplies an empty terminal vector when the caller omits it. The count queries return scalar sizes; <code>rows()</code> exposes a read-only span; <code>find_outcome_distribution</code> returns an optional read-only reference wrapper for one stored distribution; and <code>is_terminal</code> returns a Boolean membership answer. The type <code>std::optional&lt;ActionIndex&gt;</code> allows <code>bookkeeping_action()</code> to return an action index or no value. The distribution lookup instead contains a wrapper that refers to model-owned data; its access and lifetime rules are explained in <a href="#sec-finite-mdp-impl-lookup" class="quarto-xref"><span>Section 14.6</span></a>.</p>
+<p>The private constructor is the point where accepted local data becomes owned model storage. <em>The factory accepts only rows originating at nonterminal states and generates outgoing terminal rows itself.</em> It checks that supplied distributions use the same state-space size and that each current state–action key is unique. Thus the model establishes relationships among already-checked distributions rather than repeating every probability calculation.</p>
 </section>
-<section id="generating-terminal-rows" class="level3" data-number="14.5.4">
-<h3 data-number="14.5.4" class="anchored" data-anchor-id="generating-terminal-rows"><span class="header-section-number">14.5.4</span> Generating terminal rows</h3>
-<p>After validating the terminal indices, the factory puts them in increasing order:</p>
+<section id="completing-and-ordering-the-model-rows" class="level3" data-number="14.5.4">
+<h3 data-number="14.5.4" class="anchored" data-anchor-id="completing-and-ordering-the-model-rows"><span class="header-section-number">14.5.4</span> Completing and ordering the model rows</h3>
+<p>Construction adds the absorbing continuation to the supplied nonterminal rows, then orders the complete collection for lookup. The stages are:</p>
+<pre class="text"><code>1. Check the state count and terminal indices; sort the terminal indices.
+2. Check the task-action count and supplied nonterminal rows.
+3. Generate one zero-reward self-transition per terminal state.
+4. Check that every state has a feasible row.
+5. Sort the completed rows by current-state index, then action index.
+6. Return the model owning the rows and terminal indices.
+7. If any check fails, raise an exception without returning a model.</code></pre>
+<p>The following production excerpt combines terminal-row generation and final row ordering inside the factory signature. Validation branches, per-state feasible-row counting, and production comments are omitted; the comments below are teaching annotations. This is not a complete replacement function.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;algorithm&gt;</span></span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="bu">std::</span>ranges::sort<span class="op">(</span>terminal_states<span class="op">);</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>This factory excerpt uses the comparison already defined for <code>StateIndex</code>. Sorting changes the vector’s order, not the declared terminal set. Thus different input orders lead to the same stored terminal order.</p>
-<p>Once the supplied rows and terminal declarations have been checked, the following factory excerpt appends one absorbing row per terminal state:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> <span class="op">(</span><span class="at">const</span> StateIndex state <span class="op">:</span> terminal_states<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  rows<span class="op">.</span>push_back<span class="op">(</span>StateActionDistribution<span class="op">{</span></span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    state<span class="op">,</span></span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    ActionIndex<span class="op">{</span>task_action_count<span class="op">},</span></span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    JointOutcomeDistribution<span class="op">::</span>from_outcomes<span class="op">(</span></span>
-<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>      state_count<span class="op">,</span> <span class="op">{{</span>state<span class="op">,</span> <span class="fl">0.0</span><span class="op">,</span> <span class="fl">1.0</span><span class="op">}},</span> <span class="fl">1.0e-12</span><span class="op">),</span></span>
-<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>  <span class="op">});</span></span>
-<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>The range-based loop visits the terminal vector. <code>rows.push_back</code> appends a complete row to the row vector; appending there does not disturb traversal of the separate terminal vector. The generated row’s current state and sole destination are the same <code>state</code>, while its reward and probability are exactly zero and one.</p>
-<p>The expression <code>ActionIndex{task_action_count}</code> assigns the bookkeeping label the first index after all task-action indices. Every terminal uses that same action index. The supplied task-action range is the half-open interval <code>[0, task_action_count)</code>: indices are nonnegative and strictly less than the count. If the count is zero, this range is empty. The generated index is not a caller-supplied task action.</p>
-<p>After completion, every state needs at least one feasible row. A terminal has its generated row; a nonterminal needs a supplied row. Zero task actions are consequently possible only when all states are terminal. Before generating an action, construction also checks that increasing the action count by one will not wrap around the unsigned integer range.</p>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>FiniteMdp FiniteMdp<span class="op">::</span>from_rows<span class="op">(</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>  <span class="bu">std::</span>size_t state_count<span class="op">,</span> <span class="bu">std::</span>size_t task_action_count<span class="op">,</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>  <span class="bu">std::</span>vector<span class="op">&lt;</span>StateActionDistribution<span class="op">&gt;</span> rows<span class="op">,</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>  <span class="bu">std::</span>vector<span class="op">&lt;</span>StateIndex<span class="op">&gt;</span> terminal_states<span class="op">)</span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Omitted: validate the state count and terminal indices.</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>  <span class="bu">std::</span>ranges::sort<span class="op">(</span>terminal_states<span class="op">);</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Omitted: validate the task-action count and supplied nonterminal rows.</span></span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Generate the absorbing continuations.</span></span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span><span class="at">const</span> StateIndex state <span class="op">:</span> terminal_states<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>    rows<span class="op">.</span>push_back<span class="op">(</span>StateActionDistribution<span class="op">{</span></span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>      state<span class="op">,</span></span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>      ActionIndex<span class="op">{</span>task_action_count<span class="op">},</span></span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>      JointOutcomeDistribution<span class="op">::</span>from_outcomes<span class="op">(</span></span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a>        state_count<span class="op">,</span> <span class="op">{{</span>state<span class="op">,</span> <span class="fl">0.0</span><span class="op">,</span> <span class="fl">1.0</span><span class="op">}},</span> <span class="fl">1.0e-12</span><span class="op">),</span></span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a>    <span class="op">});</span></span>
+<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb22-22"><a href="#cb22-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-23"><a href="#cb22-23" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Omitted: reject the model if any state has no feasible row.</span></span>
+<span id="cb22-24"><a href="#cb22-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-25"><a href="#cb22-25" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Order the completed rows for lookup.</span></span>
+<span id="cb22-26"><a href="#cb22-26" aria-hidden="true" tabindex="-1"></a>  <span class="bu">std::</span>ranges::sort<span class="op">(</span></span>
+<span id="cb22-27"><a href="#cb22-27" aria-hidden="true" tabindex="-1"></a>    rows<span class="op">,</span> <span class="op">[](</span></span>
+<span id="cb22-28"><a href="#cb22-28" aria-hidden="true" tabindex="-1"></a>            <span class="at">const</span> StateActionDistribution <span class="op">&amp;</span> left<span class="op">,</span></span>
+<span id="cb22-29"><a href="#cb22-29" aria-hidden="true" tabindex="-1"></a>            <span class="at">const</span> StateActionDistribution <span class="op">&amp;</span> right<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb22-30"><a href="#cb22-30" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> <span class="op">(</span>left<span class="op">.</span>state <span class="op">!=</span> right<span class="op">.</span>state<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb22-31"><a href="#cb22-31" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> left<span class="op">.</span>state <span class="op">&lt;</span> right<span class="op">.</span>state<span class="op">;</span></span>
+<span id="cb22-32"><a href="#cb22-32" aria-hidden="true" tabindex="-1"></a>      <span class="op">}</span></span>
+<span id="cb22-33"><a href="#cb22-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-34"><a href="#cb22-34" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> left<span class="op">.</span>action <span class="op">&lt;</span> right<span class="op">.</span>action<span class="op">;</span></span>
+<span id="cb22-35"><a href="#cb22-35" aria-hidden="true" tabindex="-1"></a>    <span class="op">});</span></span>
+<span id="cb22-36"><a href="#cb22-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-37"><a href="#cb22-37" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> FiniteMdp<span class="op">{</span></span>
+<span id="cb22-38"><a href="#cb22-38" aria-hidden="true" tabindex="-1"></a>    state_count<span class="op">,</span></span>
+<span id="cb22-39"><a href="#cb22-39" aria-hidden="true" tabindex="-1"></a>    task_action_count<span class="op">,</span></span>
+<span id="cb22-40"><a href="#cb22-40" aria-hidden="true" tabindex="-1"></a>    <span class="bu">std::</span>move<span class="op">(</span>rows<span class="op">),</span></span>
+<span id="cb22-41"><a href="#cb22-41" aria-hidden="true" tabindex="-1"></a>    <span class="bu">std::</span>move<span class="op">(</span>terminal_states<span class="op">),</span></span>
+<span id="cb22-42"><a href="#cb22-42" aria-hidden="true" tabindex="-1"></a>  <span class="op">};</span></span>
+<span id="cb22-43"><a href="#cb22-43" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
-<section id="establishing-the-row-order" class="level3" data-number="14.5.5">
-<h3 data-number="14.5.5" class="anchored" data-anchor-id="establishing-the-row-order"><span class="header-section-number">14.5.5</span> Establishing the row order</h3>
-<p>The model stores rows in increasing current-state order, with increasing action order within each state. This final factory excerpt orders the completed rows and transfers them to the model:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="bu">std::</span>ranges::sort<span class="op">(</span></span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  rows<span class="op">,</span> <span class="op">[](</span></span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>          <span class="at">const</span> StateActionDistribution <span class="op">&amp;</span> left<span class="op">,</span></span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>          <span class="at">const</span> StateActionDistribution <span class="op">&amp;</span> right<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>left<span class="op">.</span>state <span class="op">!=</span> right<span class="op">.</span>state<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> left<span class="op">.</span>state <span class="op">&lt;</span> right<span class="op">.</span>state<span class="op">;</span></span>
-<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> left<span class="op">.</span>action <span class="op">&lt;</span> right<span class="op">.</span>action<span class="op">;</span></span>
-<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>  <span class="op">});</span></span>
-<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> FiniteMdp<span class="op">{</span></span>
-<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>  state_count<span class="op">,</span></span>
-<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>  task_action_count<span class="op">,</span></span>
-<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a>  <span class="bu">std::</span>move<span class="op">(</span>rows<span class="op">),</span></span>
-<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a>  <span class="bu">std::</span>move<span class="op">(</span>terminal_states<span class="op">),</span></span>
-<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>The comparator supplied to <code>std::ranges::sort</code> orders rows by state first, then by action when the states match. This lexicographic ordering puts all rows for a state together and orders the actions within that group.</p>
+<section id="generating-terminal-rows" class="level3" data-number="14.5.5">
+<h3 data-number="14.5.5" class="anchored" data-anchor-id="generating-terminal-rows"><span class="header-section-number">14.5.5</span> Generating terminal rows</h3>
+<p>The initial <code>std::ranges::sort(terminal_states)</code> uses the comparison already defined for <code>StateIndex</code>. Sorting changes the vector’s order, not the declared terminal set. Thus different input orders lead to the same stored terminal order.</p>
+<p>The range-based loop visits the terminal vector. <code>rows.push_back</code> appends a complete row to the row vector; appending there does not disturb traversal of the separate terminal vector. The generated row’s current-state and next-state indices both equal <code>state</code>, while its reward and probability are exactly zero and one.</p>
+<p>The expression <code>ActionIndex{task_action_count}</code> assigns the bookkeeping label the first index after all task-action indices. Every terminal uses that same action index. The supplied task-action indices are integers from zero through <code>task_action_count - 1</code>. If <code>task_action_count</code> is zero, there are no task-action indices. The generated index is not a caller-supplied task action.</p>
+<p>After completion, every state needs at least one feasible row. A terminal has its generated row; a nonterminal needs a supplied row. Zero task actions are consequently possible only when all states are terminal.</p>
+<p>The action count uses <code>std::size_t</code>, an unsigned integer type with a largest representable value. Adding one to that largest representable value produces zero under unsigned integer arithmetic; this is called <strong>wraparound</strong>. The model would then incorrectly report zero actions instead of the task actions plus the bookkeeping action. To prevent this, the factory rejects construction when terminal states are declared and <code>task_action_count</code> already equals that largest value, before generating the bookkeeping action.</p>
+</section>
+<section id="establishing-the-row-order" class="level3" data-number="14.5.6">
+<h3 data-number="14.5.6" class="anchored" data-anchor-id="establishing-the-row-order"><span class="header-section-number">14.5.6</span> Establishing the row order</h3>
+<p>The second sorting operation, <code>std::ranges::sort(rows, ...)</code>, runs after terminal completion and the feasible-row check. Its comparator orders rows by current-state index first, then by action index when the states match. This lexicographic ordering puts all rows for a state together and orders the actions within that group.</p>
 <p>Sorting happens before the final <code>return</code> transfers the local vectors to the model. The receiving constructor stores them as follows:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>FiniteMdp<span class="op">::</span>FiniteMdp<span class="op">(</span></span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="bu">std::</span>size_t state_count<span class="op">,</span> <span class="bu">std::</span>size_t task_action_count<span class="op">,</span></span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="bu">std::</span>vector<span class="op">&lt;</span>StateActionDistribution<span class="op">&gt;</span> rows<span class="op">,</span></span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  <span class="bu">std::</span>vector<span class="op">&lt;</span>StateIndex<span class="op">&gt;</span> terminal_states<span class="op">)</span></span>
-<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a><span class="op">:</span> <span class="va">state_count_</span><span class="op">{</span>state_count<span class="op">},</span></span>
-<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>  <span class="va">task_action_count_</span><span class="op">{</span>task_action_count<span class="op">},</span></span>
-<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>  <span class="va">rows_</span><span class="op">{</span><span class="bu">std::</span>move<span class="op">(</span>rows<span class="op">)},</span></span>
-<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>  <span class="va">terminal_states_</span><span class="op">{</span><span class="bu">std::</span>move<span class="op">(</span>terminal_states<span class="op">)}</span></span>
-<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
-<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>The initialiser list stores the two counts and transfers ownership of the two vectors. The finished model does not borrow those local vectors. A moved-from model should be reconstructed or replaced before being used as a validated mathematical model, since moving its vectors does not preserve its original owned rows.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>FiniteMdp<span class="op">::</span>FiniteMdp<span class="op">(</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="bu">std::</span>size_t state_count<span class="op">,</span> <span class="bu">std::</span>size_t task_action_count<span class="op">,</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="bu">std::</span>vector<span class="op">&lt;</span>StateActionDistribution<span class="op">&gt;</span> rows<span class="op">,</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  <span class="bu">std::</span>vector<span class="op">&lt;</span>StateIndex<span class="op">&gt;</span> terminal_states<span class="op">)</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="op">:</span> <span class="va">state_count_</span><span class="op">{</span>state_count<span class="op">},</span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>  <span class="va">task_action_count_</span><span class="op">{</span>task_action_count<span class="op">},</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>  <span class="va">rows_</span><span class="op">{</span><span class="bu">std::</span>move<span class="op">(</span>rows<span class="op">)},</span></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>  <span class="va">terminal_states_</span><span class="op">{</span><span class="bu">std::</span>move<span class="op">(</span>terminal_states<span class="op">)}</span></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The initialiser list stores the two counts and transfers ownership of the two vectors. The finished model does not borrow those local vectors.</p>
 </section>
-<section id="complete-action-and-bookkeeping-queries" class="level3" data-number="14.5.6">
-<h3 data-number="14.5.6" class="anchored" data-anchor-id="complete-action-and-bookkeeping-queries"><span class="header-section-number">14.5.6</span> Complete-action and bookkeeping queries</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="bu">std::</span>size_t FiniteMdp<span class="op">::</span>action_count<span class="op">()</span> <span class="at">const</span> <span class="kw">noexcept</span></span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="va">task_action_count_</span> <span class="op">+</span> <span class="op">(</span><span class="va">terminal_states_</span><span class="op">.</span>empty<span class="op">()</span> <span class="op">?</span> <span class="dv">0</span><span class="bu">U</span> <span class="op">:</span> <span class="dv">1</span><span class="bu">U</span><span class="op">);</span></span>
-<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
-<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a><span class="bu">std::</span>optional<span class="op">&lt;</span>ActionIndex<span class="op">&gt;</span> FiniteMdp<span class="op">::</span>bookkeeping_action<span class="op">()</span> <span class="at">const</span> <span class="kw">noexcept</span></span>
-<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
-<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(</span><span class="va">terminal_states_</span><span class="op">.</span>empty<span class="op">())</span> <span class="op">{</span></span>
-<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">std::</span>nullopt<span class="op">;</span></span>
-<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
-<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> ActionIndex<span class="op">{</span><span class="va">task_action_count_</span><span class="op">};</span></span>
-<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="complete-action-and-bookkeeping-queries" class="level3" data-number="14.5.7">
+<h3 data-number="14.5.7" class="anchored" data-anchor-id="complete-action-and-bookkeeping-queries"><span class="header-section-number">14.5.7</span> Complete-action and bookkeeping queries</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="bu">std::</span>size_t FiniteMdp<span class="op">::</span>action_count<span class="op">()</span> <span class="at">const</span> <span class="kw">noexcept</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="va">task_action_count_</span> <span class="op">+</span> <span class="op">(</span><span class="va">terminal_states_</span><span class="op">.</span>empty<span class="op">()</span> <span class="op">?</span> <span class="dv">0</span><span class="bu">U</span> <span class="op">:</span> <span class="dv">1</span><span class="bu">U</span><span class="op">);</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a><span class="bu">std::</span>optional<span class="op">&lt;</span>ActionIndex<span class="op">&gt;</span> FiniteMdp<span class="op">::</span>bookkeeping_action<span class="op">()</span> <span class="at">const</span> <span class="kw">noexcept</span></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(</span><span class="va">terminal_states_</span><span class="op">.</span>empty<span class="op">())</span> <span class="op">{</span></span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">std::</span>nullopt<span class="op">;</span></span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> ActionIndex<span class="op">{</span><span class="va">task_action_count_</span><span class="op">};</span></span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><code>action_count()</code> adds zero for an empty terminal set and one otherwise. This implements the piecewise formula for <span class="math inline">\(m\)</span> without changing the stored task-action count.</p>
 <p>In the optional-returning query, <code>std::nullopt</code> represents absence of a bookkeeping action. Otherwise, returning <code>ActionIndex{task_action_count_}</code> supplies the shared generated index. Presence is derived from the terminal declarations, so there is no extra stored copy of the bookkeeping index.</p>
 </section>
 </section>
 <section id="sec-finite-mdp-impl-lookup" class="level2" data-number="14.6">
 <h2 data-number="14.6" class="anchored" data-anchor-id="sec-finite-mdp-impl-lookup"><span class="header-section-number">14.6</span> Finding a distribution and checking terminal membership</h2>
-<p>A distribution query receives a current state and action and must select exactly their stored row. Terminal membership receives a state and must decide whether it belongs to the declared terminal set. The sorted storage supports both operations.</p>
+<p>A distribution query receives <span class="math inline">\(s\in\mathcal S\)</span> and <span class="math inline">\(a\in\mathcal A\)</span>. If <span class="math inline">\(a\in\mathcal A(s)\)</span>, it returns access to the stored joint distribution <span class="math inline">\(p(s',r\mid s,a)\)</span>; otherwise, it reports absence without inventing dynamics. Indices outside the state or global action domain are errors, not ordinary absence. Terminal membership receives a state and decides whether it belongs to the declared terminal set. The sorted storage supports both operations.</p>
 <section id="searching-for-a-stateaction-row" class="level3" data-number="14.6.1">
 <h3 data-number="14.6.1" class="anchored" data-anchor-id="searching-for-a-stateaction-row"><span class="header-section-number">14.6.1</span> Searching for a state–action row</h3>
-<p>After the query indices have been checked against the model’s domains, the distribution lookup uses the following core:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="bu">std::</span>pair<span class="op">&lt;</span>StateIndex<span class="op">,</span> ActionIndex<span class="op">&gt;</span> target<span class="op">{</span>state<span class="op">,</span> action<span class="op">};</span></span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="kw">auto</span> row <span class="op">=</span> <span class="bu">std::</span>lower_bound<span class="op">(</span></span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>  <span class="va">rows_</span><span class="op">.</span>begin<span class="op">(),</span> <span class="va">rows_</span><span class="op">.</span>end<span class="op">(),</span> target<span class="op">,</span></span>
-<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">[](</span></span>
-<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> StateActionDistribution <span class="op">&amp;</span> candidate<span class="op">,</span></span>
-<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> <span class="bu">std::</span>pair<span class="op">&lt;</span>StateIndex<span class="op">,</span> ActionIndex<span class="op">&gt;</span> <span class="op">&amp;</span> key<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>candidate<span class="op">.</span>state <span class="op">!=</span> key<span class="op">.</span>first<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> candidate<span class="op">.</span>state <span class="op">&lt;</span> key<span class="op">.</span>first<span class="op">;</span></span>
-<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> candidate<span class="op">.</span>action <span class="op">&lt;</span> key<span class="op">.</span>second<span class="op">;</span></span>
-<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a>  <span class="op">});</span></span>
-<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="op">(</span>row <span class="op">==</span> <span class="va">rows_</span><span class="op">.</span>end<span class="op">()</span> <span class="op">||</span> row<span class="op">-&gt;</span>state <span class="op">!=</span> state <span class="op">||</span> row<span class="op">-&gt;</span>action <span class="op">!=</span> action<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a>  <span class="cf">throw</span> FiniteMdpException<span class="op">{</span></span>
-<span id="cb27-17"><a href="#cb27-17" aria-hidden="true" tabindex="-1"></a>    FiniteMdpError<span class="op">::</span>infeasible_state_action<span class="op">,</span></span>
-<span id="cb27-18"><a href="#cb27-18" aria-hidden="true" tabindex="-1"></a>    <span class="st">"The queried action is not feasible in the current state."</span><span class="op">};</span></span>
-<span id="cb27-19"><a href="#cb27-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
-<span id="cb27-20"><a href="#cb27-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-21"><a href="#cb27-21" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> row<span class="op">-&gt;</span>outcome_distribution<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The following production excerpt includes the function signature and lookup logic. It omits the initial state- and action-index range checks and the production comments; the teaching comment marks where those checks occur. This excerpt is not a complete replacement function.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="bu">std::</span>optional<span class="op">&lt;</span><span class="bu">std::</span>reference_wrapper<span class="op">&lt;</span><span class="at">const</span> JointOutcomeDistribution<span class="op">&gt;&gt;</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>FiniteMdp<span class="op">::</span>find_outcome_distribution<span class="op">(</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> StateIndex state<span class="op">,</span> <span class="at">const</span> ActionIndex action<span class="op">)</span> <span class="at">const</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Omitted: reject state or action indices outside the model's domains.</span></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> <span class="bu">std::</span>pair<span class="op">&lt;</span>StateIndex<span class="op">,</span> ActionIndex<span class="op">&gt;</span> target<span class="op">{</span>state<span class="op">,</span> action<span class="op">};</span></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> <span class="kw">auto</span> row <span class="op">=</span> <span class="bu">std::</span>lower_bound<span class="op">(</span></span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>    <span class="va">rows_</span><span class="op">.</span>begin<span class="op">(),</span> <span class="va">rows_</span><span class="op">.</span>end<span class="op">(),</span> target<span class="op">,</span></span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">[](</span></span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>      <span class="at">const</span> StateActionDistribution <span class="op">&amp;</span> candidate<span class="op">,</span></span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>      <span class="at">const</span> <span class="bu">std::</span>pair<span class="op">&lt;</span>StateIndex<span class="op">,</span> ActionIndex<span class="op">&gt;</span> <span class="op">&amp;</span> key<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> <span class="op">(</span>candidate<span class="op">.</span>state <span class="op">!=</span> key<span class="op">.</span>first<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> candidate<span class="op">.</span>state <span class="op">&lt;</span> key<span class="op">.</span>first<span class="op">;</span></span>
+<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a>      <span class="op">}</span></span>
+<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> candidate<span class="op">.</span>action <span class="op">&lt;</span> key<span class="op">.</span>second<span class="op">;</span></span>
+<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a>    <span class="op">});</span></span>
+<span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-20"><a href="#cb25-20" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(</span>row <span class="op">==</span> <span class="va">rows_</span><span class="op">.</span>end<span class="op">()</span> <span class="op">||</span> row<span class="op">-&gt;</span>state <span class="op">!=</span> state <span class="op">||</span> row<span class="op">-&gt;</span>action <span class="op">!=</span> action<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb25-21"><a href="#cb25-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">std::</span>nullopt<span class="op">;</span></span>
+<span id="cb25-22"><a href="#cb25-22" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb25-23"><a href="#cb25-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-24"><a href="#cb25-24" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="bu">std::</span>cref<span class="op">(</span>row<span class="op">-&gt;</span>outcome_distribution<span class="op">);</span></span>
+<span id="cb25-25"><a href="#cb25-25" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>std::optional&lt;T&gt;</code> contains a value of type <code>T</code> or is empty; <code>std::nullopt</code> represents the empty case. Here the contained value is a <code>std::reference_wrapper&lt;const JointOutcomeDistribution&gt;</code>: a small object that refers to an existing distribution without copying it or allowing modification through the wrapper. <code>std::cref(row-&gt;outcome_distribution)</code> creates that read-only wrapper for the matching row. The function therefore returns either borrowed access to the exact distribution or an empty optional. The next subsection explains how to access the result and keep the borrowed reference valid.</p>
 <p><code>target</code> holds the requested state and action as one pair. <code>std::lower_bound</code> receives four arguments: the beginning of the range, the excluded end of the range, the requested value, and the comparison operation. In this call:</p>
 <ul>
 <li><code>rows_.begin()</code> identifies the first row.</li>
@@ -1292,29 +1335,79 @@ p(s_\dagger,0\mid s_\dagger,a_\bot)=1.
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>This trace shows why the search result still needs an equality check. For the sorted keys <span class="math inline">\((0,0),(0,2),(1,0)\)</span>, one search trace for <span class="math inline">\((0,1)\)</span> is:</p>
+<p>This trace shows why the search result still needs an equality check. The target is <span class="math inline">\((0,1)\)</span>: current-state index <span class="math inline">\(0\)</span> and action index <span class="math inline">\(1\)</span>. We want the stored outcome distribution for that exact pair. The stored rows have these keys:</p>
+<pre class="text"><code>Row index:       0        1        2
+Stored key:    (0,0)    (0,2)    (1,0)
+
+Target:        (0,1) — not stored</code></pre>
+<p><code>lower_bound</code> finds the <strong>first key that is not smaller than the target</strong>, rather than guaranteeing an exact match. One search trace is:</p>
 <ol type="1">
-<li>Examine the middle key <span class="math inline">\((0,2)\)</span>. The states match, but <span class="math inline">\(2&lt;1\)</span> is false. The first false position is this candidate or lies to its left.</li>
-<li>Examine <span class="math inline">\((0,0)\)</span> in the remaining left range. The action comparison <span class="math inline">\(0&lt;1\)</span> is true, so the desired boundary lies to its right.</li>
-<li>Return the position of <span class="math inline">\((0,2)\)</span>.</li>
+<li><strong>Compare the middle key <span class="math inline">\((0,2)\)</span> with <span class="math inline">\((0,1)\)</span>.</strong> Their state indices match, so compare actions: <span class="math inline">\(2&lt;1\)</span> is false. This row could be the first key that is not smaller, but an earlier row might also qualify. Search left.</li>
+<li><strong>Compare <span class="math inline">\((0,0)\)</span> with <span class="math inline">\((0,1)\)</span>.</strong> Their state indices match, and <span class="math inline">\(0&lt;1\)</span> is true. This key is smaller than the target, so discard it and search to its right.</li>
+<li><strong>The search ends at <span class="math inline">\((0,2)\)</span>.</strong> It is the first key that is not smaller than <span class="math inline">\((0,1)\)</span>.</li>
 </ol>
-<p>The candidate is greater than the requested key, not equal to it. The explicit equality check after the search therefore rejects the pair. Requesting <span class="math inline">\((0,2)\)</span> produces the same candidate and passes the check; requesting <span class="math inline">\((1,2)\)</span> reaches the end.</p>
+<p>The final equality check then asks: <strong>is <span class="math inline">\((0,2)\)</span> exactly <span class="math inline">\((0,1)\)</span>?</strong> No—the action indices differ. Therefore, the requested state–action pair is absent, and the function returns <code>std::nullopt</code>. Both indices are valid; only their combination is infeasible.</p>
 </div>
 </div>
-<p>The <code>||</code> operator stops evaluating as soon as one operand is true. If <code>row == rows_.end()</code>, neither member access is evaluated, so the code never dereferences the end iterator. Otherwise, checking both state and action establishes an exact match. The final <code>return</code> borrows the selected distribution through the const-reference return type already shown in the class declaration. The model and its row storage must remain valid while the reference is used.</p>
+<p>The <code>||</code> operator stops evaluating as soon as one operand is true. If <code>row == rows_.end()</code>, neither member access is evaluated, so the code never dereferences the end iterator. Otherwise, checking both state and action establishes an exact match. A failed match returns an empty optional; an exact match returns a wrapper referring to the selected distribution.</p>
 </section>
-<section id="reading-the-terminal-declaration" class="level3" data-number="14.6.2">
-<h3 data-number="14.6.2" class="anchored" data-anchor-id="reading-the-terminal-declaration"><span class="header-section-number">14.6.2</span> Reading the terminal declaration</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="dt">bool</span> FiniteMdp<span class="op">::</span>is_terminal<span class="op">(</span>StateIndex state<span class="op">)</span> <span class="at">const</span></span>
-<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
-<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(</span>state<span class="op">.</span>value<span class="op">()</span> <span class="op">&gt;=</span> <span class="va">state_count_</span><span class="op">)</span> <span class="op">{</span></span>
-<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">throw</span> FiniteMdpException<span class="op">{</span></span>
-<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>      FiniteMdpError<span class="op">::</span>invalid_current_state<span class="op">,</span></span>
-<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>      <span class="st">"The query contains an invalid state index."</span><span class="op">};</span></span>
-<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<section id="accessing-an-optional-borrowed-distribution" class="level3" data-number="14.6.2">
+<h3 data-number="14.6.2" class="anchored" data-anchor-id="accessing-an-optional-borrowed-distribution"><span class="header-section-number">14.6.2</span> Accessing an optional borrowed distribution</h3>
+<p>The following access pattern assumes a previously constructed model and current-state and action indices within its domains:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="kw">auto</span> result <span class="op">=</span> mdp<span class="op">.</span>find_outcome_distribution<span class="op">(</span>current<span class="op">,</span> action<span class="op">);</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="op">(</span>result<span class="op">.</span>has_value<span class="op">())</span> <span class="op">{</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> JointOutcomeDistribution <span class="op">&amp;</span> selected <span class="op">=</span> result<span class="op">-&gt;</span>get<span class="op">();</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Alternative spellings for the same borrowed access:</span></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> JointOutcomeDistribution <span class="op">&amp;</span> also_selected <span class="op">=</span> <span class="op">(*</span>result<span class="op">).</span>get<span class="op">();</span></span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> JointOutcomeDistribution <span class="op">&amp;</span> checked_selected <span class="op">=</span> result<span class="op">.</span>value<span class="op">().</span>get<span class="op">();</span></span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The return type combines two standard-library objects:</p>
+<ul>
+<li><code>std::optional&lt;T&gt;</code> contains a value of type <code>T</code> or is empty. <code>std::nullopt</code> supplies the empty case. <code>has_value()</code> checks presence; <code>.value()</code> accesses the contained value and throws <code>std::bad_optional_access</code> if empty. Dereferencing with <code>*</code> or accessing a member with <code>-&gt;</code> requires a nonempty optional.</li>
+<li><code>std::reference_wrapper&lt;T&gt;</code> is a copyable object that refers to an existing <code>T</code>. Its <code>.get()</code> operation returns that object’s reference. Copying the wrapper does not copy the referenced object or extend its lifetime.</li>
+<li><code>std::cref(object)</code> creates a read-only reference wrapper. Here it refers to the stored <code>JointOutcomeDistribution</code>, and the returned optional contains that wrapper without copying the distribution. <code>&lt;functional&gt;</code> declares the wrapper and <code>std::cref</code>; <code>&lt;optional&gt;</code> declares the optional type and <code>std::nullopt</code>.</li>
+</ul>
+<p>C++20 does not allow an optional to contain a reference directly. The wrapper supplies an object that the optional can contain while still borrowing the distribution. The model’s stored distribution must remain alive and its reference valid throughout use; destroying or replacing the owning storage invalidates the borrowed access.</p>
+<div class="callout callout-style-simple callout-note no-icon callout-titled" title="Example: Reading a distribution when present">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Example: Reading a distribution when present
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This one-state model has one feasible action with a certain reward of two:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="kw">auto</span> distribution <span class="op">=</span> JointOutcomeDistribution<span class="op">::</span>from_outcomes<span class="op">(</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  <span class="dv">1</span><span class="bu">U</span><span class="op">,</span> <span class="op">{{</span>StateIndex<span class="op">{</span><span class="dv">0</span><span class="op">},</span> <span class="fl">2.0</span><span class="op">,</span> <span class="fl">1.0</span><span class="op">}},</span> <span class="fl">1.0e-12</span><span class="op">);</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="kw">auto</span> mdp <span class="op">=</span> FiniteMdp<span class="op">::</span>from_rows<span class="op">(</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>  <span class="dv">1</span><span class="bu">U</span><span class="op">,</span> <span class="dv">1</span><span class="bu">U</span><span class="op">,</span> <span class="op">{{</span>StateIndex<span class="op">{</span><span class="dv">0</span><span class="op">},</span> ActionIndex<span class="op">{</span><span class="dv">0</span><span class="op">},</span> distribution<span class="op">}});</span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="kw">auto</span> result <span class="op">=</span></span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>  mdp<span class="op">.</span>find_outcome_distribution<span class="op">(</span>StateIndex<span class="op">{</span><span class="dv">0</span><span class="op">},</span> ActionIndex<span class="op">{</span><span class="dv">0</span><span class="op">});</span></span>
 <span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="bu">std::</span>ranges::binary_search<span class="op">(</span><span class="va">terminal_states_</span><span class="op">,</span> state<span class="op">);</span></span>
-<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="op">(</span>result<span class="op">.</span>has_value<span class="op">())</span> <span class="op">{</span></span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> <span class="dt">double</span> reward <span class="op">=</span> result<span class="op">-&gt;</span>get<span class="op">().</span>expected_reward<span class="op">();</span></span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>result</code> is nonempty because the pair was supplied. In <code>result-&gt;get()</code>, <code>-&gt;</code> accesses the wrapper inside the optional, and <code>get()</code> returns the referenced distribution. Thus <code>get()</code> belongs to the wrapper, not the optional. The expected reward is <span class="math inline">\(1\times2=2\)</span>, which is the value of <code>reward</code>. The model remains alive throughout this access.</p>
+</div>
+</div>
+</section>
+<section id="reading-the-terminal-declaration" class="level3" data-number="14.6.3">
+<h3 data-number="14.6.3" class="anchored" data-anchor-id="reading-the-terminal-declaration"><span class="header-section-number">14.6.3</span> Reading the terminal declaration</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="dt">bool</span> FiniteMdp<span class="op">::</span>is_terminal<span class="op">(</span>StateIndex state<span class="op">)</span> <span class="at">const</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(</span>state<span class="op">.</span>value<span class="op">()</span> <span class="op">&gt;=</span> <span class="va">state_count_</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">throw</span> FiniteMdpException<span class="op">{</span></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>      FiniteMdpError<span class="op">::</span>invalid_current_state<span class="op">,</span></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>      <span class="st">"The query contains an invalid state index."</span><span class="op">};</span></span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="bu">std::</span>ranges::binary_search<span class="op">(</span><span class="va">terminal_states_</span><span class="op">,</span> state<span class="op">);</span></span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The initial <code>if</code> separates an invalid index from a valid nonterminal state. The former raises an exception; the latter may correctly return false. <code>std::ranges::binary_search</code> then asks whether the index occurs in the sorted terminal vector. It returns a Boolean rather than the candidate iterator used by the distribution lookup.</p>
 <p>Membership follows the declaration, not the transition pattern. A self-loop alone does not make a state terminal.</p>
 <div class="callout callout-style-simple callout-note no-icon callout-titled" title="Example: A nonterminal state with a self-loop">
@@ -1333,38 +1426,40 @@ p(s_\dagger,0\mid s_\dagger,a_\bot)=1.
 </section>
 </section>
 <section id="sec-finite-mdp-impl-data-flow" class="level2" data-number="14.7">
-<h2 data-number="14.7" class="anchored" data-anchor-id="sec-finite-mdp-impl-data-flow"><span class="header-section-number">14.7</span> Model usage and data-flow summary</h2>
+<h2 data-number="14.7" class="anchored" data-anchor-id="sec-finite-mdp-impl-data-flow"><span class="header-section-number">14.7</span> Model usage</h2>
 <p>The individual types now have defined roles. A complete example shows how construction combines them and how a query retrieves information without executing an environment transition.</p>
 <section id="construction-from-individual-events" class="level3" data-number="14.7.1">
 <h3 data-number="14.7.1" class="anchored" data-anchor-id="construction-from-individual-events"><span class="header-section-number">14.7.1</span> Construction from individual events</h3>
 <p>Take two states <span class="math inline">\(\mathcal S=\{s_1,s_2\}\)</span>, one task action <span class="math inline">\(\mathcal A_{\mathrm{task}}=\{a_1\}\)</span>, and terminal set <span class="math inline">\(\mathcal S_{\mathrm{term}}=\{s_2\}\)</span>. From <span class="math inline">\(s_1\)</span>, action <span class="math inline">\(a_1\)</span> either stays at <span class="math inline">\(s_1\)</span> with reward <span class="math inline">\(-1\)</span> and probability <span class="math inline">\(1/4\)</span>, or reaches <span class="math inline">\(s_2\)</span> with reward <span class="math inline">\(4\)</span> and probability <span class="math inline">\(3/4\)</span>.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> StateIndex current<span class="op">{</span><span class="dv">0</span><span class="op">};</span></span>
-<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> StateIndex terminal<span class="op">{</span><span class="dv">1</span><span class="op">};</span></span>
-<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> ActionIndex action<span class="op">{</span><span class="dv">0</span><span class="op">};</span></span>
-<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> OutcomeProbability stay<span class="op">{</span>current<span class="op">,</span> <span class="op">-</span><span class="fl">1.0</span><span class="op">,</span> <span class="fl">0.25</span><span class="op">};</span></span>
-<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> OutcomeProbability arrive<span class="op">{</span>terminal<span class="op">,</span> <span class="fl">4.0</span><span class="op">,</span> <span class="fl">0.75</span><span class="op">};</span></span>
-<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="kw">auto</span> distribution <span class="op">=</span> JointOutcomeDistribution<span class="op">::</span>from_outcomes<span class="op">(</span></span>
-<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>  <span class="dv">2</span><span class="bu">U</span><span class="op">,</span> <span class="op">{</span>stay<span class="op">,</span> arrive<span class="op">},</span> <span class="fl">1.0e-12</span><span class="op">);</span></span>
-<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> StateActionDistribution row<span class="op">{</span>current<span class="op">,</span> action<span class="op">,</span> distribution<span class="op">};</span></span>
-<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="kw">auto</span> mdp <span class="op">=</span> FiniteMdp<span class="op">::</span>from_rows<span class="op">(</span></span>
-<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a>  <span class="dv">2</span><span class="bu">U</span><span class="op">,</span> <span class="dv">1</span><span class="bu">U</span><span class="op">,</span> <span class="op">{</span>row<span class="op">},</span> <span class="op">{</span>terminal<span class="op">});</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> StateIndex current<span class="op">{</span><span class="dv">0</span><span class="op">};</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> StateIndex terminal<span class="op">{</span><span class="dv">1</span><span class="op">};</span></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> ActionIndex action<span class="op">{</span><span class="dv">0</span><span class="op">};</span></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> OutcomeProbability stay<span class="op">{</span>current<span class="op">,</span> <span class="op">-</span><span class="fl">1.0</span><span class="op">,</span> <span class="fl">0.25</span><span class="op">};</span></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> OutcomeProbability arrive<span class="op">{</span>terminal<span class="op">,</span> <span class="fl">4.0</span><span class="op">,</span> <span class="fl">0.75</span><span class="op">};</span></span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="kw">auto</span> distribution <span class="op">=</span> JointOutcomeDistribution<span class="op">::</span>from_outcomes<span class="op">(</span></span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>  <span class="dv">2</span><span class="bu">U</span><span class="op">,</span> <span class="op">{</span>stay<span class="op">,</span> arrive<span class="op">},</span> <span class="fl">1.0e-12</span><span class="op">);</span></span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> StateActionDistribution row<span class="op">{</span>current<span class="op">,</span> action<span class="op">,</span> distribution<span class="op">};</span></span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="kw">auto</span> mdp <span class="op">=</span> FiniteMdp<span class="op">::</span>from_rows<span class="op">(</span></span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a>  <span class="dv">2</span><span class="bu">U</span><span class="op">,</span> <span class="dv">1</span><span class="bu">U</span><span class="op">,</span> <span class="op">{</span>row<span class="op">},</span> <span class="op">{</span>terminal<span class="op">});</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><code>current</code>, <code>terminal</code>, and <code>action</code> name indices in the state and task-action domains. <code>stay</code> and <code>arrive</code> turn the two possible events into records. The brace group <code>{stay, arrive}</code> supplies the records for the distribution factory’s vector parameter. The resulting <code>distribution</code> owns that sequence.</p>
 <p>The aggregate <code>row</code> adds the conditioning pair: it combines <code>current</code>, <code>action</code>, and the whole distribution. Finally, <code>{row}</code> supplies the model’s nonterminal rows and <code>{terminal}</code> supplies its terminal declarations. The model factory adds the absorbing row with generated action index one.</p>
 <p>These are separate values, not a chain of borrowed references. Constructing <code>row</code> from the named <code>distribution</code> copies the distribution; supplying <code>{row}</code> copies the row into the factory’s input. The factory moves its local vectors into the model. The final <code>mdp</code> therefore does not depend on the lifetime of the earlier local records or row.</p>
 </section>
 <section id="queries-produce-calculated-values" class="level3" data-number="14.7.2">
 <h3 data-number="14.7.2" class="anchored" data-anchor-id="queries-produce-calculated-values"><span class="header-section-number">14.7.2</span> Queries produce calculated values</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> JointOutcomeDistribution <span class="op">&amp;</span> selected <span class="op">=</span></span>
-<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>  mdp<span class="op">.</span>outcome_distribution<span class="op">(</span>current<span class="op">,</span> action<span class="op">);</span></span>
-<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="bu">std::</span>vector<span class="op">&lt;</span><span class="dt">double</span><span class="op">&gt;</span> probabilities <span class="op">=</span></span>
-<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>  selected<span class="op">.</span>next_state_probabilities<span class="op">();</span></span>
-<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="dt">double</span> reward <span class="op">=</span> selected<span class="op">.</span>expected_reward<span class="op">();</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p><code>selected</code> borrows the matching distribution inside <code>mdp</code>. The next two calls calculate an owning vector <code>probabilities</code> and a scalar <code>reward</code>. Applying the marginal and expectation formulas to the two supplied events gives</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="kw">auto</span> result <span class="op">=</span> mdp<span class="op">.</span>find_outcome_distribution<span class="op">(</span>current<span class="op">,</span> action<span class="op">);</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="op">(</span>result<span class="op">.</span>has_value<span class="op">())</span> <span class="op">{</span></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> JointOutcomeDistribution <span class="op">&amp;</span> selected <span class="op">=</span> result<span class="op">-&gt;</span>get<span class="op">();</span></span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> <span class="bu">std::</span>vector<span class="op">&lt;</span><span class="dt">double</span><span class="op">&gt;</span> probabilities <span class="op">=</span></span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>    selected<span class="op">.</span>next_state_probabilities<span class="op">();</span></span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> <span class="dt">double</span> reward <span class="op">=</span> selected<span class="op">.</span>expected_reward<span class="op">();</span></span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The supplied pair makes <code>result</code> nonempty. Inside the presence check, <code>selected</code> borrows the matching distribution inside <code>mdp</code>. The next two calls calculate an owning vector <code>probabilities</code> and a scalar <code>reward</code>. Applying the marginal and expectation formulas to the two supplied events gives</p>
 <p><span class="math display">\[
 \begin{aligned}
 \begin{bmatrix}p(s_1\mid s_1,a_1)&amp;p(s_2\mid s_1,a_1)\end{bmatrix}
@@ -1385,82 +1480,270 @@ p(s_\dagger,0\mid s_\dagger,a_\bot)=1.
 </div>
 <div class="callout-body-container callout-body">
 <p>Continuing the two-state example above, the generated row can be selected through the optional action query:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="kw">auto</span> bookkeeping <span class="op">=</span> mdp<span class="op">.</span>bookkeeping_action<span class="op">();</span></span>
-<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="op">(</span>bookkeeping<span class="op">.</span>has_value<span class="op">())</span> <span class="op">{</span></span>
-<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> ActionIndex generated_action <span class="op">=</span> <span class="op">*</span>bookkeeping<span class="op">;</span></span>
-<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> <span class="kw">auto</span> <span class="op">&amp;</span> absorbing <span class="op">=</span></span>
-<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>    mdp<span class="op">.</span>outcome_distribution<span class="op">(</span>terminal<span class="op">,</span> generated_action<span class="op">);</span></span>
-<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> <span class="dt">double</span> terminal_reward <span class="op">=</span> absorbing<span class="op">.</span>expected_reward<span class="op">();</span></span>
-<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p><code>has_value()</code> checks that the optional contains an index. Once this is true, <code>*bookkeeping</code> extracts that index without removing it. Here <code>generated_action</code> contains one, <code>absorbing</code> refers to the generated terminal distribution, and <code>terminal_reward</code> is zero. Its next-state row is <span class="math inline">\([0\;1]\)</span> because the destination remains <span class="math inline">\(s_2\)</span>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="kw">auto</span> bookkeeping <span class="op">=</span> mdp<span class="op">.</span>bookkeeping_action<span class="op">();</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="op">(</span>bookkeeping<span class="op">.</span>has_value<span class="op">())</span> <span class="op">{</span></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> ActionIndex generated_action <span class="op">=</span> <span class="op">*</span>bookkeeping<span class="op">;</span></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> <span class="kw">auto</span> result <span class="op">=</span></span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>    mdp<span class="op">.</span>find_outcome_distribution<span class="op">(</span>terminal<span class="op">,</span> generated_action<span class="op">);</span></span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(</span>result<span class="op">.</span>has_value<span class="op">())</span> <span class="op">{</span></span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> <span class="kw">auto</span> <span class="op">&amp;</span> absorbing <span class="op">=</span> result<span class="op">-&gt;</span>get<span class="op">();</span></span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> <span class="dt">double</span> terminal_reward <span class="op">=</span> absorbing<span class="op">.</span>expected_reward<span class="op">();</span></span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The first <code>has_value()</code> checks that the bookkeeping optional contains an index. Once this is true, <code>*bookkeeping</code> extracts that index without removing it. The second check establishes that the distribution lookup contains a wrapper before accessing it. Here <code>generated_action</code> contains one, <code>absorbing</code> refers to the generated terminal distribution, and <code>terminal_reward</code> is zero. Its next-state row is <span class="math inline">\([0\;1]\)</span> because the next state remains <span class="math inline">\(s_2\)</span>.</p>
 </div>
 </div>
 </section>
-<section id="data-flow-summary-model-construction-and-lookup" class="level3 unnumbered">
-<h3 class="unnumbered anchored" data-anchor-id="data-flow-summary-model-construction-and-lookup">Data-flow summary: model construction and lookup</h3>
-<p>Each row associates a distribution with its current state and action. The model owns the resulting rows:</p>
-<pre class="text"><code>FiniteMdp
-|-- state_count_, task_action_count_
-|-- terminal_states_: vector&lt;StateIndex&gt;
-+-- rows_: vector&lt;StateActionDistribution&gt;
-    |-- state: StateIndex
-    |-- action: ActionIndex
-    +-- outcome_distribution: JointOutcomeDistribution</code></pre>
-<p><code>state</code> is the current-state index and <code>action</code> is the action index for that row. The owned distribution contains possible next-state–reward events and supports the queries summarised in <a href="#sec-finite-mdp-impl-controlled-queries" class="quarto-xref"><span>Section 14.4</span></a>. The row’s action conditions every event in its distribution; it is not converted into an outcome.</p>
-<p>The function calls connect these stored objects to their consumers:</p>
-<pre class="text"><code>state/task-action counts + supplied rows + terminal indices
-    |
-    v
-FiniteMdp::from_rows(...)
-    |
-    v
-FiniteMdp owns supplied and generated terminal rows
-    |-- outcome_distribution(state, action)
-    |       -&gt; const reference to one stored distribution
-    |-- bookkeeping_action()
-    |       -&gt; optional generated action index
-    +-- is_terminal(state)
-            -&gt; Boolean declared-membership answer</code></pre>
-<p>Construction owns the accepted rows; distribution lookup borrows one row’s distribution; its marginal and reward queries return calculated values. These calls inspect a model rather than execute a trajectory: no query samples a destination or advances an environment.</p>
+</section>
+<section id="sec-finite-mdp-impl-connections" class="level2" data-number="14.8">
+<h2 data-number="14.8" class="anchored" data-anchor-id="sec-finite-mdp-impl-connections"><span class="header-section-number">14.8</span> How the classes and functions connect</h2>
+<p>The diagrams separate construction from later queries. Arrows show inputs passed to an operation or results produced by it; the word <strong>owns</strong> identifies stored data, not another calculation. The model remains fixed during every query.</p>
+<section id="constructing-distributions-and-model-rows" class="level3" data-number="14.8.1">
+<h3 data-number="14.8.1" class="anchored" data-anchor-id="constructing-distributions-and-model-rows"><span class="header-section-number">14.8.1</span> Constructing distributions and model rows</h3>
+<p>Typed indices identify states and actions. <code>StateIndex::value()</code> and <code>ActionIndex::value()</code> recover their integer indices; their comparison operators supply the order used for event keys, model rows, and terminal indices. An outcome record uses a next-state index, whereas a model row supplies the current-state and action indices.</p>
+<p><span class="math display">\[
+\begin{array}{c}
+\boxed{\begin{array}{c}
+\text{Inputs for one distribution}\\
+\texttt{OutcomeProbability}\text{ records: }(s'_k,r_k,q_k)\\
+\texttt{next\_state}:\ \texttt{StateIndex},\quad
+\texttt{reward}:r_k,\quad\texttt{probability}:q_k\\
+\text{State count }n\text{ and sum tolerance }\varepsilon_p
+\end{array}}\\[4pt]
+\downarrow\\[4pt]
+\boxed{\begin{array}{c}
+\texttt{JointOutcomeDistribution::from\_outcomes(...)}\\
+\texttt{validate\_distribution(...)}\\
+\text{Check domains, finite values, unique events, and row sum}\\
+\text{Kahan sum: }|\widehat q-1|\leq\varepsilon_p
+\end{array}}\\[4pt]
+\begin{array}{c}\downarrow\\\text{if valid}\end{array}\\[4pt]
+\boxed{\begin{array}{c}
+\text{Private constructor: }\texttt{JointOutcomeDistribution(...)}\\
+\text{Owns }\texttt{state\_count\_}\text{ and }\texttt{outcomes\_}\\
+\text{One stored joint-outcome distribution}
+\end{array}}
+\end{array}
+\]</span></p>
+<p>The distribution does not store its conditioning pair. Attaching a current state and action gives that distribution its role in the complete model:</p>
+<p><span class="math display">\[
+\begin{array}{c}
+\boxed{\begin{array}{c}
+\texttt{StateActionDistribution}\text{ supplied rows}\\
+\texttt{state}:\ \texttt{StateIndex}\ (s),\quad
+\texttt{action}:\ \texttt{ActionIndex}\ (a)\\
+\text{Each row owns an }\texttt{outcome\_distribution}\\
+\text{representing }p(s',r\mid s,a)\\
+\text{Additional inputs: }n,\ m_{\mathrm{task}},\ \mathcal S_{\mathrm{term}}
+\end{array}}\\[4pt]
+\downarrow\\[4pt]
+\boxed{\begin{array}{c}
+\texttt{FiniteMdp::from\_rows(...)}\\
+\text{Validate and sort terminal declarations; check supplied rows}\\
+\text{Generate terminal rows using }\texttt{from\_outcomes(...)}\\
+p(s_\dagger,0\mid s_\dagger,a_\bot)=1\\
+\text{Check feasible-row coverage; sort completed rows}
+\end{array}}\\[4pt]
+\begin{array}{c}\downarrow\\\text{if valid}\end{array}\\[4pt]
+\boxed{\begin{array}{c}
+\text{Private constructor: }\texttt{FiniteMdp(...)}\\
+\text{Owns }\texttt{state\_count\_},\ \texttt{task\_action\_count\_},\\
+\texttt{rows\_},\ \texttt{terminal\_states\_}\\
+\texttt{rows\_}\text{ owns rows; each row owns its distribution;}\\
+\text{each distribution owns its outcome records}
+\end{array}}
+\end{array}
+\]</span></p>
+<p>At either factory, a failed validation raises <code>FiniteMdpException</code> with a <code>FiniteMdpError</code> category instead of producing an object. Construction does not renormalise accepted probabilities or generate missing nonterminal dynamics.</p>
+</section>
+<section id="looking-up-and-evaluating-a-distribution" class="level3" data-number="14.8.2">
+<h3 data-number="14.8.2" class="anchored" data-anchor-id="looking-up-and-evaluating-a-distribution"><span class="header-section-number">14.8.2</span> Looking up and evaluating a distribution</h3>
+<p>The model is fixed input. Each call supplies only a current-state index and an action index; the lookup borrows an existing distribution rather than constructing a new one.</p>
+<p><span class="math display">\[
+\begin{array}{c}
+\boxed{\begin{array}{c}
+\text{Fixed storage: }\texttt{FiniteMdp}\text{ and its sorted }\texttt{rows\_}\\
+\text{Per-call inputs: }\texttt{StateIndex}\ (s),\ \texttt{ActionIndex}\ (a)
+\end{array}}\\[4pt]
+\downarrow\\[4pt]
+\boxed{\begin{array}{c}
+\texttt{find\_outcome\_distribution(state, action)}\\
+\text{Check index domains; }\texttt{std::lower\_bound}\text{ and exact match}\\
+\text{Infeasible pair: }\texttt{std::nullopt}\\
+\text{Feasible pair: }\texttt{std::cref}\text{ of the stored distribution}
+\end{array}}\\[4pt]
+\begin{array}{c}\downarrow\\\text{if the optional is nonempty}\end{array}\\[4pt]
+\boxed{\begin{array}{c}
+\texttt{result-&gt;get()}\\
+\text{Borrowed read-only }\texttt{JointOutcomeDistribution}\\
+\texttt{state\_count()}\ \longrightarrow\ n\\
+\texttt{outcomes()}\ \longrightarrow\ \text{borrowed read-only record span}\\[3pt]
+\texttt{next\_state\_probabilities()}\ \longrightarrow\ \text{owning vector}\\
+\bigl[p(s_1\mid s,a),\ldots,p(s_n\mid s,a)\bigr],\quad
+p(s'\mid s,a)=\sum_r p(s',r\mid s,a)\\[3pt]
+\texttt{expected\_reward()}\ \longrightarrow\ \text{scalar }\bar r(s,a)\\
+\bar r(s,a)=\sum_{s',r}r\,p(s',r\mid s,a)
+\end{array}}
+\end{array}
+\]</span></p>
+<p>Invalid lookup indices raise a domain exception rather than returning an empty optional. The marginal and reward methods use Kahan accumulation; they return calculated values, not borrowed storage. The wrapper and record span require valid owner storage, while the calculated vector and scalar do not. The expected-reward overflow caution in <a href="#sec-finite-mdp-impl-controlled-queries" class="quarto-xref"><span>Section 14.4</span></a> still applies.</p>
+</section>
+<section id="inspecting-the-model-itself" class="level3" data-number="14.8.3">
+<h3 data-number="14.8.3" class="anchored" data-anchor-id="inspecting-the-model-itself"><span class="header-section-number">14.8.3</span> Inspecting the model itself</h3>
+<p>These methods read model structure without selecting an outcome distribution. Only terminal membership needs a per-call state index.</p>
+<p><span class="math display">\[
+\begin{array}{c}
+\boxed{\text{Fixed storage: }\texttt{FiniteMdp}}\\[4pt]
+\downarrow\\[4pt]
+\boxed{\begin{array}{rcl}
+\texttt{state\_count()}&amp;\longrightarrow&amp;n\\
+\texttt{task\_action\_count()}&amp;\longrightarrow&amp;m_{\mathrm{task}}\\
+\texttt{action\_count()}&amp;\longrightarrow&amp;m=|\mathcal A|\\
+\texttt{bookkeeping\_action()}&amp;\longrightarrow&amp;
+\text{optional index of }a_\bot\\
+\texttt{rows()}&amp;\longrightarrow&amp;\text{borrowed read-only row span}\\
+\texttt{is\_terminal(state)}&amp;\longrightarrow&amp;s\in\mathcal S_{\mathrm{term}}
+\end{array}}
+\end{array}
+\]</span></p>
+<p>The bookkeeping optional is empty exactly when no terminal states are declared. Terminal membership uses the sorted declaration and rejects an invalid state index. None of these calls samples an outcome, chooses an action, or advances an environment.</p>
 </section>
 </section>
-<section id="sec-finite-mdp-impl-tests" class="level2" data-number="14.8">
-<h2 data-number="14.8" class="anchored" data-anchor-id="sec-finite-mdp-impl-tests"><span class="header-section-number">14.8</span> Analytic examples and focused test meaning</h2>
-<p>A useful test compares a calculated result with an independently known answer. The three-event distribution has marginal <span class="math inline">\([0.2\;0.8\;0]\)</span> and expected reward <span class="math inline">\(3.5\)</span>. The terminal example requires a different distinction: the entering task reward must be retained while the generated outgoing reward is zero.</p>
-<section id="retaining-the-entering-reward" class="level3" data-number="14.8.1">
-<h3 data-number="14.8.1" class="anchored" data-anchor-id="retaining-the-entering-reward"><span class="header-section-number">14.8.1</span> Retaining the entering reward</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="kw">auto</span> incoming <span class="op">=</span> JointOutcomeDistribution<span class="op">::</span>from_outcomes<span class="op">(</span></span>
-<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>  <span class="dv">2</span><span class="bu">U</span><span class="op">,</span> <span class="op">{{</span>StateIndex<span class="op">{</span><span class="dv">1</span><span class="op">},</span> <span class="fl">7.0</span><span class="op">,</span> <span class="fl">1.0</span><span class="op">}},</span> <span class="fl">1.0e-12</span><span class="op">);</span></span>
-<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="kw">auto</span> mdp <span class="op">=</span> FiniteMdp<span class="op">::</span>from_rows<span class="op">(</span></span>
-<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>  <span class="dv">2</span><span class="bu">U</span><span class="op">,</span> <span class="dv">1</span><span class="bu">U</span><span class="op">,</span></span>
-<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>  <span class="op">{{</span>StateIndex<span class="op">{</span><span class="dv">0</span><span class="op">},</span> ActionIndex<span class="op">{</span><span class="dv">0</span><span class="op">},</span> incoming<span class="op">}},</span></span>
-<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>  <span class="op">{</span>StateIndex<span class="op">{</span><span class="dv">1</span><span class="op">}});</span></span>
-<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>EXPECT_EQ<span class="op">(</span>mdp<span class="op">.</span>task_action_count<span class="op">(),</span> <span class="dv">1</span><span class="bu">U</span><span class="op">);</span></span>
-<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>EXPECT_EQ<span class="op">(</span>mdp<span class="op">.</span>action_count<span class="op">(),</span> <span class="dv">2</span><span class="bu">U</span><span class="op">);</span></span>
-<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>EXPECT_FALSE<span class="op">(</span>mdp<span class="op">.</span>is_terminal<span class="op">(</span>StateIndex<span class="op">{</span><span class="dv">0</span><span class="op">}));</span></span>
-<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a>EXPECT_TRUE<span class="op">(</span>mdp<span class="op">.</span>is_terminal<span class="op">(</span>StateIndex<span class="op">{</span><span class="dv">1</span><span class="op">}));</span></span>
+<section id="sec-finite-mdp-impl-tests" class="level2" data-number="14.9">
+<h2 data-number="14.9" class="anchored" data-anchor-id="sec-finite-mdp-impl-tests"><span class="header-section-number">14.9</span> Analytic examples</h2>
+<section id="a-task-with-uncertain-progress" class="level3" data-number="14.9.1">
+<h3 data-number="14.9.1" class="anchored" data-anchor-id="a-task-with-uncertain-progress"><span class="header-section-number">14.9.1</span> A task with uncertain progress</h3>
+<p>Consider three states in the order <span class="math inline">\(\mathcal S=\{s_1,s_2,s_3\}\)</span>: <strong>start</strong>, <strong>in progress</strong>, and <strong>finished</strong>. Only <span class="math inline">\(s_3\)</span> is terminal. The task actions are <span class="math inline">\(\mathcal A_{\mathrm{task}}=\{a_1,a_2\}\)</span>, where <span class="math inline">\(a_1\)</span> means <strong>attempt</strong> and <span class="math inline">\(a_2\)</span> means <strong>quit</strong>. Both actions are feasible at the start, but only attempt is feasible in progress.</p>
+<p>An attempt from the start can fail or make progress. Two outcomes reach the same in-progress state with different rewards. Quitting ends the task with reward zero; an attempt from the in-progress state completes it with reward six. The diagram uses the mathematical state and action labels, with <code>a_bot</code> denoting <span class="math inline">\(a_\bot\)</span>. In C++, states <span class="math inline">\(s_1,s_2,s_3\)</span> have indices <span class="math inline">\(0,1,2\)</span>, and actions <span class="math inline">\(a_1,a_2,a_\bot\)</span> have indices <span class="math inline">\(0,1,2\)</span>.</p>
+<pre class="text"><code>Supplied task transitions (p = probability, r = reward):
+
+s_1 -- a_1 --&gt; +-- p=0.25, r=-2 --&gt; s_1
+               +-- p=0.25, r= 1 --&gt; s_2
+               +-- p=0.50, r= 3 --&gt; s_2
+
+s_1 -- a_2 --&gt; p=1, r=0 --&gt; s_3
+s_2 -- a_1 --&gt; p=1, r=6 --&gt; s_3
+
+Generated terminal continuation:
+s_3 -- a_bot --&gt; p=1, r=0 --&gt; s_3</code></pre>
+</section>
+<section id="calculating-the-expected-results" class="level3" data-number="14.9.2">
+<h3 data-number="14.9.2" class="anchored" data-anchor-id="calculating-the-expected-results"><span class="header-section-number">14.9.2</span> Calculating the expected results</h3>
+<p>For an attempt from the start, combine the two events reaching the in-progress state to obtain the next-state marginal:</p>
+<p><span class="math display">\[
+\begin{aligned}
+p(s_1\mid s_1,a_1)&amp;=0.25,\\
+p(s_2\mid s_1,a_1)&amp;=0.25+0.50=0.75,\\
+p(s_3\mid s_1,a_1)&amp;=0.
+\end{aligned}
+\]</span></p>
+<p>The expected reward must retain the different rewards of the two progress events:</p>
+<p><span class="math display">\[
+\bar r(s_1,a_1)
+=(-2)(0.25)+(1)(0.25)+(3)(0.50)
+=1.25.
+\]</span></p>
+<p>The remaining rows each contain one certain outcome. All expected results are:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 23%">
+<col style="width: 23%">
+<col style="width: 23%">
+<col style="width: 30%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Current state</th>
+<th>Action</th>
+<th>Next-state probability row</th>
+<th style="text-align: right;">Expected reward</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Start</td>
+<td>Attempt</td>
+<td><span class="math inline">\([0.25\;0.75\;0]\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(1.25\)</span></td>
+</tr>
+<tr class="even">
+<td>Start</td>
+<td>Quit</td>
+<td><span class="math inline">\([0\;0\;1]\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0\)</span></td>
+</tr>
+<tr class="odd">
+<td>In progress</td>
+<td>Attempt</td>
+<td><span class="math inline">\([0\;0\;1]\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(6\)</span></td>
+</tr>
+<tr class="even">
+<td>Finished</td>
+<td>Bookkeeping</td>
+<td><span class="math inline">\([0\;0\;1]\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0\)</span></td>
+</tr>
+</tbody>
+</table>
+<p>Construction produces three states, two task actions, three complete action labels, and four feasible rows. The reward six belongs to entering the finished state; the generated continuation contributes zero afterward.</p>
+</section>
+<section id="constructing-the-model" class="level3" data-number="14.9.3">
+<h3 data-number="14.9.3" class="anchored" data-anchor-id="constructing-the-model"><span class="header-section-number">14.9.3</span> Constructing the model</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> StateIndex start<span class="op">{</span><span class="dv">0</span><span class="op">};</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> StateIndex in_progress<span class="op">{</span><span class="dv">1</span><span class="op">};</span></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> StateIndex finished<span class="op">{</span><span class="dv">2</span><span class="op">};</span></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> ActionIndex attempt<span class="op">{</span><span class="dv">0</span><span class="op">};</span></span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> ActionIndex quit<span class="op">{</span><span class="dv">1</span><span class="op">};</span></span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="kw">auto</span> attempt_from_start <span class="op">=</span> JointOutcomeDistribution<span class="op">::</span>from_outcomes<span class="op">(</span></span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>  <span class="dv">3</span><span class="bu">U</span><span class="op">,</span></span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>  <span class="op">{{</span>start<span class="op">,</span> <span class="op">-</span><span class="fl">2.0</span><span class="op">,</span> <span class="fl">0.25</span><span class="op">},</span></span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>   <span class="op">{</span>in_progress<span class="op">,</span> <span class="fl">1.0</span><span class="op">,</span> <span class="fl">0.25</span><span class="op">},</span></span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>   <span class="op">{</span>in_progress<span class="op">,</span> <span class="fl">3.0</span><span class="op">,</span> <span class="fl">0.50</span><span class="op">}},</span></span>
+<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a>  <span class="fl">1.0e-12</span><span class="op">);</span></span>
 <span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a>EXPECT_DOUBLE_EQ<span class="op">(</span></span>
-<span id="cb34-15"><a href="#cb34-15" aria-hidden="true" tabindex="-1"></a>  mdp<span class="op">.</span>outcome_distribution<span class="op">(</span>StateIndex<span class="op">{</span><span class="dv">0</span><span class="op">},</span> ActionIndex<span class="op">{</span><span class="dv">0</span><span class="op">}).</span>expected_reward<span class="op">(),</span></span>
-<span id="cb34-16"><a href="#cb34-16" aria-hidden="true" tabindex="-1"></a>  <span class="fl">7.0</span><span class="op">);</span></span>
-<span id="cb34-17"><a href="#cb34-17" aria-hidden="true" tabindex="-1"></a>EXPECT_DOUBLE_EQ<span class="op">(</span></span>
-<span id="cb34-18"><a href="#cb34-18" aria-hidden="true" tabindex="-1"></a>  mdp<span class="op">.</span>outcome_distribution<span class="op">(</span>StateIndex<span class="op">{</span><span class="dv">1</span><span class="op">},</span> ActionIndex<span class="op">{</span><span class="dv">1</span><span class="op">}).</span>expected_reward<span class="op">(),</span></span>
-<span id="cb34-19"><a href="#cb34-19" aria-hidden="true" tabindex="-1"></a>  <span class="fl">0.0</span><span class="op">);</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>The first construction defines a certain transition from state index zero to terminal-state index one with reward seven. The assertions compare the model’s two action counts and two terminal-membership answers, then check the incoming and outgoing expected rewards separately.</p>
-<p><code>EXPECT_EQ</code> compares values and records a failure without stopping the test function. <code>EXPECT_TRUE</code> and <code>EXPECT_FALSE</code> check Boolean results. <code>EXPECT_DOUBLE_EQ</code> allows a difference of up to four units in the last place rather than requiring bitwise equality. A <strong>unit in the last place</strong> is a local floating-point spacing, which changes with magnitude. These macros make the intended comparisons visible without repeating the production calculation. <a href="https://google.github.io/googletest/reference/assertions.html">GoogleTest assertion reference</a>.</p>
+<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="kw">auto</span> quit_from_start <span class="op">=</span> JointOutcomeDistribution<span class="op">::</span>from_outcomes<span class="op">(</span></span>
+<span id="cb34-15"><a href="#cb34-15" aria-hidden="true" tabindex="-1"></a>  <span class="dv">3</span><span class="bu">U</span><span class="op">,</span> <span class="op">{{</span>finished<span class="op">,</span> <span class="fl">0.0</span><span class="op">,</span> <span class="fl">1.0</span><span class="op">}},</span> <span class="fl">1.0e-12</span><span class="op">);</span></span>
+<span id="cb34-16"><a href="#cb34-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-17"><a href="#cb34-17" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="kw">auto</span> complete_task <span class="op">=</span> JointOutcomeDistribution<span class="op">::</span>from_outcomes<span class="op">(</span></span>
+<span id="cb34-18"><a href="#cb34-18" aria-hidden="true" tabindex="-1"></a>  <span class="dv">3</span><span class="bu">U</span><span class="op">,</span> <span class="op">{{</span>finished<span class="op">,</span> <span class="fl">6.0</span><span class="op">,</span> <span class="fl">1.0</span><span class="op">}},</span> <span class="fl">1.0e-12</span><span class="op">);</span></span>
+<span id="cb34-19"><a href="#cb34-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-20"><a href="#cb34-20" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="kw">auto</span> mdp <span class="op">=</span> FiniteMdp<span class="op">::</span>from_rows<span class="op">(</span></span>
+<span id="cb34-21"><a href="#cb34-21" aria-hidden="true" tabindex="-1"></a>  <span class="dv">3</span><span class="bu">U</span><span class="op">,</span> <span class="dv">2</span><span class="bu">U</span><span class="op">,</span></span>
+<span id="cb34-22"><a href="#cb34-22" aria-hidden="true" tabindex="-1"></a>  <span class="op">{{</span>start<span class="op">,</span> attempt<span class="op">,</span> attempt_from_start<span class="op">},</span></span>
+<span id="cb34-23"><a href="#cb34-23" aria-hidden="true" tabindex="-1"></a>   <span class="op">{</span>start<span class="op">,</span> quit<span class="op">,</span> quit_from_start<span class="op">},</span></span>
+<span id="cb34-24"><a href="#cb34-24" aria-hidden="true" tabindex="-1"></a>   <span class="op">{</span>in_progress<span class="op">,</span> attempt<span class="op">,</span> complete_task<span class="op">}},</span></span>
+<span id="cb34-25"><a href="#cb34-25" aria-hidden="true" tabindex="-1"></a>  <span class="op">{</span>finished<span class="op">});</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>attempt_from_start</code> stores all three joint events, including both rewards for <code>in_progress</code>. The rows passed to <code>from_rows</code> attach each distribution to its current state and action. No terminal row is supplied: the factory generates it with bookkeeping action index two. No row is supplied for quitting from <code>in_progress</code>, so that pair remains infeasible.</p>
 </section>
-<section id="checking-structure-before-reading-an-element" class="level3" data-number="14.8.2">
-<h3 data-number="14.8.2" class="anchored" data-anchor-id="checking-structure-before-reading-an-element"><span class="header-section-number">14.8.2</span> Checking structure before reading an element</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb35"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="kw">auto</span> outcomes <span class="op">=</span></span>
-<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>  mdp<span class="op">.</span>outcome_distribution<span class="op">(</span>StateIndex<span class="op">{</span><span class="dv">1</span><span class="op">},</span> ActionIndex<span class="op">{</span><span class="dv">1</span><span class="op">}).</span>outcomes<span class="op">();</span></span>
-<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>ASSERT_EQ<span class="op">(</span>outcomes<span class="op">.</span>size<span class="op">(),</span> <span class="dv">1</span><span class="bu">U</span><span class="op">);</span></span>
-<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>EXPECT_EQ<span class="op">(</span>outcomes<span class="op">[</span><span class="dv">0</span><span class="op">].</span>next_state<span class="op">,</span> StateIndex<span class="op">{</span><span class="dv">1</span><span class="op">});</span></span>
-<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>EXPECT_DOUBLE_EQ<span class="op">(</span>outcomes<span class="op">[</span><span class="dv">0</span><span class="op">].</span>probability<span class="op">,</span> <span class="fl">1.0</span><span class="op">);</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p><code>outcomes</code> is a span into the generated terminal row. <code>ASSERT_EQ</code> stops the current test function if the size is not one, protecting the following element access. Once that assertion succeeds, the two expectations check the destination and the probability-one self-transition. The size check matters here because the mathematical terminal convention is a single certain outcome, not an arbitrary distribution.</p>
+<section id="reading-the-model" class="level3" data-number="14.9.4">
+<h3 data-number="14.9.4" class="anchored" data-anchor-id="reading-the-model"><span class="header-section-number">14.9.4</span> Reading the model</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb35"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="kw">auto</span> result <span class="op">=</span> mdp<span class="op">.</span>find_outcome_distribution<span class="op">(</span>start<span class="op">,</span> attempt<span class="op">);</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="op">(</span>result<span class="op">.</span>has_value<span class="op">())</span> <span class="op">{</span></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> <span class="kw">auto</span> probabilities <span class="op">=</span> result<span class="op">-&gt;</span>get<span class="op">().</span>next_state_probabilities<span class="op">();</span></span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> <span class="dt">double</span> reward <span class="op">=</span> result<span class="op">-&gt;</span>get<span class="op">().</span>expected_reward<span class="op">();</span></span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="kw">auto</span> unavailable <span class="op">=</span></span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>  mdp<span class="op">.</span>find_outcome_distribution<span class="op">(</span>in_progress<span class="op">,</span> quit<span class="op">);</span></span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="kw">auto</span> bookkeeping <span class="op">=</span> mdp<span class="op">.</span>bookkeeping_action<span class="op">();</span></span>
+<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="op">(</span>bookkeeping<span class="op">.</span>has_value<span class="op">())</span> <span class="op">{</span></span>
+<span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> <span class="kw">auto</span> terminal_result <span class="op">=</span></span>
+<span id="cb35-14"><a href="#cb35-14" aria-hidden="true" tabindex="-1"></a>    mdp<span class="op">.</span>find_outcome_distribution<span class="op">(</span>finished<span class="op">,</span> <span class="op">*</span>bookkeeping<span class="op">);</span></span>
+<span id="cb35-15"><a href="#cb35-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-16"><a href="#cb35-16" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(</span>terminal_result<span class="op">.</span>has_value<span class="op">())</span> <span class="op">{</span></span>
+<span id="cb35-17"><a href="#cb35-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> <span class="kw">auto</span> terminal_probabilities <span class="op">=</span></span>
+<span id="cb35-18"><a href="#cb35-18" aria-hidden="true" tabindex="-1"></a>      terminal_result<span class="op">-&gt;</span>get<span class="op">().</span>next_state_probabilities<span class="op">();</span></span>
+<span id="cb35-19"><a href="#cb35-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> <span class="dt">double</span> terminal_reward <span class="op">=</span></span>
+<span id="cb35-20"><a href="#cb35-20" aria-hidden="true" tabindex="-1"></a>      terminal_result<span class="op">-&gt;</span>get<span class="op">().</span>expected_reward<span class="op">();</span></span>
+<span id="cb35-21"><a href="#cb35-21" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb35-22"><a href="#cb35-22" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The first lookup is nonempty: <code>probabilities</code> is <span class="math inline">\([0.25\;0.75\;0]\)</span> and <code>reward</code> is <span class="math inline">\(1.25\)</span>, matching the hand calculation. <code>unavailable</code> is empty because quit is a valid global action but is not feasible in the in-progress state. The bookkeeping query contains action index two; its terminal distribution yields <code>terminal_probabilities</code> equal to <span class="math inline">\([0\;0\;1]\)</span> and <code>terminal_reward</code> equal to zero.</p>
+<p>The two events reaching the in-progress state remain distinct in the stored distribution but combine in the marginal vector. Terminal completion preserves the reward for finishing, and the optional lookup distinguishes an unavailable action from a stored transition.</p>
 </section>
 </section>
 <section id="references" class="level2 unnumbered">
@@ -1469,7 +1752,7 @@ FiniteMdp owns supplied and generated terminal rows
 <li>Sutton, R. S., and Barto, A. G. <em>Reinforcement Learning: An Introduction</em>, second-edition draft, 2014–2015. Chapter 3, especially Sections 3.4 and 3.6, supplies the absorbing-episode convention and the joint-kernel, marginal, and reward formulas. The draft’s <span class="math inline">\(r(s,a)\)</span> is written <span class="math inline">\(\bar r(s,a)\)</span> here to distinguish an expectation from a realised reward.</li>
 <li>Bertsekas, D. P. <em>A Course in Reinforcement Learning</em>, second edition, 2026 editorial version. Section 1.3.1, printed pp.&nbsp;28–29, supplies the state-dependent control-set and random-disturbance viewpoint. Its state <span class="math inline">\(x_k\)</span> and control <span class="math inline">\(u_k\)</span> play the roles of <span class="math inline">\(s\)</span> and <span class="math inline">\(a\)</span>; its <span class="math inline">\(U_k(x_k)\)</span> is the feasible control set.</li>
 <li>Goldberg, D. “What Every Computer Scientist Should Know About Floating-Point Arithmetic.” <em>ACM Computing Surveys</em>, 23(1), 1991. Theorem 8 and “Errors In Summation”; <a href="https://docs.oracle.com/cd/E19422-01/819-3693/ncg_goldberg.html">reproduced in Oracle’s Numerical Computation Guide</a>.</li>
-<li><a href="https://eel.is/c++draft/alg.binary.search">C++ standard draft: binary-search algorithms</a>, for search preconditions and return meanings; and <a href="https://google.github.io/googletest/reference/assertions.html">GoogleTest assertions</a>, for fatal, nonfatal, and floating-point assertions.</li>
+<li><a href="https://eel.is/c++draft/alg.binary.search">C++ standard draft: binary-search algorithms</a>, for search preconditions and return meanings.</li>
 <li>The companion’s code excerpts follow the <a href="https://github.com/chypwc/uir/tree/main/ros_ws/src/intelligence_foundations/include/intelligence_foundations">public headers</a>, <a href="https://github.com/chypwc/uir/tree/main/ros_ws/src/intelligence_foundations/src">compiled operations</a>, and <a href="https://github.com/chypwc/uir/tree/main/ros_ws/src/intelligence_foundations/test">focused tests</a> of the C++20 foundations library.</li>
 </ul>
 

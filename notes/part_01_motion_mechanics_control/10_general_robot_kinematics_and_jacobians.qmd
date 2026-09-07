@@ -1060,6 +1060,23 @@ Thus any point on the same axis line produces the same ${}^{s}\mathbf S_j$. Befo
 
 The notation records two separate modelling choices. The superscript $s$ states that the screw-axis coordinates are expressed using the fixed space frame $\{s\}$. To obtain those coordinates, place the robot at $\mathbf q=\mathbf 0_n$, identify each joint’s axis line and positive direction at that placement, and express them using $\{s\}$. Thus every ${}^{s}\mathbf S_j$ uses one common coordinate frame and is constructed from the same zero arrangement. The next subsection will show how these fixed model data are combined when the joint coordinates are nonzero.
 
+The home pose and ordered space screw columns together define the **geometric forward-kinematics model**, denoted by $\mathcal M$:
+
+$$
+\mathcal M
+:=
+\left(
+\mathbf M,\;
+({}^{s}\mathbf S_j)_{j=1}^{n}
+\right).
+$$ {#eq-serial-geometric-model}
+
+- $\mathbf M\in SE(3)$ is the home end-effector pose relative to the fixed space frame $\{s\}$.
+- $({}^{s}\mathbf S_j)_{j=1}^{n}$ is the ordered sequence of six-entry space screw columns, from joint $1$ at the base to joint $n$ nearest the end effector. Every column describes its joint at the same zero arrangement and is expressed in $\{s\}$.
+- $n$ is the number of joints.
+
+The parentheses denote an ordered pair containing a pose and an ordered sequence, not an unordered set: changing the joint order can change the resulting end-effector pose. The current joint coordinates and their allowed domains are specified separately from these fixed geometric data.
+
 ::: {.callout-note title="Example: Home data for a planar revolute--prismatic chain" appearance="simple" icon=false}
 
 This example shows how one zero arrangement supplies $\mathbf M$ and both types of space screw axis. Let $n=2$, place $O_s$ on joint 1, and align the end-effector frame with $\{s\}$ when $\mathbf q=\mathbf 0_2$. In this zero arrangement, joint 1 revolves about positive $z_s$ through $O_s$, joint 2 translates along positive $x_s$, and $O_e$ is $L$ metres from $O_s$ along positive $x_s$, where $L>0$.

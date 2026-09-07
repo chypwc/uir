@@ -180,6 +180,14 @@ $$
 
 Passing this check shall not cause the stored probabilities to be rescaled.
 
+### Joint-distribution lookup
+
+`FiniteMdp::find_outcome_distribution(StateIndex state, ActionIndex action) const` shall return `std::optional<std::reference_wrapper<const JointOutcomeDistribution>>`. For valid state and global action indices representing $(s,a)$, the result shall contain a read-only reference wrapper to the exact stored distribution $p(s',r\mid s,a)$ if $a\in\mathcal A(s)$, and shall be `std::nullopt` otherwise. An infeasible pair is ordinary absence, not an exception or a zero-valued distribution. This rule includes a task action queried at a terminal state and the generated bookkeeping action queried at a nonterminal state.
+
+The lookup shall first reject a state index at or beyond `state_count()` with `FiniteMdpException` code `invalid_current_state`, then reject an action index at or beyond the complete `action_count()` with code `invalid_action`. These domain errors shall not be converted to empty optionals.
+
+Lookup shall be deterministic, shall not mutate the model, and shall not copy the stored distribution or invent missing dynamics. The optional owns only its reference wrapper, not the referenced distribution. Callers shall check presence before dereferencing the optional and shall keep the referenced model storage alive and its reference valid throughout use. Returning or copying the wrapper shall not extend that storage's lifetime.
+
 ### Terminal-membership query
 
 `FiniteMdp::is_terminal(StateIndex state) const` shall return `true` exactly when the valid queried state belongs to the declared terminal-state set, and `false` otherwise. An index outside `[0, state_count)` shall throw `FiniteMdpException` with code `invalid_current_state`, including when the terminal set is empty. The query shall be deterministic, shall not mutate the model, and shall use declared terminal membership rather than infer termination from self-transitions, rewards, or action counts.
@@ -243,7 +251,9 @@ Construction or calculation shall fail explicitly for:
 7. an invalid or duplicate terminal-state identifier, or any caller-supplied outgoing terminal row;
 8. an invalid probability-sum tolerance;
 9. a policy with incompatible dimensions, non-finite entries, entries outside $[0,1]$, nonzero probability on an infeasible action, or an invalid row sum; or
-10. a query containing an invalid state, invalid action, or infeasible state--action pair.
+10. a query containing an invalid state or invalid global action index.
+
+A joint-distribution lookup with valid indices but an infeasible state--action pair shall return `std::nullopt` under the lookup contract above. It shall not throw an infeasibility exception or supply a probability or reward result for that pair.
 
 Failures shall distinguish invalid domain identifiers, invalid model structure, invalid probabilities, invalid terminal structure, and invalid policy structure. The implementation shall not clamp probabilities, discard invalid outcomes, normalise rows, replace non-finite values, or return a numeric result alongside a failure. The only permitted action and row generation is the terminal completion above; missing nonterminal dynamics shall not be invented.
 
@@ -282,6 +292,7 @@ This fixture is an exact mathematical acceptance case. Fixture labels and task m
 | IF-MDP-MOD-002 | The model shall remain immutable after successful validation. |
 | IF-MDP-MOD-003 | Construction shall automatically append one terminal-only bookkeeping action when needed, generate all terminal rows, reject supplied terminal rows, and preserve task-action indices and incoming rewards while exposing task and complete action counts. |
 | IF-MDP-MOD-004 | The terminal-membership query shall report declared membership for valid states and explicitly reject invalid state indices. |
+| IF-MDP-MOD-005 | Joint-distribution lookup shall return an optional borrowed read-only distribution for the exact feasible pair, an empty optional for an in-domain infeasible pair, and the specified exception for an invalid index, without copying distributions or generating dynamics. |
 | IF-MDP-CAL-001 | Controlled-transition queries shall marginalise the joint kernel over reward. |
 | IF-MDP-CAL-002 | Expected-reward queries shall calculate the probability-weighted reward over all joint outcomes. |
 | IF-MDP-CAL-003 | One deterministic conversion shall produce the declared dense controlled-transition, expected-reward, feasible-action-mask, and terminal-mask representation without assigning dynamics to infeasible pairs. |
@@ -300,14 +311,14 @@ Use the frozen fixture and $\varepsilon_p=10^{-12}$ unless a case states otherwi
 | ID | Case | Expected result |
 |---|---|---|
 | IF-MDP-ACC-001 | Construct the frozen fixture from two task actions and its nonterminal rows. | Construction succeeds with three states, two task actions, three complete global actions, all feasible pairs, six positive joint outcomes, and one terminal state. |
-| IF-MDP-ACC-002 | Query $(s_1,a_1)$. | The controlled-transition row is $[0.5\;0.5\;0]$ and $\bar r(s_1,a_1)=0.5$. |
+| IF-MDP-ACC-002 | Look up $(s_1,a_1)$, then calculate its marginal and expected reward. | The optional is nonempty and refers to the matching stored distribution. The controlled-transition row is $[0.5\;0.5\;0]$ and $\bar r(s_1,a_1)=0.5$. |
 | IF-MDP-ACC-003 | Apply the frozen policy. | $\mathbf P^\pi=\begin{bmatrix}0.30&0.30&0.40\\0.25&0&0.75\\0&0&1\end{bmatrix}$ and $\bar{\mathbf r}^{\,\pi}=[1.10\;2.75\;0]$. |
 | IF-MDP-ACC-004 | Multiply the factors for the declared two-step event $s_1,a_1,1,s_2,a_2,-1,s_1$. | The independently calculated trajectory probability is $0.075$. |
 | IF-MDP-ACC-005 | Classify the outcome entering $s_\dagger$ with reward $2$ and no collector stop. | The result retains reward $2$, sets `terminated=true`, and sets `truncated=false`. |
 | IF-MDP-ACC-006 | Stop collection after a transition into nonterminal $s_2$ without a task ending. | The result sets `terminated=false` and `truncated=true`; the model still defines subsequent actions from $s_2$. |
 | IF-MDP-ACC-007 | Replace one fixture probability by a negative, non-finite, or greater-than-one value, or make a row sum violate $\varepsilon_p$. | An invalid entry fails with `invalid_probability`; an invalid row sum fails with `invalid_probability_sum`; construction returns no model. |
 | IF-MDP-ACC-008 | Give a policy positive mass on an infeasible action or an invalid row sum. | Policy validation fails and no induced matrix or reward row is returned. |
-| IF-MDP-ACC-009 | Query an invalid state, invalid action, or infeasible pair. | The query fails explicitly and returns no probability or reward result. |
+| IF-MDP-ACC-009 | Look up an out-of-domain state with a valid action; separately look up a valid state with an out-of-domain global action. | The lookup throws `FiniteMdpException` with `invalid_current_state` or `invalid_action`, respectively; it does not return an empty optional in place of the exception. |
 | IF-MDP-ACC-010 | Repeat a valid policy-induced calculation. | Every returned entry is identical across calls on the same platform and configuration. |
 | IF-MDP-ACC-011 | Convert the frozen sparse model to the dense compute view. | Every feasible transition and reward entry equals its direct sparse query in flattened order $k=im+\ell$; terminal and feasible masks match the model; infeasible storage is zero padding and remains excluded from calculations. |
 | IF-MDP-ACC-012 | Construct with terminal states and only nonterminal rows, including an incoming terminal reward; repeat with shuffled rows and terminal indices and with multiple terminals. | Exactly one shared action is appended at the task-action count; each terminal gets an exact zero-reward, probability-one self-loop in canonical order. Task-action indices and every incoming outcome are preserved. The generated action is infeasible at nonterminals, and task actions are infeasible at terminals. |
@@ -315,6 +326,7 @@ Use the frozen fixture and $\varepsilon_p=10^{-12}$ unless a case states otherwi
 | IF-MDP-ACC-014 | Declare no terminal states; separately omit nonterminal rows in a model with a terminal state. | Without terminals, no action is appended and `bookkeeping_action()` is empty. Missing nonterminal feasibility still fails rather than generating nonterminal rows. |
 | IF-MDP-ACC-015 | Declare every state terminal with zero task actions and no supplied rows; separately leave a nonterminal state with zero task actions. | The all-terminal model has task-action count zero, complete action count one, bookkeeping index zero, and one generated self-loop per state. The nonterminal case fails with `invalid_action_count`. |
 | IF-MDP-ACC-016 | Query terminal and nonterminal states in a mixed model, valid states in empty-terminal and all-terminal models, and indices at or beyond the state count (including with no terminals). | Results match declared membership; a nonterminal zero-reward self-loop remains nonterminal. Every invalid index fails with `invalid_current_state`; repeated valid queries leave model data unchanged. |
+| IF-MDP-ACC-017 | Use a two-state, three-task-action model without terminals and stored index pairs `(0,0)`, `(0,2)`, `(1,0)` with certain rewards 10, 20, 30. Look up each stored pair, then missing pairs `(0,1)` and `(1,2)`. In the frozen terminal fixture, also query a task action at the terminal state and the bookkeeping action at a nonterminal state. | Stored pairs return nonempty optionals whose distributions have the corresponding expected rewards. Every missing or terminal-infeasible pair returns an empty optional without throwing. Lookup neither substitutes a greater stored key nor accesses the end iterator as a row. |
 
 Floating-point comparisons shall use the tolerance declared by each test. Tests shall compare the fixture results with the analytic values above rather than with a second implementation of the same production calculation.
 

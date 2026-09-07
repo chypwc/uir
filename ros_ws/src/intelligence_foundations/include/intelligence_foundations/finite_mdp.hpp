@@ -2,6 +2,7 @@
 #define INTELLIGENCE_FOUNDATIONS_FINITE_MDP_HPP_
 
 #include <cstddef>
+#include <functional>  // std::reference_wrapper, std::cref
 #include <optional>
 #include <span>
 #include <vector>
@@ -45,8 +46,9 @@ public:
   [[nodiscard]] std::span<const StateActionDistribution> rows() const noexcept;
 
   // Query p(s', r| s, a) given (s, a).
-  [[nodiscard]] const JointOutcomeDistribution & outcome_distribution(
-    StateIndex state, ActionIndex action) const;
+  [[nodiscard]]
+  std::optional<std::reference_wrapper<const JointOutcomeDistribution>>
+  find_outcome_distribution(StateIndex state, ActionIndex action) const;
 
   [[nodiscard]] bool is_terminal(StateIndex state) const;
 };

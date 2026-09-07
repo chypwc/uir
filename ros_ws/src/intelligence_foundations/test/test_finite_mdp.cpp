@@ -233,8 +233,13 @@ TEST(FiniteMdpTest, ReturnsDistributionForFeasibleStateActionPair)
   const auto rows = make_single_valid_row();
   const FiniteMdp mdp = FiniteMdp::from_rows(1U, 1U, rows);
 
-  const JointOutcomeDistribution & distribution =
-    mdp.outcome_distribution(StateIndex{0}, ActionIndex{0});
+  const auto result =
+    mdp.find_outcome_distribution(StateIndex{0}, ActionIndex{0});
+
+  ASSERT_TRUE(result.has_value());
+
+  // result-> accesses the contained std::reference_wrapper.
+  const JointOutcomeDistribution & distribution = result->get();
 
   EXPECT_EQ(distribution.state_count(), 1U);
   EXPECT_NEAR(distribution.expected_reward(), 0.0, 1.0e-12);
@@ -244,14 +249,9 @@ TEST(FiniteMdpTest, RejectsInfeasibleStateActionQuery)
 {
   const auto rows = make_single_valid_row();
   const FiniteMdp mdp = FiniteMdp::from_rows(1U, 2U, rows);
-
-  try {
-    static_cast<void>(mdp.outcome_distribution(StateIndex{0}, ActionIndex{1}));
-
-    FAIL() << "Expected lookup to reject an infeasible action.";
-  } catch (const FiniteMdpException & exception) {
-    EXPECT_EQ(exception.code(), FiniteMdpError::infeasible_state_action);
-  }
+  const auto result =
+    mdp.find_outcome_distribution(StateIndex{0}, ActionIndex{1});
+  EXPECT_FALSE(result.has_value());
 }
 
 TEST(FiniteMdpTest, RejectsInvalidStateInDistributionQuery)
@@ -260,7 +260,8 @@ TEST(FiniteMdpTest, RejectsInvalidStateInDistributionQuery)
   const FiniteMdp mdp = FiniteMdp::from_rows(1U, 1U, rows);
 
   try {
-    static_cast<void>(mdp.outcome_distribution(StateIndex{1}, ActionIndex{0}));
+    static_cast<void>(
+      mdp.find_outcome_distribution(StateIndex{1}, ActionIndex{0}));
 
     FAIL() << "Expected lookup to reject an invalid state index.";
   } catch (const FiniteMdpException & exception) {
@@ -274,7 +275,8 @@ TEST(FiniteMdpTest, RejectsInvalidActionInDistributionQuery)
   const FiniteMdp mdp = FiniteMdp::from_rows(1U, 1U, rows);
 
   try {
-    static_cast<void>(mdp.outcome_distribution(StateIndex{0}, ActionIndex{1}));
+    static_cast<void>(
+      mdp.find_outcome_distribution(StateIndex{0}, ActionIndex{1}));
 
     FAIL() << "Expected lookup to reject an invalid action index.";
   } catch (const FiniteMdpException & exception) {
@@ -286,43 +288,40 @@ TEST(FiniteMdpTest, LooksUpFirstMiddleAndLastRows)
 {
   const FiniteMdp mdp = make_lookup_fixture();
 
-  EXPECT_DOUBLE_EQ(
-    mdp.outcome_distribution(StateIndex{0}, ActionIndex{0}).expected_reward(),
-    10.0);
+  const auto first =
+    mdp.find_outcome_distribution(StateIndex{0}, ActionIndex{0});
+  ASSERT_TRUE(first.has_value());
+  EXPECT_EQ(first->get().expected_reward(), 10.0);
 
-  EXPECT_DOUBLE_EQ(
-    mdp.outcome_distribution(StateIndex{0}, ActionIndex{2}).expected_reward(),
-    20.0);
+  const auto middle =
+    mdp.find_outcome_distribution(StateIndex{0}, ActionIndex{2});
+  ASSERT_TRUE(middle.has_value());
+  EXPECT_DOUBLE_EQ(middle->get().expected_reward(), 20.0);
 
-  EXPECT_DOUBLE_EQ(
-    mdp.outcome_distribution(StateIndex{1}, ActionIndex{0}).expected_reward(),
-    30.0);
+  const auto last =
+    mdp.find_outcome_distribution(StateIndex{1}, ActionIndex{0});
+  ASSERT_TRUE(last.has_value());
+  EXPECT_DOUBLE_EQ(last->get().expected_reward(), 30.0);
 }
 
 TEST(FiniteMdpTest, RejectsMissingPairBetweenStoredKeys)
 {
   const FiniteMdp mdp = make_lookup_fixture();
 
-  try {
-    static_cast<void>(mdp.outcome_distribution(StateIndex{0}, ActionIndex{1}));
+  const auto result =
+    mdp.find_outcome_distribution(StateIndex{0}, ActionIndex{1});
 
-    FAIL() << "Expected lookup to reject a missing pair between stored keys.";
-  } catch (const FiniteMdpException & exception) {
-    EXPECT_EQ(exception.code(), FiniteMdpError::infeasible_state_action);
-  }
+  EXPECT_FALSE(result.has_value());
 }
 
 TEST(FiniteMdpTest, RejectsMissingPairAfterLastStoredKey)
 {
   const FiniteMdp mdp = make_lookup_fixture();
 
-  try {
-    static_cast<void>(mdp.outcome_distribution(StateIndex{1}, ActionIndex{2}));
+  const auto result =
+    mdp.find_outcome_distribution(StateIndex{1}, ActionIndex{2});
 
-    FAIL() << "Expected lookup to reject a missing pair after the last key.";
-  } catch (const FiniteMdpException & exception) {
-    EXPECT_EQ(exception.code(), FiniteMdpError::infeasible_state_action);
-  }
+  EXPECT_FALSE(result.has_value());
 }
 
 TEST(FiniteMdpTest, RejectsOutOfRangeTerminalState)
@@ -383,19 +382,22 @@ TEST(FiniteMdpTest, GeneratesTerminalRowAndPreservesIncomingReward)
   EXPECT_EQ(*mdp.bookkeeping_action(), ActionIndex{1});
   ASSERT_EQ(mdp.rows().size(), 2U);
 
-  const auto incoming_outcomes =
-    mdp.outcome_distribution(StateIndex{0}, ActionIndex{0}).outcomes();
+  const auto incoming_result =
+    mdp.find_outcome_distribution(StateIndex{0}, ActionIndex{0});
+  ASSERT_TRUE(incoming_result.has_value());
+
+  const auto incoming_outcomes = incoming_result->get().outcomes();
   ASSERT_EQ(incoming_outcomes.size(), 1U);
   EXPECT_EQ(incoming_outcomes[0].next_state, StateIndex{1});
   EXPECT_DOUBLE_EQ(incoming_outcomes[0].reward, 7.0);
   EXPECT_DOUBLE_EQ(incoming_outcomes[0].probability, 1.0);
-  EXPECT_DOUBLE_EQ(
-    mdp.outcome_distribution(StateIndex{0}, ActionIndex{0}).expected_reward(),
-    7.0);
+  EXPECT_DOUBLE_EQ(incoming_result->get().expected_reward(), 7.0);
 
-  const auto terminal_outcomes =
-    mdp.outcome_distribution(StateIndex{1}, ActionIndex{1}).outcomes();
+  const auto terminal_result =
+    mdp.find_outcome_distribution(StateIndex{1}, ActionIndex{1});
+  ASSERT_TRUE(terminal_result.has_value());
 
+  const auto terminal_outcomes = terminal_result->get().outcomes();
   ASSERT_EQ(terminal_outcomes.size(), 1U);
   EXPECT_EQ(terminal_outcomes[0].next_state, StateIndex{1});
   EXPECT_DOUBLE_EQ(terminal_outcomes[0].reward, 0.0);
@@ -512,8 +514,11 @@ TEST(FiniteMdpTest, AcceptsAllTerminalModelWithoutTaskActions)
   for (std::size_t i = 0U; i < 2U; ++i) {
     EXPECT_TRUE(mdp.is_terminal(StateIndex{i}));
 
-    const auto outcomes =
-      mdp.outcome_distribution(StateIndex{i}, ActionIndex{0}).outcomes();
+    const auto result =
+      mdp.find_outcome_distribution(StateIndex{i}, ActionIndex{0});
+    ASSERT_TRUE(result.has_value());
+
+    const auto outcomes = result->get().outcomes();
 
     ASSERT_EQ(outcomes.size(), 1U);
     EXPECT_EQ(outcomes[0].next_state, StateIndex{i});
@@ -555,13 +560,9 @@ TEST(FiniteMdpTest, KeepsTaskAndBookkeepingFeasibilitySeparate)
     // At state 0 only task action 0 is feasible; at state 1 only action 1 is.
     const ActionIndex infeasible_action{1U - state.value()};
     SCOPED_TRACE(::testing::Message() << "state index = " << state.value());
-    try {
-      static_cast<void>(mdp.outcome_distribution(state, infeasible_action));
 
-      FAIL() << "Expected rejection of an in-domain but infeasible action.";
-    } catch (const FiniteMdpException & exception) {
-      EXPECT_EQ(exception.code(), FiniteMdpError::infeasible_state_action);
-    }
+    const auto result = mdp.find_outcome_distribution(state, infeasible_action);
+    EXPECT_FALSE(result.has_value());
   }
 }
 
