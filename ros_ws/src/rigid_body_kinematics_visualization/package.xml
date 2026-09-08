@@ -11,8 +11,12 @@
     <depend>rigid_body_kinematics</depend>
     <depend>rclcpp</depend>
     <depend>visualization_msgs</depend>
+    <depend>geometry_msgs</depend>
+
+    <test_depend>ament_cmake_gtest</test_depend>
 
     <export>
         <build_type>ament_cmake</build_type>
     </export>
+
 </package>

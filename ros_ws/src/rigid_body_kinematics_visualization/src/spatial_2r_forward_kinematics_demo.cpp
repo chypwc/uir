@@ -1,20 +1,46 @@
 #include <Eigen/Core>
+#include <chrono>  // time durations: std::chrono::milliseconds
+#include <cmath>
 #include <cstdlib>
 #include <exception>
+#include <iomanip>  // std::setprecision
 #include <iostream>
+#include <memory>  // smart pointers: std::shared_ptr, std::make_shared
 #include <numbers>
+#include <sstream>  // std::ostringstream
+#include <stdexcept>
 
+#include "geometry_msgs/msg/point.hpp"  // geometry_msgs::msg::Point
+#include "rclcpp/rclcpp.hpp"            // ROS 2 C++ interface
 #include "rigid_body_kinematics/forward_kinematics.hpp"
 #include "rigid_body_kinematics/joint_definition.hpp"
 #include "rigid_body_kinematics/joint_limits.hpp"
 #include "rigid_body_kinematics/serial_chain_model.hpp"
 #include "rigid_body_kinematics/transform3.hpp"
+#include "rigid_body_kinematics_visualization/spatial_2r_markers.hpp"
+#include "visualization_msgs/msg/marker.hpp"  // Describe a visual object for RViz
+#include "visualization_msgs/msg/marker_array.hpp"  // a collection of markers
 
-int main()
+int main(int argc, char * argv[])
 {
   namespace rbk = rigid_body_kinematics;
+  using MarkerArray = visualization_msgs::msg::MarkerArray;
+  using rigid_body_kinematics_visualization::make_spatial_2r_markers;
 
   try {
+    // Initialize ROS and create the node
+    rclcpp::init(argc, argv);
+
+    // Creates a node named spatial_2r_forward_kinematics_demo.
+    const auto node =
+      std::make_shared<rclcpp::Node>("spatial_2r_forward_kinematics_demo");
+
+    // Print a ROS log message using that node's logger.
+    RCLCPP_INFO(node->get_logger(), "Spatial 2R node started.");
+
+    /*
+    Compute end effector's pose.
+    */
     const double first_link_length_metres = 2.0;
     const double second_link_length_metres = 1.0;
 
@@ -45,27 +71,74 @@ int main()
       rbk::SerialChainModel::from_home_and_joints(
         rbk::Transform3::from_matrix(end_home_matrix), {joint_1, joint_2});
 
-    Eigen::VectorXd joint_coordinates(2);
-    joint_coordinates << std::numbers::pi / 2.0, -std::numbers::pi / 2.0;
+    const MarkerArray markers =
+      make_spatial_2r_markers(elbow_model, end_model, 1.0, node->now());
 
-    Eigen::VectorXd elbow_coordinates(1);
-    elbow_coordinates(0) = joint_coordinates(0);
+    std::cout << "Prepared " << markers.markers.size() << " marker messages.\n";
 
-    const rbk::Transform3 elbow_pose =
-      rbk::space_form_forward_kinematics(elbow_model, elbow_coordinates);
+    /*
+    Create a publisher.
+    MarkerArray: the message type this publisher sends.
+    "~/markers": topic name relative to the node's name. With our default node name,
+            it becomes /spatial_2r_forward_kinematics_demo/markers.
+    QoS(1): heeps a history of one message.
+    reliable(): requests reliable delivery.
+    durability_volatile(): does not retail old message for subscribers. Our repeated
+                          publication supplies fresh ones.
+    */
+    const auto publisher = node->create_publisher<MarkerArray>(
+      "~/markers", rclcpp::QoS(1).reliable().durability_volatile());
 
-    const rbk::Transform3 end_pose =
-      rbk::space_form_forward_kinematics(end_model, joint_coordinates);
+    /*
+    Add a timer.
+    Each callback gives both markers the same current timestamp,
+    then publishes the complete array.
+    Keeping timer in a local variable keeps the timer alive while spin(node) runs.
+    The timer requests a callback every 50ms, or 20 times per second.
+    node, publisher: shared pointers, keeping those objects available.
+    */
 
-    const Eigen::Vector3d elbow_position_metres =
-      elbow_pose.transform_point(Eigen::Vector3d::Zero());
+    const bool animate = node->declare_parameter<bool>("animate", false);
 
-    std::cout << "Elbow position in world [m]: "
-              << elbow_position_metres.transpose() << '\n';
-    std::cout << "End-effector transform T_se:\n" << end_pose.matrix() << '\n';
+    const auto start_time = std::chrono::steady_clock::now();
+
+    const auto timer = node->create_wall_timer(
+      std::chrono::milliseconds(50),
+      [node, publisher, elbow_model, end_model, animate, start_time]() {
+        double u = 1.0;
+
+        if (animate) {
+          const double elapsed_seconds =
+            std::chrono::duration<double>(
+              std::chrono::steady_clock::now() - start_time)
+              .count();
+
+          const double cycle_seconds = std::fmod(elapsed_seconds, 8.0);
+
+          u = cycle_seconds < 4.0 ? cycle_seconds / 4.0
+                                  : (8.0 - cycle_seconds) / 4.0;
+        }
+
+        const auto message =
+          make_spatial_2r_markers(elbow_model, end_model, u, node->now());
+
+        publisher->publish(message);
+      });
+
+    /*
+    Keep the node running
+    */
+    rclcpp::spin(node);  // Keep processing ROS events until shutdown.
+    rclcpp::shutdown();
+    return EXIT_SUCCESS;
 
   } catch (const std::exception & error) {
     std::cerr << "Spatial 2R evaluation failed: " << error.what() << '\n';
+
+    if (rclcpp::ok()) {
+      rclcpp::shutdown();
+    }
+
     return EXIT_FAILURE;
   }
 }

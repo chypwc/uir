@@ -509,7 +509,7 @@ window.Quarto = {
   <li><a href="#accessing-either-joint-kind" id="toc-accessing-either-joint-kind" class="nav-link" data-scroll-target="#accessing-either-joint-kind"><span class="header-section-number">11.4.2</span> Accessing either joint kind</a></li>
   <li><a href="#evaluating-the-ordered-product" id="toc-evaluating-the-ordered-product" class="nav-link" data-scroll-target="#evaluating-the-ordered-product"><span class="header-section-number">11.4.3</span> Evaluating the ordered product</a></li>
   <li><a href="#sec-general-kinematics-impl-spatial-2r" id="toc-sec-general-kinematics-impl-spatial-2r" class="nav-link" data-scroll-target="#sec-general-kinematics-impl-spatial-2r"><span class="header-section-number">11.4.4</span> Worked example: spatial two-revolute-joint motion</a></li>
-  <li><a href="#verification-meaning-3" id="toc-verification-meaning-3" class="nav-link" data-scroll-target="#verification-meaning-3"><span class="header-section-number">11.4.5</span> Verification meaning</a></li>
+  <li><a href="#sec-general-kinematics-impl-rviz" id="toc-sec-general-kinematics-impl-rviz" class="nav-link" data-scroll-target="#sec-general-kinematics-impl-rviz"><span class="header-section-number">11.4.5</span> RViz implementation example: displaying the spatial 2R arm</a></li>
   <li><a href="#sec-general-kinematics-impl-cycle-connections" id="toc-sec-general-kinematics-impl-cycle-connections" class="nav-link" data-scroll-target="#sec-general-kinematics-impl-cycle-connections"><span class="header-section-number">11.4.6</span> How the classes and functions connect</a></li>
   </ul></li>
   </ul>
@@ -1397,10 +1397,454 @@ u\begin{bmatrix}\pi/2\\-\pi/2\end{bmatrix}\mathrm{rad}.
 <p>Choosing <span class="math inline">\(q_2=+\pi/2\)</span> instead would put the end effector at <span class="math inline">\((0,2,-1)\,\mathrm m\)</span>. In the stated motion, the arm swings sideways and lifts its second link while the end-effector orientation changes. These closed-form values provide an independent reference for pose and display-coordinate comparisons; they do not replace the general product-of-exponentials calculation.</p>
 </section>
 </section>
-<section id="verification-meaning-3" class="level3" data-number="11.4.5">
-<h3 data-number="11.4.5" class="anchored" data-anchor-id="verification-meaning-3"><span class="header-section-number">11.4.5</span> Verification meaning</h3>
-<p>The forward-pose tests exercise the home-pose identity at zero, a quarter turn about the space origin, rotation about an offset axis line, translation along a normalized negative direction, an out-of-plane rotation about the space <span class="math inline">\(x\)</span>-axis, and the mixed chain above. The offset-axis case checks the sign and role of the revolute screw’s upper block; the out-of-plane case guards against an accidentally planar implementation. The mixed chain checks that a proximal rotation carries the distal extension. The nonzero examples use independently specified expected matrices rather than another call to the same forward evaluator.</p>
-<p>Pose comparison uses the relative transform <span class="math inline">\(\mathbf T_{\mathrm{err}}=\mathbf T_{\mathrm{expected}}^{-1}\mathbf T_{\mathrm{actual}}\)</span>, where the subscripts identify the independently expected and computed poses. Its translation column measures position discrepancy along the expected end-effector axes. The angular block of its principal logarithm measures orientation discrepancy. The tests compare the translation norm with <span class="math inline">\(10^{-12}\,\mathrm m\)</span> and the angular norm with <span class="math inline">\(10^{-12}\)</span> radians separately; they do not combine metre and radian errors into one scalar norm. These cases provide evidence for their particular geometric properties, not a proof for every possible chain or numerical magnitude.</p>
+<section id="sec-general-kinematics-impl-rviz" class="level3" data-number="11.4.5">
+<h3 data-number="11.4.5" class="anchored" data-anchor-id="sec-general-kinematics-impl-rviz"><span class="header-section-number">11.4.5</span> RViz implementation example: displaying the spatial 2R arm</h3>
+<p>The arm in <a href="#sec-general-kinematics-impl-spatial-2r" class="quarto-xref"><span>Section 11.4.4</span></a> can be displayed by converting its calculated poses into drawing messages. The numerical core calculates geometry; a separate ROS 2 program publishes the drawing instructions, and RViz displays them. All displayed points are measured from its origin and expressed along its axes in metres. This is a prescribed kinematic animation, not a simulation of forces or a controller.</p>
+<div id="fig-spatial-2r-rviz-static" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Two cyan links with orange joint centres, labelled end-effector axes, and numerical joint-angle and position text.">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-spatial-2r-rviz-static-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../figures/spatial_2r_space_poe_rviz.png" class="img-fluid figure-img" style="width:100.0%" alt="Two cyan links with orange joint centres, labelled end-effector axes, and numerical joint-angle and position text.">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-spatial-2r-rviz-static-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;11.1: Static spatial 2R pose at joint angles <span class="math inline">\((\pi/2,-\pi/2)\)</span> radians. The elbow is at <span class="math inline">\((0,2,0)\)</span> metres and the end effector at <span class="math inline">\((0,2,1)\)</span> metres in world coordinates.
+</figcaption>
+</figure>
+</div>
+<section id="construct-the-fixed-models" class="level4">
+<h4 class="anchored" data-anchor-id="construct-the-fixed-models">Construct the fixed models</h4>
+<p>The elbow is carried by joint 1 alone, whereas the end effector is carried by both joints. Their home orientations are identity, with home positions <span class="math inline">\((2,0,0)\)</span> and <span class="math inline">\((3,0,0)\)</span> metres, respectively.</p>
+<p><strong>Production excerpt — model construction.</strong> The namespace alias, geometry constants, and home matrices are shown. Joint factory calls are summarized at their point of omission; surrounding node setup and logging are omitted.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> rbk <span class="op">=</span> rigid_body_kinematics<span class="op">;</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="dt">double</span> first_link_length_metres <span class="op">=</span> <span class="fl">2.0</span><span class="op">;</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="dt">double</span> second_link_length_metres <span class="op">=</span> <span class="fl">1.0</span><span class="op">;</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="co">// Omitted: construct joint_1 about +z through the origin, and joint_2</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="co">// about +y through (2, 0, 0) m at home, both with limits [-pi, pi].</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>Eigen<span class="op">::</span>Matrix4d elbow_home_matrix <span class="op">=</span> Eigen<span class="op">::</span>Matrix4d<span class="op">::</span>Identity<span class="op">();</span></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>elbow_home_matrix<span class="op">(</span><span class="dv">0</span><span class="op">,</span> <span class="dv">3</span><span class="op">)</span> <span class="op">=</span> first_link_length_metres<span class="op">;</span></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>Eigen<span class="op">::</span>Matrix4d end_home_matrix <span class="op">=</span> Eigen<span class="op">::</span>Matrix4d<span class="op">::</span>Identity<span class="op">();</span></span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>end_home_matrix<span class="op">(</span><span class="dv">0</span><span class="op">,</span> <span class="dv">3</span><span class="op">)</span> <span class="op">=</span></span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>  first_link_length_metres <span class="op">+</span> second_link_length_metres<span class="op">;</span></span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> rbk<span class="op">::</span>SerialChainModel elbow_model <span class="op">=</span></span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>  rbk<span class="op">::</span>SerialChainModel<span class="op">::</span>from_home_and_joints<span class="op">(</span></span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>    rbk<span class="op">::</span>Transform3<span class="op">::</span>from_matrix<span class="op">(</span>elbow_home_matrix<span class="op">),</span> <span class="op">{</span>joint_1<span class="op">});</span></span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> rbk<span class="op">::</span>SerialChainModel end_model <span class="op">=</span></span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>  rbk<span class="op">::</span>SerialChainModel<span class="op">::</span>from_home_and_joints<span class="op">(</span></span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>    rbk<span class="op">::</span>Transform3<span class="op">::</span>from_matrix<span class="op">(</span>end_home_matrix<span class="op">),</span> <span class="op">{</span>joint_1<span class="op">,</span> joint_2<span class="op">});</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The code specializes the geometric model <span class="math inline">\(\mathcal M=(\mathbf M,({}^{s}\mathbf S_j)_{j=1}^{n})\)</span> from <a href="#sec-general-kinematics-impl-serial-model" class="quarto-xref"><span>Section 11.3</span></a> to the geometry in <a href="#sec-general-kinematics-impl-spatial-2r" class="quarto-xref"><span>Section 11.4.4</span></a>. Define an auxiliary elbow frame <span class="math inline">\(\{\ell\}\)</span> whose origin is the elbow and whose axes follow link 1, so its orientation is <span class="math inline">\(\mathbf R_z(q_1)\)</span>. It does not include joint 2’s rotation. Let <span class="math inline">\(\mathbf M_\ell,\mathbf M_e\in SE(3)\)</span> be the home poses of this frame and the end-effector frame relative to <span class="math inline">\(\{s\}\)</span>:</p>
+<p><span class="math display">\[
+\mathbf M_\ell=
+\begin{bmatrix}
+\mathbf I_3&amp;{}^{s}\mathbf p_{\ell,0}\\
+\mathbf0_3^{\mathsf T}&amp;1
+\end{bmatrix},
+\qquad
+\mathbf M_e=
+\begin{bmatrix}
+\mathbf I_3&amp;{}^{s}\mathbf p_{e,0}\\
+\mathbf0_3^{\mathsf T}&amp;1
+\end{bmatrix}.
+\]</span></p>
+<p>Here <span class="math inline">\({}^{s}\mathbf p_{\ell,0}=(L_1,0,0)^{\mathsf T}\)</span> and <span class="math inline">\({}^{s}\mathbf p_{e,0}=(L_1+L_2,0,0)^{\mathsf T}\)</span> are the home positions in metres from the worked example; <span class="math inline">\(\mathbf I_3\)</span> is their identity home orientation. The subscript <span class="math inline">\(\ell\)</span> selects the elbow and <span class="math inline">\(e\)</span> the end effector. The code-to-mathematics mapping is:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Code value</th>
+<th>Mathematical quantity</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>first_link_length_metres</code>, <code>second_link_length_metres</code></td>
+<td><span class="math inline">\(L_1=2\,\mathrm m\)</span>, <span class="math inline">\(L_2=1\,\mathrm m\)</span></td>
+</tr>
+<tr class="even">
+<td><code>elbow_home_matrix</code></td>
+<td>Matrix representation of <span class="math inline">\(\mathbf M_\ell\)</span></td>
+</tr>
+<tr class="odd">
+<td><code>end_home_matrix</code></td>
+<td>Matrix representation of <span class="math inline">\(\mathbf M_e\)</span>, the end-effector home pose <span class="math inline">\(\mathbf M\)</span></td>
+</tr>
+<tr class="even">
+<td><code>elbow_model</code></td>
+<td><span class="math inline">\(\mathcal M_\ell=(\mathbf M_\ell,({}^{s}\mathbf S_1))\)</span>: one ordered joint</td>
+</tr>
+<tr class="odd">
+<td><code>end_model</code></td>
+<td><span class="math inline">\(\mathcal M_e=(\mathbf M_e,({}^{s}\mathbf S_1,{}^{s}\mathbf S_2))\)</span>: two ordered joints</td>
+</tr>
+</tbody>
+</table>
+<p>The model objects also retain the joints’ limits, as explained in <a href="#sec-general-kinematics-impl-serial-model" class="quarto-xref"><span>Section 11.3</span></a>. They own fixed reference data and are constructed once; neither stores the current pose. Joint 2’s supplied axis remains its home description, not its current world direction after joint 1 rotates.</p>
+</section>
+<section id="evaluate-one-complete-drawing-update" class="level4">
+<h4 class="anchored" data-anchor-id="evaluate-one-complete-drawing-update">Evaluate one complete drawing update</h4>
+<p>The dimensionless parameter <span class="math inline">\(u\in[0,1]\)</span> selects how far the arm has moved along the joint-coordinate path from the straight home configuration to the bent configuration. Using the motion defined in <a href="#sec-general-kinematics-impl-spatial-2r" class="quarto-xref"><span>Section 11.4.4</span></a>, the two-entry joint-coordinate column is</p>
+<p><span class="math display">\[
+\mathbf q(u)=
+\begin{bmatrix}q_1(u)\\q_2(u)\end{bmatrix}
+=u\begin{bmatrix}\pi/2\\-\pi/2\end{bmatrix}\ \mathrm{rad}.
+\]</span></p>
+<p>Substituting these angles into the end-effector pose map gives</p>
+<p><span class="math display">\[
+\mathbf T_{se}\bigl(q_1(u),q_2(u)\bigr)
+=\mathbf T_{se}\!\left(u\frac{\pi}{2},-u\frac{\pi}{2}\right).
+\]</span></p>
+<p>The arguments are joint angles in radians. The fixed end-effector model supplies the geometry; evaluating it at these angles returns the complete <span class="math inline">\(4\times4\)</span> pose, containing both orientation and position. The elbow model uses only the first angle, <span class="math inline">\(q_1=u\pi/2\)</span> radians. Changing <span class="math inline">\(u\)</span> changes the queries, not either model’s stored geometry.</p>
+<p>One call receives one value of <span class="math inline">\(u\)</span> and draws one configuration. Animation comes from calling it repeatedly with changing values; <span class="math inline">\(u\)</span> itself is not time and does not specify a speed. The timer supplies the time-dependent choice below. The separate timestamp labels the drawing update but does not enter the pose calculation.</p>
+<pre class="text"><code>Given the fixed models, u, and a timestamp:
+  Reject a non-finite u or a value outside [0, 1].
+  Form the two joint angles and the elbow's one-angle query.
+  Evaluate both poses through the forward-kinematics core.
+  Build joint spheres, links, axis arrows, and text from those poses.
+  Return the complete marker array.
+If validation or evaluation throws, return no marker array.</code></pre>
+<p>The function declaration is:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>visualization_msgs<span class="op">::</span>msg<span class="op">::</span>MarkerArray make_spatial_2r_markers<span class="op">(</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> rigid_body_kinematics<span class="op">::</span>SerialChainModel <span class="op">&amp;</span> elbow_model<span class="op">,</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> rigid_body_kinematics<span class="op">::</span>SerialChainModel <span class="op">&amp;</span> end_model<span class="op">,</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">double</span> u<span class="op">,</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> rclcpp<span class="op">::</span>Time <span class="op">&amp;</span> stamp<span class="op">);</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>make_spatial_2r_markers</code> borrows both models and the timestamp, and returns an owned <code>MarkerArray</code>. A ROS message is a typed data object that can be sent between programs. Here each <code>Marker</code> describes a drawable object or group of objects; a <code>MarkerArray</code> collects the drawing for one update. The helper constructs messages without creating a node or publishing anything, so a test can call it directly.</p>
+<p><strong>Production excerpt — coordinates and poses.</strong> The input guard, later marker construction, and final return are omitted; this excerpt assumes finite <span class="math inline">\(u\in[0,1]\)</span>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> rbk <span class="op">=</span> rigid_body_kinematics<span class="op">;</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>Eigen<span class="op">::</span>VectorXd joint_coordinates<span class="op">(</span><span class="dv">2</span><span class="op">);</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>joint_coordinates <span class="op">&lt;&lt;</span> u <span class="op">*</span> <span class="bu">std::</span>numbers::pi <span class="op">/</span> <span class="fl">2.0</span><span class="op">,</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">-</span>u <span class="op">*</span> <span class="bu">std::</span>numbers::pi <span class="op">/</span> <span class="fl">2.0</span><span class="op">;</span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>Eigen<span class="op">::</span>VectorXd elbow_coordinates<span class="op">(</span><span class="dv">1</span><span class="op">);</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>elbow_coordinates<span class="op">(</span><span class="dv">0</span><span class="op">)</span> <span class="op">=</span> joint_coordinates<span class="op">(</span><span class="dv">0</span><span class="op">);</span></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> rbk<span class="op">::</span>Transform3 elbow_pose <span class="op">=</span></span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>  rbk<span class="op">::</span>space_form_forward_kinematics<span class="op">(</span>elbow_model<span class="op">,</span> elbow_coordinates<span class="op">);</span></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> rbk<span class="op">::</span>Transform3 end_pose <span class="op">=</span></span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>  rbk<span class="op">::</span>space_form_forward_kinematics<span class="op">(</span>end_model<span class="op">,</span> joint_coordinates<span class="op">);</span></span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> Eigen<span class="op">::</span>Vector3d elbow_position_metres <span class="op">=</span></span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>  elbow_pose<span class="op">.</span>transform_point<span class="op">(</span>Eigen<span class="op">::</span>Vector3d<span class="op">::</span>Zero<span class="op">());</span></span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> Eigen<span class="op">::</span>Vector3d end_position_metres <span class="op">=</span></span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>  end_pose<span class="op">.</span>transform_point<span class="op">(</span>Eigen<span class="op">::</span>Vector3d<span class="op">::</span>Zero<span class="op">());</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Let <span class="math inline">\(\mathbf T_{s\ell}(q_1)\in SE(3)\)</span> denote the auxiliary elbow frame’s current pose relative to <span class="math inline">\(\{s\}\)</span>. The end-effector pose is the previously defined <span class="math inline">\(\mathbf T_{se}(q_1,q_2)\)</span>. Both map local point coordinates into <span class="math inline">\(\{s\}\)</span> by left multiplication. Applying the space-form product from <a href="#sec-general-kinematics-impl-space-forward-kinematics" class="quarto-xref"><span>Section 11.4</span></a> to the two models gives the direct mapping:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Code value</th>
+<th>Mathematical quantity</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>joint_coordinates</code></td>
+<td><span class="math inline">\(\mathbf q(u)=u[\pi/2,-\pi/2]^{\mathsf T}\)</span> in radians</td>
+</tr>
+<tr class="even">
+<td><code>elbow_coordinates</code></td>
+<td>The one-entry column <span class="math inline">\([q_1]\)</span> in radians</td>
+</tr>
+<tr class="odd">
+<td><code>elbow_pose</code></td>
+<td><span class="math inline">\(\mathbf T_{s\ell}(q_1)=\exp(\widehat{{}^{s}\mathbf S_1q_1})\mathbf M_\ell\)</span></td>
+</tr>
+<tr class="even">
+<td><code>end_pose</code></td>
+<td><span class="math inline">\(\mathbf T_{se}(q_1,q_2)=\exp(\widehat{{}^{s}\mathbf S_1q_1})\exp(\widehat{{}^{s}\mathbf S_2q_2})\mathbf M_e\)</span></td>
+</tr>
+<tr class="odd">
+<td><code>elbow_position_metres</code></td>
+<td><span class="math inline">\({}^{s}\mathbf p_\ell(q_1)=\mathbf R_z(q_1)[L_1,0,0]^{\mathsf T}\)</span></td>
+</tr>
+<tr class="even">
+<td><code>end_position_metres</code></td>
+<td><span class="math inline">\({}^{s}\mathbf p_e(q_1,q_2)\)</span>, the position derived in <a href="#sec-general-kinematics-impl-spatial-2r" class="quarto-xref"><span>Section 11.4.4</span></a></td>
+</tr>
+</tbody>
+</table>
+<p>The hat and exponential are the same linear-first operations used in the forward-kinematics core. Each position is a three-entry column in metres, measured from the world origin and expressed along world axes. The base remains the fixed world origin.</p>
+<section id="a-pose-locates-an-entire-frame" class="level5">
+<h5 class="anchored" data-anchor-id="a-pose-locates-an-entire-frame">A pose locates an entire frame</h5>
+<p>At a selected joint configuration, the elbow pose has the block form</p>
+<p><span class="math display">\[
+\mathbf T_{s\ell}
+=
+\begin{bmatrix}
+\mathbf R_{s\ell}&amp;{}^{s}\mathbf p_\ell\\
+\mathbf0_3^{\mathsf T}&amp;1
+\end{bmatrix}.
+\]</span></p>
+<ul>
+<li><span class="math inline">\(\mathbf R_{s\ell}\in SO(3)\)</span> is the dimensionless <span class="math inline">\(3\times3\)</span> orientation matrix of the auxiliary elbow frame relative to <span class="math inline">\(\{s\}\)</span>.</li>
+<li><span class="math inline">\({}^{s}\mathbf p_\ell\in\mathbb R^3\)</span> gives that frame’s origin position in <span class="math inline">\(\{s\}\)</span>, in metres.</li>
+</ul>
+<p>For the same physical point, let <span class="math inline">\({}^{\ell}\mathbf x\in\mathbb R^3\)</span> be its coordinates measured from the elbow-frame origin along the elbow-frame axes, and <span class="math inline">\({}^{s}\mathbf x\in\mathbb R^3\)</span> its coordinates measured from the world origin along world axes. Both columns are in metres. The pose converts between them:</p>
+<p><span class="math display">\[
+{}^{s}\mathbf x
+=\mathbf R_{s\ell}\,{}^{\ell}\mathbf x+{}^{s}\mathbf p_\ell.
+\]</span></p>
+<p>We placed the auxiliary elbow frame’s origin at the elbow itself. Therefore, to locate the elbow, choose <span class="math inline">\({}^{\ell}\mathbf x=\mathbf0_3\)</span>:</p>
+<p><span class="math display">\[
+{}^{s}\mathbf x
+=\mathbf R_{s\ell}\mathbf0_3+{}^{s}\mathbf p_\ell
+={}^{s}\mathbf p_\ell.
+\]</span></p>
+<p>This is exactly the calculation performed by the call from the preceding excerpt:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>elbow_pose<span class="op">.</span>transform_point<span class="op">(</span>Eigen<span class="op">::</span>Vector3d<span class="op">::</span>Zero<span class="op">());</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>It asks: “Where is the elbow frame’s origin in <span class="math inline">\(\{s\}\)</span> ?” The zero column is a point expressed in the elbow frame, not the world origin.</p>
+<p>The end-effector call applies the same reasoning to the origin of <span class="math inline">\(\{e\}\)</span>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>end_pose<span class="op">.</span>transform_point<span class="op">(</span>Eigen<span class="op">::</span>Vector3d<span class="op">::</span>Zero<span class="op">());</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Its result is <span class="math inline">\(\mathbf R_{se}\mathbf0_3+{}^{s}\mathbf p_e={}^{s}\mathbf p_e\)</span>. The two calls use identical local coordinates but locate different physical points because each pose describes a different frame. The function does not recognize an elbow or a tool; the result is the desired position because we chose that frame’s origin at the desired point.</p>
+</section>
+</section>
+<section id="convert-positions-into-spheres-and-links" class="level4">
+<h4 class="anchored" data-anchor-id="convert-positions-into-spheres-and-links">Convert positions into spheres and links</h4>
+<p>This complete helper copies the three coordinates into the ROS representation without changing their units or frame:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>geometry_msgs<span class="op">::</span>msg<span class="op">::</span>Point to_point_message<span class="op">(</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> Eigen<span class="op">::</span>Vector3d <span class="op">&amp;</span> position_metres<span class="op">)</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  geometry_msgs<span class="op">::</span>msg<span class="op">::</span>Point point<span class="op">;</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>  point<span class="op">.</span>x <span class="op">=</span> position_metres<span class="op">.</span>x<span class="op">();</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>  point<span class="op">.</span>y <span class="op">=</span> position_metres<span class="op">.</span>y<span class="op">();</span></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>  point<span class="op">.</span>z <span class="op">=</span> position_metres<span class="op">.</span>z<span class="op">();</span></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> point<span class="op">;</span></span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>geometry_msgs::msg::Point</code> stores three coordinates. The surrounding marker supplies their frame name; a point message alone does not identify a coordinate frame.</p>
+<p><strong>Production excerpt — joint centres and links.</strong> Colour assignments are omitted; production uses opaque orange spheres and cyan links.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="kw">using</span> Marker <span class="op">=</span> visualization_msgs<span class="op">::</span>msg<span class="op">::</span>Marker<span class="op">;</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="kw">using</span> MarkerArray <span class="op">=</span> visualization_msgs<span class="op">::</span>msg<span class="op">::</span>MarkerArray<span class="op">;</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>Marker joints<span class="op">;</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>joints<span class="op">.</span>header<span class="op">.</span>frame_id <span class="op">=</span> <span class="st">"world"</span><span class="op">;</span></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>joints<span class="op">.</span>header<span class="op">.</span>stamp <span class="op">=</span> stamp<span class="op">;</span></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>joints<span class="op">.</span>ns <span class="op">=</span> <span class="st">"spatial_2r_fk"</span><span class="op">;</span></span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>joints<span class="op">.</span>id <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>joints<span class="op">.</span>type <span class="op">=</span> Marker<span class="op">::</span>SPHERE_LIST<span class="op">;</span></span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>joints<span class="op">.</span>action <span class="op">=</span> Marker<span class="op">::</span>ADD<span class="op">;</span></span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>joints<span class="op">.</span>pose<span class="op">.</span>orientation<span class="op">.</span>w <span class="op">=</span> <span class="fl">1.0</span><span class="op">;</span></span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>joints<span class="op">.</span>scale<span class="op">.</span>x <span class="op">=</span> <span class="fl">0.12</span><span class="op">;</span>  <span class="co">// diameter</span></span>
+<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a>joints<span class="op">.</span>scale<span class="op">.</span>y <span class="op">=</span> <span class="fl">0.12</span><span class="op">;</span></span>
+<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a>joints<span class="op">.</span>scale<span class="op">.</span>z <span class="op">=</span> <span class="fl">0.12</span><span class="op">;</span></span>
+<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a><span class="co">// Omitted: orange colour and fully opaque alpha.</span></span>
+<span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a>joints<span class="op">.</span>lifetime <span class="op">=</span> rclcpp<span class="op">::</span>Duration<span class="op">::</span>from_seconds<span class="op">(</span><span class="fl">0.5</span><span class="op">);</span></span>
+<span id="cb27-17"><a href="#cb27-17" aria-hidden="true" tabindex="-1"></a>joints<span class="op">.</span>points <span class="op">=</span> <span class="op">{</span></span>
+<span id="cb27-18"><a href="#cb27-18" aria-hidden="true" tabindex="-1"></a>  to_point_message<span class="op">(</span>Eigen<span class="op">::</span>Vector3d<span class="op">::</span>Zero<span class="op">()),</span></span>
+<span id="cb27-19"><a href="#cb27-19" aria-hidden="true" tabindex="-1"></a>  to_point_message<span class="op">(</span>elbow_position_metres<span class="op">),</span></span>
+<span id="cb27-20"><a href="#cb27-20" aria-hidden="true" tabindex="-1"></a>  to_point_message<span class="op">(</span>end_position_metres<span class="op">),</span></span>
+<span id="cb27-21"><a href="#cb27-21" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span>
+<span id="cb27-22"><a href="#cb27-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-23"><a href="#cb27-23" aria-hidden="true" tabindex="-1"></a>Marker links <span class="op">=</span> joints<span class="op">;</span></span>
+<span id="cb27-24"><a href="#cb27-24" aria-hidden="true" tabindex="-1"></a>links<span class="op">.</span>id <span class="op">=</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb27-25"><a href="#cb27-25" aria-hidden="true" tabindex="-1"></a>links<span class="op">.</span>type <span class="op">=</span> Marker<span class="op">::</span>LINE_STRIP<span class="op">;</span></span>
+<span id="cb27-26"><a href="#cb27-26" aria-hidden="true" tabindex="-1"></a>links<span class="op">.</span>scale<span class="op">.</span>x <span class="op">=</span> <span class="fl">0.05</span><span class="op">;</span></span>
+<span id="cb27-27"><a href="#cb27-27" aria-hidden="true" tabindex="-1"></a><span class="co">// Omitted: cyan link colour.</span></span>
+<span id="cb27-28"><a href="#cb27-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-29"><a href="#cb27-29" aria-hidden="true" tabindex="-1"></a>MarkerArray markers<span class="op">;</span></span>
+<span id="cb27-30"><a href="#cb27-30" aria-hidden="true" tabindex="-1"></a>markers<span class="op">.</span>markers <span class="op">=</span> <span class="op">{</span>joints<span class="op">,</span> links<span class="op">};</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>joints.header.frame_id = "world"</code> names the reference frame for the marker. In this example, we choose <code>world</code> as the ROS name for the fixed mathematical space frame <span class="math inline">\(\{s\}\)</span>: its origin is the robot base, and its axes are <span class="math inline">\(x_s,y_s,z_s\)</span> from the worked example. Because the marker pose is identity, its point coordinates are expressed directly in that frame, in metres.</p>
+<p>The string <code>"world"</code> is a name we choose, not a special keyword that creates a coordinate frame or transforms coordinates. It tells RViz how to interpret the supplied geometry. Setting RViz’s <strong>Fixed Frame</strong> to the same name lets it display these world-frame coordinates without a transform between different frames.</p>
+<p><code>SPHERE_LIST</code> draws a sphere of diameter <span class="math inline">\(0.12\,\mathrm m\)</span> at each point. <code>LINE_STRIP</code> joins consecutive points, producing base → elbow → end effector; its <code>scale.x</code> is the <span class="math inline">\(0.05\,\mathrm m\)</span> line width. These dimensions describe the illustration, not physical link thickness.</p>
+<p><code>ns</code> is a grouping string. Namespace and ID together identify a marker: publishing the same pair updates it instead of accumulating another object. The <span class="math inline">\(0.5\)</span>-second lifetime lets markers expire if updates stop while the viewer’s clock advances. Copies inherit the common timestamp.</p>
+<p>The marker pose has zero translation by default and quaternion <span class="math inline">\((x,y,z,w)=(0,0,0,1)\)</span> after setting <code>orientation.w</code>.<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> This is identity orientation. Point-based markers must retain identity poses because their points already contain world coordinates; another pose would transform them again. Field meanings follow the <a href="https://docs.ros.org/en/jazzy/Tutorials/Intermediate/RViz/Marker-Display-types/Marker-Display-types.html">ROS 2 Jazzy marker documentation</a>.</p>
+</section>
+<section id="draw-orientation-arrows-and-labels" class="level4">
+<h4 class="anchored" data-anchor-id="draw-orientation-arrows-and-labels">Draw orientation arrows and labels</h4>
+<p>Let <span class="math inline">\(\mathbf e_i\in\mathbb R^3\)</span> be the dimensionless Cartesian unit column for local end-effector axis <span class="math inline">\(i\)</span>, where code indices <span class="math inline">\(i=0,1,2\)</span> select <span class="math inline">\(x,y,z\)</span>. Its unit direction in <code>world</code> is <span class="math inline">\(\mathbf R_{se}\mathbf e_i\)</span>. For arrow length <span class="math inline">\(\ell_{\mathrm a}=0.3\,\mathrm m\)</span> and label gap <span class="math inline">\(d_{\mathrm a}=0.08\,\mathrm m\)</span>, define the world-frame tip and label positions, both three-entry columns in metres, by</p>
+<p><span class="math display">\[
+\begin{aligned}
+{}^{s}\mathbf p_{\mathrm{tip},i}
+&amp;={}^{s}\mathbf p_e+\ell_{\mathrm a}\mathbf R_{se}\mathbf e_i,\\
+{}^{s}\mathbf p_{\mathrm{label},i}
+&amp;={}^{s}\mathbf p_{\mathrm{tip},i}
++d_{\mathrm a}\mathbf R_{se}\mathbf e_i.
+\end{aligned}
+\]</span></p>
+<p>The gap moves the letter beyond the arrowhead; it does not change the arm geometry.</p>
+<p><strong>Production excerpt — axis geometry and text placement.</strong> The preceding sphere/link setup is assumed. Arrow dimensions and colour assignments are omitted; production uses red, green, and light blue for the three axes.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> Eigen<span class="op">::</span>Matrix3d end_rotation <span class="op">=</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  end_pose<span class="op">.</span>matrix<span class="op">().</span>topLeftCorner<span class="op">&lt;</span><span class="dv">3</span><span class="op">,</span> <span class="dv">3</span><span class="op">&gt;();</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="dt">double</span> axis_length_metres <span class="op">=</span> <span class="fl">0.3</span><span class="op">;</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> axis_index <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> axis_index <span class="op">&lt;</span> <span class="dv">3</span><span class="op">;</span> <span class="op">++</span>axis_index<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> Eigen<span class="op">::</span>Vector3d tip_position_metres <span class="op">=</span></span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>    end_position_metres <span class="op">+</span></span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>    axis_length_metres <span class="op">*</span> end_rotation<span class="op">.</span>col<span class="op">(</span>axis_index<span class="op">);</span></span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>  Marker axis <span class="op">=</span> joints<span class="op">;</span></span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>  axis<span class="op">.</span>id <span class="op">=</span> <span class="dv">2</span> <span class="op">+</span> axis_index<span class="op">;</span></span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>  axis<span class="op">.</span>type <span class="op">=</span> Marker<span class="op">::</span>ARROW<span class="op">;</span></span>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Omitted: shaft/head dimensions and the axis colour.</span></span>
+<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a>  axis<span class="op">.</span>points <span class="op">=</span> <span class="op">{</span></span>
+<span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a>    to_point_message<span class="op">(</span>end_position_metres<span class="op">),</span></span>
+<span id="cb28-16"><a href="#cb28-16" aria-hidden="true" tabindex="-1"></a>    to_point_message<span class="op">(</span>tip_position_metres<span class="op">),</span></span>
+<span id="cb28-17"><a href="#cb28-17" aria-hidden="true" tabindex="-1"></a>  <span class="op">};</span></span>
+<span id="cb28-18"><a href="#cb28-18" aria-hidden="true" tabindex="-1"></a>  markers<span class="op">.</span>markers<span class="op">.</span>push_back<span class="op">(</span>axis<span class="op">);</span></span>
+<span id="cb28-19"><a href="#cb28-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-20"><a href="#cb28-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> Eigen<span class="op">::</span>Vector3d axis_label_position_metres <span class="op">=</span></span>
+<span id="cb28-21"><a href="#cb28-21" aria-hidden="true" tabindex="-1"></a>    tip_position_metres <span class="op">+</span> <span class="fl">0.08</span> <span class="op">*</span> end_rotation<span class="op">.</span>col<span class="op">(</span>axis_index<span class="op">);</span></span>
+<span id="cb28-22"><a href="#cb28-22" aria-hidden="true" tabindex="-1"></a>  Marker axis_label <span class="op">=</span> axis<span class="op">;</span></span>
+<span id="cb28-23"><a href="#cb28-23" aria-hidden="true" tabindex="-1"></a>  axis_label<span class="op">.</span>id <span class="op">=</span> <span class="dv">7</span> <span class="op">+</span> axis_index<span class="op">;</span></span>
+<span id="cb28-24"><a href="#cb28-24" aria-hidden="true" tabindex="-1"></a>  axis_label<span class="op">.</span>type <span class="op">=</span> Marker<span class="op">::</span>TEXT_VIEW_FACING<span class="op">;</span></span>
+<span id="cb28-25"><a href="#cb28-25" aria-hidden="true" tabindex="-1"></a>  axis_label<span class="op">.</span>points<span class="op">.</span>clear<span class="op">();</span></span>
+<span id="cb28-26"><a href="#cb28-26" aria-hidden="true" tabindex="-1"></a>  axis_label<span class="op">.</span>pose<span class="op">.</span>position <span class="op">=</span></span>
+<span id="cb28-27"><a href="#cb28-27" aria-hidden="true" tabindex="-1"></a>    to_point_message<span class="op">(</span>axis_label_position_metres<span class="op">);</span></span>
+<span id="cb28-28"><a href="#cb28-28" aria-hidden="true" tabindex="-1"></a>  axis_label<span class="op">.</span>scale<span class="op">.</span>z <span class="op">=</span> <span class="fl">0.10</span><span class="op">;</span></span>
+<span id="cb28-29"><a href="#cb28-29" aria-hidden="true" tabindex="-1"></a>  axis_label<span class="op">.</span>text <span class="op">=</span> <span class="st">"xyz"</span><span class="op">[</span>axis_index<span class="op">];</span></span>
+<span id="cb28-30"><a href="#cb28-30" aria-hidden="true" tabindex="-1"></a>  markers<span class="op">.</span>markers<span class="op">.</span>push_back<span class="op">(</span>axis_label<span class="op">);</span></span>
+<span id="cb28-31"><a href="#cb28-31" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>end_rotation</code> owns the dimensionless <span class="math inline">\(3\times3\)</span> rotation block. <code>col(axis_index)</code> selects an axis direction from the calculated pose; it does not reconstruct orientation using another kinematics implementation. Each arrow replaces the copied sphere list with exactly two points: start and tip.</p>
+<p>The text marker copies its arrow’s colour, clears the endpoints, and uses <code>pose.position</code> for placement. <code>"xyz"[axis_index]</code> selects the corresponding letter. <code>TEXT_VIEW_FACING</code> keeps the letter facing the viewer as the camera moves, while its position follows the end-effector axis. For text, <code>scale.z</code> controls character height rather than displacement along <span class="math inline">\(z\)</span>.</p>
+<p><strong>Production excerpt — numerical label contents.</strong> The construction and configuration of the text marker are omitted: ID 5, opaque white, cleared points, character height <span class="math inline">\(0.11\,\mathrm m\)</span>, and placement <span class="math inline">\(0.6\,\mathrm m\)</span> above the end effector along world <span class="math inline">\(+z\)</span>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="bu">std::</span>ostringstream pose_text<span class="op">;</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>pose_text <span class="op">&lt;&lt;</span> <span class="bu">std::</span>fixed <span class="op">&lt;&lt;</span> <span class="bu">std::</span>setprecision<span class="op">(</span><span class="dv">3</span><span class="op">)</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>          <span class="op">&lt;&lt;</span> <span class="st">"q [rad]: ("</span> <span class="op">&lt;&lt;</span> joint_coordinates<span class="op">(</span><span class="dv">0</span><span class="op">)</span> <span class="op">&lt;&lt;</span> <span class="st">", "</span></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>          <span class="op">&lt;&lt;</span> joint_coordinates<span class="op">(</span><span class="dv">1</span><span class="op">)</span> <span class="op">&lt;&lt;</span> <span class="st">")</span><span class="sc">\n</span><span class="st">"</span></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>          <span class="op">&lt;&lt;</span> <span class="st">"p_e in world [m]: ("</span> <span class="op">&lt;&lt;</span> end_position_metres<span class="op">.</span>x<span class="op">()</span> <span class="op">&lt;&lt;</span> <span class="st">", "</span></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>          <span class="op">&lt;&lt;</span> end_position_metres<span class="op">.</span>y<span class="op">()</span> <span class="op">&lt;&lt;</span> <span class="st">", "</span></span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>          <span class="op">&lt;&lt;</span> end_position_metres<span class="op">.</span>z<span class="op">()</span> <span class="op">&lt;&lt;</span> <span class="st">")"</span><span class="op">;</span></span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a><span class="co">// Omitted: construct and configure Marker label as described above.</span></span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>label<span class="op">.</span>text <span class="op">=</span> pose_text<span class="op">.</span>str<span class="op">();</span></span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>markers<span class="op">.</span>markers<span class="op">.</span>push_back<span class="op">(</span>label<span class="op">);</span></span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> markers<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>std::ostringstream</code>, supplied by <code>&lt;sstream&gt;</code>, collects text in memory through <code>&lt;&lt;</code> instead of printing it. The <code>&lt;iomanip&gt;</code> header supplies <code>std::setprecision</code>. With <code>std::fixed</code>, precision three means three digits after the decimal point; <code>str()</code> returns the assembled string. Only the displayed text is rounded, not the calculated coordinates.</p>
+<p>The array contains nine markers: spheres (ID 0), links (ID 1), arrows (IDs 2–4), pose text (ID 5), and axis text (IDs 7–9). Marker identity is not its array index; consumers select by namespace and ID.</p>
+</section>
+<section id="publish-static-poses-or-a-repeating-motion" class="level4">
+<h4 class="anchored" data-anchor-id="publish-static-poses-or-a-repeating-motion">Publish static poses or a repeating motion</h4>
+<p>Let <span class="math inline">\(t\geq0\)</span> be elapsed steady-clock time in seconds, <span class="math inline">\(P=8\,\mathrm s\)</span> the cycle period, and <span class="math inline">\(H=P/2=4\,\mathrm s\)</span> its half-period. Define time within the cycle by <span class="math inline">\(\tau=t-P\lfloor t/P\rfloor\in[0,P)\)</span>, where <span class="math inline">\(\lfloor\cdot\rfloor\)</span> takes the greatest integer not exceeding its argument. The dimensionless animation input is</p>
+<p><span class="math display">\[
+u(t)=
+\begin{cases}
+\tau/H,&amp;0\leq\tau&lt;H,\\
+(P-\tau)/H,&amp;H\leq\tau&lt;P.
+\end{cases}
+\]</span></p>
+<p>The arm moves from home to the bent pose in four seconds and back in four seconds. The reversals change velocity abruptly; this display motion is not a dynamically smooth actuator command.</p>
+<pre class="text"><code>Construct the models and publisher once.
+Read the startup animation setting and store a steady-clock start time.
+On each requested 50 ms callback:
+  Hold u = 1 for a static display.
+  Otherwise, derive u from elapsed time within the eight-second cycle.
+  Build one complete marker array with the current ROS timestamp.
+  Publish only after the helper returns successfully.</code></pre>
+<p><strong>Production excerpt — node, publisher, and timer.</strong> Model construction is the earlier excerpt. The initial diagnostic drawing call, logging, surrounding main/try block, and exception handler are omitted. Production logs a caught exception and exits with failure; no partial marker array is published.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="kw">using</span> MarkerArray <span class="op">=</span> visualization_msgs<span class="op">::</span>msg<span class="op">::</span>MarkerArray<span class="op">;</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="kw">using</span> rigid_body_kinematics_visualization<span class="op">::</span>make_spatial_2r_markers<span class="op">;</span></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>rclcpp<span class="op">::</span>init<span class="op">(</span>argc<span class="op">,</span> argv<span class="op">);</span></span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="kw">auto</span> node <span class="op">=</span></span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>  <span class="bu">std::</span>make_shared<span class="op">&lt;</span>rclcpp<span class="op">::</span>Node<span class="op">&gt;(</span><span class="st">"spatial_2r_forward_kinematics_demo"</span><span class="op">);</span></span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a><span class="co">// Omitted here: construct elbow_model and end_model once.</span></span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="kw">auto</span> publisher <span class="op">=</span> node<span class="op">-&gt;</span>create_publisher<span class="op">&lt;</span>MarkerArray<span class="op">&gt;(</span></span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a>  <span class="st">"~/markers"</span><span class="op">,</span> rclcpp<span class="op">::</span>QoS<span class="op">(</span><span class="dv">1</span><span class="op">).</span>reliable<span class="op">().</span>durability_volatile<span class="op">());</span></span>
+<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="dt">bool</span> animate <span class="op">=</span> node<span class="op">-&gt;</span>declare_parameter<span class="op">&lt;</span><span class="dt">bool</span><span class="op">&gt;(</span><span class="st">"animate"</span><span class="op">,</span> <span class="kw">false</span><span class="op">);</span></span>
+<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="kw">auto</span> start_time <span class="op">=</span> <span class="bu">std::</span>chrono::steady_clock::now<span class="op">();</span></span>
+<span id="cb31-13"><a href="#cb31-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-14"><a href="#cb31-14" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="kw">auto</span> timer <span class="op">=</span> node<span class="op">-&gt;</span>create_wall_timer<span class="op">(</span></span>
+<span id="cb31-15"><a href="#cb31-15" aria-hidden="true" tabindex="-1"></a>  <span class="bu">std::</span>chrono::milliseconds<span class="op">(</span><span class="dv">50</span><span class="op">),</span></span>
+<span id="cb31-16"><a href="#cb31-16" aria-hidden="true" tabindex="-1"></a>  <span class="op">[</span>node<span class="op">,</span> publisher<span class="op">,</span> elbow_model<span class="op">,</span> end_model<span class="op">,</span> animate<span class="op">,</span> start_time<span class="op">]()</span> <span class="op">{</span></span>
+<span id="cb31-17"><a href="#cb31-17" aria-hidden="true" tabindex="-1"></a>    <span class="dt">double</span> u <span class="op">=</span> <span class="fl">1.0</span><span class="op">;</span></span>
+<span id="cb31-18"><a href="#cb31-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>animate<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb31-19"><a href="#cb31-19" aria-hidden="true" tabindex="-1"></a>      <span class="at">const</span> <span class="dt">double</span> elapsed_seconds <span class="op">=</span></span>
+<span id="cb31-20"><a href="#cb31-20" aria-hidden="true" tabindex="-1"></a>        <span class="bu">std::</span>chrono::duration<span class="op">&lt;</span><span class="dt">double</span><span class="op">&gt;(</span></span>
+<span id="cb31-21"><a href="#cb31-21" aria-hidden="true" tabindex="-1"></a>          <span class="bu">std::</span>chrono::steady_clock::now<span class="op">()</span> <span class="op">-</span> start_time<span class="op">)</span></span>
+<span id="cb31-22"><a href="#cb31-22" aria-hidden="true" tabindex="-1"></a>          <span class="op">.</span>count<span class="op">();</span></span>
+<span id="cb31-23"><a href="#cb31-23" aria-hidden="true" tabindex="-1"></a>      <span class="at">const</span> <span class="dt">double</span> cycle_seconds <span class="op">=</span> <span class="bu">std::</span>fmod<span class="op">(</span>elapsed_seconds<span class="op">,</span> <span class="fl">8.0</span><span class="op">);</span></span>
+<span id="cb31-24"><a href="#cb31-24" aria-hidden="true" tabindex="-1"></a>      u <span class="op">=</span> cycle_seconds <span class="op">&lt;</span> <span class="fl">4.0</span></span>
+<span id="cb31-25"><a href="#cb31-25" aria-hidden="true" tabindex="-1"></a>        <span class="op">?</span> cycle_seconds <span class="op">/</span> <span class="fl">4.0</span></span>
+<span id="cb31-26"><a href="#cb31-26" aria-hidden="true" tabindex="-1"></a>        <span class="op">:</span> <span class="op">(</span><span class="fl">8.0</span> <span class="op">-</span> cycle_seconds<span class="op">)</span> <span class="op">/</span> <span class="fl">4.0</span><span class="op">;</span></span>
+<span id="cb31-27"><a href="#cb31-27" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb31-28"><a href="#cb31-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> <span class="kw">auto</span> message <span class="op">=</span></span>
+<span id="cb31-29"><a href="#cb31-29" aria-hidden="true" tabindex="-1"></a>      make_spatial_2r_markers<span class="op">(</span>elbow_model<span class="op">,</span> end_model<span class="op">,</span> u<span class="op">,</span> node<span class="op">-&gt;</span>now<span class="op">());</span></span>
+<span id="cb31-30"><a href="#cb31-30" aria-hidden="true" tabindex="-1"></a>    publisher<span class="op">-&gt;</span>publish<span class="op">(</span>message<span class="op">);</span></span>
+<span id="cb31-31"><a href="#cb31-31" aria-hidden="true" tabindex="-1"></a>  <span class="op">});</span></span>
+<span id="cb31-32"><a href="#cb31-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-33"><a href="#cb31-33" aria-hidden="true" tabindex="-1"></a>rclcpp<span class="op">::</span>spin<span class="op">(</span>node<span class="op">);</span></span>
+<span id="cb31-34"><a href="#cb31-34" aria-hidden="true" tabindex="-1"></a>rclcpp<span class="op">::</span>shutdown<span class="op">();</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>A ROS node is a named participant in communication. Here <code>rclcpp::Node</code> provides the publisher and timer interfaces. <code>std::make_shared</code> creates the node with shared ownership; copying its pointer into the callback keeps the same node accessible without copying the node itself. <code>rclcpp::spin</code> processes callbacks until shutdown, while the local <code>timer</code> variable keeps the timer alive.</p>
+<p>The publisher sends <code>MarkerArray</code> messages on <code>~/markers</code>, resolving to <code>/spatial_2r_forward_kinematics_demo/markers</code> for this node name. Its second argument sets the message-delivery rules, called QoS (<em>quality of service</em>).<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a></p>
+<p><strong>How the displayed call uses these settings:</strong></p>
+<ul>
+<li><code>create_publisher&lt;MarkerArray&gt;</code> creates a publisher whose message type is <code>MarkerArray</code>. Its first argument names the topic; its second argument supplies the QoS configuration.</li>
+<li><code>QoS(1)</code> keeps a history depth of one complete marker-array message. It does not limit the array to one marker: our nine markers are carried together in each message.</li>
+<li><code>reliable()</code> requests reliable delivery of those updates. A delayed update is still possible, so this is not a real-time timing guarantee.</li>
+<li><code>durability_volatile()</code> means RViz does not receive an old drawing merely by subscribing. Our repeated publication supplies a fresh drawing after it connects.</li>
+</ul>
+<p>The returned publisher is held through a shared pointer. <code>auto</code> deduces that pointer type; <code>const</code> prevents reassigning the local pointer, but does not prevent calling <code>publisher-&gt;publish(message)</code>. Publisher and subscriber QoS settings must also be compatible for messages to flow.</p>
+<p>The publisher belongs to our node; it is not a separate node. The topic is the named communication channel, and RViz is a separate consumer that subscribes to it:</p>
+<p><span class="math display">\[
+\boxed{\begin{gathered}
+\text{Our ROS node}\\
+\text{Calculate poses}\\
+\text{Build }\texttt{MarkerArray}\\
+\text{Publisher sends messages}
+\end{gathered}}
+\quad\xrightarrow{\ \text{topic}\ }\quad
+\boxed{\begin{gathered}
+\text{RViz node}\\
+\text{Subscribe to topic}\\
+\text{Receive }\texttt{MarkerArray}\\
+\text{Draw the markers}
+\end{gathered}}
+\]</span></p>
+<p>Selecting the marker topic in RViz connects its MarkerArray display to these messages. Our node computes the geometry; RViz renders it. The publisher does not call RViz directly and can continue publishing when RViz is closed.</p>
+<p><strong>How the timer calls our code.</strong> <code>create_wall_timer</code> creates a repeating timer associated with the node. Its basic call pattern is:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Schematic syntax: period and callback are placeholders.</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>node<span class="op">-&gt;</span>create_wall_timer<span class="op">(</span>period<span class="op">,</span> callback<span class="op">);</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ol type="1">
+<li><code>period</code> is the requested time between timer callbacks.</li>
+<li><code>callback</code> is the function ROS should run when the timer is ready. Creating the timer registers that function; it does not execute its body immediately.</li>
+<li>The result is a shared pointer to the timer. Keeping it in <code>timer</code> keeps the timer available while <code>rclcpp::spin(node)</code> processes events. The call does not create a separate thread dedicated to running this callback.</li>
+</ol>
+<p>In the displayed implementation:</p>
+<ul>
+<li><code>std::chrono::milliseconds(50)</code> requests one callback every <span class="math inline">\(50\,\mathrm{ms}\)</span>, or nominally <span class="math inline">\(20\)</span> times per second.</li>
+<li>The lambda beginning with <code>[node, publisher, ...]()</code> is the callback. Each invocation selects <span class="math inline">\(u\)</span>, calculates the current marker array, and publishes it.</li>
+<li><code>rclcpp::spin(node)</code> runs ready callbacks, including this timer’s callback. If the program is busy, execution can be delayed; the period is not an exact timing guarantee.</li>
+</ul>
+<p>The timer decides when to request an update; the elapsed-time calculation inside the callback decides which pose to draw.</p>
+<p>The timing operations have distinct jobs:</p>
+<ol type="1">
+<li><code>std::chrono::steady_clock::now()</code> reads a monotonic clock: system-clock corrections do not move its elapsed-time reading backwards.</li>
+<li>Subtracting <code>start_time</code> gives an elapsed duration; <code>std::chrono::duration&lt;double&gt;(...).count()</code> expresses it as seconds.</li>
+<li><code>std::fmod(elapsed_seconds, 8.0)</code>, from <code>&lt;cmath&gt;</code>, gives the <strong>floating-point remainder</strong> after dividing elapsed seconds by eight. For nonnegative elapsed time, this implements <span class="math inline">\(\tau\)</span>, the time within the current cycle.</li>
+<li><code>node-&gt;now()</code> supplies a ROS timestamp for the drawing; it does not determine the animation phase.</li>
+</ol>
+<p>The callback captures owned copies of both models, the startup setting, and the start time. It creates a fresh local message on each call; no mutable lambda is required. <code>animate</code> is read once, so later parameter changes do not change the captured setting. The timer requests 20 updates per second, not a real-time guarantee. A delayed callback skips to the pose corresponding to elapsed time rather than stretching the cycle by counting callbacks.</p>
+</section>
+<section id="run-and-inspect-the-example" class="level4">
+<h4 class="anchored" data-anchor-id="run-and-inspect-the-example">Run and inspect the example</h4>
+<p><strong>Usage commands — a configured ROS workspace terminal.</strong> After building the visualization package, source its installed environment and start the static display:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33"><pre class="sourceCode zsh code-with-copy"><code class="sourceCode zsh"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="bu">source</span> install/setup.zsh</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="ex">ros2</span> run rigid_body_kinematics_visualization <span class="dt">\</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>  spatial_2r_forward_kinematics_demo</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>To animate, stop that process and run:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="sourceCode zsh code-with-copy"><code class="sourceCode zsh"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="ex">ros2</span> run rigid_body_kinematics_visualization <span class="dt">\</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>  spatial_2r_forward_kinematics_demo <span class="dt">\</span></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--ros-args</span> <span class="at">-p</span> animate:=true <span class="at">-p</span> use_sim_time:=false</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>In another sourced terminal, run <code>rviz2</code>. Set <strong>Global Options -&gt; Fixed Frame</strong> to <code>world</code>, add a <strong>MarkerArray</strong> display, and select <code>/spatial_2r_forward_kinematics_demo/markers</code>.</p>
+<div id="fig-spatial-2r-rviz-animation" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Animation of the arm sweeping between home and bent configurations while its end-effector axes and pose text update.">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-spatial-2r-rviz-animation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../figures/spatial_2r_space_pose_rivz.gif" class="img-fluid figure-img" style="width:100.0%" alt="Animation of the arm sweeping between home and bent configurations while its end-effector axes and pose text update.">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-spatial-2r-rviz-animation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;11.2: Recorded spatial 2R animation. Joint centres, links, end-effector axes, and labels are rebuilt from the changing joint coordinates.
+</figcaption>
+</figure>
+</div>
+<p>The static image in <a href="#fig-spatial-2r-rviz-static" class="quarto-xref">Figure&nbsp;<span>11.1</span></a> also serves as the PDF illustration; the animation is included in HTML. Visual inspection helps explain motion and orientation, but it does not replace numerical acceptance tests.</p>
+</section>
 </section>
 <section id="sec-general-kinematics-impl-cycle-connections" class="level3" data-number="11.4.6">
 <h3 data-number="11.4.6" class="anchored" data-anchor-id="sec-general-kinematics-impl-cycle-connections"><span class="header-section-number">11.4.6</span> How the classes and functions connect</h3>
@@ -1485,6 +1929,42 @@ u\begin{bmatrix}\pi/2\\-\pi/2\end{bmatrix}\mathrm{rad}.
 \end{gathered}
 \]</span></p>
 <p>Evaluation reads the model and coordinates without changing them and returns an owned pose. A failed query throws instead of returning a partial result.</p>
+</section>
+<section id="connect-the-pose-calculation-to-the-viewer" class="level4">
+<h4 class="anchored" data-anchor-id="connect-the-pose-calculation-to-the-viewer">Connect the pose calculation to the viewer</h4>
+<p><span class="math display">\[
+\begin{gathered}
+\boxed{\begin{gathered}
+\text{Fixed models: }\texttt{elbow\_model},\
+\texttt{end\_model}\\
+\text{Per-call inputs: }u\in[0,1],\ \texttt{stamp}\\
+\text{Static }u=1\ \text{or elapsed-time }u(t)
+\end{gathered}}\\[0.1em]
+\Big\downarrow\\[0.1em]
+\boxed{\begin{gathered}
+\texttt{make\_spatial\_2r\_markers}\\
+\mathbf q(u)=u[\pi/2,\ -\pi/2]^{\mathsf T}\ \mathrm{rad}\\
+\texttt{space\_form\_forward\_kinematics}\\
+{}^{s}\mathbf p_\ell,\quad{}^{s}\mathbf p_e,\quad\mathbf R_{se}\\
+\text{Derived tips: }{}^{s}\mathbf p_e+
+\ell_{\mathrm a}\mathbf R_{se}\mathbf e_i
+\end{gathered}}\\[0.1em]
+\Big\downarrow\\[0.1em]
+\boxed{\begin{gathered}
+\texttt{to\_point\_message}\ \longrightarrow\
+\texttt{MarkerArray}\\
+\text{World points, identity point-marker poses,}\\
+\text{axis and pose text, shared timestamp}
+\end{gathered}}\\[0.1em]
+\Big\downarrow\\[0.1em]
+\boxed{\begin{gathered}
+\texttt{publisher-&gt;publish(message)}\\
+\texttt{RViz: Fixed Frame = world}\\
+\text{Display the calculated geometry}
+\end{gathered}}
+\end{gathered}
+\]</span></p>
+<p>The marker helper borrows the models and owns the returned drawing data. ROS carries the published messages to RViz, which renders the supplied coordinates rather than recalculating the robot’s kinematics.</p>
 
 
 </section>
@@ -1500,6 +1980,8 @@ u\begin{bmatrix}\pi/2\\-\pi/2\end{bmatrix}\mathrm{rad}.
 =\mathbf R\mathbf x+\underbrace{(\mathbf p-\mathbf R\mathbf p)}_{\mathbf t}.
 \]</span></p>
 <p>Thus the translation column is <span class="math inline">\(\mathbf t=\mathbf p-\mathbf R\mathbf p\)</span>, measured in metres.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>For a right-handed rotation by angle <span class="math inline">\(\theta\)</span> radians about a unit axis <span class="math inline">\(\mathbf a=(a_x,a_y,a_z)^{\mathsf T}\)</span> expressed in the reference frame, the dimensionless quaternion components in ROS order are <span class="math inline">\((x,y,z,w)=(a_x\sin(\theta/2),a_y\sin(\theta/2),a_z\sin(\theta/2),\cos(\theta/2))\)</span>. These <span class="math inline">\(x,y,z\)</span> are quaternion components, not position coordinates. At <span class="math inline">\(\theta=0\)</span>, <span class="math inline">\(\sin(0)=0\)</span> and <span class="math inline">\(\cos(0)=1\)</span>, giving <span class="math inline">\((0,0,0,1)\)</span> regardless of the chosen axis. The marker’s quaternion <span class="math inline">\(x,y,z\)</span> fields start at zero; setting <code>orientation.w = 1.0</code> therefore gives zero rotation.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p><code>QoS(n)</code> keeps the latest <code>n</code> messages in history. <code>reliable()</code> requests acknowledgements and retries for missing messages, but delivery can still be delayed. <code>durability_volatile()</code> does not supply past messages to a newly connected subscriber. Each method returns the same settings object, allowing the calls to be joined with dots; they configure the publisher rather than send data.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section>
 
