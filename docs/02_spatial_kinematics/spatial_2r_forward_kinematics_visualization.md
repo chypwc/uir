@@ -1,6 +1,6 @@
 # Spatial 2R Forward-Kinematics Visualization Specification
 
-Draft for review. This is the small RViz consumer of the [space-form kinematics contract](general_kinematics_and_jacobians.md), not an extension of the mathematical core. The [Chapter 10 model](../../notes/part_01_motion_mechanics_control/10_general_robot_kinematics_and_jacobians.qmd#sec-serial-product-of-exponentials) and [Chapter 11 implementation](../../notes/part_01_motion_mechanics_control/11_general_robot_kinematics_and_jacobians_implementation.qmd#sec-general-kinematics-impl-space-forward-kinematics) own the pose calculation.
+This specification defines the small RViz consumer of the [space-form kinematics contract](general_kinematics_and_jacobians.md), not an extension of the mathematical core. The [Chapter 10 model](../../notes/part_01_motion_mechanics_control/10_general_robot_kinematics_and_jacobians.qmd#sec-serial-product-of-exponentials) and [Chapter 11 implementation](../../notes/part_01_motion_mechanics_control/11_general_robot_kinematics_and_jacobians_implementation.qmd#sec-general-kinematics-impl-space-forward-kinematics) own the pose calculation.
 
 ## Fixed scenario and inputs
 
@@ -55,17 +55,19 @@ Use one marker namespace, `spatial_2r_fk`, and stable identifiers:
 |---|---|---|
 | 0 | `SPHERE_LIST` | Base, elbow, end-effector origin |
 | 1 | `LINE_STRIP` | Base → elbow → end effector |
-| 2–4 | `ARROW` | End-effector $x$, $y$, $z$ axes, coloured red, green, blue |
+| 2–4 | `ARROW` | End-effector $x$, $y$, $z$ axes, coloured red, green, light blue |
 | 5 | `TEXT_VIEW_FACING` | Current joint angles in radians and end-effector position in metres |
-| 6 | `LINE_STRIP` | Animated end-effector trail, at most 160 points; omit until two samples exist and omit in static mode |
+| 7–9 | `TEXT_VIEW_FACING` | End-effector `x`, `y`, `z` labels beyond the corresponding arrow tips, with matching colours |
+
+ID 6 is unused. Each update displays only the current arm configuration; no end-effector path history or trail is stored or drawn.
 
 For the returned end-effector pose $\mathbf T_{se}=[\mathbf R,\mathbf p;\mathbf0^{\mathsf T},1]$, $\mathbf R$ is its orientation and $\mathbf p$ its origin position in `world`. Draw each axis from $\mathbf p$ to $\mathbf p+\ell\mathbf R\mathbf e_i$, where $\ell=0.3\,\mathrm m$ and $\mathbf e_i$ is the corresponding three-entry Cartesian unit column. Axis endpoints use the returned rotation matrix, not an independently reconstructed orientation.
 
-All markers in an update shall have frame `world` and one shared timestamp. Point-based markers use identity marker poses so already transformed points are not transformed twice; place the text near the returned end-effector position with an identity orientation. Use visible positive scales and nonzero opacity. Replace existing markers through the same namespace/ID pairs; do not grow the number of markers. Set marker lifetimes to 0.5 seconds and keep at most seven markers and 160 trail points per update. These fields follow the [ROS 2 Jazzy Marker definition](https://github.com/ros2/common_interfaces/blob/jazzy/visualization_msgs/msg/Marker.msg).
+All markers in an update shall have frame `world` and one shared timestamp. Point-based markers use identity marker poses so already transformed points are not transformed twice; place the text near the returned end-effector position with an identity orientation. Use visible positive scales and nonzero opacity. Replace existing markers through the same namespace/ID pairs; do not grow the number of markers. Set marker lifetimes to 0.5 seconds and keep at most nine markers per update. These fields follow the [ROS 2 Jazzy Marker definition](https://github.com/ros2/common_interfaces/blob/jazzy/visualization_msgs/msg/Marker.msg).
 
 ## Failure behaviour and exclusions
 
-Reject non-finite $u$ or values outside $[0,1]$ before evaluation. Construct both poses and the complete marker update before publishing; if construction, evaluation, or conversion fails, log the reason and terminate with a nonzero exit status. Do not publish a partial arm, substitute an identity/home pose, or append a failed sample to the trail. Previously displayed markers expire by their finite lifetimes while the viewer clock advances.
+Reject non-finite $u$ or values outside $[0,1]$ before evaluation. Construct both poses and the complete marker update before publishing; if construction, evaluation, or conversion fails, log the reason and terminate with a nonzero exit status. Do not publish a partial arm or substitute an identity/home pose. Previously displayed markers expire by their finite lifetimes while the viewer clock advances.
 
 No ROS dependencies enter `rigid_body_kinematics`. This demo adds no URDF, `tf2`, `robot_state_publisher`, Gazebo, dynamics, control, collision checking, or general robot visualization API. RViz is explanatory evidence; deterministic tests remain the evidence for numerical correctness.
 
@@ -84,10 +86,12 @@ $$
 \mathbf R_{se}=\begin{bmatrix}0&-1&0\\0&0&-1\\1&0&0\end{bmatrix}.
 $$
 
-Its columns point along $+z_s$, $-x_s$, and $-y_s$, respectively. In one home/nonzero geometry test, verify joint centres, matching line endpoints, and all axis-arrow endpoints against the independent positions and rotation above. This checks the rotated axes without a separate scenario or duplicate core test. A bounded-history check shall establish that repeated updates keep the same IDs and at most 160 trail points. One rejected-input case shall establish that no successful marker update is produced for invalid $u$.
+Its columns point along $+z_s$, $-x_s$, and $-y_s$, respectively. In one home/nonzero geometry test, verify joint centres, matching line endpoints, and all axis-arrow endpoints against the independent positions and rotation above. This checks the rotated axes without a separate scenario or duplicate core test. One rejected-input case shall establish that no successful marker update is produced for invalid $u$. No bounded-history test is required because the demo retains no path history.
 
-Provide a launch file and saved RViz configuration with fixed frame `world` and the marker topic above. Inspect the static arm first, then the repeating animation, readable pose text, axes, and bounded trail. Record a PNG for the companion; apply the existing checklist's optional GIF conditions. Do not call visual agreement a substitute for the headless checks or use this demo to waive outstanding core acceptance exceptions.
+Provide a launch file and saved RViz configuration with fixed frame `world` and the marker topic above. Inspect the static arm first, then the repeating animation, readable pose text, axes, and axis labels. Record a PNG for the companion; apply the existing checklist's optional GIF conditions. Do not call visual agreement a substitute for the headless checks or use this demo to waive outstanding core acceptance exceptions.
 
-## Implementation order
+The supplied `spatial_2r_space_pose_rivz.gif` is accepted at 10,972,711 bytes (about 10.46 MiB); the earlier 5 MiB target does not apply to this asset. Retain the PNG for PDF and as the HTML fallback. The no-trail scope removes path-history storage and its dedicated test, but does not remove the launch-file or saved-RViz-configuration requirement.
 
-After review: package and installed-core linkage → static model evaluation and base/joint/link markers → headless endpoint checks → animation, axes, text, and bounded trail → launch/RViz configuration and visual inspection. The learner writes each implementation block; no package source is created by this specification draft.
+## Reproduction and evidence
+
+The [package README](../../ros_ws/src/rigid_body_kinematics_visualization/README.md) gives the build, static/animated launch, and shutdown commands. The [Cycle 1 checklist summary](../../CHECKLIST.md#cycle-1--space-form-product-of-exponentials-forward-kinematics) records the deterministic checks, live launch observations, render scope, and accepted omissions, with links to the PNG and GIF. Cycle status belongs to that checklist.

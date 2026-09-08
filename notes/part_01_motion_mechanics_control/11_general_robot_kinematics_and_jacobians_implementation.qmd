@@ -1446,7 +1446,7 @@ The timer decides when to request an update; the elapsed-time calculation inside
 The timing operations have distinct jobs:
 
 1. `std::chrono::steady_clock::now()` reads a monotonic clock: system-clock corrections do not move its elapsed-time reading backwards.
-2. Subtracting `start_time` gives an elapsed duration; `std::chrono::duration<double>(...).count()` expresses it as seconds.
+2. Subtracting `start_time` gives an elapsed duration. The displayed conversion and `count()` call express it as a number of seconds.
 3. `std::fmod(elapsed_seconds, 8.0)`, from `<cmath>`, gives the **floating-point remainder** after dividing elapsed seconds by eight. For nonnegative elapsed time, this implements $\tau$, the time within the current cycle.
 4. `node->now()` supplies a ROS timestamp for the drawing; it does not determine the animation phase.
 
@@ -1454,15 +1454,31 @@ The callback captures owned copies of both models, the startup setting, and the 
 
 #### Run and inspect the example
 
-**Usage commands — a configured ROS workspace terminal.** After building the visualization package, source its installed environment and start the static display:
+**Usage commands — a configured ROS workspace terminal.** After building the visualization package, source its installed environment and start the static display and viewer together:
 
 ~~~zsh
 source install/setup.zsh
+ros2 launch rigid_body_kinematics_visualization \
+  spatial_2r_forward_kinematics.launch.xml animate:=false
+~~~
+
+To animate, stop the launch with `Ctrl+C` and run:
+
+~~~zsh
+ros2 launch rigid_body_kinematics_visualization \
+  spatial_2r_forward_kinematics.launch.xml animate:=true
+~~~
+
+The XML launch file starts the demo and RViz. It passes the `animate` launch argument to the demo's parameter and keeps `use_sim_time=false` for both nodes. The installed RViz configuration restores the camera view, fixed frame `world`, and a **MarkerArray** display subscribed to `/spatial_2r_forward_kinematics_demo/markers`. No separate RViz command or manual display setup is needed. `Ctrl+C` in the launch terminal stops both programs; stop separately launched copies before using this command.
+
+**Alternative — run the demo directly.** In the same prepared workspace environment, the static display can also be started without the launch file:
+
+~~~zsh
 ros2 run rigid_body_kinematics_visualization \
   spatial_2r_forward_kinematics_demo
 ~~~
 
-To animate, stop that process and run:
+For animation, stop that process with `Ctrl+C` and run:
 
 ~~~zsh
 ros2 run rigid_body_kinematics_visualization \
@@ -1470,7 +1486,13 @@ ros2 run rigid_body_kinematics_visualization \
   --ros-args -p animate:=true -p use_sim_time:=false
 ~~~
 
-In another sourced terminal, run `rviz2`. Set **Global Options -> Fixed Frame** to `world`, add a **MarkerArray** display, and select `/spatial_2r_forward_kinematics_demo/markers`. 
+`ros2 run` starts only the demo. In another sourced terminal, start the viewer separately:
+
+~~~zsh
+rviz2
+~~~
+
+Set **Global Options -> Fixed Frame** to `world`, add a **MarkerArray** display, and select the marker topic named above. With this direct method, stop the demo and RViz separately. Use either this method or the combined launch, not both at the same time.
 
 ::: {.content-visible when-format="html"}
 

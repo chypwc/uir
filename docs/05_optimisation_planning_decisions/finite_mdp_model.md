@@ -257,6 +257,61 @@ A joint-distribution lookup with valid indices but an infeasible state--action p
 
 Failures shall distinguish invalid domain identifiers, invalid model structure, invalid probabilities, invalid terminal structure, and invalid policy structure. The implementation shall not clamp probabilities, discard invalid outcomes, normalise rows, replace non-finite values, or return a numeric result alongside a failure. The only permitted action and row generation is the terminal completion above; missing nonterminal dynamics shall not be invented.
 
+### Unresolved expected-reward numerical domain
+
+The 2026-09-05 review found the following gap in the accepted-input domain. This is an unresolved contract finding, not an approved change to the reward domain or failure behaviour. Resolve the policy before changing production code or claiming full-domain numerical acceptance.
+
+The [distribution factory](../../ros_ws/src/intelligence_foundations/src/joint_outcome_distribution.cpp) accepts probabilities within the sum tolerance without renormalising them. Its `expected_reward()` query uses compensated `double` accumulation but neither checks its result for finiteness nor reports numeric failure. The public declaration is `noexcept`.
+
+The following complete program reproduces the defect with the installed implementation on the review host:
+
+```cpp
+#include <iomanip>
+#include <iostream>
+#include <limits>
+
+#include "intelligence_foundations/joint_outcome_distribution.hpp"
+
+int main()
+{
+  using intelligence_foundations::JointOutcomeDistribution;
+  using intelligence_foundations::StateIndex;
+
+  const double maximum = std::numeric_limits<double>::max();
+  const auto distribution = JointOutcomeDistribution::from_outcomes(
+    2U,
+    {{StateIndex{0}, maximum, 0.5},
+     {StateIndex{1}, maximum, 0.5000000000005}},
+    1.0e-12);
+
+  std::cout << std::setprecision(17)
+            << "sum=" << 0.5 + 0.5000000000005 << '\n'
+            << "expected_reward=" << distribution.expected_reward() << '\n';
+}
+```
+
+After saving the reproducer as `/tmp/finite_mdp_reward_probe.cpp`, compile from the repository root against the built library:
+
+```zsh
+g++ -std=c++20 -O2 -Wall -Wextra -Wpedantic \
+  -I ros_ws/src/intelligence_foundations/include \
+  /tmp/finite_mdp_reward_probe.cpp \
+  ros_ws/build/intelligence_foundations/libintelligence_foundations.a \
+  -o /tmp/finite_mdp_reward_probe
+/tmp/finite_mdp_reward_probe
+```
+
+Observed values:
+
+```text
+sum=1.0000000000005
+expected_reward=inf
+```
+
+Both records have valid distinct destinations, finite rewards, and individually valid probabilities. The sum excess is below the accepted tolerance. Their exact weighted total nevertheless exceeds the largest finite `double`. Kahan compensation does not increase the floating-point range.
+
+This is a numerical-domain defect relative to the expected-reward calculation and explicit-failure intent, and a gap in the specification's numeric-range policy. Existing normal-case tests do not establish safety over all accepted finite inputs. Before claiming that domain, choose and specify a bounded reward domain or explicit overflow failure behaviour, then implement and verify the chosen contract. Silent renormalisation or clamping would conflict with the current specification and must not be introduced as an incidental fix.
+
 ## Frozen finite-MDP fixture
 
 The `synthetic_intelligence_engine` package shall own one frozen fixture with states $(s_1,s_2,s_\dagger)$, task actions $(a_1,a_2)$, and terminal set $\{s_\dagger\}$. Construction receives `task_action_count = 2` and only the nonterminal rows. It appends $a_\bot$ at action index 2, giving the complete global action order $(a_1,a_2,a_\bot)$. The completed model's positive joint outcomes are listed below; the final row is generated, not supplied:

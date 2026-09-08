@@ -1816,7 +1816,7 @@ On each requested 50 ms callback:
 <p>The timing operations have distinct jobs:</p>
 <ol type="1">
 <li><code>std::chrono::steady_clock::now()</code> reads a monotonic clock: system-clock corrections do not move its elapsed-time reading backwards.</li>
-<li>Subtracting <code>start_time</code> gives an elapsed duration; <code>std::chrono::duration&lt;double&gt;(...).count()</code> expresses it as seconds.</li>
+<li>Subtracting <code>start_time</code> gives an elapsed duration. The displayed conversion and <code>count()</code> call express it as a number of seconds.</li>
 <li><code>std::fmod(elapsed_seconds, 8.0)</code>, from <code>&lt;cmath&gt;</code>, gives the <strong>floating-point remainder</strong> after dividing elapsed seconds by eight. For nonnegative elapsed time, this implements <span class="math inline">\(\tau\)</span>, the time within the current cycle.</li>
 <li><code>node-&gt;now()</code> supplies a ROS timestamp for the drawing; it does not determine the animation phase.</li>
 </ol>
@@ -1824,15 +1824,24 @@ On each requested 50 ms callback:
 </section>
 <section id="run-and-inspect-the-example" class="level4">
 <h4 class="anchored" data-anchor-id="run-and-inspect-the-example">Run and inspect the example</h4>
-<p><strong>Usage commands — a configured ROS workspace terminal.</strong> After building the visualization package, source its installed environment and start the static display:</p>
+<p><strong>Usage commands — a configured ROS workspace terminal.</strong> After building the visualization package, source its installed environment and start the static display and viewer together:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33"><pre class="sourceCode zsh code-with-copy"><code class="sourceCode zsh"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="bu">source</span> install/setup.zsh</span>
-<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="ex">ros2</span> run rigid_body_kinematics_visualization <span class="dt">\</span></span>
-<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>  spatial_2r_forward_kinematics_demo</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>To animate, stop that process and run:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="sourceCode zsh code-with-copy"><code class="sourceCode zsh"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="ex">ros2</span> run rigid_body_kinematics_visualization <span class="dt">\</span></span>
-<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>  spatial_2r_forward_kinematics_demo <span class="dt">\</span></span>
-<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--ros-args</span> <span class="at">-p</span> animate:=true <span class="at">-p</span> use_sim_time:=false</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>In another sourced terminal, run <code>rviz2</code>. Set <strong>Global Options -&gt; Fixed Frame</strong> to <code>world</code>, add a <strong>MarkerArray</strong> display, and select <code>/spatial_2r_forward_kinematics_demo/markers</code>.</p>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="ex">ros2</span> launch rigid_body_kinematics_visualization <span class="dt">\</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>  spatial_2r_forward_kinematics.launch.xml animate:=false</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>To animate, stop the launch with <code>Ctrl+C</code> and run:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="sourceCode zsh code-with-copy"><code class="sourceCode zsh"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="ex">ros2</span> launch rigid_body_kinematics_visualization <span class="dt">\</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>  spatial_2r_forward_kinematics.launch.xml animate:=true</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The XML launch file starts the demo and RViz. It passes the <code>animate</code> launch argument to the demo’s parameter and keeps <code>use_sim_time=false</code> for both nodes. The installed RViz configuration restores the camera view, fixed frame <code>world</code>, and a <strong>MarkerArray</strong> display subscribed to <code>/spatial_2r_forward_kinematics_demo/markers</code>. No separate RViz command or manual display setup is needed. <code>Ctrl+C</code> in the launch terminal stops both programs; stop separately launched copies before using this command.</p>
+<p><strong>Alternative — run the demo directly.</strong> In the same prepared workspace environment, the static display can also be started without the launch file:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb35"><pre class="sourceCode zsh code-with-copy"><code class="sourceCode zsh"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="ex">ros2</span> run rigid_body_kinematics_visualization <span class="dt">\</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>  spatial_2r_forward_kinematics_demo</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>For animation, stop that process with <code>Ctrl+C</code> and run:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36"><pre class="sourceCode zsh code-with-copy"><code class="sourceCode zsh"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="ex">ros2</span> run rigid_body_kinematics_visualization <span class="dt">\</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>  spatial_2r_forward_kinematics_demo <span class="dt">\</span></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--ros-args</span> <span class="at">-p</span> animate:=true <span class="at">-p</span> use_sim_time:=false</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>ros2 run</code> starts only the demo. In another sourced terminal, start the viewer separately:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb37"><pre class="sourceCode zsh code-with-copy"><code class="sourceCode zsh"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="ex">rviz2</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Set <strong>Global Options -&gt; Fixed Frame</strong> to <code>world</code>, add a <strong>MarkerArray</strong> display, and select the marker topic named above. With this direct method, stop the demo and RViz separately. Use either this method or the combined launch, not both at the same time.</p>
 <div id="fig-spatial-2r-rviz-animation" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Animation of the arm sweeping between home and bent configurations while its end-effector axes and pose text update.">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-spatial-2r-rviz-animation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">

@@ -373,6 +373,77 @@ The following expected values come from direct rigid-body geometry, elementary t
 
 Threshold tests shall use fixed inputs and a documented IEEE 754 binary64 environment. Optional randomized stress tests may use a fixed seed and bounded domains, but they shall supplement rather than replace the analytic fixtures.
 
+### Selected essential-test scope
+
+The learner-selected test batch omits a dedicated repeated-evaluation/default-policy-equivalence test from GK-ACC-012. Its interval-boundary checks remain required. Determinism, non-mutation, model reuse, and equivalent default-policy behaviour remain API requirements; omitting a dedicated test does not weaken those behaviours or establish executable evidence for them.
+
+A separate overflow test for composition between two joint displacements is not required in this batch. Retain the home-pose-composition overflow case GK-ACC-011 and the implemented screw-scaling overflow check. The evaluator must still reject unsupported intermediate results at every composition.
+
+The explicit reversed-factor negative control GK-ACC-008 may be verified by the [executable acceptance check below](#gk-acc-008-executable-negative-control) rather than an additional registered unit test; this case is not waived. The [owning checklist](../../CHECKLIST.md#cycle-1--space-form-product-of-exponentials-forward-kinematics) records the observed result and cycle status.
+
+### GK-ACC-008: executable negative control
+
+This manual acceptance verifier retains the axes, angles, and home pose of GK-ACC-007 and reverses only the two exponential factors. The independent analytic positions are `(1, 2, 0)` metres for the correct product and `(5, 2, 0)` metres for the reversed product. It requires translation error below `1e-12` metres and a reversed result more than one metre from the correct expected position. It is not an additional registered production test.
+
+To repeat it, save the following verifier as `/tmp/order_check.cpp`:
+
+```cpp
+#include <Eigen/Core>
+#include <iostream>
+#include <numbers>
+#include "rigid_body_kinematics/forward_kinematics.hpp"
+#include "rigid_body_kinematics/joint_definition.hpp"
+#include "rigid_body_kinematics/joint_limits.hpp"
+#include "rigid_body_kinematics/serial_chain_model.hpp"
+#include "rigid_body_kinematics/transform3.hpp"
+
+int main()
+{
+  namespace rbk = rigid_body_kinematics;
+  const auto limits = rbk::RevoluteLimits::from_bounds(
+    -std::numbers::pi, std::numbers::pi);
+  const auto j1 = rbk::RevoluteJoint::from_axis(
+    Eigen::Vector3d::UnitZ(), Eigen::Vector3d::Zero(), limits);
+  const auto j2 = rbk::RevoluteJoint::from_axis(
+    Eigen::Vector3d::UnitZ(), Eigen::Vector3d(2, 0, 0), limits);
+  Eigen::Matrix4d m = Eigen::Matrix4d::Identity();
+  m(0, 3) = 3;
+  const auto home = rbk::Transform3::from_matrix(m);
+  const auto model = rbk::SerialChainModel::from_home_and_joints(home, {j1, j2});
+  Eigen::VectorXd q(2);
+  q << std::numbers::pi / 2, -std::numbers::pi / 2;
+  const rbk::Vector6LinearFirst eta1 = j1.space_screw_axis() * q(0);
+  const rbk::Vector6LinearFirst eta2 = j2.space_screw_axis() * q(1);
+  const auto e1 = rbk::Transform3::from_exponential_coordinates(eta1);
+  const auto e2 = rbk::Transform3::from_exponential_coordinates(eta2);
+  const auto correct = rbk::space_form_forward_kinematics(model, q);
+  const auto reversed = e2.compose(e1).compose(home);
+  const auto pc = correct.transform_point(Eigen::Vector3d::Zero());
+  const auto pr = reversed.transform_point(Eigen::Vector3d::Zero());
+  const bool pass = (pc - Eigen::Vector3d(1, 2, 0)).norm() < 1e-12 &&
+    (pr - Eigen::Vector3d(5, 2, 0)).norm() < 1e-12 &&
+    (pr - Eigen::Vector3d(1, 2, 0)).norm() > 1;
+  std::cout << "Correct position [m]: " << pc.transpose()
+            << "\nReversed position [m]: " << pr.transpose()
+            << "\nGK-ACC-008: " << (pass ? "PASS" : "FAIL") << '\n';
+  return pass ? 0 : 1;
+}
+
+```
+
+Compile and execute from `ros_ws`:
+
+```zsh
+c++ -std=c++20 /tmp/order_check.cpp \
+  -I install/rigid_body_kinematics/include -I /usr/include/eigen3 \
+  -L install/rigid_body_kinematics/lib \
+  -Wl,-rpath,"$PWD/install/rigid_body_kinematics/lib" \
+  -lrigid_body_kinematics -o /tmp/order_check
+/tmp/order_check
+```
+
+The expected output ends with `GK-ACC-008: PASS`; a failed comparison returns a nonzero exit status.
+
 ## Exclusions for Cycle 1
 
 This specification increment does not include:
