@@ -459,7 +459,7 @@ window.Quarto = {
   <li><a href="#revolute-motion-about-the-line" id="toc-revolute-motion-about-the-line" class="nav-link" data-scroll-target="#revolute-motion-about-the-line"><span class="header-section-number">8.2.3</span> Revolute motion about the line</a></li>
   <li><a href="#sec-helical-motion-screw-pitch" id="toc-sec-helical-motion-screw-pitch" class="nav-link" data-scroll-target="#sec-helical-motion-screw-pitch"><span class="header-section-number">8.2.4</span> Helical motion and screw pitch</a></li>
   <li><a href="#prismatic-motion-along-a-direction" id="toc-prismatic-motion-along-a-direction" class="nav-link" data-scroll-target="#prismatic-motion-along-a-direction"><span class="header-section-number">8.2.5</span> Prismatic motion along a direction</a></li>
-  <li><a href="#the-normalisation-rule-and-the-declared-component-order" id="toc-the-normalisation-rule-and-the-declared-component-order" class="nav-link" data-scroll-target="#the-normalisation-rule-and-the-declared-component-order"><span class="header-section-number">8.2.6</span> The normalisation rule and the declared component order</a></li>
+  <li><a href="#sec-screw-normalisation-component-order" id="toc-sec-screw-normalisation-component-order" class="nav-link" data-scroll-target="#sec-screw-normalisation-component-order"><span class="header-section-number">8.2.6</span> The normalisation rule and the declared component order</a></li>
   <li><a href="#worked-checks" id="toc-worked-checks" class="nav-link" data-scroll-target="#worked-checks"><span class="header-section-number">8.2.7</span> Worked checks</a></li>
   <li><a href="#contrasting-the-geometric-and-motion-quantities" id="toc-contrasting-the-geometric-and-motion-quantities" class="nav-link" data-scroll-target="#contrasting-the-geometric-and-motion-quantities"><span class="header-section-number">8.2.8</span> Contrasting the geometric and motion quantities</a></li>
   <li><a href="#quick-test-a-screw-axes-and-joint-motion" id="toc-quick-test-a-screw-axes-and-joint-motion" class="nav-link" data-scroll-target="#quick-test-a-screw-axes-and-joint-motion">Quick test A: screw axes and joint motion</a></li>
@@ -1087,8 +1087,8 @@ Figure&nbsp;8.2: Helical motion at a fixed joint angle, showing axial displaceme
 <p>The subscript <span class="math inline">\(P\)</span> labels the prismatic case. The first three entries of <span class="math inline">\({}^{a}\mathbf S_P\)</span> are dimensionless direction components, and multiplication by <span class="math inline">\(\dot d_j\)</span> produces linear velocity in <span class="math inline">\(\mathrm{m\,s^{-1}}\)</span>. The angular entries remain zero. Unlike a revolute or helical motion, a pure translation has no unique finite axis location; its direction is sufficient.</p>
 <p>Pure translation is sometimes described as screw motion with infinite pitch. That phrase is a geometric limiting interpretation, not a numerical instruction. A software model should use the finite prismatic form <span class="math inline">\({}^{a}\mathbf S_P\)</span> and should not store <span class="math inline">\(h=\infty\)</span>.</p>
 </section>
-<section id="the-normalisation-rule-and-the-declared-component-order" class="level3" data-number="8.2.6">
-<h3 data-number="8.2.6" class="anchored" data-anchor-id="the-normalisation-rule-and-the-declared-component-order"><span class="header-section-number">8.2.6</span> The normalisation rule and the declared component order</h3>
+<section id="sec-screw-normalisation-component-order" class="level3" data-number="8.2.6">
+<h3 data-number="8.2.6" class="anchored" data-anchor-id="sec-screw-normalisation-component-order"><span class="header-section-number">8.2.6</span> The normalisation rule and the declared component order</h3>
 <p>Write any normalised screw-axis coordinate column in the project’s linear-first order as</p>
 <p><span class="math display">\[
 {}^{a}\mathbf S

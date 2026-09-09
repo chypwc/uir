@@ -1623,39 +1623,7 @@ The position block is exactly the planar 2R forward-position map already obtaine
 
 The space form stores every joint screw axis using $\{s\}$. The same physical model can instead store the axes using the end-effector frame $\{e\}$ when the robot is at $\mathbf q=\mathbf 0_n$. This alternative is useful when geometric measurements or calculations are naturally referred to the tool frame, but it must produce the same $\mathbf T_{se}(\mathbf q)$.
 
-The adjoint rule recalled from @sec-se3-adjoint-twist is stated first for an instantaneous twist. If $\mathbf T_{ab}$ maps coordinates from frame $\{b\}$ to frame $\{a\}$, then the two coordinate columns of the same physical instantaneous rigid-body velocity satisfy
-
-$$
-\boxed{
-{}^{a}\boldsymbol\xi_j
-=
-\operatorname{Ad}_{\mathbf T_{ab}}
-{}^{b}\boldsymbol\xi_j
-}.
-$$
-
-Here ${}^{a}\boldsymbol\xi_j$ and ${}^{b}\boldsymbol\xi_j$ describe the same joint-induced velocity; only the frame used for their coordinates differs. In each frame, the corresponding screw-axis column maps the same scalar joint rate $\dot q_j$ to that twist:
-
-$$
-{}^{a}\boldsymbol\xi_j
-=
-{}^{a}\mathbf S_j\dot q_j,
-\qquad
-{}^{b}\boldsymbol\xi_j
-=
-{}^{b}\mathbf S_j\dot q_j.
-$$
-
-Substituting these two expressions into the twist transformation gives
-
-$$
-{}^{a}\mathbf S_j\dot q_j
-=
-\operatorname{Ad}_{\mathbf T_{ab}}
-{}^{b}\mathbf S_j\dot q_j.
-$$
-
-This equality must hold for every possible value of the same joint rate. Therefore, the columns multiplying $\dot q_j$ must be equal:
+Recall the screw-axis coordinate transformation derived in @sec-screw-normalisation-component-order. If $\mathbf T_{ab}\in SE(3)$ maps coordinates from frame $\{b\}$ to frame $\{a\}$, the linear-first six-entry columns ${}^{a}\mathbf S_j$ and ${}^{b}\mathbf S_j$ of the same joint screw satisfy
 
 $$
 \boxed{
@@ -1689,7 +1657,7 @@ $$
 }.
 $$
 
-The body screw axis ${}^{e}\mathbf B_j$ is fixed home-configuration model data, whereas $\boldsymbol\xi_{e,j}$ is an instantaneous velocity that depends on the current joint rate. Multiplication by the joint coordinate instead gives the finite exponential-coordinate column ${}^{e}\boldsymbol\eta_j={}^{e}\mathbf B_jq_j$ used inside the body-form joint factor. At a general nonzero configuration, the complete end-effector twist combines all joint rates through the robot Jacobian developed later; it is not obtained by treating every stored home-axis column as an unmodified current twist.
+The body screw axis ${}^{e}\mathbf B_j$ is fixed home-configuration model data, whereas $\boldsymbol\xi_{e,j}$ is an instantaneous velocity that depends on the current joint rate. Multiplication by the joint coordinate instead gives the finite exponential-coordinate column ${}^{e}\boldsymbol\eta_j={}^{e}\mathbf B_jq_j$ used inside the body-form joint factor. At a general nonzero configuration, the complete end-effector twist combines all joint rates through the robot Jacobian developed later.
 
 To make the linear-first conversion explicit, write
 
@@ -2131,7 +2099,30 @@ $$
 \end{bmatrix}.
 $$
 
-Substituting $d_1=L_1+L_2$ and $d_2=L_2$ recovers the two linear blocks calculated above. For joint 1, the fixed axis point may be chosen as $O_s$ because its axis passes through the space origin. For joint 2, the fixed point is instead a point on joint 2’s axis; $O_s$ does not lie on that axis. Substituting the two body screw axes into Equation @eq-serial-body-poe gives
+Substituting $d_1=L_1+L_2$ and $d_2=L_2$ recovers the two linear blocks calculated above. For joint 1, the fixed axis point may be chosen as $O_s$ because its axis passes through the space origin. For joint 2, the fixed point is instead a point on joint 2’s axis; $O_s$ does not lie on that axis.
+
+**Lever-arm interpretation.** Here the lever arm is the perpendicular distance from a joint's rotation axis to the end-effector origin. At home, these distances are $d_1=L_1+L_2$ for joint 1 and $d_2=L_2$ for joint 2. Hold the other joint still: positive rotation about $+z_e$ initially moves the end-effector origin toward $+y_e$, tangent to its circular path around the moving joint's axis.
+
+Let ${}^{e}\mathbf v_{O_e,j}$ denote the end-effector origin's velocity relative to the fixed space frame, expressed along the home end-effector axes, when only joint $j$ moves. At home, that origin has coordinates $\mathbf0_3$ in $\{e\}$, so evaluating the velocity field there gives
+
+$$
+\begin{aligned}
+{}^{e}\mathbf v_{O_e,j}
+&=
+\left(
+{}^{e}\mathbf b_{v,j}
++{}^{e}\mathbf b_{\omega,j}\times\mathbf0_3
+\right)\dot\theta_j\\
+&=
+\begin{bmatrix}
+0\\d_j\dot\theta_j\\0
+\end{bmatrix}.
+\end{aligned}
+$$
+
+Thus the tangential speed is the lever-arm distance multiplied by the angular speed, $d_j|\dot\theta_j|$. For $L_1=2\,\mathrm m$ and $L_2=1\,\mathrm m$, the lever arms are three metres and one metre. With only joint 1 moving at $1\,\mathrm{rad/s}$, the initial end-effector velocity is $3\,\mathrm{m/s}$ toward $+y_e$; with only joint 2 moving at the same rate, it is $1\,\mathrm{m/s}$ toward $+y_e$. These are instantaneous velocities at home, not straight-line motions along $+y_e$.
+
+Substituting the two body screw axes into Equation @eq-serial-body-poe gives
 
 $$
 \mathbf T_{se}(\boldsymbol\theta)

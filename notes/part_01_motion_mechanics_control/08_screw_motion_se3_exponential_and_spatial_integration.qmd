@@ -661,7 +661,7 @@ The subscript $P$ labels the prismatic case. The first three entries of ${}^{a}\
 
 Pure translation is sometimes described as screw motion with infinite pitch. That phrase is a geometric limiting interpretation, not a numerical instruction. A software model should use the finite prismatic form ${}^{a}\mathbf S_P$ and should not store $h=\infty$.
 
-### The normalisation rule and the declared component order
+### The normalisation rule and the declared component order {#sec-screw-normalisation-component-order}
 
 Write any normalised screw-axis coordinate column in the project's linear-first order as
 

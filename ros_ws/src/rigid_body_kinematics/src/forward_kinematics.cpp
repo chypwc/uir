@@ -52,9 +52,7 @@ const Vector6LinearFirst & space_screw_axis(
     joint_definition);
 }
 
-}  // namespace
-
-Transform3 space_form_forward_kinematics(
+void validate_forward_kinematics_query(
   const SerialChainModel & model,
   Eigen::Ref<const Eigen::VectorXd> joint_coordinates,
   const NumericalPolicy & policy)
@@ -103,6 +101,16 @@ Transform3 space_form_forward_kinematics(
           " exceeds the supported exponential angle.");
     }
   }
+}
+
+}  // namespace
+
+Transform3 space_form_forward_kinematics(
+  const SerialChainModel & model,
+  Eigen::Ref<const Eigen::VectorXd> joint_coordinates,
+  const NumericalPolicy & policy)
+{
+  validate_forward_kinematics_query(model, joint_coordinates, policy);
 
   Transform3 result = Transform3::identity();
 
@@ -147,6 +155,78 @@ Transform3 space_form_forward_kinematics(
       SerialChainError::unsupported_magnitude,
       std::string("Final home-pose composition failed: ") + error.what());
   }
+}
+
+Transform3 body_form_forward_kinematics(
+  const SerialChainModel & model,
+  Eigen::Ref<const Eigen::VectorXd> joint_coordinates,
+  const NumericalPolicy & policy)
+{
+  validate_forward_kinematics_query(model, joint_coordinates, policy);
+
+  // Convert from the space frame to the home end-effector frame.
+  Eigen::Matrix<double, 6, 6> home_inverse_adjoint;
+
+  try {
+    home_inverse_adjoint = model.home_pose().inverse().adjoint();
+  } catch (const GeometryException & exception) {
+    const SerialChainError serial_error =
+      exception.code() == GeometryError::invalid_policy
+        ? SerialChainError::invalid_policy
+        : SerialChainError::unsupported_magnitude;
+
+    throw SerialChainException(
+      serial_error,
+      std::string("Home-frame conversion failed: ") + exception.what());
+  }
+
+  Transform3 result = model.home_pose();
+
+  // M -> M G_1 -> M G_1 G_2 -> ... -> M G_1 ... G_n
+  for (std::size_t index = 0; index < model.joint_count(); ++index) {
+    const double coordinate =
+      joint_coordinates(static_cast<Eigen::Index>(index));
+
+    const Vector6LinearFirst body_screw_axis =
+      home_inverse_adjoint *
+      space_screw_axis(model.joint_definitions().at(index));
+
+    if (!body_screw_axis.allFinite()) {
+      throw SerialChainException{
+        SerialChainError::unsupported_magnitude,
+        "Joint " + std::to_string(index + 1) +
+          " produced a non-finite body screw axis."};
+    }
+
+    const Vector6LinearFirst exponential_coordinates =
+      body_screw_axis * coordinate;
+
+    if (!exponential_coordinates.allFinite()) {
+      throw SerialChainException(
+        SerialChainError::unsupported_magnitude,
+        "Joint " + std::to_string(index + 1) +
+          " produced non-finite exponential coordinates.");
+    }
+
+    try {
+      const Transform3 joint_displacement =
+        Transform3::from_exponential_coordinates(
+          exponential_coordinates, policy);
+
+      result = result.compose(joint_displacement);
+    } catch (const GeometryException & exception) {
+      const SerialChainError serial_error =
+        exception.code() == GeometryError::invalid_policy
+          ? SerialChainError::invalid_policy
+          : SerialChainError::unsupported_magnitude;
+
+      throw SerialChainException{
+        serial_error, "Joint " + std::to_string(index + 1) +
+                        " evaluation failed: " + exception.what()};
+    }
+  }
+
+  return result;
 }
 
 }  // namespace rigid_body_kinematics

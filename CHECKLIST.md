@@ -52,11 +52,11 @@ The parallel track is active at `IF.4` — Finite MDPs, Bellman equations, and e
 
 - **Milestone:** `M1` — Classical intelligence foundation.
 - **Phase:** Phase 1 — Geometry, mechanics, and control.
-- **Capability:** `P1.CI` — Package and documentation continuous integration.
-- **Cycle:** Reproducible package and HTML checks in CI.
-- **Active stage:** Learn and review.
-- **Active task:** Review the existing package/documentation commands and CI requirements before drafting the bounded environment specification.
-- **Next engineering checkpoint:** Complete `P1.CI`, then resume `P1.3` Cycle 2 — Body-form forward kinematics.
+- **Capability:** `P1.3` — General robot kinematics and Jacobians.
+- **Cycle:** Cycle 2 — Body-form product-of-exponentials forward kinematics.
+- **Active stage:** Implement and verify.
+- **Active task:** Extract the existing forward-kinematics query validation into a shared internal helper, then implement the body evaluator using the already-added declaration and the approved RRP acceptance fixture.
+- **Next engineering checkpoint:** Implement and verify the body evaluator in small learner-authored blocks using local package builds and focused tests.
 - **Next mathematical capability:** `P1.4` — General inverse-kinematics foundations and planar manipulator laboratory.
 - **Blockers:** None. `P1.3` Cycle 1 is closed with evidence linked below.
 
@@ -71,7 +71,7 @@ Phase 1 closes when its shared mathematical references and two bounded learning 
 | Linear algebra and coordinate frames | [Chapter 1](notes/part_01_motion_mechanics_control/01_linear_algebra_foundations.qmd) covers vectors, matrices, rank, null spaces, determinants, and orthogonal maps; [Chapter 2](notes/part_01_motion_mechanics_control/02_geometry_and_coordinate_frames.qmd) covers frames, coordinate changes, and a cumulative test; Chapter 7 introduces a constraint Jacobian, rank, and tangent null space; the opening [Chapter 10](notes/part_01_motion_mechanics_control/10_general_robot_kinematics_and_jacobians.qmd) block defines the total derivative and multivariable chain rule | Task, space, and body robot Jacobians and robot singularities remain untaught | Complete the queued Chapter 10 Jacobian blocks in `P1.3` |
 | Planar rigid-body and differential-drive motion | [Chapter 3](notes/part_01_motion_mechanics_control/03_kinematics_and_numerical_integration.qmd), [Chapter 6](notes/part_01_motion_mechanics_control/06_planar_rigid_body_motion_se2_and_twists.qmd), the [specification](docs/01_motion_models/differential_drive_motion_model.md), and the [package](ros_ws/src/differential_drive_motion_model) cover ideal planar kinematics, exact constant-input integration, and Forward Euler | Encoder odometry, timestamps, drift, and broader ODE treatment remain outside the closed ideal-motion capability | Preserve the accepted `P1.1` evidence and add the deferred topics only in their owning later capabilities |
 | Spatial rigid-body motion | Reviewed [Chapter 7](notes/part_01_motion_mechanics_control/07_degrees_of_freedom_and_spatial_motion_so3_se3.qmd) and [Chapter 8](notes/part_01_motion_mechanics_control/08_screw_motion_se3_exponential_and_spatial_integration.qmd), the approved [specification](docs/02_spatial_kinematics/spatial_geometry_kernel.md), the retrospective [implementation companion](notes/part_01_motion_mechanics_control/09_spatial_geometry_kernel_implementation.qmd), and the deterministic C++20 [package and tests](ros_ws/src/rigid_body_kinematics) cover the bounded spatial geometry kernel | No remaining gap for `P1.2`; general forward and velocity kinematics belong to `P1.3` | Preserve the closed kernel and extend it only through approved later capability contracts |
-| General robot kinematics | [Chapter 10](notes/part_01_motion_mechanics_control/10_general_robot_kinematics_and_jacobians.qmd) opening and space-form PoE blocks are reviewed; the [Cycle 1 closure summary](#cycle-1--space-form-product-of-exponentials-forward-kinematics) links the accepted core, companion, tests, and RViz consumer | Body-form, Jacobian, and singularity cycles remain open | Complete `P1.CI`, then resume `P1.3` Cycle 2 without reopening the accepted space-form cycle |
+| General robot kinematics | [Chapter 10](notes/part_01_motion_mechanics_control/10_general_robot_kinematics_and_jacobians.qmd) opening and space-form PoE blocks are reviewed; the [Cycle 1 closure summary](#cycle-1--space-form-product-of-exponentials-forward-kinematics) links the accepted core, companion, tests, and RViz consumer | Body-form, Jacobian, and singularity cycles remain open | Continue `P1.3` Cycle 2 without reopening the accepted space-form cycle |
 | Inverse kinematics and planar manipulation | No current note, specification, or package solves a manipulator task | Analytic and numerical inverse kinematics, convergence, multiple solutions, reachability, damped least squares, joint limits, redundancy, null-space objectives, manipulability, and manipulator-specific acceptance evidence are absent | Teach general open-serial-chain inverse-kinematics foundations, verify them in a bounded 2R/3R planar laboratory, and reserve the spatial production arm and manipulation mission for Phase 8 |
 | Wheeled constraints and odometry | Chapter 3 derives the ideal no-sideways differential-drive constraint and wheel/body mapping; Chapters 3 and 7 distinguish holonomic and nonholonomic constraints | The general Pfaffian-to-parametric framework, rolling-constraint matrices, encoder odometry, Ackermann steering, and the bicycle comparison are absent | Add a wheeled-constraints and odometry chapter, then implement one differential-drive odometry pipeline |
 | Dynamic systems and mechanics | The preserved [dynamics draft](notes/part_01_motion_mechanics_control/16_dynamic_systems_mechanics_and_actuator_limits.qmd) covers one-dimensional Newtonian motion, wheel traction balance, and ideal gearing | General state ODEs, planar yaw dynamics, manipulator mass, Coriolis/centrifugal and gravity terms, inertia, friction and traction bounds, resistance, actuator saturation, braking, and a reference numerical method are absent | Preserve and complete the shared dynamic-systems foundation, then derive separate bounded differential-drive and 2R manipulator plants |
@@ -113,8 +113,8 @@ Phase 1 closes when its shared mathematical references and two bounded learning 
 |---|---|---|---|
 | `P1.1` — Ideal planar motion kernel | Close Chapters 2–3 and preserve Chapters 4 and 6 | Existing `differential_drive_motion_model`, Python and `pytest` | Complete |
 | `P1.2` — Spatial geometry kernel | Complete Chapter 8 and its Chapter 9 implementation companion | `rigid_body_kinematics`, modern C++, CMake, Eigen, and GTest | Complete |
-| `P1.3` — General kinematics and Jacobians | Complete Chapter 10 and its Chapter 11 implementation companion | Extend `rigid_body_kinematics` with bounded forward and velocity kinematics; add a scenario-specific downstream `rigid_body_kinematics_visualization` consumer with ROS 2, `visualization_msgs`, and RViz | Cycle 1 complete; resume Cycle 2 after `P1.CI`; later cycles remain open |
-| `P1.CI` — Package and documentation CI | Environment specification and retrospective workflow explanation | GitHub Actions with the existing package build/test and reviewed HTML commands | Active: review the existing commands and bounded CI requirements |
+| `P1.3` — General kinematics and Jacobians | Complete Chapter 10 and its Chapter 11 implementation companion | Extend `rigid_body_kinematics` with bounded forward and velocity kinematics; add a scenario-specific downstream `rigid_body_kinematics_visualization` consumer with ROS 2, `visualization_msgs`, and RViz | Cycle 1 complete; Cycle 2 active at implementation; one RRP acceptance fixture; later cycles remain open |
+| `P1.CI` — Package and documentation CI | No additional artifact required | Retain local builds, tests, and document renders | Skipped by user decision on 2026-09-09; not a Phase 1 gate |
 | `P1.4` — General inverse-kinematics foundations and planar manipulator laboratory | Chapter 12 and its Chapter 13 implementation companion | Begin the ROS-free `planar_manipulator_lab` with 2R/3R inverse kinematics, modern C++, Eigen, and GTest; extend the downstream RViz consumer for selected spatial results and retain Python plots for numerical histories | Queued |
 | `P1.5` — Wheel-odometry pipeline | Chapter 14 and its Chapter 15 implementation companion | `differential_drive_odometry`, modern C++ core and thin ROS 2 adapter, with the accepted Python kernel as an independent reference | Queued |
 | `P1.6` — Differential-drive dynamics laboratory | Chapter 16 and its Chapter 17 implementation companion | `differential_drive_planar_plant`, modern C++ and deterministic numerical tests | Queued |
@@ -242,10 +242,10 @@ colcon test-result \
 
 #### Cycle 2 — Body-form product-of-exponentials forward kinematics
 
-- [ ] Learn and write body screw axes, the body-form product, its multiplication order, and its equivalence to the space form and the declared transform chain using *Modern Robotics*, Chapter 4, and the selected supporting sources.
-- [ ] Review the body-form block and complete its retrieval questions on frame meaning, axis conversion, product order, equivalence, and supported inputs.
-- [ ] Extend the general-kinematics specification with body-form inputs, validation, exclusions, and fixed space/body pose-equivalence cases.
-- [ ] Implement body-form forward kinematics with focused tests for independent single-joint cases and agreement with the space form on the planar 2R and one small non-planar chain.
+- [x] The existing Chapter 10 draft contains body screw axes, the body-form product, its multiplication order, and equivalence with the space form and the declared transform chain. Reuse this draft rather than writing a duplicate; this records draft presence, not review acceptance.
+- [x] Review the body-form derivation, home-frame axis conversion, lever-arm example, and transform-chain equivalence. The learner confirmed the same space-referenced output pose, fixed home axes, and unchanged joint order with the home pose on the left; local clarification edits are in Chapter 10. This clears the Cycle 2 learning gate, not chapter-wide acceptance.
+- [x] Review and refine the [body-form specification](docs/02_spatial_kinematics/general_kinematics_and_jacobians.md#body-form-forward-kinematics). The learner selected one RRP fixture at zero and one nonzero configuration; retain shared validation checks and the distinct conversion-overflow check. Independent NumPy/SciPy checks confirm the rotated-home RRP poses within the declared tolerance; this verifies specification values, not production body-form behaviour.
+- [ ] **Active:** Implement body-form forward kinematics with the existing model. The learner has added the public declaration; next extract shared query validation, preserve space-form tests, then add body accumulation and the RRP acceptance checks. No separate single-joint, planar 2R, or spatial 2R geometry fixture is required for the body evaluator.
 - [ ] Write and review the retrospective body-form companion section after its implementation and tests work.
 - [ ] Run the focused package build and acceptance cases, inspect the affected artifacts, link the evidence, and close the body-form cycle.
 
@@ -283,16 +283,6 @@ colcon test-result \
 - [ ] Run the complete affected-package build and deterministic test set, confirm that the general-purpose package excludes inverse kinematics, pseudoinverse control, URDF parsing, collision, and dynamics, and inspect the final P1.3 artifacts.
 - [ ] Link the approved theory, specification, companion, package, and deterministic tests and close `P1.3`.
 - [ ] Review the available [effort log](docs/effort_log.md) entries for `P1.1`–`P1.3` alongside the accepted artifacts; identify unrecorded historical effort without inventing retrospective totals.
-
-### P1.CI — Package and documentation continuous integration
-
-Active engineering checkpoint after closure of `P1.3` Cycle 1 on 2026-09-08. Complete this bounded cycle, then resume `P1.3` Cycle 2. It is the only active main-track task. Follow learn/review → specify → implement/test → retrospective → close; no CI implementation has begun.
-
-- [ ] **Active:** Review the existing package commands and current official GitHub Actions/ROS guidance; specify `docs/environment/continuous_integration.md` for a pinned Ubuntu/ROS environment, dependencies, pull-request triggers, failure reporting, and reproducible local commands.
-- [ ] Implement `.github/workflows/ci.yml` through the learner-authored workflow: build and run the registered functional and lint checks for `rigid_body_kinematics`, `intelligence_foundations`, and `differential_drive_motion_model` from `ros_ws`; exercise already specified installed-target consumers where available. Exclude future package skeletons and incomplete unregistered blocks from the target list.
-- [ ] Add scoped local-link checks and HTML compilation of the reviewed book sources, respecting executable-block environments. Keep GPU training, full statistical campaigns, and PDF release renders in their owning manual acceptance paths.
-- [ ] Verify a clean runner and an intentional failing-check fixture in an isolated branch or local runner, confirm visible failure reporting, then record the commands and first successful CI run in the environment documentation. Write the retrospective workflow explanation after these checks work.
-- [ ] Link the workflow and evidence here and include passing CI for the released package versions in Phase 1 acceptance. CI implementation has not begun; the existing Pages workflow only publishes rendered output.
 
 ### Queued Phase 1 capabilities
 
@@ -366,7 +356,7 @@ The following outlines retain required artifacts and decisive acceptance boundar
 - [ ] Review Chapter 27 `27_geometry_mechanics_and_control_cumulative_review.qmd`, correct blocking misconceptions, and reconcile the reviewed book and registries without adding duplicate concepts.
 - [ ] Freeze `docs/05_phase_01_integration/phase_01_acceptance.md` as the owner of final mobile scenarios, thresholds, environment, held-out cases, commands, and result manifests. Reference the state-space and arm specifications and result manifests for their separate educational evidence.
 - [ ] Run the complete clean-environment mobile acceptance campaign across nominal motion, geometry mismatch, bounded disturbance, encoder noise, command latency, effort/traction limits, dropout, invalid data, timestamps, and emergency stop. Use tested metrics and frozen controller comparisons, preserving failures and negative results.
-- [ ] Confirm the accepted `P1.8` and `P1.10` evidence and passing package CI; render the complete reviewed Phase 1 book and record a concise phase acceptance conclusion here linking the existing component results.
+- [ ] Confirm the accepted `P1.8` and `P1.10` evidence and passing local package builds and tests; render the complete reviewed Phase 1 book and record a concise phase acceptance conclusion here linking the existing component results.
 - [ ] Package the Motion and Control Foundations Release with source revision, environment/scenario manifests, build/test/reproduction commands, reviewed notes and companions, and representative demonstration. Link the release and acceptance evidence here, mark Phase 1 complete, condense its working detail, and expand Phase 2.
 
 ## Backlog

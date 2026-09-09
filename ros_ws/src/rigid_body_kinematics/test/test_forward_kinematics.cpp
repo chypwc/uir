@@ -6,6 +6,7 @@
 #include <limits>
 #include <numbers>
 #include <optional>
+#include <string>
 #include <vector>
 
 #include "rigid_body_kinematics/forward_kinematics.hpp"
@@ -43,6 +44,50 @@ void expect_pose_near(
   EXPECT_LE(translation_error_metres.norm(), translation_tolerance_metres);
   EXPECT_LE(rotation_error_radians.norm(), rotation_tolerance_radians);
 }
+
+// A reusable model with 2 revolute joints and 1 prismatic joint.
+rigid_body_kinematics::SerialChainModel make_rrp_model()
+{
+  const auto revolute_limits =
+    rigid_body_kinematics::RevoluteLimits::from_bounds(
+      -std::numbers::pi, std::numbers::pi);
+
+  const auto prismatic_limits =
+    rigid_body_kinematics::PrismaticLimits::from_bounds(0.0, 1.0);
+
+  // Home geometry: base rotation about +z, elbow rotation about +y.
+  const auto base_joint = rigid_body_kinematics::RevoluteJoint::from_axis(
+    Eigen::Vector3d::UnitZ(), Eigen::Vector3d::Zero(), revolute_limits);
+
+  const auto elbow_joint = rigid_body_kinematics::RevoluteJoint::from_axis(
+    Eigen::Vector3d::UnitY(), Eigen::Vector3d(2.0, 0.0, 0.0), revolute_limits);
+
+  // Extension along the second link, which points along +x at home.
+  const auto extension_joint = rigid_body_kinematics::PrismaticJoint::from_axis(
+    Eigen::Vector3d::UnitX(), prismatic_limits);
+
+  // Let the end-effector's axes in the space frame:
+  // +x_e points along +y_s; +y_e points along -x_s; +z_e points along +z_s.
+  // That is, the orientation is R_z(π/2).
+  Eigen::Matrix4d home_matrix;
+  // clang-format off
+  home_matrix <<
+    0.0, -1.0, 0.0, 3.0,
+    1.0,  0.0, 0.0, 0.0,
+    0.0,  0.0, 1.0, 0.0,
+    0.0,  0.0, 0.0, 1.0;
+  // clang-format on
+
+  const auto home_pose =
+    rigid_body_kinematics::Transform3::from_matrix(home_matrix);
+
+  const std::vector<rigid_body_kinematics::JointDefinition> joints{
+    base_joint, elbow_joint, extension_joint};
+
+  return rigid_body_kinematics::SerialChainModel::from_home_and_joints(
+    home_pose, joints);
+}
+
 }  // namespace
 
 // Purpose: Preserve the complete home pose when all allowed coordinates are zero.
@@ -432,40 +477,44 @@ TEST(ForwardKinematicsTest, PlanarTwoRevoluteChainMatchesAnalyticPose)
     expected, actual, kTranslationToleranceMetres, kRotationToleranceRadians);
 }
 
-// Purpose: Enforce one coordinate per joint: q must belong to R^n.
-// For n = 2, lengths 1 and 3 must throw dimension_mismatch, not return a pose.
+// Purpose: Both evaluators require exactly one coordinate per joint.
+// For n = 2, lengths 1 and 3 must throw dimension_mismatch.
 TEST(ForwardKinematicsTest, RejectsWrongJointCoordinateCount)
 {
   namespace rbk = rigid_body_kinematics;
 
-  // Valid two-joint model; zero is within both joint intervals.
-  const rbk::PrismaticLimits limits =
-    rbk::PrismaticLimits::from_bounds(-1.0, 1.0);
+  const auto limits = rbk::PrismaticLimits::from_bounds(-1.0, 1.0);
 
-  const rbk::PrismaticJoint joint_1 =
-    rbk::PrismaticJoint::from_axis(Eigen::Vector3d(1.0, 0.0, 0.0), limits);
+  const auto joint_1 =
+    rbk::PrismaticJoint::from_axis(Eigen::Vector3d::UnitX(), limits);
 
-  const rbk::PrismaticJoint joint_2 =
-    rbk::PrismaticJoint::from_axis(Eigen::Vector3d(0.0, 1.0, 0.0), limits);
+  const auto joint_2 =
+    rbk::PrismaticJoint::from_axis(Eigen::Vector3d::UnitY(), limits);
 
-  const rbk::SerialChainModel model =
-    rbk::SerialChainModel::from_home_and_joints(
-      rbk::Transform3::identity(), {joint_1, joint_2});
+  const auto model = rbk::SerialChainModel::from_home_and_joints(
+    rbk::Transform3::identity(), {joint_1, joint_2});
 
-  // Two coordinates are required: test too few and too many.
-  for (const int coordinate_count : {1, 3}) {
-    const Eigen::VectorXd joint_coordinates =
-      Eigen::VectorXd::Zero(coordinate_count);
+  for (const auto evaluate :
+       {&rbk::space_form_forward_kinematics,
+        &rbk::body_form_forward_kinematics}) {
+    SCOPED_TRACE(
+      evaluate == &rbk::space_form_forward_kinematics ? "space form"
+                                                      : "body form");
 
-    try {
-      static_cast<void>(
-        rbk::space_form_forward_kinematics(model, joint_coordinates));
+    for (const int coordinate_count : {1, 3}) {
+      const Eigen::VectorXd joint_coordinates =
+        Eigen::VectorXd::Zero(coordinate_count);
 
-      FAIL() << "Expected dimension_mismatch for " << coordinate_count
-             << " coordinates.";
-    } catch (const rbk::SerialChainException & error) {
-      EXPECT_EQ(error.code(), rbk::SerialChainError::dimension_mismatch)
-        << "Coordinate count: " << coordinate_count;
+      try {
+        static_cast<void>(
+          evaluate(model, joint_coordinates, rbk::NumericalPolicy{}));
+
+        FAIL() << "Expected dimension_mismatch for " << coordinate_count
+               << " coordinates.";
+      } catch (const rbk::SerialChainException & error) {
+        EXPECT_EQ(error.code(), rbk::SerialChainError::dimension_mismatch)
+          << "Coordinate count: " << coordinate_count;
+      }
     }
   }
 }
@@ -710,49 +759,51 @@ TEST(
     expected, actual, kTranslationToleranceMetres, kRotationToleranceRadians);
 }
 
-// Purpose: Distinguish arithmetic overflow from non-finite supplied input.
-// Both q and the home x-position equal the largest finite double D_max.
-// The final E_1 M requires x = D_max + D_max, which is not representable;
-// the evaluator must throw unsupported_magnitude rather than return a pose.
+// Purpose: Both evaluators reject overflow during pose composition.
+// Home translation and prismatic displacement are each D_max along +x.
+// Their composition requires 2 D_max, which is not representable.
 TEST(ForwardKinematicsTest, RejectsOverflowDuringHomePoseComposition)
 {
   namespace rbk = rigid_body_kinematics;
 
   const double largest_finite = std::numeric_limits<double>::max();
 
-  // Allow any finite nonnegative prismatic coordinate.
-  const rbk::PrismaticLimits limits =
-    rbk::PrismaticLimits::from_bounds(0.0, std::nullopt);
+  const auto limits = rbk::PrismaticLimits::from_bounds(0.0, std::nullopt);
 
-  const rbk::PrismaticJoint joint =
-    rbk::PrismaticJoint::from_axis(Eigen::Vector3d(1.0, 0.0, 0.0), limits);
+  const auto joint =
+    rbk::PrismaticJoint::from_axis(Eigen::Vector3d::UnitX(), limits);
 
-  // The home translation is large but finite.
   Eigen::Matrix4d home_matrix = Eigen::Matrix4d::Identity();
   home_matrix(0, 3) = largest_finite;
 
-  const rbk::Transform3 home_pose = rbk::Transform3::from_matrix(home_matrix);
+  const auto home_pose = rbk::Transform3::from_matrix(home_matrix);
 
-  const rbk::SerialChainModel model =
+  const auto model =
     rbk::SerialChainModel::from_home_and_joints(home_pose, {joint});
 
   Eigen::VectorXd joint_coordinates(1);
   joint_coordinates << largest_finite;
 
-  try {
-    static_cast<void>(
-      rbk::space_form_forward_kinematics(model, joint_coordinates));
+  for (const auto evaluate :
+       {&rbk::space_form_forward_kinematics,
+        &rbk::body_form_forward_kinematics}) {
+    SCOPED_TRACE(
+      evaluate == &rbk::space_form_forward_kinematics ? "space form"
+                                                      : "body form");
 
-    FAIL() << "Expected unsupported_magnitude when the final "
-              "translation overflows.";
-  } catch (const rbk::SerialChainException & error) {
-    EXPECT_EQ(error.code(), rbk::SerialChainError::unsupported_magnitude);
+    try {
+      static_cast<void>(
+        evaluate(model, joint_coordinates, rbk::NumericalPolicy{}));
+
+      FAIL() << "Expected unsupported_magnitude when composing poses.";
+    } catch (const rbk::SerialChainException & error) {
+      EXPECT_EQ(error.code(), rbk::SerialChainError::unsupported_magnitude);
+    }
   }
 }
-
-// Purpose: reject overflow in exponential coordinates eta = S * q.
-// The screw and coordinate are individually finite, but scaling the linear
-// component -0.75 D_max by q = 2 produces an unrepresentable -1.5 D_max.
+// Purpose: Both evaluators reject overflow when scaling a finite screw.
+// M = I_4 gives B = S, so body conversion remains finite.
+// Scaling the linear entry -0.75 D_max by q = 2 exceeds double's range.
 TEST(ForwardKinematicsTest, RejectsOverflowDuringScrewScaling)
 {
   namespace rbk = rigid_body_kinematics;
@@ -760,27 +811,131 @@ TEST(ForwardKinematicsTest, RejectsOverflowDuringScrewScaling)
   const double largest_finite = std::numeric_limits<double>::max();
   const double axis_offset_metres = 0.75 * largest_finite;
 
-  // The requested angle is within both the physical and numerical limits.
-  const rbk::RevoluteLimits limits =
+  const auto limits =
     rbk::RevoluteLimits::from_bounds(-std::numbers::pi, std::numbers::pi);
 
-  const rbk::RevoluteJoint joint = rbk::RevoluteJoint::from_axis(
-    Eigen::Vector3d(0.0, 0.0, 1.0),
-    Eigen::Vector3d(axis_offset_metres, 0.0, 0.0), limits);
+  const auto joint = rbk::RevoluteJoint::from_axis(
+    Eigen::Vector3d::UnitZ(), Eigen::Vector3d{axis_offset_metres, 0.0, 0.0},
+    limits);
 
-  const rbk::SerialChainModel model =
-    rbk::SerialChainModel::from_home_and_joints(
-      rbk::Transform3::identity(), {joint});
+  const auto model = rbk::SerialChainModel::from_home_and_joints(
+    rbk::Transform3::identity(), {joint});
 
   Eigen::VectorXd joint_coordinates(1);
   joint_coordinates << 2.0;
 
+  for (const auto evaluate :
+       {&rbk::space_form_forward_kinematics,
+        &rbk::body_form_forward_kinematics}) {
+    SCOPED_TRACE(
+      evaluate == &rbk::space_form_forward_kinematics ? "space form"
+                                                      : "body form");
+
+    try {
+      static_cast<void>(
+        evaluate(model, joint_coordinates, rbk::NumericalPolicy{}));
+
+      FAIL() << "Expected unsupported_magnitude when scaling overflows.";
+    } catch (const rbk::SerialChainException & error) {
+      EXPECT_EQ(error.code(), rbk::SerialChainError::unsupported_magnitude);
+    }
+  }
+}
+
+// Purpose: Preserve the complete RRP home pose at zero coordinates.
+// G_j(0) = I_4, so T(0) = M I_4 I_4 I_4 = M.
+TEST(BodyForwardKinematicsTest, ZeroRrpCoordinatesReturnHomePose)
+{
+  const auto model = make_rrp_model();
+  const Eigen::Vector3d joint_coordinates = Eigen::Vector3d::Zero();
+
+  const auto body_pose = rigid_body_kinematics::body_form_forward_kinematics(
+    model, joint_coordinates);
+
+  const auto space_pose = rigid_body_kinematics::space_form_forward_kinematics(
+    model, joint_coordinates);
+
+  expect_pose_near(
+    model.home_pose(), body_pose, kTranslationToleranceMetres,
+    kRotationToleranceRadians);
+
+  expect_pose_near(
+    space_pose, body_pose, kTranslationToleranceMetres,
+    kRotationToleranceRadians);
+}
+
+// Purpose: Check body-axis conversion and ordered motion for the RRP chain.
+// q = (pi/2 rad, -pi/2 rad, 0.5 m) gives p = (0, 2, 1.5) m.
+// R = R_z(pi/2) R_y(-pi/2) R_z(pi/2), including home orientation.
+TEST(BodyForwardKinematicsTest, NonzeroRrpCoordinatesMatchAnalyticPose)
+{
+  const auto model = make_rrp_model();
+  const Eigen::Vector3d joint_coordinates(
+    std::numbers::pi / 2.0, -std::numbers::pi / 2.0, 0.5);
+
+  Eigen::Matrix4d expected_matrix;
+  // clang-format off
+  expected_matrix <<
+    -1.0,  0.0,  0.0, 0.0,
+     0.0,  0.0, -1.0, 2.0,
+     0.0, -1.0,  0.0, 1.5,
+     0.0,  0.0,  0.0, 1.0;
+  // clang-format on
+
+  const auto expected_pose =
+    rigid_body_kinematics::Transform3::from_matrix(expected_matrix);
+
+  const auto body_pose = rigid_body_kinematics::body_form_forward_kinematics(
+    model, joint_coordinates);
+
+  const auto space_pose = rigid_body_kinematics::space_form_forward_kinematics(
+    model, joint_coordinates);
+
+  expect_pose_near(
+    expected_pose, body_pose, kTranslationToleranceMetres,
+    kRotationToleranceRadians);
+
+  expect_pose_near(
+    space_pose, body_pose, kTranslationToleranceMetres,
+    kRotationToleranceRadians);
+}
+
+// Purpose: Reject overflow introduced by space-to-body screw conversion.
+// S = (0, D, 0; 0, 0, 1) is finite, but B requires a 2D linear entry.
+// This failure occurs before scaling by q or evaluating the exponential.
+TEST(BodyForwardKinematicsTest, RejectsOverflowDuringBodyScrewConversion)
+{
+  namespace rbk = rigid_body_kinematics;
+
+  const double largest_finite = std::numeric_limits<double>::max();
+
+  const auto limits =
+    rbk::RevoluteLimits::from_bounds(-std::numbers::pi, std::numbers::pi);
+
+  const auto joint = rbk::RevoluteJoint::from_axis(
+    Eigen::Vector3d::UnitZ(), Eigen::Vector3d(-largest_finite, 0.0, 0.0),
+    limits);
+
+  Eigen::Matrix4d home_matrix = Eigen::Matrix4d::Identity();
+  home_matrix(0, 3) = largest_finite;
+
+  const auto home_pose = rbk::Transform3::from_matrix(home_matrix);
+
+  const auto model =
+    rbk::SerialChainModel::from_home_and_joints(home_pose, {joint});
+
+  Eigen::VectorXd joint_coordinates(1);
+  joint_coordinates << 0.25;
+
   try {
     static_cast<void>(
-      rbk::space_form_forward_kinematics(model, joint_coordinates));
+      rbk::body_form_forward_kinematics(model, joint_coordinates));
 
-    FAIL() << "Expected unsupported_magnitude when screw scaling overflows.";
+    FAIL() << "Expected unsupported_magnitude during body-screw conversion.";
   } catch (const rbk::SerialChainException & error) {
     EXPECT_EQ(error.code(), rbk::SerialChainError::unsupported_magnitude);
+
+    const std::string message = error.what();
+    EXPECT_NE(message.find("Joint 1"), std::string::npos);
   }
 }

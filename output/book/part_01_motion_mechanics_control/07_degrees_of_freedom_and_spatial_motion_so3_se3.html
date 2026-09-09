@@ -882,7 +882,6 @@ n_{\mathrm{dof}}
 \]</span></p>
 <p>The single varying coefficient <span class="math inline">\(\alpha\)</span> explicitly represents the one local degree of freedom. At a different point on the circle, the fixed values of <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span> produce a different tangent direction, but the null space still has dimension one.</p>
 <p>The number of stored values is consequently not necessarily the number of degrees of freedom. For example, a spatial rotation matrix stores nine scalar entries, but its constraints leave only three independent rotational directions. Likewise, the circle uses two Cartesian entries even though its allowable-change space is one-dimensional.</p>
-<p>This counting rule applies directly to geometric, or <strong>holonomic</strong>, equality constraints that restrict configuration. Constraints imposed only on velocity require separate analysis and do not necessarily reduce the dimension of the configuration space.</p>
 </section>
 </section>
 <section id="why-a-free-planar-rigid-body-has-three-degrees-of-freedom" class="level3" data-number="7.1.3">
@@ -980,17 +979,19 @@ n_{\mathrm{dof}}
 </section>
 <section id="a-free-aerial-vehicle" class="level4">
 <h4 class="anchored" data-anchor-id="a-free-aerial-vehicle">A free aerial vehicle</h4>
-<p>Treat the vehicle as one rigid body with no geometric connection to the environment. Its configuration has six degrees of freedom: three position freedoms and three orientation freedoms. This statement does not imply that the vehicle can independently accelerate in all six directions at one instant. Its actuator arrangement and dynamics determine which accelerations can actually be produced.</p>
+<p>Imagine an aerial vehicle in open space, with no hinge, rail, or cable restricting its position or orientation. Treating it as one rigid body, we need three position coordinates and three local orientation coordinates to describe its configuration. It therefore has <strong>six configuration degrees of freedom</strong>, regardless of how many motors it has.</p>
+<p>This count describes where the vehicle can be placed and how it can be oriented. It does <strong>not</strong> say that its motors can independently produce every translational and rotational acceleration at its current orientation. To answer that separate question, we must examine the forces and torques its actuators can produce and how the body responds to them.</p>
 </section>
 </section>
 <section id="assumptions-limitations-and-checks" class="level3" data-number="7.1.7">
 <h3 data-number="7.1.7" class="anchored" data-anchor-id="assumptions-limitations-and-checks"><span class="header-section-number">7.1.7</span> Assumptions, limitations, and checks</h3>
+<p>Before accepting a DOF count, check what is being counted and what each constraint actually restricts.</p>
 <ul>
-<li><strong>Counting redundant constraints:</strong> Several equations may express the same geometric restriction. Check the rank of the constraint derivatives rather than counting written equations blindly.</li>
-<li><strong>Confusing coordinates with physical freedom:</strong> A rotation matrix has nine entries but only three rotational degrees of freedom. Identify the independent constraints imposed on a representation.</li>
-<li><strong>Confusing actuator count with DOF:</strong> A robot may be underactuated or may have redundant actuators. State whether a count refers to configuration, velocity, inputs, or state.</li>
-<li><strong>Applying <span class="math inline">\(n_v-n_c\)</span> at a singular configuration:</strong> Constraint rank can change at singularities. Verify that the constraints are regular in the region being analysed.</li>
-<li><strong>Treating a velocity constraint as a configuration constraint:</strong> Under ideal rolling, a wheel moves without sliding sideways at its ground contact. This condition is <strong>nonholonomic</strong> when it restricts the allowable velocities but cannot be replaced by an equivalent equation involving only the configuration. For example, a differential-drive robot cannot move sideways instantaneously, but turning and driving can still change all three coordinates <span class="math inline">\((x,y,\theta)\)</span>. The rolling constraint therefore reduces instantaneous mobility without reducing the dimension of its C-space; analyse valid configurations and valid velocities separately.</li>
+<li><strong>Count independent restrictions, not written equations.</strong> The equations <span class="math inline">\(x=0\)</span> and <span class="math inline">\(2x=0\)</span> impose the same restriction, so they remove only one freedom. Use the rank of the constraint Jacobian to identify independent restrictions.</li>
+<li><strong>Count independent coordinates, not stored numbers.</strong> A rotation matrix stores nine entries, but those entries cannot vary independently: its columns must remain unit length and mutually perpendicular, with determinant <span class="math inline">\(+1\)</span>. The orientation still has only three degrees of freedom.</li>
+<li><strong>Do not count motors as configuration freedoms.</strong> A door needs one angle to describe its position whether it is moved by hand, one motor, or several motors acting together. Actuators determine how motion is driven; they do not by themselves determine how many coordinates describe the configuration.</li>
+<li><strong>Check that the constraint rank stays constant nearby.</strong> The count <span class="math inline">\(n_v-n_c\)</span> assumes that the <span class="math inline">\(n_c\)</span> constraints are independent and regular in the region considered. At a singular configuration, their derivatives can lose independence. Do not apply the usual count there without examining the constraints more carefully.</li>
+<li><strong>Distinguish a restriction on motion from a restriction on position.</strong> A velocity constraint may restrict how a system can move at each instant without being equivalent to any restriction on its configuration alone. Such a constraint is called <strong>nonholonomic</strong>. For example, an ideal differential-drive robot cannot slide sideways at an instant, but it can turn, drive, and turn back to reach a sideways-displaced position. Its no-sideways-slip constraint is therefore nonholonomic: it restricts the motion used to reach a position, not the sideways position itself. The robot still needs all three configuration coordinates <span class="math inline">\((x,y,\theta)\)</span>; its allowed instantaneous motions are forward/backward movement and turning, or a combination of both.</li>
 </ul>
 </section>
 </section>

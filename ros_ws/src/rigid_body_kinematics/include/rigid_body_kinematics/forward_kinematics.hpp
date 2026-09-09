@@ -15,6 +15,11 @@ namespace rigid_body_kinematics
   Eigen::Ref<const Eigen::VectorXd> joint_coordinates,
   const NumericalPolicy & policy = NumericalPolicy{});
 
+[[nodiscard]] Transform3 body_form_forward_kinematics(
+  const SerialChainModel & model,
+  Eigen::Ref<const Eigen::VectorXd> joint_coordinates,
+  const NumericalPolicy & policy = NumericalPolicy{});
+
 }  // namespace rigid_body_kinematics
 
 #endif  // RIGID_BODY_KINEMATICS_FORWARD_KINEMATICS_HPP_

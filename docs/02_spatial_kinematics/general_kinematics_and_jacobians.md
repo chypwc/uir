@@ -1,14 +1,14 @@
 # General Kinematics and Jacobians Capability Specification
 
-## Capability and active cycle
+## Capability and scope
 
-The complete capability will provide reusable forward and velocity kinematics for fixed-base open serial chains. This first specification increment owns only Cycle 1: validated space-form product-of-exponentials forward kinematics. Given one fixed serial-chain model and one allowed joint-coordinate column, the operation shall return the pose of the selected end-effector frame relative to the fixed space frame or fail explicitly without returning a plausible-looking pose.
+This specification defines space-form and [body-form forward kinematics](#body-form-forward-kinematics) for fixed-base open serial chains. Given one fixed serial-chain model and one allowed joint-coordinate column within the selected evaluator's numerical domain, either operation shall return the pose of the selected end-effector frame relative to the fixed space frame or fail explicitly without returning a plausible-looking pose.
 
 The reviewed theory is documented in [General Robot Kinematics and Jacobians](../../notes/part_01_motion_mechanics_control/10_general_robot_kinematics_and_jacobians.qmd), especially the section on serial-chain pose through products of exponentials. The existing [Spatial Geometry Kernel Capability Specification](spatial_geometry_kernel.md) owns validated $SO(3)$ and $SE(3)$ representations, the linear-first hat map, the $SE(3)$ exponential, transformation composition, numerical policy, and unit-aware pose comparison. This specification reuses those operations rather than redefining them.
 
 ## Intended behaviour
 
-The Cycle 1 capability shall:
+The shared model and space-form operation shall:
 
 1. represent a fixed-base open serial chain by one validated home end-effector pose and an ordered list of validated revolute or prismatic joint definitions;
 2. construct every fixed space screw axis from joint-axis geometry measured at the same declared zero arrangement and expressed in the same space frame;
@@ -32,7 +32,7 @@ $$
 
 Transformations are active, coordinate columns are used, positive rotations follow the right-hand rule, and products act on columns rightmost first. Every position and translation is measured in metres. Rotation matrices are dimensionless, while angular coordinates are labelled in radians even though radians are dimensionless in algebra.
 
-The mathematical core may use documented frame preconditions rather than compile-time frame tags in this cycle. It shall not infer, relabel, or silently mix frames. Every joint axis used by one model is measured when $\mathbf q=\mathbf 0_n$ and expressed using the same fixed frame $\{s\}$ as the home pose.
+The mathematical core may use documented frame preconditions rather than compile-time frame tags. It shall not infer, relabel, or silently mix frames. Every joint axis used by one model is measured when $\mathbf q=\mathbf 0_n$ and expressed using the same fixed frame $\{s\}$ as the home pose.
 
 ### Joint order and coordinate column
 
@@ -157,7 +157,7 @@ A valid `SerialChainModel` satisfies all of the following conditions:
 6. joint definitions, screw axes, and indices have equal length and matching order; and
 7. the positive axis direction agrees with the sign and unit assigned to $q_j$.
 
-The model shall be validated once at construction and remain immutable so that many joint-coordinate columns can reuse the same geometry. Runtime frame labels are not required in Cycle 1, so agreement of documented frame names remains a construction precondition that numeric data alone cannot verify.
+The model shall be validated once at construction and remain immutable so that many joint-coordinate columns can reuse the same geometry. Runtime frame labels are not required, so agreement of documented frame names remains a construction precondition that numeric data alone cannot verify.
 
 ## Space-form forward-pose operation
 
@@ -224,7 +224,7 @@ $$
 
 ## Interfaces and result contract
 
-The first implementation shall be a C++20 library operation in `rigid_body_kinematics`, using Eigen for numeric storage and the existing spatial geometry kernel for validated transformations and exponentials. The mathematical core shall have no ROS runtime, URDF parser, simulator, global state, clock, or parameter-server dependency.
+The evaluators shall be C++20 library operations in `rigid_body_kinematics`, using Eigen for numeric storage and the existing spatial geometry kernel for validated transformations and exponentials. The mathematical core shall have no ROS runtime, URDF parser, simulator, global state, clock, or parameter-server dependency.
 
 | Operation | Inputs | Success output | Failure output |
 |---|---|---|---|
@@ -235,9 +235,9 @@ The first implementation shall be a C++20 library operation in `rigid_body_kinem
 | `SerialChainModel::from_home_and_joints` | Validated home pose $\mathbf M$ and ordered `JointDefinition` values | Immutable validated model containing the ordered derived ${}^{s}\mathbf S_j$ columns | `SerialChainException` and no model |
 | `space_form_forward_kinematics` | Validated `SerialChainModel`, current $\mathbf q$ as `Eigen::Ref<const Eigen::VectorXd>`, and numerical policy | Validated `Transform3` representing $\mathbf T_{se}(\mathbf q)$ | `SerialChainException` and no transform |
 
-The shared model is named `SerialChainModel`, and the Cycle 1 evaluator is named `space_form_forward_kinematics`. Cycle 2 will add the symmetric `body_form_forward_kinematics` operation using the same model. Public operations shall be deterministic, non-mutating, and safe to call repeatedly with one model. Failure messages shall identify the failing joint index when one joint caused the error.
+The shared model is named `SerialChainModel`. The `space_form_forward_kinematics` and `body_form_forward_kinematics` operations shall use that same model. Public operations shall be deterministic, non-mutating, and safe to call repeatedly with one model. Failure messages shall identify the failing joint index when one joint caused the error.
 
-The Cycle 1 evaluator shall have the following public shape:
+The space-form evaluator shall have the following public shape:
 
 ```cpp
 [[nodiscard]] Transform3 space_form_forward_kinematics(
@@ -248,7 +248,7 @@ The Cycle 1 evaluator shall have the following public shape:
 
 The Eigen reference is a read-only non-owning view. It permits a dynamic Eigen column or a compatible mapped Eigen view without copying and does not transfer ownership to the evaluator.
 
-`NumericalPolicy` belongs to an evaluation, not to the robot model. The model stores the physical zero-arrangement data $\mathbf M$, the ordered joint geometry, and the joint domains; it does not store formula-selection thresholds such as the small-angle threshold or `maximum_exponential_angle`. A caller may therefore evaluate the same immutable model with the default policy or supply an explicit validated policy for a controlled numerical test. Cycle 2 shall use the same final policy parameter for `body_form_forward_kinematics`.
+`NumericalPolicy` belongs to an evaluation, not to the robot model. The model stores the physical zero-arrangement data $\mathbf M$, the ordered joint geometry, and the joint domains; it does not store formula-selection thresholds such as the small-angle threshold or `maximum_exponential_angle`. A caller may therefore evaluate the same immutable model with the default policy or supply an explicit validated policy for a controlled numerical test. The `body_form_forward_kinematics` operation shall use the same final policy parameter.
 
 The limits, joint, and model types shall use the named static factories above with non-public unchecked constructors. Validation proceeds once through typed limits, then joint geometry, then the complete ordered model. After `SerialChainModel::from_home_and_joints` succeeds, neither forward-kinematics operation shall repeat validation of immutable home or joint geometry on each evaluation.
 
@@ -379,7 +379,7 @@ The learner-selected test batch omits a dedicated repeated-evaluation/default-po
 
 A separate overflow test for composition between two joint displacements is not required in this batch. Retain the home-pose-composition overflow case GK-ACC-011 and the implemented screw-scaling overflow check. The evaluator must still reject unsupported intermediate results at every composition.
 
-The explicit reversed-factor negative control GK-ACC-008 may be verified by the [executable acceptance check below](#gk-acc-008-executable-negative-control) rather than an additional registered unit test; this case is not waived. The [owning checklist](../../CHECKLIST.md#cycle-1--space-form-product-of-exponentials-forward-kinematics) records the observed result and cycle status.
+The explicit reversed-factor negative control GK-ACC-008 may be verified by the [executable acceptance check below](#gk-acc-008-executable-negative-control) rather than an additional registered unit test; this case is not waived. The [owning checklist](../../CHECKLIST.md) records verification outcomes.
 
 ### GK-ACC-008: executable negative control
 
@@ -444,21 +444,6 @@ c++ -std=c++20 /tmp/order_check.cpp \
 
 The expected output ends with `GK-ACC-008: PASS`; a failed comparison returns a nonzero exit status.
 
-## Exclusions for Cycle 1
-
-This specification increment does not include:
-
-- body screw-axis storage or `body_form_forward_kinematics`, which belongs to Cycle 2;
-- task, space, or body Jacobians, joint-rate mappings, singularity analysis, or finite-difference Jacobian checks, which belong to later `P1.3` cycles;
-- inverse kinematics, pseudoinverses, redundancy resolution, manipulability optimisation, or joint-limit avoidance objectives, which belong to `P1.4`;
-- intermediate link-pose output, branching kinematic trees, closed chains, parallel mechanisms, coupled or mimic joints, helical joints, floating bases, or mobile-base composition;
-- URDF or SRDF parsing, ROS messages or nodes, `tf2`, MoveIt, simulator integration, frame-tree lookup, timestamps, or interpolation;
-- collision geometry, dynamics, forces, torques, control, trajectory generation, uncertainty propagation, automatic differentiation, or optimization;
-- recomputing space screw axes from the robot's current pose, silently changing factor order, or interpreting the product as a physical joint-motion schedule; or
-- projection or repair of invalid model geometry, automatic angle wrapping, degree-to-radian conversion, unit inference, or support beyond the spatial kernel's declared numerical domain.
-
-A relative-transform chain may be used as an independent acceptance calculation, but Cycle 1 does not add a second production forward-kinematics representation merely to duplicate the space-form operation.
-
 ## Traceability
 
 | Requirement | Reviewed source | Planned verification |
@@ -469,6 +454,132 @@ A relative-transform chain may be used as an independent acceptance calculation,
 | GK-VAL-001, GK-VAL-002, GK-NUM-001, GK-NUM-002 | Chapter 10 supported-input boundaries and the spatial geometry kernel's numerical policy | GK-ACC-009 through GK-ACC-012 |
 | GK-API-001, GK-API-002 | Project reusable-core rules and the spatial geometry kernel result contract | Public-interface review, focused deterministic tests, and package-level test reporting |
 
-## Gate to implementation
+## Body-form forward kinematics
 
-Implementation may begin only after the user reviews and approves this Cycle 1 specification. The first implementation block shall establish the smallest public model representation and its focused construction tests before adding the space-form evaluator. Production code, public headers, tests, and build files remain learner-authored under the project workflow.
+### Scope and public interface
+
+The body-form evaluator shall be declared in `rigid_body_kinematics/forward_kinematics.hpp`:
+
+```cpp
+[[nodiscard]] Transform3 body_form_forward_kinematics(
+  const SerialChainModel & model,
+  Eigen::Ref<const Eigen::VectorXd> joint_coordinates,
+  const NumericalPolicy & policy = NumericalPolicy{});
+```
+
+Reuse the existing `SerialChainModel`, joint definitions, typed limits, and error types. The input model continues to own the home pose and ordered space-frame joint geometry. Do not add a second model, public body-axis factory or accessor, persistent body-axis cache, or new numerical-policy field. Do not change which models the existing factories accept.
+
+Body axes shall be derived as local values from the fixed home pose during evaluation. Repeating this calculation for another query is an implementation choice, not a change of reference configuration: neither the current pose nor a partially accumulated pose may replace the home pose in the conversion. No current joint coordinates or mutable cache are stored in the model.
+
+### Governing equations and calculation
+
+The owning derivation is Chapter 10's “Body-form product of exponentials” and its planar 2R example; Chapter 8's normalisation section owns the screw-axis coordinate transformation. For the same joint index $j$, define the home end-effector-frame screw column
+
+$$
+\boxed{
+{}^{e}\mathbf B_j
+:=
+\operatorname{Ad}_{\mathbf M^{-1}}{}^{s}\mathbf S_j
+\in\mathbb R^6
+}.
+$$
+
+Here $\mathbf M=\mathbf T_{se}(\mathbf0_n)\in SE(3)$ is the existing home pose, and $\operatorname{Ad}_{\mathbf M^{-1}}\in\mathbb R^{6\times6}$ changes screw coordinates from $\{s\}$ to the home end-effector frame $\{e\}$. The superscript $e$ does not refer to a newly calculated current pose. Both screw columns use linear-first order and describe the same joint geometry, positive direction, and coordinate $q_j$.
+
+Multiplication by $q_j$ gives ${}^{e}\boldsymbol\eta_j={}^e\mathbf B_jq_j$. Its upper block has units of metres and its lower block has units of radians; the latter is zero for a prismatic joint. The hat map turns this six-column into its $4\times4$ Lie-algebra matrix. Define the joint displacement and required pose by
+
+$$
+\mathbf G_j(q_j)
+:=
+\exp\!\left(\widehat{{}^{e}\mathbf B_j}\,q_j\right),
+\qquad
+\boxed{
+\mathbf T_{se}(\mathbf q)
+=
+\mathbf M\mathbf G_1(q_1)\cdots\mathbf G_n(q_n)
+}.
+$$
+
+The output remains the pose of $\{e\}$ relative to $\{s\}$, not its inverse. Initialise the accumulated pose with $\mathbf M$ and append the body displacement factors on the right in increasing joint order $1,\ldots,n$. Use the kernel's inverse, adjoint, exponential, and composition operations; do not implement another matrix exponential. The implementation shall evaluate the body factors, not delegate the result to `space_form_forward_kinematics`.
+
+The identity
+
+$$
+\mathbf G_j(q_j)=\mathbf M^{-1}\mathbf E_j(q_j)\mathbf M
+$$
+
+implies equality with the space-form pose in exact arithmetic. For supported moderate inputs, both numerical results shall agree within the separate translation and rotation tolerances below. When zero is inside every joint domain and the required conversion is numerically supported, $\mathbf q=\mathbf0_n$ returns $\mathbf M$. A zero query outside a declared joint domain must still fail.
+
+### Validation and numerical range
+
+Preserve the existing query contract: validate the exponential policy, coordinate count, all coordinate finiteness, typed joint limits, and revolute angular magnitude before body-axis conversion or exponentiation. Match the existing evaluator's deterministic order: policy, count, a complete finiteness pass, then increasing joint index with each interval check preceding that joint's revolute-angle check. Check $|q_j|$ against `maximum_exponential_angle` only for revolute joints. Do not wrap, clamp, renormalise body screws, or rescale coordinates; the kernel still checks the actual exponential-coordinate magnitude after floating-point conversion.
+
+Compute the home inverse and its adjoint once per call. For each joint, require a finite converted ${}^{e}\mathbf B_j$ and finite scaled ${}^{e}\boldsymbol\eta_j$ before using the exponential. A finite model does not guarantee that the inverse, adjoint, converted screw, scaled screw, or composed pose is representable. Reject any such unsupported calculation with `SerialChainError::unsupported_magnitude`.
+
+Keep `invalid_policy`, `dimension_mismatch`, `non_finite`, and `joint_out_of_domain` for their existing supplied-input errors. Translate geometry-kernel exceptions at the body evaluator boundary: preserve an invalid-policy category; other kernel evaluation failures become `unsupported_magnitude`. Identify home-frame conversion failures separately from joint failures, and include the one-based joint index and useful underlying context when applicable. No failure returns a partial transform or mutates the model or coordinate input.
+
+Body-frame conversion introduces intermediates that the space evaluator need not form. Consequently, equality of the mathematical formulas is not a promise of identical success domains or bitwise-identical results at extreme magnitudes. Do not narrow shared model construction or space-form acceptance merely to make both numerical domains coincide. Do not silently fall back to the space evaluator after a body-form failure.
+
+### Body-form requirements
+
+The body-form operation shall satisfy the shared frame/unit, joint-domain, non-mutation, and typed-failure requirements, together with the following:
+
+| ID          | Requirement                                                                                                                                                                                    | Acceptance                                     |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| GK-BODY-001 | Derive body screws from the same model's fixed home inverse using the linear-first adjoint; preserve joint type, sign, coordinate units, and order.                                            | GK-BACC-001 and GK-BACC-002                |
+| GK-BODY-002 | Evaluate $\mathbf M\exp(\widehat{{}^{e}\mathbf B_1}q_1)\cdots\exp(\widehat{{}^{e}\mathbf B_n}q_n)$ and return $\mathbf T_{se}$, with home/space/body agreement in the shared supported domain. | GK-BACC-001 and GK-BACC-002                |
+| GK-BODY-003 | Reuse the unchanged shared model and query signature, with the same default evaluation policy and no new model ownership or public axis-storage interface.                                     | Interface review and all body acceptance calls |
+| GK-BODY-004 | Apply the existing query validation and numerical bounds without changing physical limits or silently repairing inputs.                                                                        | GK-BACC-005                                    |
+| GK-BODY-005 | Reject unsupported home conversion, body-screw conversion/scaling, exponential, or composition with the declared serial-chain failure and no partial output.                                   | GK-BACC-005 and GK-BACC-006                    |
+
+### Essential and distinct acceptance cases
+
+Use one spatial revolute–revolute–prismatic (RRP) chain for geometric acceptance. All joint geometry is specified in the space frame at home. Let $L_1=2\,\mathrm m$ and $L_2=1\,\mathrm m$. The first two links initially point along $+x_s$; the third joint extends the second link along its length.
+
+| Joint | Type and home geometry | Coordinate and limits |
+|---|---|---|
+| 1 | Revolute about $+z_s$ through the base origin | $q_1$ in radians, $[-\pi,\pi]$ |
+| 2 | Revolute about $+y_s$ through $[L_1,0,0]^{\mathsf T}$ | $q_2$ in radians, $[-\pi,\pi]$ |
+| 3 | Prismatic along $+x_s$ at home | $q_3$ in metres, $[0,1]$ |
+
+Choose the home end-effector orientation $\mathbf R_{se,0}=\mathbf R_z(\pi/2)$ and home position $[L_1+L_2,0,0]^{\mathsf T}$, so
+
+$$
+\mathbf M=
+\begin{bmatrix}
+0&-1&0&3\\
+1&0&0&0\\
+0&0&1&0\\
+0&0&0&1
+\end{bmatrix}.
+$$
+
+The translation column is measured in metres. This rotated tool-frame choice changes the end-effector coordinate axes, not the physical home link directions or prismatic direction. It exercises both rotation and origin shift in the body-axis conversion without requiring another robot fixture.
+
+Direct link geometry gives the independent pose for this fixture:
+
+$$
+{}^{s}\mathbf p_e(\mathbf q)=
+\begin{bmatrix}
+\bigl(L_1+(L_2+q_3)\cos q_2\bigr)\cos q_1\\
+\bigl(L_1+(L_2+q_3)\cos q_2\bigr)\sin q_1\\
+-(L_2+q_3)\sin q_2
+\end{bmatrix},
+\qquad
+\mathbf R_{se}(\mathbf q)=
+\mathbf R_z(q_1)\mathbf R_y(q_2)\mathbf R_{se,0}.
+$$
+
+The prismatic coordinate changes the second link's effective length, not its orientation. Use these geometric relations or the explicit expected matrices below as the oracle, not another invocation of the production exponential calculation.
+
+Use deterministic binary64 inputs. For both geometric cases, require translation residual $e_p\leq10^{-12}\,\mathrm m$ and rotation residual $e_R\leq10^{-12}\,\mathrm{rad}$ as defined above. Compare each body result with the independent expected pose and with the space-form evaluator. Matching the two evaluators alone does not establish correctness.
+
+| ID | Fixture and query | Independent expected result and distinct purpose |
+|---|---|---|
+| GK-BACC-001 | The RRP fixture at $q_1=q_2=0\,\mathrm{rad}$ and $q_3=0\,\mathrm m$. | Return the complete $\mathbf M$ above, including its non-identity rotation and nonzero translation. Establish the home-pose boundary using the same fixture. |
+| GK-BACC-002 | The same RRP fixture at $q_1=\pi/2\,\mathrm{rad}$, $q_2=-\pi/2\,\mathrm{rad}$, and $q_3=0.5\,\mathrm m$. | Return position $[0,2,1.5]^{\mathsf T}\,\mathrm m$ and rotation $\begin{bmatrix}-1&0&0\\0&0&-1\\0&-1&0\end{bmatrix}$. Establish mixed joint types, nonparallel rotation axes, factor order, tool-frame rotation, origin shift, and agreement with the space form in one nonzero configuration. |
+| GK-BACC-005 | Reuse the existing evaluator fixtures for coordinate count, NaN/infinity, inclusive limits and out-of-domain values, invalid exponential policy, revolute angle bound, permitted prismatic motion beyond that angular number, screw-scaling overflow, and the composition-overflow case GK-ACC-011. | Preserve the existing independent poses or typed failures. Apply reusable checks to both entry points rather than copying the tests or repeating construction tests. Representative cases for distinct rules suffice; exhaustive input permutations and dedicated repeated-call/default-policy tests are not required.                                                                         |
+| GK-BACC-006 | Let $D_{\max}$ be the largest finite binary64 value. Use one revolute joint about $+z_s$ through $[-D_{\max},0,0]^{\mathsf T}$, home rotation $\mathbf I_3$, home position $[D_{\max},0,0]^{\mathsf T}$, and $q_1=0.25\,\mathrm{rad}$.                                                                                                                                                | Model construction succeeds with finite space screw $[0,D_{\max},0,0,0,1]^{\mathsf T}$. Its body screw would require $[0,2D_{\max},0,0,0,1]^{\mathsf T}$, which is unrepresentable. The body evaluator throws `SerialChainException` with `unsupported_magnitude` and joint 1 context, without returning a pose. This is a conversion overflow, distinct from scaling or composition overflow. |
+
+The two RRP queries are the only required geometric scenarios for body-form acceptance; separate single-joint, planar 2R, and spatial 2R fixtures are not required for this evaluator. Preserve existing space-form tests. Reuse existing validation and arithmetic-failure checks across both entry points where practical, without introducing another nominal robot fixture solely for body-form testing. The conversion-overflow case remains separate because it tests a new numerical failure, not nominal geometry. No public body-axis accessor, exhaustive input permutations, or dedicated repeated-call/default-policy test is required. Test count is not an acceptance target.
+

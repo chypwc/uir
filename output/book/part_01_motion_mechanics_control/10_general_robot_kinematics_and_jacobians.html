@@ -1886,33 +1886,7 @@ L_1\sin\theta_1+L_2\sin(\theta_1+\theta_2)\\
 <section id="body-form-product-of-exponentials" class="level3" data-number="10.2.3">
 <h3 data-number="10.2.3" class="anchored" data-anchor-id="body-form-product-of-exponentials"><span class="header-section-number">10.2.3</span> Body-form product of exponentials</h3>
 <p>The space form stores every joint screw axis using <span class="math inline">\(\{s\}\)</span>. The same physical model can instead store the axes using the end-effector frame <span class="math inline">\(\{e\}\)</span> when the robot is at <span class="math inline">\(\mathbf q=\mathbf 0_n\)</span>. This alternative is useful when geometric measurements or calculations are naturally referred to the tool frame, but it must produce the same <span class="math inline">\(\mathbf T_{se}(\mathbf q)\)</span>.</p>
-<p>The adjoint rule recalled from <a href="07_degrees_of_freedom_and_spatial_motion_so3_se3.html#sec-se3-adjoint-twist" class="quarto-xref"><span>Section 7.9.4</span></a> is stated first for an instantaneous twist. If <span class="math inline">\(\mathbf T_{ab}\)</span> maps coordinates from frame <span class="math inline">\(\{b\}\)</span> to frame <span class="math inline">\(\{a\}\)</span>, then the two coordinate columns of the same physical instantaneous rigid-body velocity satisfy</p>
-<p><span class="math display">\[
-\boxed{
-{}^{a}\boldsymbol\xi_j
-=
-\operatorname{Ad}_{\mathbf T_{ab}}
-{}^{b}\boldsymbol\xi_j
-}.
-\]</span></p>
-<p>Here <span class="math inline">\({}^{a}\boldsymbol\xi_j\)</span> and <span class="math inline">\({}^{b}\boldsymbol\xi_j\)</span> describe the same joint-induced velocity; only the frame used for their coordinates differs. In each frame, the corresponding screw-axis column maps the same scalar joint rate <span class="math inline">\(\dot q_j\)</span> to that twist:</p>
-<p><span class="math display">\[
-{}^{a}\boldsymbol\xi_j
-=
-{}^{a}\mathbf S_j\dot q_j,
-\qquad
-{}^{b}\boldsymbol\xi_j
-=
-{}^{b}\mathbf S_j\dot q_j.
-\]</span></p>
-<p>Substituting these two expressions into the twist transformation gives</p>
-<p><span class="math display">\[
-{}^{a}\mathbf S_j\dot q_j
-=
-\operatorname{Ad}_{\mathbf T_{ab}}
-{}^{b}\mathbf S_j\dot q_j.
-\]</span></p>
-<p>This equality must hold for every possible value of the same joint rate. Therefore, the columns multiplying <span class="math inline">\(\dot q_j\)</span> must be equal:</p>
+<p>Recall the screw-axis coordinate transformation derived in <a href="08_screw_motion_se3_exponential_and_spatial_integration.html#sec-screw-normalisation-component-order" class="quarto-xref"><span>Section 8.2.6</span></a>. If <span class="math inline">\(\mathbf T_{ab}\in SE(3)\)</span> maps coordinates from frame <span class="math inline">\(\{b\}\)</span> to frame <span class="math inline">\(\{a\}\)</span>, the linear-first six-entry columns <span class="math inline">\({}^{a}\mathbf S_j\)</span> and <span class="math inline">\({}^{b}\mathbf S_j\)</span> of the same joint screw satisfy</p>
 <p><span class="math display">\[
 \boxed{
 {}^{a}\mathbf S_j
@@ -1939,7 +1913,7 @@ L_1\sin\theta_1+L_2\sin(\theta_1+\theta_2)\\
 {}^{e}\mathbf B_j\dot q_j
 }.
 \]</span></p>
-<p>The body screw axis <span class="math inline">\({}^{e}\mathbf B_j\)</span> is fixed home-configuration model data, whereas <span class="math inline">\(\boldsymbol\xi_{e,j}\)</span> is an instantaneous velocity that depends on the current joint rate. Multiplication by the joint coordinate instead gives the finite exponential-coordinate column <span class="math inline">\({}^{e}\boldsymbol\eta_j={}^{e}\mathbf B_jq_j\)</span> used inside the body-form joint factor. At a general nonzero configuration, the complete end-effector twist combines all joint rates through the robot Jacobian developed later; it is not obtained by treating every stored home-axis column as an unmodified current twist.</p>
+<p>The body screw axis <span class="math inline">\({}^{e}\mathbf B_j\)</span> is fixed home-configuration model data, whereas <span class="math inline">\(\boldsymbol\xi_{e,j}\)</span> is an instantaneous velocity that depends on the current joint rate. Multiplication by the joint coordinate instead gives the finite exponential-coordinate column <span class="math inline">\({}^{e}\boldsymbol\eta_j={}^{e}\mathbf B_jq_j\)</span> used inside the body-form joint factor. At a general nonzero configuration, the complete end-effector twist combines all joint rates through the robot Jacobian developed later.</p>
 <p>To make the linear-first conversion explicit, write</p>
 <p><span class="math display">\[
 \mathbf M^{-1}
@@ -2340,7 +2314,25 @@ L_2,
 0\\d_j\\0
 \end{bmatrix}.
 \]</span></p>
-<p>Substituting <span class="math inline">\(d_1=L_1+L_2\)</span> and <span class="math inline">\(d_2=L_2\)</span> recovers the two linear blocks calculated above. For joint 1, the fixed axis point may be chosen as <span class="math inline">\(O_s\)</span> because its axis passes through the space origin. For joint 2, the fixed point is instead a point on joint 2’s axis; <span class="math inline">\(O_s\)</span> does not lie on that axis. Substituting the two body screw axes into Equation <a href="#eq-serial-body-poe" class="quarto-xref">Equation&nbsp;<span>10.14</span></a> gives</p>
+<p>Substituting <span class="math inline">\(d_1=L_1+L_2\)</span> and <span class="math inline">\(d_2=L_2\)</span> recovers the two linear blocks calculated above. For joint 1, the fixed axis point may be chosen as <span class="math inline">\(O_s\)</span> because its axis passes through the space origin. For joint 2, the fixed point is instead a point on joint 2’s axis; <span class="math inline">\(O_s\)</span> does not lie on that axis.</p>
+<p><strong>Lever-arm interpretation.</strong> Here the lever arm is the perpendicular distance from a joint’s rotation axis to the end-effector origin. At home, these distances are <span class="math inline">\(d_1=L_1+L_2\)</span> for joint 1 and <span class="math inline">\(d_2=L_2\)</span> for joint 2. Hold the other joint still: positive rotation about <span class="math inline">\(+z_e\)</span> initially moves the end-effector origin toward <span class="math inline">\(+y_e\)</span>, tangent to its circular path around the moving joint’s axis.</p>
+<p>Let <span class="math inline">\({}^{e}\mathbf v_{O_e,j}\)</span> denote the end-effector origin’s velocity relative to the fixed space frame, expressed along the home end-effector axes, when only joint <span class="math inline">\(j\)</span> moves. At home, that origin has coordinates <span class="math inline">\(\mathbf0_3\)</span> in <span class="math inline">\(\{e\}\)</span>, so evaluating the velocity field there gives</p>
+<p><span class="math display">\[
+\begin{aligned}
+{}^{e}\mathbf v_{O_e,j}
+&amp;=
+\left(
+{}^{e}\mathbf b_{v,j}
++{}^{e}\mathbf b_{\omega,j}\times\mathbf0_3
+\right)\dot\theta_j\\
+&amp;=
+\begin{bmatrix}
+0\\d_j\dot\theta_j\\0
+\end{bmatrix}.
+\end{aligned}
+\]</span></p>
+<p>Thus the tangential speed is the lever-arm distance multiplied by the angular speed, <span class="math inline">\(d_j|\dot\theta_j|\)</span>. For <span class="math inline">\(L_1=2\,\mathrm m\)</span> and <span class="math inline">\(L_2=1\,\mathrm m\)</span>, the lever arms are three metres and one metre. With only joint 1 moving at <span class="math inline">\(1\,\mathrm{rad/s}\)</span>, the initial end-effector velocity is <span class="math inline">\(3\,\mathrm{m/s}\)</span> toward <span class="math inline">\(+y_e\)</span>; with only joint 2 moving at the same rate, it is <span class="math inline">\(1\,\mathrm{m/s}\)</span> toward <span class="math inline">\(+y_e\)</span>. These are instantaneous velocities at home, not straight-line motions along <span class="math inline">\(+y_e\)</span>.</p>
+<p>Substituting the two body screw axes into Equation <a href="#eq-serial-body-poe" class="quarto-xref">Equation&nbsp;<span>10.14</span></a> gives</p>
 <p><span class="math display">\[
 \mathbf T_{se}(\boldsymbol\theta)
 =
