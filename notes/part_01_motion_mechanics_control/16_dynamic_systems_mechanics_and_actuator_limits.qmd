@@ -503,5 +503,6 @@ This result remains valid only while the assumed torques are available and both 
 
 ## References {.unnumbered}
 
-- Kevin M. Lynch and Frank C. Park, *Modern Robotics: Mechanics, Planning, and Control*, Chapter 8, especially Sections 8.1, 8.2, and 8.9.
-- Karl J. Åström and Richard M. Murray, *Feedback Systems: An Introduction for Scientists and Engineers*, Chapter 3.
+[@lynch2017, chap. 8] **Secs. 8.1, 8.2, 8.9.**
+
+[@astrom2021, chap. 3]

@@ -1358,7 +1358,10 @@ $$
 
 ## References {.unnumbered}
 
-- Richard S. Sutton and Andrew G. Barto, *Reinforcement Learning: An Introduction*, second-edition draft, Chapter 3, especially Sections 3.1--3.4, 3.6, and 3.7 on the agent--environment interaction, rewards, episodic and continuing tasks, terminal-state extensions, finite-MDP dynamics, policies, and policy-dependent state evolution.
-- Dimitri P. Bertsekas, *Reinforcement Learning and Optimal Control*, second edition, Chapter 1, especially Sections 1.3.1, 1.4, 1.6.2, and 1.6.4 on stochastic controlled models, discounted objectives, termination states, and finite-to-infinite-horizon reformulations.
-- Zhiqing Xiao, *Reinforcement Learning: Theory and Python Implementation*, Chapters 1 and 2, especially the agent--environment interface and Sections 2.1.1--2.1.4 on finite-MDP components, policies, terminal states, and discounting.
-- Farama Foundation, *Gymnasium Documentation*, “Handling Time Limits,” on the distinction between task-defined termination and externally imposed truncation.
+[@sutton2015draft, chap. 3] **Secs. 3.1–3.4, 3.6–3.7.**
+
+[@bertsekas2026, chap. 1] **Secs. 1.3.1, 1.4, 1.6.2, 1.6.4.**
+
+[@xiao2024, chaps. 1-2] **Secs. 2.1.1–2.1.4.**
+
+[@gymnasium_time_limits]

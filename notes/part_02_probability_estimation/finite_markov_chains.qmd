@@ -365,6 +365,8 @@ Here the value $0.25$ also equals the total probability of being answered at tim
 
 ## References {.unnumbered}
 
-- Richard S. Sutton and Andrew G. Barto, *Reinforcement Learning: An Introduction*, second-edition draft, Chapter 3, especially Sections 3.5 and 3.6 on the Markov property and finite Markov decision processes.
-- Dimitri P. Bertsekas, *Reinforcement Learning and Optimal Control*, second edition, Chapter 1, especially Sections 1.3 and 1.4 on stochastic state evolution, policies, and time-homogeneous infinite-horizon models.
-- Sebastian Thrun, Wolfram Burgard, and Dieter Fox, *Probabilistic Robotics*, Chapter 2, especially Section 2.2 on conditional probability, the probability product rule, and the law of total probability.
+[@sutton2015draft, chap. 3] **Secs. 3.5–3.6.**
+
+[@bertsekas2026, chap. 1] **Secs. 1.3–1.4.**
+
+[@thrun2005, chap. 2] **Sec. 2.2.**

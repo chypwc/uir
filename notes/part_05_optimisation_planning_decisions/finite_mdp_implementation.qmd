@@ -1259,8 +1259,12 @@ The two events reaching the in-progress state remain distinct in the stored dist
 
 ## References {.unnumbered}
 
-- Sutton, R. S., and Barto, A. G. *Reinforcement Learning: An Introduction*, second-edition draft, 2014--2015. Chapter 3, especially Sections 3.4 and 3.6, supplies the absorbing-episode convention and the joint-kernel, marginal, and reward formulas. The draft's $r(s,a)$ is written $\bar r(s,a)$ here to distinguish an expectation from a realised reward.
-- Bertsekas, D. P. *A Course in Reinforcement Learning*, second edition, 2026 editorial version. Section 1.3.1, printed pp. 28--29, supplies the state-dependent control-set and random-disturbance viewpoint. Its state $x_k$ and control $u_k$ play the roles of $s$ and $a$; its $U_k(x_k)$ is the feasible control set.
-- Goldberg, D. “What Every Computer Scientist Should Know About Floating-Point Arithmetic.” *ACM Computing Surveys*, 23(1), 1991. Theorem 8 and “Errors In Summation”; [reproduced in Oracle's Numerical Computation Guide](https://docs.oracle.com/cd/E19422-01/819-3693/ncg_goldberg.html).
-- [C++ standard draft: binary-search algorithms](https://eel.is/c++draft/alg.binary.search), for search preconditions and return meanings.
-- The companion's code excerpts follow the [public headers]({{< var repository-url >}}/tree/{{< var repository-branch >}}/ros_ws/src/intelligence_foundations/include/intelligence_foundations), [compiled operations]({{< var repository-url >}}/tree/{{< var repository-branch >}}/ros_ws/src/intelligence_foundations/src), and [focused tests]({{< var repository-url >}}/tree/{{< var repository-branch >}}/ros_ws/src/intelligence_foundations/test) of the C++20 foundations library.
+[@sutton2015draft, chap. 3] **Secs. 3.4, 3.6.**
+
+[@bertsekas2026, sec. 1.3.1] **Pp. 28–29.**
+
+[@goldberg1991] **Theorem 8; “Errors in Summation.”**
+
+[@cppdraft_binary_search]
+
+The companion's code excerpts follow the [public headers]({{< var repository-url >}}/tree/{{< var repository-branch >}}/ros_ws/src/intelligence_foundations/include/intelligence_foundations), [compiled operations]({{< var repository-url >}}/tree/{{< var repository-branch >}}/ros_ws/src/intelligence_foundations/src), and [focused tests]({{< var repository-url >}}/tree/{{< var repository-branch >}}/ros_ws/src/intelligence_foundations/test) of the C++20 foundations library.

@@ -6415,6 +6415,8 @@ Finally, if $\mathbf R_\Delta=\mathbf I_3$ and ${}^{a}\mathbf p_\Delta=\mathbf 0
 
 ## References {.unnumbered}
 
-- Kevin M. Lynch and Frank C. Park, *Modern Robotics: Mechanics, Planning, and Control*, Chapter 2 on rigid links, joints, and robot configuration; and Chapter 3, especially Section 3.3.2 on body and space twists, Section 3.3.2.2 on the screw interpretation of a twist and normalised screw axes, and Section 3.3.3 on the $SE(3)$ exponential and logarithm.
-- John J. Craig, *Introduction to Robotics: Mechanics and Control*, Chapter 2 on spatial descriptions, homogeneous transformation mappings, composition order, and rotations about general axes; and Chapter 3 on one-degree-of-freedom revolute and prismatic joints.
-- Peter Corke, *Robotics, Vision and Control: Fundamental Algorithms in Python*, Chapter 2, especially Sections 2.3.2.2--2.3.2.3 and 2.4.8 on the matrix exponential for pose, three-dimensional twists, and their revolute, prismatic, and finite-pitch screw cases; and Chapter 3, especially Sections 3.1.1--3.1.5 on time-varying pose, frame-dependent velocity coordinates, exponential rotation updates, and incremental rigid-body motion.
+[@lynch2017, chaps. 2-3] **Secs. 3.3.2, 3.3.2.2, 3.3.3.**
+
+[@craig2022, chaps. 2-3]
+
+[@corke2023, chaps. 2-3] **Secs. 2.3.2.2–2.3.2.3, 2.4.8, 3.1.1–3.1.5.**

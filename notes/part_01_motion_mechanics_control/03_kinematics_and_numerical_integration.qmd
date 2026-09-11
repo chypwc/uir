@@ -1036,5 +1036,6 @@ For this example, $e_p\approx0.4863\,\mathrm m$. Smaller steps allow Euler to up
 
 ## References {.unnumbered}
 
-- Kevin M. Lynch and Frank C. Park, *Modern Robotics: Mechanics, Planning, and Control*, Chapter 13, especially the wheeled-mobile-robot kinematic models and odometry discussion.
-- Steven M. LaValle, *Planning Algorithms*, Chapter 13, especially continuous-time differential models, velocity constraints, and wheeled-vehicle models.
+[@lynch2017, chap. 13]
+
+[@lavalle2006, chap. 13]

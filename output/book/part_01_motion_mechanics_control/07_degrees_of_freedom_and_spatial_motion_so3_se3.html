@@ -5441,7 +5441,7 @@ T_{\mathbf I_4}SE(3)
 \end{bmatrix},
 \]</span></p>
 <p>where <span class="math inline">\(\mathbf R=\mathbf R_{wb}\in SO(3)\)</span>, <span class="math inline">\(\mathbf p={}^w\mathbf p_b\in\mathbb R^3\)</span>, and <span class="math inline">\(\dot{\mathbf p}={}^w\mathbf v_b\in\mathbb R^3\)</span>. To express the pose rate relative to the fixed world frame, postmultiply <span class="math inline">\(\dot{\mathbf T}\)</span> by the inverse pose:</p>
-<p><span class="math display">\[
+<p><span id="eq-se3-spatial-twist-block-product"><span class="math display">\[
 \begin{aligned}
 \dot{\mathbf T}\mathbf T^{-1}
 &amp;=
@@ -5460,7 +5460,7 @@ T_{\mathbf I_4}SE(3)
 \mathbf 0_3^\mathsf T&amp;0
 \end{bmatrix}.
 \end{aligned}
-\]</span></p>
+\tag{7.1}\]</span></span></p>
 <p>The upper-left block is the world-expressed angular-velocity matrix derived in <a href="#sec-so3-angular-velocity" class="quarto-xref"><span>Section 7.4</span></a>:</p>
 <p><span class="math display">\[
 \dot{\mathbf R}\mathbf R^\mathsf T
@@ -5628,7 +5628,7 @@ T_{\mathbf I_4}SE(3)
 +
 \underbrace{\boldsymbol\omega_w\times\mathbf p}_{\text{change caused by the different location}}
 }.
-\tag{7.1}\]</span></span></p>
+\tag{7.2}\]</span></span></p>
 <p>This equation also follows immediately by rearranging <span class="math inline">\(\boldsymbol\nu_w=\dot{\mathbf p}-\boldsymbol\omega_w\times\mathbf p\)</span>. It shows why <span class="math inline">\(\boldsymbol\nu_w\)</span> alone must not be called the body-origin velocity: the two quantities refer to different locations. They are equal when <span class="math inline">\(\boldsymbol\omega_w\times\mathbf p=\mathbf 0_3\)</span>, including pure translation or a body origin lying on the instantaneous rotation-axis line through <span class="math inline">\(O_w\)</span>.</p>
 </section>
 <section id="worked-reference-origin-check" class="level4 unnumbered">
@@ -5709,7 +5709,7 @@ T_{\mathbf I_4}SE(3)
 =
 \mathbf R\boldsymbol\nu_b.
 \]</span></p>
-<p>The spatial-twist velocity field in <a href="#eq-se3-spatial-twist-body-origin-velocity" class="quarto-xref">Equation&nbsp;<span>7.1</span></a> gives the same body-origin velocity as</p>
+<p>The spatial-twist velocity field in <a href="#eq-se3-spatial-twist-body-origin-velocity" class="quarto-xref">Equation&nbsp;<span>7.2</span></a> gives the same body-origin velocity as</p>
 <p><span class="math display">\[
 {}^w\mathbf v_b
 =
@@ -6684,12 +6684,10 @@ n_v-\operatorname{rank}\!\left(
 </section>
 <section id="references" class="level2 unnumbered">
 <h2 class="unnumbered anchored" data-anchor-id="references">References</h2>
-<ul>
-<li>Kevin M. Lynch and Frank C. Park, <em>Modern Robotics: Mechanics, Planning, and Control</em>, Chapter 2 for configuration space and degrees of freedom, and Chapter 3, especially Sections 3.2.1-3.2.3 on spatial rotation matrices, angular velocity, exponential coordinates, and Rodrigues’ formula, Section 3.3.1 on homogeneous transformation matrices, and Section 3.3.2 on spatial rigid-body velocities and twists.</li>
-<li>John J. Craig, <em>Introduction to Robotics: Mechanics and Control</em>, 4th ed., Chapters 1-2, especially degrees of freedom, body-attached frames, proper orthonormal rotation matrices, spatial orientation, homogeneous transformations, equivalent angle–axis representations, and Euler parameters.</li>
-<li>Peter Corke, <em>Robotics, Vision and Control: Fundamental Algorithms in Python</em>, 3rd ed., Chapters 2-3, especially rotation matrices, the matrix exponential, Rodrigues’ formula, unit quaternions, rotational velocity, and body- and world-frame expressions of spatial motion.</li>
-<li>ROS 2 Jazzy <code>geometry_msgs</code>, <a href="https://docs.ros.org/en/jazzy/p/geometry_msgs/msg/Quaternion.html">Quaternion message definition</a>, for the <code>x</code>, <code>y</code>, <code>z</code>, and <code>w</code> field order.</li>
-</ul>
+<p><span class="citation" data-cites="lynch2017">Lynch, Kevin M., and Frank C. Park. 2017. <em>Modern Robotics: Mechanics, Planning, and Control</em>. 1st ed. Cambridge University Press. <strong>Chaps. 2–3.</strong></span> <strong>Secs. 3.2.1–3.2.3, 3.3.1–3.3.2.</strong></p>
+<p><span class="citation" data-cites="craig2022">Craig, John J. 2022. <em>Introduction to Robotics: Mechanics and Control</em>. 4th ed. Pearson Education Limited. <strong>Chaps. 1–2.</strong></span></p>
+<p><span class="citation" data-cites="corke2023">Corke, Peter. 2023. <em>Robotics, Vision and Control: Fundamental Algorithms in <span>Python</span></em>. 3rd ed. Springer. <a href="https://doi.org/10.1007/978-3-031-06469-2">https://doi.org/10.1007/978-3-031-06469-2</a>. <strong>Chaps. 2–3.</strong></span></p>
+<p><span class="citation" data-cites="ros2jazzy_quaternion"><em><span>Quaternion</span> Message Definition</em>. ROS 2 Jazzy geometry_msgs Documentation. <a href="https://docs.ros.org/en/jazzy/p/geometry_msgs/msg/Quaternion.html">https://docs.ros.org/en/jazzy/p/geometry_msgs/msg/Quaternion.html</a>.</span></p>
 
 
 </section>

@@ -43,6 +43,11 @@ book:
 
 lang: en-AU
 
+bibliography: references.bib
+csl: styles/full-textbook-reference.csl
+suppress-bibliography: true
+link-citations: false
+
 format:
   html:
     theme:

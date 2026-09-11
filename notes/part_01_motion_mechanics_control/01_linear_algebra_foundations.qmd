@@ -1776,5 +1776,6 @@ Matrices in $SO(n)$ preserve lengths, angles, and orientation. Orthogonal matric
 
 ## References {.unnumbered}
 
-- Richard Szeliski, *Computer Vision: Algorithms and Applications*, 2nd ed., Appendix A, especially the discussion of orthonormal matrices, rank, singular values, and matrix factorisations.
-- Kevin M. Lynch and Frank C. Park, *Modern Robotics*, Chapter 3, especially Section 3.2.1 on rotation matrices and the distinction between orthogonality and right-handed orientation.
+[@szeliski2022] **Appendix A.**
+
+[@lynch2017, chap. 3] **Sec. 3.2.1.**

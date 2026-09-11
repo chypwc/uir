@@ -5541,7 +5541,7 @@ $$
 \mathbf 0_3^\mathsf T&0
 \end{bmatrix}.
 \end{aligned}
-$$
+$$ {#eq-se3-spatial-twist-block-product}
 
 The upper-left block is the world-expressed angular-velocity matrix derived in @sec-so3-angular-velocity:
 
@@ -6943,7 +6943,10 @@ The principal implementation rules from this chapter are therefore:
 
 ## References {.unnumbered}
 
-- Kevin M. Lynch and Frank C. Park, *Modern Robotics: Mechanics, Planning, and Control*, Chapter 2 for configuration space and degrees of freedom, and Chapter 3, especially Sections 3.2.1-3.2.3 on spatial rotation matrices, angular velocity, exponential coordinates, and Rodrigues' formula, Section 3.3.1 on homogeneous transformation matrices, and Section 3.3.2 on spatial rigid-body velocities and twists.
-- John J. Craig, *Introduction to Robotics: Mechanics and Control*, 4th ed., Chapters 1-2, especially degrees of freedom, body-attached frames, proper orthonormal rotation matrices, spatial orientation, homogeneous transformations, equivalent angle--axis representations, and Euler parameters.
-- Peter Corke, *Robotics, Vision and Control: Fundamental Algorithms in Python*, 3rd ed., Chapters 2-3, especially rotation matrices, the matrix exponential, Rodrigues' formula, unit quaternions, rotational velocity, and body- and world-frame expressions of spatial motion.
-- ROS 2 Jazzy `geometry_msgs`, [Quaternion message definition](https://docs.ros.org/en/jazzy/p/geometry_msgs/msg/Quaternion.html), for the `x`, `y`, `z`, and `w` field order.
+[@lynch2017, chaps. 2-3] **Secs. 3.2.1–3.2.3, 3.3.1–3.3.2.**
+
+[@craig2022, chaps. 1-2]
+
+[@corke2023, chaps. 2-3]
+
+[@ros2jazzy_quaternion]

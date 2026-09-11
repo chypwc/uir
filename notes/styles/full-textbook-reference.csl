@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<style xmlns="http://purl.org/net/xbiblio/csl"
+       version="1.0" class="in-text" default-locale="en-AU">
+  <info>
+    <title>Full Textbook Reference with Reading Locator</title>
+    <id>urn:uuid:6adc7329-e1c3-47b8-b5b3-70a690a829d1</id>
+    <summary>Full references in chapter reference sections, with bold reading locators and no separate bibliography.</summary>
+    <updated>2026-09-11T00:00:00+00:00</updated>
+  </info>
+  <macro name="author">
+    <names variable="author">
+      <name name-as-sort-order="first" sort-separator=", "
+            and="text" delimiter=", " delimiter-precedes-last="always"
+            initialize="false"/>
+    </names>
+  </macro>
+  <macro name="year">
+    <date variable="issued">
+      <date-part name="year"/>
+    </date>
+  </macro>
+  <macro name="title">
+    <choose>
+      <if type="article-journal">
+        <text variable="title" text-case="title" quotes="true"/>
+      </if>
+      <else>
+        <text variable="title" text-case="title" font-style="italic"/>
+      </else>
+    </choose>
+  </macro>
+  <macro name="edition">
+    <group delimiter=" ">
+      <number variable="edition" form="ordinal"/>
+      <text term="edition" form="short"/>
+    </group>
+  </macro>
+  <macro name="publication">
+    <choose>
+      <if type="article-journal">
+        <group delimiter=" ">
+          <text variable="container-title" font-style="italic"/>
+          <group>
+            <text variable="volume"/>
+            <text variable="issue" prefix="(" suffix=")"/>
+            <text variable="page" prefix=": "/>
+          </group>
+        </group>
+      </if>
+      <else-if type="book">
+        <text variable="publisher"/>
+      </else-if>
+      <else>
+        <text variable="note"/>
+      </else>
+    </choose>
+  </macro>
+  <macro name="link">
+    <choose>
+      <if variable="DOI">
+        <text variable="DOI" prefix="https://doi.org/"/>
+      </if>
+      <else>
+        <text variable="URL"/>
+      </else>
+    </choose>
+  </macro>
+  <macro name="reading-locator">
+    <group font-weight="bold">
+      <group delimiter=" " suffix=".">
+        <label variable="locator" form="short" text-case="capitalize-first"/>
+        <text variable="locator"/>
+      </group>
+    </group>
+  </macro>
+  <!-- Each bracketed citation is a full reference, even on repeated use. -->
+  <citation>
+    <layout delimiter="; ">
+      <group delimiter=" ">
+        <group delimiter=". " suffix=".">
+          <text macro="author"/>
+          <text macro="year"/>
+          <text macro="title"/>
+          <text macro="edition"/>
+          <text macro="publication"/>
+          <text macro="link"/>
+        </group>
+        <text macro="reading-locator"/>
+      </group>
+    </layout>
+  </citation>
+</style>

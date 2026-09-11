@@ -926,7 +926,7 @@ $$
 -\sin q_2
 \end{bmatrix}\mathrm m.
 }
-$$
+$$ {#eq-general-kinematics-impl-spatial-2r-position}
 
 The same base rotation gives the elbow position:
 
@@ -1626,3 +1626,265 @@ $$
 $$
 
 The marker helper borrows the models and owns the returned drawing data. ROS carries the published messages to RViz, which renders the supplied coordinates rather than recalculating the robot's kinematics.
+
+## Body-form forward kinematics {#sec-general-kinematics-impl-body-forward-kinematics}
+
+The body form computes the same end-effector pose using joint screws expressed in the home end-effector frame. Recall @eq-serial-body-screw-axis and @eq-serial-body-poe: for joint $j=1,\ldots,n$, the stored space screw ${}^s\mathbf S_j$ and home pose $\mathbf M=\mathbf T_{se}(\mathbf0_n)\in SE(3)$ determine the fixed body screw
+
+$$
+{}^e\mathbf B_j
+=\operatorname{Ad}_{\mathbf M^{-1}}{}^s\mathbf S_j
+\in\mathbb R^6.
+$$
+
+The $6\times6$ adjoint changes coordinates from $\{s\}$ to the home frame $\{e\}$; it does not use the current end-effector pose. Both columns describe the same joint, with the same positive direction and coordinate $q_j$. The linear-first exponential coordinates ${}^e\boldsymbol\eta_j={}^e\mathbf B_jq_j$ have an upper block in metres and a lower block in radians, with zero angular entries for a prismatic joint. Define the body-represented joint displacement $\mathbf G_j(q_j)\in SE(3)$ and complete pose by
+
+$$
+\mathbf G_j(q_j)
+=\exp\!\left(\widehat{{}^e\boldsymbol\eta_j}\right),
+\qquad
+\boxed{
+\mathbf T_{se}(\mathbf q)
+=\mathbf M\mathbf G_1(q_1)\cdots\mathbf G_n(q_n)
+}.
+$$
+
+The input is the same validated model and $n$-entry joint-coordinate column as in @sec-general-kinematics-impl-space-forward-kinematics. Each revolute entry is in radians and each prismatic entry is in metres; each must lie in its declared interval. The output still maps current end-effector coordinates into $\{s\}$. The home pose moves to the left of the product, but the joint indices retain their order.
+
+### Convert the home axes and evaluate the product
+
+The public declaration is:
+
+```cpp
+[[nodiscard]] Transform3 body_form_forward_kinematics(
+  const SerialChainModel & model,
+  Eigen::Ref<const Eigen::VectorXd> joint_coordinates,
+  const NumericalPolicy & policy = NumericalPolicy{});
+```
+
+`body_form_forward_kinematics` borrows the same inputs as the space evaluator and returns an owned `Transform3`. `SerialChainModel` continues to store space-frame joint geometry; the body screws are local calculation results, not a second stored model.
+
+```text
+Validate the query using the shared forward-kinematics checks.
+Calculate the inverse home pose and its adjoint once.
+Start the accumulated pose at the home pose.
+For each joint in base-to-end-effector order:
+    Convert its stored space screw into the home end-effector frame.
+    Reject a non-finite converted screw.
+    Scale the body screw by the supplied coordinate.
+    Reject non-finite exponential coordinates.
+    Calculate the displacement and append it on the right.
+Return the accumulated pose.
+On failure, report a serial-chain error without returning a partial pose.
+```
+
+**Production excerpt — essential body-form calculation, not a complete function.** The inputs are those in the declaration above. The function wrapper, shared validation helper's internals, and the home-conversion and joint-evaluation `try`/`catch` blocks are omitted. The conversion, finiteness guards, scaling, exponential, and composition are retained.
+
+```cpp
+validate_forward_kinematics_query(model, joint_coordinates, policy);
+
+Eigen::Matrix<double, 6, 6> home_inverse_adjoint;
+home_inverse_adjoint = model.home_pose().inverse().adjoint();
+
+Transform3 result = model.home_pose();
+
+for (std::size_t index = 0; index < model.joint_count(); ++index) {
+  const double coordinate =
+    joint_coordinates(static_cast<Eigen::Index>(index));
+
+  const Vector6LinearFirst body_screw_axis =
+    home_inverse_adjoint *
+    space_screw_axis(model.joint_definitions().at(index));
+
+  if (!body_screw_axis.allFinite()) {
+    throw SerialChainException{
+      SerialChainError::unsupported_magnitude,
+      "Joint " + std::to_string(index + 1) +
+        " produced a non-finite body screw axis."};
+  }
+
+  const Vector6LinearFirst exponential_coordinates =
+    body_screw_axis * coordinate;
+
+  if (!exponential_coordinates.allFinite()) {
+    throw SerialChainException(
+      SerialChainError::unsupported_magnitude,
+      "Joint " + std::to_string(index + 1) +
+        " produced non-finite exponential coordinates.");
+  }
+
+  const Transform3 joint_displacement =
+    Transform3::from_exponential_coordinates(
+      exponential_coordinates, policy);
+
+  result = result.compose(joint_displacement);
+}
+
+return result;
+```
+
+- `validate_forward_kinematics_query` is the internal helper shared with the space evaluator. It checks policy, coordinate count, all coordinate finiteness, and then each joint's interval and applicable angular bound before calculation.
+- `home_inverse_adjoint` stores $\operatorname{Ad}_{\mathbf M^{-1}}$. The existing `inverse()` and `adjoint()` operations are explained in @sec-spatial-kernel-composition-inversion and @sec-spatial-kernel-se3-adjoint. In production, assignment is inside the omitted home-conversion `try` block; failure exits before this matrix is used.
+- `body_screw_axis` stores ${}^e\mathbf B_j$ as an owned six-entry column. Its explicit type evaluates the Eigen matrix-vector product into stored numbers rather than retaining an expression that borrows its operands.
+- `exponential_coordinates` stores ${}^e\boldsymbol\eta_j={}^e\mathbf B_jq_j$, and `joint_displacement` stores $\mathbf G_j(q_j)$. Conversion and scaling can overflow separately, so each has its own finiteness check.
+
+For this evaluator, define $\mathbf P_j$ as the accumulated transform after joint $j$. Initialization and `compose` implement
+
+$$
+\mathbf P_0=\mathbf M,
+\qquad
+\mathbf P_j=\mathbf P_{j-1}\mathbf G_j(q_j),
+\qquad
+\mathbf T_{se}(\mathbf q)=\mathbf P_n.
+$$
+
+Thus `result` builds $\mathbf M\mathbf G_1$, then $\mathbf M\mathbf G_1\mathbf G_2$, and so on. There is no final home-pose composition: $\mathbf M$ is already present once, at the left. Every conversion uses `home_inverse_adjoint`, never `result`; changing the query changes the factors but not the home screws.
+
+The omitted exception handling preserves the evaluator's typed failure contract and distinguishes home-conversion failures from indexed joint failures. The inputs are not modified and no partial pose is returned. Mathematical equivalence with the space form does not guarantee identical floating-point behaviour at extreme magnitudes: the body form must also represent the additional conversion intermediates.
+
+### Example: a spatial RRP chain with a rotated home frame {#sec-general-kinematics-impl-body-rrp}
+
+Extend the geometry in @sec-general-kinematics-impl-spatial-2r by adding a prismatic joint that lengthens the second link. The home link lengths remain $L_1=2\,\mathrm m$ and $L_2=1\,\mathrm m$, both along $+x_s$. Joint 1 rotates about $+z_s$ through the base; joint 2 rotates about $+y_s$ through $(2,0,0)^{\mathsf T}\,\mathrm m$ at home. Joint 3 translates along $+x_s$ at home and is carried by the two rotations. The revolute coordinates $q_1,q_2$ lie in $[-\pi,\pi]$ radians, and the extension $q_3$ lies in $[0,1]$ metres.
+
+Choose the home end-effector origin at $(3,0,0)^{\mathsf T}\,\mathrm m$ but orient its attached frame by $\mathbf R_{se,0}=\mathbf R_z(\pi/2)$:
+
+$$
+\mathbf M=
+\begin{bmatrix}
+0&-1&0&3\\
+1&0&0&0\\
+0&0&1&0\\
+0&0&0&1
+\end{bmatrix}.
+$$
+
+The columns of $\mathbf R_{se,0}$ put $+x_e$ along $+y_s$, $+y_e$ along $-x_s$, and $+z_e$ along $+z_s$. This chooses the tool-frame orientation without changing the physical home link directions. Home means zero joint coordinates, not necessarily identity orientation.
+
+Recall the spatial 2R position in @eq-general-kinematics-impl-spatial-2r-position, where $L_1=2\,\mathrm m$ and $L_2=1\,\mathrm m$. The prismatic joint extends the second link by $q_3$ without changing its direction. Replacing $L_2$ by the effective length $L_2+q_3$ in that position calculation gives the RRP position below; its orientation includes the separately chosen home rotation:
+
+$$
+{}^s\mathbf p_e(\mathbf q)=
+\begin{bmatrix}
+\bigl(L_1+(L_2+q_3)\cos q_2\bigr)\cos q_1\\
+\bigl(L_1+(L_2+q_3)\cos q_2\bigr)\sin q_1\\
+-(L_2+q_3)\sin q_2
+\end{bmatrix},
+\qquad
+\mathbf R_{se}(\mathbf q)
+=\mathbf R_z(q_1)\mathbf R_y(q_2)\mathbf R_{se,0}.
+$$
+
+Here ${}^s\mathbf p_e$ is the end-effector origin's position relative to the base, expressed in $\{s\}$ in metres. The rotation is dimensionless. At $q_1=\pi/2\,\mathrm{rad}$, $q_2=-\pi/2\,\mathrm{rad}$, and $q_3=0.5\,\mathrm m$, the effective second-link length is $1.5\,\mathrm m$. Substitution gives
+
+$$
+{}^s\mathbf p_e=
+\begin{bmatrix}0\\2\\1.5\end{bmatrix}\mathrm m,
+\qquad
+\mathbf R_{se}
+=\mathbf R_z(\pi/2)\mathbf R_y(-\pi/2)\mathbf R_z(\pi/2)
+=
+\begin{bmatrix}
+-1&0&0\\
+0&0&-1\\
+0&-1&0
+\end{bmatrix}.
+$$
+
+**Usage example.** The following statements belong inside a caller function with the public forward-kinematics header, Eigen, and `<numbers>` available. They construct the same geometry as the tests, with no test-framework machinery.
+
+```cpp
+namespace rbk = rigid_body_kinematics;
+
+const auto revolute_limits = rbk::RevoluteLimits::from_bounds(
+  -std::numbers::pi, std::numbers::pi);
+const auto prismatic_limits =
+  rbk::PrismaticLimits::from_bounds(0.0, 1.0);
+
+const auto base_joint = rbk::RevoluteJoint::from_axis(
+  Eigen::Vector3d::UnitZ(), Eigen::Vector3d::Zero(), revolute_limits);
+const auto elbow_joint = rbk::RevoluteJoint::from_axis(
+  Eigen::Vector3d::UnitY(), Eigen::Vector3d{2.0, 0.0, 0.0},
+  revolute_limits);
+const auto extension_joint = rbk::PrismaticJoint::from_axis(
+  Eigen::Vector3d::UnitX(), prismatic_limits);
+
+Eigen::Matrix4d home_matrix;
+// clang-format off
+home_matrix <<
+  0.0, -1.0, 0.0, 3.0,
+  1.0,  0.0, 0.0, 0.0,
+  0.0,  0.0, 1.0, 0.0,
+  0.0,  0.0, 0.0, 1.0;
+// clang-format on
+
+const auto model = rbk::SerialChainModel::from_home_and_joints(
+  rbk::Transform3::from_matrix(home_matrix),
+  {base_joint, elbow_joint, extension_joint});
+
+const Eigen::Vector3d joint_coordinates{
+  std::numbers::pi / 2.0, -std::numbers::pi / 2.0, 0.5};
+const auto body_pose =
+  rbk::body_form_forward_kinematics(model, joint_coordinates);
+const auto space_pose =
+  rbk::space_form_forward_kinematics(model, joint_coordinates);
+```
+
+The ordered `base_joint`, `elbow_joint`, and `extension_joint` correspond to $q_1,q_2,q_3$ in `joint_coordinates`. `home_matrix` stores $\mathbf M$, including the separately chosen tool orientation. Both `body_pose` and `space_pose` should agree with the independently calculated matrix
+
+$$
+\mathbf T_{se}(\mathbf q)=
+\begin{bmatrix}
+-1&0&0&0\\
+0&0&-1&2\\
+0&-1&0&1.5\\
+0&0&0&1
+\end{bmatrix}.
+$$
+
+### What the tests establish
+
+The same RRP model is checked at zero coordinates and at the nonzero query above. The zero case requires the complete home pose because every exponential is identity. The nonzero case exercises body conversion, nonparallel revolute axes, prismatic extension, and factor order. The tests compare the body result with the independent expected pose and with the space result, using separate translation and rotation residual limits of $10^{-12}\,\mathrm m$ and $10^{-12}\,\mathrm{rad}$. Agreement between the two implementations alone is not the reference.
+
+### How the classes and functions connect {#sec-general-kinematics-impl-body-connections}
+
+The model construction remains the one in @sec-general-kinematics-impl-cycle-connections. This diagram shows the body evaluator's local calculations; arrows are calculation flow, not ownership transfer or a sequence of physical joint movements.
+
+$$
+\begin{gathered}
+\boxed{\begin{gathered}
+\texttt{SerialChainModel}\ \text{owns fixed data}\\
+\mathbf M,\quad({}^s\mathbf S_j)_{j=1}^{n},\quad
+(\mathcal Q_j)_{j=1}^{n}\\
+\text{Separate per-call inputs: }\mathbf q,\ \texttt{NumericalPolicy}
+\end{gathered}}\\[0.1em]
+\Big\downarrow\\[0.1em]
+\boxed{\begin{gathered}
+\texttt{body\_form\_forward\_kinematics}\\
+\texttt{validate\_forward\_kinematics\_query}\\
+\text{Borrow inputs and validate before calculation}
+\end{gathered}}\\[0.1em]
+\Big\downarrow\\[0.1em]
+\boxed{\begin{gathered}
+\texttt{model.home\_pose().inverse().adjoint()}\\
+\text{Local conversion matrix: }\operatorname{Ad}_{\mathbf M^{-1}}\\
+\texttt{result = model.home\_pose()}\qquad\mathbf P_0=\mathbf M
+\end{gathered}}\\[0.1em]
+\Big\downarrow\\[0.1em]
+\boxed{\begin{gathered}
+\text{For each joint }j=1,\ldots,n\\
+\texttt{space\_screw\_axis}\ \longrightarrow\
+{}^e\mathbf B_j=\operatorname{Ad}_{\mathbf M^{-1}}{}^s\mathbf S_j\\
+{}^e\boldsymbol\eta_j={}^e\mathbf B_jq_j\\
+\texttt{Transform3::from\_exponential\_coordinates}\\
+\mathbf G_j(q_j)=\exp\!\left(\widehat{{}^e\boldsymbol\eta_j}\right)\\
+\texttt{result.compose(joint\_displacement)}\\
+\mathbf P_j=\mathbf P_{j-1}\mathbf G_j(q_j)
+\end{gathered}}\\[0.1em]
+\Big\downarrow\\[0.1em]
+\boxed{\begin{gathered}
+\texttt{return result}\\
+\mathbf T_{se}(\mathbf q)=\mathbf P_n\\
+\text{Owned }\texttt{Transform3}\text{; inputs unchanged}
+\end{gathered}}
+\end{gathered}
+$$

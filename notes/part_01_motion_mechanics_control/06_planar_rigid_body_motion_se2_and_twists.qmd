@@ -2727,6 +2727,8 @@ $$
 
 ## References {.unnumbered}
 
-- John J. Craig, *Introduction to Robotics: Mechanics and Control*, 4th ed., Chapters 2 and 5, especially frame mappings, transformation interpretations, angular velocity, and rigid-body point velocity.
-- Peter Corke, *Robotics, Vision and Control: Fundamental Algorithms in Python*, 3rd ed., Chapters 2-3, especially time-varying pose, angular velocity, and derivatives of orientation and pose.
-- Kevin M. Lynch and Frank C. Park, *Modern Robotics: Mechanics, Planning, and Control*, Chapters 2-3, especially configuration spaces, angular velocity, skew-symmetric representations, body and spatial twists, and rigid-body motions. The $SE(3)$ twist definitions are specialised here to planar motion in $SE(2)$.
+[@craig2022, chaps. 2, 5]
+
+[@corke2023, chaps. 2-3]
+
+[@lynch2017, chaps. 2-3]

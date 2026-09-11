@@ -512,6 +512,13 @@ window.Quarto = {
   <li><a href="#sec-general-kinematics-impl-rviz" id="toc-sec-general-kinematics-impl-rviz" class="nav-link" data-scroll-target="#sec-general-kinematics-impl-rviz"><span class="header-section-number">11.4.5</span> RViz implementation example: displaying the spatial 2R arm</a></li>
   <li><a href="#sec-general-kinematics-impl-cycle-connections" id="toc-sec-general-kinematics-impl-cycle-connections" class="nav-link" data-scroll-target="#sec-general-kinematics-impl-cycle-connections"><span class="header-section-number">11.4.6</span> How the classes and functions connect</a></li>
   </ul></li>
+  <li><a href="#sec-general-kinematics-impl-body-forward-kinematics" id="toc-sec-general-kinematics-impl-body-forward-kinematics" class="nav-link" data-scroll-target="#sec-general-kinematics-impl-body-forward-kinematics"><span class="header-section-number">11.5</span> Body-form forward kinematics</a>
+  <ul class="collapse">
+  <li><a href="#convert-the-home-axes-and-evaluate-the-product" id="toc-convert-the-home-axes-and-evaluate-the-product" class="nav-link" data-scroll-target="#convert-the-home-axes-and-evaluate-the-product"><span class="header-section-number">11.5.1</span> Convert the home axes and evaluate the product</a></li>
+  <li><a href="#sec-general-kinematics-impl-body-rrp" id="toc-sec-general-kinematics-impl-body-rrp" class="nav-link" data-scroll-target="#sec-general-kinematics-impl-body-rrp"><span class="header-section-number">11.5.2</span> Example: a spatial RRP chain with a rotated home frame</a></li>
+  <li><a href="#what-the-tests-establish" id="toc-what-the-tests-establish" class="nav-link" data-scroll-target="#what-the-tests-establish"><span class="header-section-number">11.5.3</span> What the tests establish</a></li>
+  <li><a href="#sec-general-kinematics-impl-body-connections" id="toc-sec-general-kinematics-impl-body-connections" class="nav-link" data-scroll-target="#sec-general-kinematics-impl-body-connections"><span class="header-section-number">11.5.4</span> How the classes and functions connect</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -1327,7 +1334,7 @@ L_1+L_2\cos q_2\\0\\-L_2\sin q_2
 \end{aligned}
 \]</span></p>
 <p>Substituting the two link lengths yields</p>
-<p><span class="math display">\[
+<p><span id="eq-general-kinematics-impl-spatial-2r-position"><span class="math display">\[
 \boxed{
 {}^{s}\mathbf p_e(q_1,q_2)=
 \begin{bmatrix}
@@ -1336,7 +1343,7 @@ L_1+L_2\cos q_2\\0\\-L_2\sin q_2
 -\sin q_2
 \end{bmatrix}\mathrm m.
 }
-\]</span></p>
+\tag{11.1}\]</span></span></p>
 <p>The same base rotation gives the elbow position:</p>
 <p><span class="math display">\[
 {}^{s}\mathbf p_\ell(q_1)
@@ -1974,9 +1981,239 @@ Figure&nbsp;11.2: Recorded spatial 2R animation. Joint centres, links, end-effec
 \end{gathered}
 \]</span></p>
 <p>The marker helper borrows the models and owns the returned drawing data. ROS carries the published messages to RViz, which renders the supplied coordinates rather than recalculating the robot’s kinematics.</p>
-
-
 </section>
+</section>
+</section>
+<section id="sec-general-kinematics-impl-body-forward-kinematics" class="level2" data-number="11.5">
+<h2 data-number="11.5" class="anchored" data-anchor-id="sec-general-kinematics-impl-body-forward-kinematics"><span class="header-section-number">11.5</span> Body-form forward kinematics</h2>
+<p>The body form computes the same end-effector pose using joint screws expressed in the home end-effector frame. Recall <a href="10_general_robot_kinematics_and_jacobians.html#eq-serial-body-screw-axis" class="quarto-xref">Equation&nbsp;<span>10.12</span></a> and <a href="10_general_robot_kinematics_and_jacobians.html#eq-serial-body-poe" class="quarto-xref">Equation&nbsp;<span>10.14</span></a>: for joint <span class="math inline">\(j=1,\ldots,n\)</span>, the stored space screw <span class="math inline">\({}^s\mathbf S_j\)</span> and home pose <span class="math inline">\(\mathbf M=\mathbf T_{se}(\mathbf0_n)\in SE(3)\)</span> determine the fixed body screw</p>
+<p><span class="math display">\[
+{}^e\mathbf B_j
+=\operatorname{Ad}_{\mathbf M^{-1}}{}^s\mathbf S_j
+\in\mathbb R^6.
+\]</span></p>
+<p>The <span class="math inline">\(6\times6\)</span> adjoint changes coordinates from <span class="math inline">\(\{s\}\)</span> to the home frame <span class="math inline">\(\{e\}\)</span>; it does not use the current end-effector pose. Both columns describe the same joint, with the same positive direction and coordinate <span class="math inline">\(q_j\)</span>. The linear-first exponential coordinates <span class="math inline">\({}^e\boldsymbol\eta_j={}^e\mathbf B_jq_j\)</span> have an upper block in metres and a lower block in radians, with zero angular entries for a prismatic joint. Define the body-represented joint displacement <span class="math inline">\(\mathbf G_j(q_j)\in SE(3)\)</span> and complete pose by</p>
+<p><span class="math display">\[
+\mathbf G_j(q_j)
+=\exp\!\left(\widehat{{}^e\boldsymbol\eta_j}\right),
+\qquad
+\boxed{
+\mathbf T_{se}(\mathbf q)
+=\mathbf M\mathbf G_1(q_1)\cdots\mathbf G_n(q_n)
+}.
+\]</span></p>
+<p>The input is the same validated model and <span class="math inline">\(n\)</span>-entry joint-coordinate column as in <a href="#sec-general-kinematics-impl-space-forward-kinematics" class="quarto-xref"><span>Section 11.4</span></a>. Each revolute entry is in radians and each prismatic entry is in metres; each must lie in its declared interval. The output still maps current end-effector coordinates into <span class="math inline">\(\{s\}\)</span>. The home pose moves to the left of the product, but the joint indices retain their order.</p>
+<section id="convert-the-home-axes-and-evaluate-the-product" class="level3" data-number="11.5.1">
+<h3 data-number="11.5.1" class="anchored" data-anchor-id="convert-the-home-axes-and-evaluate-the-product"><span class="header-section-number">11.5.1</span> Convert the home axes and evaluate the product</h3>
+<p>The public declaration is:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb38"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="op">[[</span><span class="at">nodiscard</span><span class="op">]]</span> Transform3 body_form_forward_kinematics<span class="op">(</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> SerialChainModel <span class="op">&amp;</span> model<span class="op">,</span></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>  Eigen<span class="op">::</span>Ref<span class="op">&lt;</span><span class="at">const</span> Eigen<span class="op">::</span>VectorXd<span class="op">&gt;</span> joint_coordinates<span class="op">,</span></span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> NumericalPolicy <span class="op">&amp;</span> policy <span class="op">=</span> NumericalPolicy<span class="op">{});</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>body_form_forward_kinematics</code> borrows the same inputs as the space evaluator and returns an owned <code>Transform3</code>. <code>SerialChainModel</code> continues to store space-frame joint geometry; the body screws are local calculation results, not a second stored model.</p>
+<pre class="text"><code>Validate the query using the shared forward-kinematics checks.
+Calculate the inverse home pose and its adjoint once.
+Start the accumulated pose at the home pose.
+For each joint in base-to-end-effector order:
+    Convert its stored space screw into the home end-effector frame.
+    Reject a non-finite converted screw.
+    Scale the body screw by the supplied coordinate.
+    Reject non-finite exponential coordinates.
+    Calculate the displacement and append it on the right.
+Return the accumulated pose.
+On failure, report a serial-chain error without returning a partial pose.</code></pre>
+<p><strong>Production excerpt — essential body-form calculation, not a complete function.</strong> The inputs are those in the declaration above. The function wrapper, shared validation helper’s internals, and the home-conversion and joint-evaluation <code>try</code>/<code>catch</code> blocks are omitted. The conversion, finiteness guards, scaling, exponential, and composition are retained.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb40"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>validate_forward_kinematics_query<span class="op">(</span>model<span class="op">,</span> joint_coordinates<span class="op">,</span> policy<span class="op">);</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>Eigen<span class="op">::</span>Matrix<span class="op">&lt;</span><span class="dt">double</span><span class="op">,</span> <span class="dv">6</span><span class="op">,</span> <span class="dv">6</span><span class="op">&gt;</span> home_inverse_adjoint<span class="op">;</span></span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>home_inverse_adjoint <span class="op">=</span> model<span class="op">.</span>home_pose<span class="op">().</span>inverse<span class="op">().</span>adjoint<span class="op">();</span></span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>Transform3 result <span class="op">=</span> model<span class="op">.</span>home_pose<span class="op">();</span></span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> <span class="op">(</span><span class="bu">std::</span>size_t index <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> index <span class="op">&lt;</span> model<span class="op">.</span>joint_count<span class="op">();</span> <span class="op">++</span>index<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> <span class="dt">double</span> coordinate <span class="op">=</span></span>
+<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a>    joint_coordinates<span class="op">(</span><span class="kw">static_cast</span><span class="op">&lt;</span>Eigen<span class="op">::</span>Index<span class="op">&gt;(</span>index<span class="op">));</span></span>
+<span id="cb40-11"><a href="#cb40-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-12"><a href="#cb40-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> Vector6LinearFirst body_screw_axis <span class="op">=</span></span>
+<span id="cb40-13"><a href="#cb40-13" aria-hidden="true" tabindex="-1"></a>    home_inverse_adjoint <span class="op">*</span></span>
+<span id="cb40-14"><a href="#cb40-14" aria-hidden="true" tabindex="-1"></a>    space_screw_axis<span class="op">(</span>model<span class="op">.</span>joint_definitions<span class="op">().</span>at<span class="op">(</span>index<span class="op">));</span></span>
+<span id="cb40-15"><a href="#cb40-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-16"><a href="#cb40-16" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(!</span>body_screw_axis<span class="op">.</span>allFinite<span class="op">())</span> <span class="op">{</span></span>
+<span id="cb40-17"><a href="#cb40-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">throw</span> SerialChainException<span class="op">{</span></span>
+<span id="cb40-18"><a href="#cb40-18" aria-hidden="true" tabindex="-1"></a>      SerialChainError<span class="op">::</span>unsupported_magnitude<span class="op">,</span></span>
+<span id="cb40-19"><a href="#cb40-19" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Joint "</span> <span class="op">+</span> <span class="bu">std::</span>to_string<span class="op">(</span>index <span class="op">+</span> <span class="dv">1</span><span class="op">)</span> <span class="op">+</span></span>
+<span id="cb40-20"><a href="#cb40-20" aria-hidden="true" tabindex="-1"></a>        <span class="st">" produced a non-finite body screw axis."</span><span class="op">};</span></span>
+<span id="cb40-21"><a href="#cb40-21" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb40-22"><a href="#cb40-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-23"><a href="#cb40-23" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> Vector6LinearFirst exponential_coordinates <span class="op">=</span></span>
+<span id="cb40-24"><a href="#cb40-24" aria-hidden="true" tabindex="-1"></a>    body_screw_axis <span class="op">*</span> coordinate<span class="op">;</span></span>
+<span id="cb40-25"><a href="#cb40-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-26"><a href="#cb40-26" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(!</span>exponential_coordinates<span class="op">.</span>allFinite<span class="op">())</span> <span class="op">{</span></span>
+<span id="cb40-27"><a href="#cb40-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">throw</span> SerialChainException<span class="op">(</span></span>
+<span id="cb40-28"><a href="#cb40-28" aria-hidden="true" tabindex="-1"></a>      SerialChainError<span class="op">::</span>unsupported_magnitude<span class="op">,</span></span>
+<span id="cb40-29"><a href="#cb40-29" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Joint "</span> <span class="op">+</span> <span class="bu">std::</span>to_string<span class="op">(</span>index <span class="op">+</span> <span class="dv">1</span><span class="op">)</span> <span class="op">+</span></span>
+<span id="cb40-30"><a href="#cb40-30" aria-hidden="true" tabindex="-1"></a>        <span class="st">" produced non-finite exponential coordinates."</span><span class="op">);</span></span>
+<span id="cb40-31"><a href="#cb40-31" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb40-32"><a href="#cb40-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-33"><a href="#cb40-33" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> Transform3 joint_displacement <span class="op">=</span></span>
+<span id="cb40-34"><a href="#cb40-34" aria-hidden="true" tabindex="-1"></a>    Transform3<span class="op">::</span>from_exponential_coordinates<span class="op">(</span></span>
+<span id="cb40-35"><a href="#cb40-35" aria-hidden="true" tabindex="-1"></a>      exponential_coordinates<span class="op">,</span> policy<span class="op">);</span></span>
+<span id="cb40-36"><a href="#cb40-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-37"><a href="#cb40-37" aria-hidden="true" tabindex="-1"></a>  result <span class="op">=</span> result<span class="op">.</span>compose<span class="op">(</span>joint_displacement<span class="op">);</span></span>
+<span id="cb40-38"><a href="#cb40-38" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb40-39"><a href="#cb40-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-40"><a href="#cb40-40" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> result<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li><code>validate_forward_kinematics_query</code> is the internal helper shared with the space evaluator. It checks policy, coordinate count, all coordinate finiteness, and then each joint’s interval and applicable angular bound before calculation.</li>
+<li><code>home_inverse_adjoint</code> stores <span class="math inline">\(\operatorname{Ad}_{\mathbf M^{-1}}\)</span>. The existing <code>inverse()</code> and <code>adjoint()</code> operations are explained in <a href="09_spatial_geometry_kernel_implementation.html#sec-spatial-kernel-composition-inversion" class="quarto-xref"><span>Section 9.4</span></a> and <a href="09_spatial_geometry_kernel_implementation.html#sec-spatial-kernel-se3-adjoint" class="quarto-xref"><span>Section 9.13</span></a>. In production, assignment is inside the omitted home-conversion <code>try</code> block; failure exits before this matrix is used.</li>
+<li><code>body_screw_axis</code> stores <span class="math inline">\({}^e\mathbf B_j\)</span> as an owned six-entry column. Its explicit type evaluates the Eigen matrix-vector product into stored numbers rather than retaining an expression that borrows its operands.</li>
+<li><code>exponential_coordinates</code> stores <span class="math inline">\({}^e\boldsymbol\eta_j={}^e\mathbf B_jq_j\)</span>, and <code>joint_displacement</code> stores <span class="math inline">\(\mathbf G_j(q_j)\)</span>. Conversion and scaling can overflow separately, so each has its own finiteness check.</li>
+</ul>
+<p>For this evaluator, define <span class="math inline">\(\mathbf P_j\)</span> as the accumulated transform after joint <span class="math inline">\(j\)</span>. Initialization and <code>compose</code> implement</p>
+<p><span class="math display">\[
+\mathbf P_0=\mathbf M,
+\qquad
+\mathbf P_j=\mathbf P_{j-1}\mathbf G_j(q_j),
+\qquad
+\mathbf T_{se}(\mathbf q)=\mathbf P_n.
+\]</span></p>
+<p>Thus <code>result</code> builds <span class="math inline">\(\mathbf M\mathbf G_1\)</span>, then <span class="math inline">\(\mathbf M\mathbf G_1\mathbf G_2\)</span>, and so on. There is no final home-pose composition: <span class="math inline">\(\mathbf M\)</span> is already present once, at the left. Every conversion uses <code>home_inverse_adjoint</code>, never <code>result</code>; changing the query changes the factors but not the home screws.</p>
+<p>The omitted exception handling preserves the evaluator’s typed failure contract and distinguishes home-conversion failures from indexed joint failures. The inputs are not modified and no partial pose is returned. Mathematical equivalence with the space form does not guarantee identical floating-point behaviour at extreme magnitudes: the body form must also represent the additional conversion intermediates.</p>
+</section>
+<section id="sec-general-kinematics-impl-body-rrp" class="level3" data-number="11.5.2">
+<h3 data-number="11.5.2" class="anchored" data-anchor-id="sec-general-kinematics-impl-body-rrp"><span class="header-section-number">11.5.2</span> Example: a spatial RRP chain with a rotated home frame</h3>
+<p>Extend the geometry in <a href="#sec-general-kinematics-impl-spatial-2r" class="quarto-xref"><span>Section 11.4.4</span></a> by adding a prismatic joint that lengthens the second link. The home link lengths remain <span class="math inline">\(L_1=2\,\mathrm m\)</span> and <span class="math inline">\(L_2=1\,\mathrm m\)</span>, both along <span class="math inline">\(+x_s\)</span>. Joint 1 rotates about <span class="math inline">\(+z_s\)</span> through the base; joint 2 rotates about <span class="math inline">\(+y_s\)</span> through <span class="math inline">\((2,0,0)^{\mathsf T}\,\mathrm m\)</span> at home. Joint 3 translates along <span class="math inline">\(+x_s\)</span> at home and is carried by the two rotations. The revolute coordinates <span class="math inline">\(q_1,q_2\)</span> lie in <span class="math inline">\([-\pi,\pi]\)</span> radians, and the extension <span class="math inline">\(q_3\)</span> lies in <span class="math inline">\([0,1]\)</span> metres.</p>
+<p>Choose the home end-effector origin at <span class="math inline">\((3,0,0)^{\mathsf T}\,\mathrm m\)</span> but orient its attached frame by <span class="math inline">\(\mathbf R_{se,0}=\mathbf R_z(\pi/2)\)</span>:</p>
+<p><span class="math display">\[
+\mathbf M=
+\begin{bmatrix}
+0&amp;-1&amp;0&amp;3\\
+1&amp;0&amp;0&amp;0\\
+0&amp;0&amp;1&amp;0\\
+0&amp;0&amp;0&amp;1
+\end{bmatrix}.
+\]</span></p>
+<p>The columns of <span class="math inline">\(\mathbf R_{se,0}\)</span> put <span class="math inline">\(+x_e\)</span> along <span class="math inline">\(+y_s\)</span>, <span class="math inline">\(+y_e\)</span> along <span class="math inline">\(-x_s\)</span>, and <span class="math inline">\(+z_e\)</span> along <span class="math inline">\(+z_s\)</span>. This chooses the tool-frame orientation without changing the physical home link directions. Home means zero joint coordinates, not necessarily identity orientation.</p>
+<p>Recall the spatial 2R position in <a href="#eq-general-kinematics-impl-spatial-2r-position" class="quarto-xref">Equation&nbsp;<span>11.1</span></a>, where <span class="math inline">\(L_1=2\,\mathrm m\)</span> and <span class="math inline">\(L_2=1\,\mathrm m\)</span>. The prismatic joint extends the second link by <span class="math inline">\(q_3\)</span> without changing its direction. Replacing <span class="math inline">\(L_2\)</span> by the effective length <span class="math inline">\(L_2+q_3\)</span> in that position calculation gives the RRP position below; its orientation includes the separately chosen home rotation:</p>
+<p><span class="math display">\[
+{}^s\mathbf p_e(\mathbf q)=
+\begin{bmatrix}
+\bigl(L_1+(L_2+q_3)\cos q_2\bigr)\cos q_1\\
+\bigl(L_1+(L_2+q_3)\cos q_2\bigr)\sin q_1\\
+-(L_2+q_3)\sin q_2
+\end{bmatrix},
+\qquad
+\mathbf R_{se}(\mathbf q)
+=\mathbf R_z(q_1)\mathbf R_y(q_2)\mathbf R_{se,0}.
+\]</span></p>
+<p>Here <span class="math inline">\({}^s\mathbf p_e\)</span> is the end-effector origin’s position relative to the base, expressed in <span class="math inline">\(\{s\}\)</span> in metres. The rotation is dimensionless. At <span class="math inline">\(q_1=\pi/2\,\mathrm{rad}\)</span>, <span class="math inline">\(q_2=-\pi/2\,\mathrm{rad}\)</span>, and <span class="math inline">\(q_3=0.5\,\mathrm m\)</span>, the effective second-link length is <span class="math inline">\(1.5\,\mathrm m\)</span>. Substitution gives</p>
+<p><span class="math display">\[
+{}^s\mathbf p_e=
+\begin{bmatrix}0\\2\\1.5\end{bmatrix}\mathrm m,
+\qquad
+\mathbf R_{se}
+=\mathbf R_z(\pi/2)\mathbf R_y(-\pi/2)\mathbf R_z(\pi/2)
+=
+\begin{bmatrix}
+-1&amp;0&amp;0\\
+0&amp;0&amp;-1\\
+0&amp;-1&amp;0
+\end{bmatrix}.
+\]</span></p>
+<p><strong>Usage example.</strong> The following statements belong inside a caller function with the public forward-kinematics header, Eigen, and <code>&lt;numbers&gt;</code> available. They construct the same geometry as the tests, with no test-framework machinery.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb41"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> rbk <span class="op">=</span> rigid_body_kinematics<span class="op">;</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="kw">auto</span> revolute_limits <span class="op">=</span> rbk<span class="op">::</span>RevoluteLimits<span class="op">::</span>from_bounds<span class="op">(</span></span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>  <span class="op">-</span><span class="bu">std::</span>numbers::pi<span class="op">,</span> <span class="bu">std::</span>numbers::pi<span class="op">);</span></span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="kw">auto</span> prismatic_limits <span class="op">=</span></span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>  rbk<span class="op">::</span>PrismaticLimits<span class="op">::</span>from_bounds<span class="op">(</span><span class="fl">0.0</span><span class="op">,</span> <span class="fl">1.0</span><span class="op">);</span></span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="kw">auto</span> base_joint <span class="op">=</span> rbk<span class="op">::</span>RevoluteJoint<span class="op">::</span>from_axis<span class="op">(</span></span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a>  Eigen<span class="op">::</span>Vector3d<span class="op">::</span>UnitZ<span class="op">(),</span> Eigen<span class="op">::</span>Vector3d<span class="op">::</span>Zero<span class="op">(),</span> revolute_limits<span class="op">);</span></span>
+<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="kw">auto</span> elbow_joint <span class="op">=</span> rbk<span class="op">::</span>RevoluteJoint<span class="op">::</span>from_axis<span class="op">(</span></span>
+<span id="cb41-11"><a href="#cb41-11" aria-hidden="true" tabindex="-1"></a>  Eigen<span class="op">::</span>Vector3d<span class="op">::</span>UnitY<span class="op">(),</span> Eigen<span class="op">::</span>Vector3d<span class="op">{</span><span class="fl">2.0</span><span class="op">,</span> <span class="fl">0.0</span><span class="op">,</span> <span class="fl">0.0</span><span class="op">},</span></span>
+<span id="cb41-12"><a href="#cb41-12" aria-hidden="true" tabindex="-1"></a>  revolute_limits<span class="op">);</span></span>
+<span id="cb41-13"><a href="#cb41-13" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="kw">auto</span> extension_joint <span class="op">=</span> rbk<span class="op">::</span>PrismaticJoint<span class="op">::</span>from_axis<span class="op">(</span></span>
+<span id="cb41-14"><a href="#cb41-14" aria-hidden="true" tabindex="-1"></a>  Eigen<span class="op">::</span>Vector3d<span class="op">::</span>UnitX<span class="op">(),</span> prismatic_limits<span class="op">);</span></span>
+<span id="cb41-15"><a href="#cb41-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-16"><a href="#cb41-16" aria-hidden="true" tabindex="-1"></a>Eigen<span class="op">::</span>Matrix4d home_matrix<span class="op">;</span></span>
+<span id="cb41-17"><a href="#cb41-17" aria-hidden="true" tabindex="-1"></a><span class="co">// clang-format off</span></span>
+<span id="cb41-18"><a href="#cb41-18" aria-hidden="true" tabindex="-1"></a>home_matrix <span class="op">&lt;&lt;</span></span>
+<span id="cb41-19"><a href="#cb41-19" aria-hidden="true" tabindex="-1"></a>  <span class="fl">0.0</span><span class="op">,</span> <span class="op">-</span><span class="fl">1.0</span><span class="op">,</span> <span class="fl">0.0</span><span class="op">,</span> <span class="fl">3.0</span><span class="op">,</span></span>
+<span id="cb41-20"><a href="#cb41-20" aria-hidden="true" tabindex="-1"></a>  <span class="fl">1.0</span><span class="op">,</span>  <span class="fl">0.0</span><span class="op">,</span> <span class="fl">0.0</span><span class="op">,</span> <span class="fl">0.0</span><span class="op">,</span></span>
+<span id="cb41-21"><a href="#cb41-21" aria-hidden="true" tabindex="-1"></a>  <span class="fl">0.0</span><span class="op">,</span>  <span class="fl">0.0</span><span class="op">,</span> <span class="fl">1.0</span><span class="op">,</span> <span class="fl">0.0</span><span class="op">,</span></span>
+<span id="cb41-22"><a href="#cb41-22" aria-hidden="true" tabindex="-1"></a>  <span class="fl">0.0</span><span class="op">,</span>  <span class="fl">0.0</span><span class="op">,</span> <span class="fl">0.0</span><span class="op">,</span> <span class="fl">1.0</span><span class="op">;</span></span>
+<span id="cb41-23"><a href="#cb41-23" aria-hidden="true" tabindex="-1"></a><span class="co">// clang-format on</span></span>
+<span id="cb41-24"><a href="#cb41-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-25"><a href="#cb41-25" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="kw">auto</span> model <span class="op">=</span> rbk<span class="op">::</span>SerialChainModel<span class="op">::</span>from_home_and_joints<span class="op">(</span></span>
+<span id="cb41-26"><a href="#cb41-26" aria-hidden="true" tabindex="-1"></a>  rbk<span class="op">::</span>Transform3<span class="op">::</span>from_matrix<span class="op">(</span>home_matrix<span class="op">),</span></span>
+<span id="cb41-27"><a href="#cb41-27" aria-hidden="true" tabindex="-1"></a>  <span class="op">{</span>base_joint<span class="op">,</span> elbow_joint<span class="op">,</span> extension_joint<span class="op">});</span></span>
+<span id="cb41-28"><a href="#cb41-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-29"><a href="#cb41-29" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> Eigen<span class="op">::</span>Vector3d joint_coordinates<span class="op">{</span></span>
+<span id="cb41-30"><a href="#cb41-30" aria-hidden="true" tabindex="-1"></a>  <span class="bu">std::</span>numbers::pi <span class="op">/</span> <span class="fl">2.0</span><span class="op">,</span> <span class="op">-</span><span class="bu">std::</span>numbers::pi <span class="op">/</span> <span class="fl">2.0</span><span class="op">,</span> <span class="fl">0.5</span><span class="op">};</span></span>
+<span id="cb41-31"><a href="#cb41-31" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="kw">auto</span> body_pose <span class="op">=</span></span>
+<span id="cb41-32"><a href="#cb41-32" aria-hidden="true" tabindex="-1"></a>  rbk<span class="op">::</span>body_form_forward_kinematics<span class="op">(</span>model<span class="op">,</span> joint_coordinates<span class="op">);</span></span>
+<span id="cb41-33"><a href="#cb41-33" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="kw">auto</span> space_pose <span class="op">=</span></span>
+<span id="cb41-34"><a href="#cb41-34" aria-hidden="true" tabindex="-1"></a>  rbk<span class="op">::</span>space_form_forward_kinematics<span class="op">(</span>model<span class="op">,</span> joint_coordinates<span class="op">);</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The ordered <code>base_joint</code>, <code>elbow_joint</code>, and <code>extension_joint</code> correspond to <span class="math inline">\(q_1,q_2,q_3\)</span> in <code>joint_coordinates</code>. <code>home_matrix</code> stores <span class="math inline">\(\mathbf M\)</span>, including the separately chosen tool orientation. Both <code>body_pose</code> and <code>space_pose</code> should agree with the independently calculated matrix</p>
+<p><span class="math display">\[
+\mathbf T_{se}(\mathbf q)=
+\begin{bmatrix}
+-1&amp;0&amp;0&amp;0\\
+0&amp;0&amp;-1&amp;2\\
+0&amp;-1&amp;0&amp;1.5\\
+0&amp;0&amp;0&amp;1
+\end{bmatrix}.
+\]</span></p>
+</section>
+<section id="what-the-tests-establish" class="level3" data-number="11.5.3">
+<h3 data-number="11.5.3" class="anchored" data-anchor-id="what-the-tests-establish"><span class="header-section-number">11.5.3</span> What the tests establish</h3>
+<p>The same RRP model is checked at zero coordinates and at the nonzero query above. The zero case requires the complete home pose because every exponential is identity. The nonzero case exercises body conversion, nonparallel revolute axes, prismatic extension, and factor order. The tests compare the body result with the independent expected pose and with the space result, using separate translation and rotation residual limits of <span class="math inline">\(10^{-12}\,\mathrm m\)</span> and <span class="math inline">\(10^{-12}\,\mathrm{rad}\)</span>. Agreement between the two implementations alone is not the reference.</p>
+</section>
+<section id="sec-general-kinematics-impl-body-connections" class="level3" data-number="11.5.4">
+<h3 data-number="11.5.4" class="anchored" data-anchor-id="sec-general-kinematics-impl-body-connections"><span class="header-section-number">11.5.4</span> How the classes and functions connect</h3>
+<p>The model construction remains the one in <a href="#sec-general-kinematics-impl-cycle-connections" class="quarto-xref"><span>Section 11.4.6</span></a>. This diagram shows the body evaluator’s local calculations; arrows are calculation flow, not ownership transfer or a sequence of physical joint movements.</p>
+<p><span class="math display">\[
+\begin{gathered}
+\boxed{\begin{gathered}
+\texttt{SerialChainModel}\ \text{owns fixed data}\\
+\mathbf M,\quad({}^s\mathbf S_j)_{j=1}^{n},\quad
+(\mathcal Q_j)_{j=1}^{n}\\
+\text{Separate per-call inputs: }\mathbf q,\ \texttt{NumericalPolicy}
+\end{gathered}}\\[0.1em]
+\Big\downarrow\\[0.1em]
+\boxed{\begin{gathered}
+\texttt{body\_form\_forward\_kinematics}\\
+\texttt{validate\_forward\_kinematics\_query}\\
+\text{Borrow inputs and validate before calculation}
+\end{gathered}}\\[0.1em]
+\Big\downarrow\\[0.1em]
+\boxed{\begin{gathered}
+\texttt{model.home\_pose().inverse().adjoint()}\\
+\text{Local conversion matrix: }\operatorname{Ad}_{\mathbf M^{-1}}\\
+\texttt{result = model.home\_pose()}\qquad\mathbf P_0=\mathbf M
+\end{gathered}}\\[0.1em]
+\Big\downarrow\\[0.1em]
+\boxed{\begin{gathered}
+\text{For each joint }j=1,\ldots,n\\
+\texttt{space\_screw\_axis}\ \longrightarrow\
+{}^e\mathbf B_j=\operatorname{Ad}_{\mathbf M^{-1}}{}^s\mathbf S_j\\
+{}^e\boldsymbol\eta_j={}^e\mathbf B_jq_j\\
+\texttt{Transform3::from\_exponential\_coordinates}\\
+\mathbf G_j(q_j)=\exp\!\left(\widehat{{}^e\boldsymbol\eta_j}\right)\\
+\texttt{result.compose(joint\_displacement)}\\
+\mathbf P_j=\mathbf P_{j-1}\mathbf G_j(q_j)
+\end{gathered}}\\[0.1em]
+\Big\downarrow\\[0.1em]
+\boxed{\begin{gathered}
+\texttt{return result}\\
+\mathbf T_{se}(\mathbf q)=\mathbf P_n\\
+\text{Owned }\texttt{Transform3}\text{; inputs unchanged}
+\end{gathered}}
+\end{gathered}
+\]</span></p>
+
+
 </section>
 </section>
 <section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">

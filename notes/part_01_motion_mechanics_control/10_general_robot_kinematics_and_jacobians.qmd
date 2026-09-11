@@ -2707,6 +2707,132 @@ Do not combine the metre-valued and radian-valued residuals in one unscaled norm
 
 ## Velocity kinematics and robot Jacobians {#sec-general-robot-jacobians}
 
+### From the end-effector pose to its instantaneous twist {#sec-end-effector-pose-rate-space-twist}
+
+Forward kinematics tells us where the end effector is. To describe how it is moving, we need both its turning rate and the velocity of its points. Given a differentiable joint trajectory $\mathbf q(t)\in\mathcal Q$ and the forward map $\mathbf T_{se}(\mathbf q)$, the question is: what instantaneous rigid-body velocity does the changing pose describe? Here $t$ is time in seconds, $\{s\}$ is the fixed space frame, and $\{e\}$ is attached rigidly to the end effector.
+
+#### Recall the pose-rate relation
+
+Write the pose along the trajectory as
+
+$$
+\mathbf T_{se}(\mathbf q(t))
+=
+\begin{bmatrix}
+\mathbf R_{se}(t)&{}^{s}\mathbf p_e(t)\\
+\mathbf 0_3^{\mathsf T}&1
+\end{bmatrix},
+\qquad
+\dot{\mathbf T}_{se}
+=
+\begin{bmatrix}
+\dot{\mathbf R}_{se}&{}^{s}\dot{\mathbf p}_e\\
+\mathbf 0_3^{\mathsf T}&0
+\end{bmatrix}.
+$$
+
+The dimensionless rotation $\mathbf R_{se}\in SO(3)$ gives the end-effector orientation, and ${}^{s}\mathbf p_e\in\mathbb R^3$ gives its origin's position in metres, both relative to $\{s\}$. A dot denotes differentiation with respect to time along the joint trajectory. In particular, ${}^{s}\dot{\mathbf p}_e$ is the end-effector origin's velocity relative to $\{s\}$, expressed along the fixed space axes, in $\mathrm{m\,s^{-1}}$. The $4\times4$ matrix $\dot{\mathbf T}_{se}$ is a pose derivative, not a pose or a six-entry twist.
+
+Recall the space-twist relation derived in @sec-se3-spatial-twist and reused for pose integration in @sec-se3-constant-twist-integration: postmultiplying the pose derivative by the current inverse pose extracts the space-twist matrix. This instantaneous relation does not require the twist to be constant. Applying the block product in @eq-se3-spatial-twist-block-product to the end-effector pose, with $\{s\}$ in place of $\{w\}$ and $\{e\}$ in place of $\{b\}$, gives
+
+$$
+\boxed{
+\widehat{\boldsymbol\xi_s}
+=
+\dot{\mathbf T}_{se}\mathbf T_{se}^{-1}
+=
+\begin{bmatrix}
+\dot{\mathbf R}_{se}\mathbf R_{se}^{\mathsf T}
+&
+{}^{s}\dot{\mathbf p}_e
+-\dot{\mathbf R}_{se}\mathbf R_{se}^{\mathsf T}
+{}^{s}\mathbf p_e\\
+\mathbf 0_3^{\mathsf T}&0
+\end{bmatrix}
+}.
+$$ {#eq-end-effector-space-twist-pose-rate}
+
+Use the same linear-first order as before:
+
+$$
+\boldsymbol\xi_s=
+\begin{bmatrix}\boldsymbol\nu_s\\\boldsymbol\omega_s\end{bmatrix}
+\in\mathbb R^6,
+\qquad
+\begin{aligned}
+\left[\boldsymbol\omega_s\right]_\times
+&=\dot{\mathbf R}_{se}\mathbf R_{se}^{\mathsf T},\\
+\boldsymbol\nu_s
+&={}^s\dot{\mathbf p}_e
+-\boldsymbol\omega_s\times{}^s\mathbf p_e.
+\end{aligned}
+$$
+
+Here $\boldsymbol\omega_s\in\mathbb R^3$ is the end effector's angular velocity relative to $\{s\}$, expressed along the space axes, in $\mathrm{rad\,s^{-1}}$. The column $\boldsymbol\nu_s\in\mathbb R^3$ is the linear part of its space twist, in $\mathrm{m\,s^{-1}}$. The operator $[\boldsymbol\omega_s]_\times$ performs the cross product with $\boldsymbol\omega_s$; the hat operator packages these angular and linear blocks into a $4\times4$ matrix in $\mathfrak{se}(3)$. This is the same convention as Chapter 7, with $s$ replacing $w$ and the end effector replacing the general rigid body.
+
+#### Recover the velocity of the end-effector origin
+
+The two linear quantities must not be confused. The space-twist block $\boldsymbol\nu_s$ is the value of the end effector's rigid-motion velocity field at the space-origin location; it is not generally the velocity of the end-effector origin. This does not mean that the fixed space frame moves or that the end effector must contain a point at the space origin.
+
+To obtain the actual end-effector origin velocity, rearrange the preceding expression:
+
+$$
+\boxed{
+{}^{s}\dot{\mathbf p}_e
+=
+\boldsymbol\nu_s
++\boldsymbol\omega_s\times{}^{s}\mathbf p_e
+}.
+$$ {#eq-end-effector-origin-velocity-from-space-twist}
+
+The rotational term accounts for the end-effector origin's location relative to the space origin. Thus a space twist answers the complete rigid-motion question, while ${}^{s}\dot{\mathbf p}_e$ answers the narrower question of how fast the selected origin moves. They use the same coordinate axes, but their linear quantities refer to different locations. The two linear columns coincide exactly when $\boldsymbol\omega_s\times{}^{s}\mathbf p_e=\mathbf 0_3$, including pure translation. This distinction follows the twist treatment in Lynch and Park, Chapter 5, Section 5.1, and the moving-point velocity relation in Craig, Chapter 5, Section 5.3.
+
+::: {.callout-note title="Example: a moving tool with a zero linear space-twist block" appearance="simple" icon=false}
+
+Consider one revolute joint through the space origin, directed along $+z_s$. A rigid link of length $L=3\,\mathrm m$ initially points along $+x_s$, with its end-effector frame aligned with $\{s\}$. For a differentiable joint angle $q(t)$ in radians, its pose blocks are
+
+$$
+\mathbf R_{se}(q)=\mathbf R_z(q),
+\qquad
+{}^{s}\mathbf p_e(q)
+=
+\begin{bmatrix}L\cos q\\L\sin q\\0\end{bmatrix}.
+$$
+
+The active, right-handed rotation $\mathbf R_z(q)$ is the rotation about $+z_s$ already defined in @sec-so3-active-axis-rotations. Differentiating the position and using the joint's angular velocity gives
+
+$$
+\begin{aligned}
+{}^{s}\dot{\mathbf p}_e
+&=
+\begin{bmatrix}-L\sin q\\L\cos q\\0\end{bmatrix}\dot q,
+\qquad
+\boldsymbol\omega_s=
+\begin{bmatrix}0\\0\\\dot q\end{bmatrix},\\
+\boldsymbol\omega_s\times{}^{s}\mathbf p_e
+&=
+\begin{bmatrix}-L\sin q\\L\cos q\\0\end{bmatrix}\dot q.
+\end{aligned}
+$$
+
+The two terms in $\boldsymbol\nu_s={}^s\dot{\mathbf p}_e-\boldsymbol\omega_s\times{}^s\mathbf p_e$ cancel, so $\boldsymbol\nu_s=\mathbf 0_3$. At $q=0$ and $\dot q=1\,\mathrm{rad\,s^{-1}}$, the end-effector origin nevertheless moves with velocity ${}^{s}\dot{\mathbf p}_e=[0\;3\;0]^{\mathsf T}\,\mathrm{m\,s^{-1}}$. Rotation about the space origin produces zero velocity at that origin but nonzero velocity at the tool, three metres away. A zero linear space-twist block therefore does not mean that the tool is stationary.
+
+:::
+
+#### Quick test: pose rate and end-effector velocity {.unnumbered}
+
+1. **Recall:** Which product of $\dot{\mathbf T}_{se}$ and $\mathbf T_{se}^{-1}$ gives the space-twist matrix? What does each three-entry block of $\boldsymbol\xi_s$ represent?
+2. **Derivation:** Multiply $\dot{\mathbf T}_{se}$ by $\mathbf T_{se}^{-1}=[\,\mathbf R_{se}^{\mathsf T},-\mathbf R_{se}^{\mathsf T}{}^s\mathbf p_e;\,\mathbf 0_3^{\mathsf T},1\,]$ in block form. Explain the minus sign in its resulting linear block.
+3. **Application:** In the one-joint example, keep $\dot q=1\,\mathrm{rad\,s^{-1}}$ but set $q=\pi/2$. Calculate ${}^s\mathbf p_e$, ${}^s\dot{\mathbf p}_e$, and $\boldsymbol\nu_s$.
+4. **Interpretation and validity:** When can $\boldsymbol\nu_s$ be used directly as the end-effector origin velocity? Why does the pose-rate calculation require a differentiable motion rather than just two arbitrary pose samples?
+
+#### Answers and hints {.unnumbered}
+
+1. Use $\widehat{\boldsymbol\xi_s}=\dot{\mathbf T}_{se}\mathbf T_{se}^{-1}$. In the six-entry column $\boldsymbol\xi_s$, the upper three entries are the space-referenced linear velocity-field coefficient $\boldsymbol\nu_s$ in $\mathrm{m\,s^{-1}}$; the lower three are angular velocity $\boldsymbol\omega_s$ expressed along space axes in $\mathrm{rad\,s^{-1}}$.
+2. The upper-right block is $-\dot{\mathbf R}_{se}\mathbf R_{se}^{\mathsf T}{}^s\mathbf p_e+{}^s\dot{\mathbf p}_e$. The minus sign comes from the inverse pose's translation column; use $\dot{\mathbf R}_{se}\mathbf R_{se}^{\mathsf T}=[\boldsymbol\omega_s]_\times$ to identify the cross product.
+3. The position is $[0\;3\;0]^{\mathsf T}\,\mathrm m$ and its velocity is $[-3\;0\;0]^{\mathsf T}\,\mathrm{m\,s^{-1}}$. The cross product gives that same velocity, so $\boldsymbol\nu_s=\mathbf 0_3$.
+4. Only when $\boldsymbol\omega_s\times{}^s\mathbf p_e=\mathbf 0_3$. Differentiability supplies the instantaneous derivative $\dot{\mathbf T}_{se}$. Two pose samples alone do not determine a unique intervening motion or its instantaneous velocity.
+
 ### Task Jacobians
 
 ### Space Jacobians
@@ -2737,6 +2863,8 @@ Do not combine the metre-valued and radian-valued residuals in one unscaled norm
 
 ## References {.unnumbered}
 
-- Kevin M. Lynch and Frank C. Park, *Modern Robotics: Mechanics, Planning, and Control*, Chapter 2 on robot configuration, Chapter 4 on relative-transform forward kinematics and the space and body forms of the product of exponentials, and the opening of Chapter 5 on task-coordinate forward maps, the multivariable chain rule, and the derivative mapping from joint rates to task rates.
-- John J. Craig, *Introduction to Robotics: Mechanics and Control*, Chapter 3 on joint space, link-frame assignment, parent--child transform chains, and the end-link pose as a function of the joint variables, and Chapter 5, especially Section 5.7, on the Jacobian as a multidimensional derivative and the velocity form of the chain rule.
-- Peter Corke, *Robotics, Vision and Control: Fundamental Algorithms in Python*, Chapter 7 on configuration coordinates, elementary transform sequences, parent--child link products, and forward kinematics, and Chapter 8, especially Section 8.1, on task-space derivatives and computational Jacobian evaluation.
+[@lynch2017, chaps. 2, 4–5]
+
+[@craig2022, chaps. 3, 5]
+
+[@corke2023, chaps. 7–8]

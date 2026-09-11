@@ -352,6 +352,8 @@ Use `source install/setup.bash` in Bash.
 
 ## References {.unnumbered}
 
-- Open Robotics, [“Developing a ROS 2 package,”](https://docs.ros.org/en/jazzy/How-To-Guides/Developing-a-ROS-2-Package.html) *ROS 2 Jazzy Documentation*.
-- Open Robotics, [“Using Python Packages with ROS 2,”](https://docs.ros.org/en/jazzy/How-To-Guides/Using-Python-Packages.html) *ROS 2 Jazzy Documentation*.
-- colcon, [“What is a Workspace?”](https://colcon.readthedocs.io/en/released/user/what-is-a-workspace.html) *colcon Documentation*.
+[@ros2jazzy_package_development]
+
+[@ros2jazzy_python_packages]
+
+[@colcon_workspace]
