@@ -5138,7 +5138,7 @@ $$
 \mathbf 0_3^\mathsf T&0
 \end{bmatrix}.
 \end{aligned}
-$$
+$$ {#eq-se3-body-twist-block-product}
 
 The translation column $-\mathbf R^\mathsf T\mathbf p$ contributes zero because it multiplies the zero bottom row of $\dot{\mathbf T}$. The angular-velocity relations from @sec-so3-angular-velocity are
 
@@ -6057,7 +6057,7 @@ $$
 \end{bmatrix}
 \in\mathbb R^{6\times6}
 }.
-$$
+$$ {#eq-se3-adjoint-linear-first}
 
 Each block is $3\times3$. The rotation blocks are dimensionless, whereas $[\mathbf p]_\times\mathbf R$ has units of metres. Multiplying that block by $\boldsymbol\omega_b$ in $\mathrm{rad\,s^{-1}}$ produces the required $\mathrm{m\,s^{-1}}$ contribution to $\boldsymbol\nu_w$. The zero block shows that linear velocity does not contribute to angular velocity, while the upper-right block shows that angular velocity contributes to the linear part whenever the two reference origins differ.
 
@@ -6082,7 +6082,7 @@ $$
 =
 \mathbf T\widehat{\boldsymbol\xi}\mathbf T^{-1}
 }.
-$$
+$$ {#eq-se3-adjoint-conjugation}
 
 #### Inverse adjoint operator {.unnumbered}
 

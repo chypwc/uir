@@ -5096,7 +5096,7 @@ r_x\\r_y\\0
 \end{bmatrix}.
 \]</span></p>
 <p>Premultiplying the pose derivative by this inverse gives</p>
-<p><span class="math display">\[
+<p><span id="eq-se3-body-twist-block-product"><span class="math display">\[
 \begin{aligned}
 \mathbf T^{-1}\dot{\mathbf T}
 &amp;=
@@ -5115,7 +5115,7 @@ r_x\\r_y\\0
 \mathbf 0_3^\mathsf T&amp;0
 \end{bmatrix}.
 \end{aligned}
-\]</span></p>
+\tag{7.1}\]</span></span></p>
 <p>The translation column <span class="math inline">\(-\mathbf R^\mathsf T\mathbf p\)</span> contributes zero because it multiplies the zero bottom row of <span class="math inline">\(\dot{\mathbf T}\)</span>. The angular-velocity relations from <a href="#sec-so3-angular-velocity" class="quarto-xref"><span>Section 7.4</span></a> are</p>
 <p><span class="math display">\[
 \mathbf R_{wb}^\mathsf T\dot{\mathbf R}_{wb}
@@ -5460,7 +5460,7 @@ T_{\mathbf I_4}SE(3)
 \mathbf 0_3^\mathsf T&amp;0
 \end{bmatrix}.
 \end{aligned}
-\tag{7.1}\]</span></span></p>
+\tag{7.2}\]</span></span></p>
 <p>The upper-left block is the world-expressed angular-velocity matrix derived in <a href="#sec-so3-angular-velocity" class="quarto-xref"><span>Section 7.4</span></a>:</p>
 <p><span class="math display">\[
 \dot{\mathbf R}\mathbf R^\mathsf T
@@ -5628,7 +5628,7 @@ T_{\mathbf I_4}SE(3)
 +
 \underbrace{\boldsymbol\omega_w\times\mathbf p}_{\text{change caused by the different location}}
 }.
-\tag{7.2}\]</span></span></p>
+\tag{7.3}\]</span></span></p>
 <p>This equation also follows immediately by rearranging <span class="math inline">\(\boldsymbol\nu_w=\dot{\mathbf p}-\boldsymbol\omega_w\times\mathbf p\)</span>. It shows why <span class="math inline">\(\boldsymbol\nu_w\)</span> alone must not be called the body-origin velocity: the two quantities refer to different locations. They are equal when <span class="math inline">\(\boldsymbol\omega_w\times\mathbf p=\mathbf 0_3\)</span>, including pure translation or a body origin lying on the instantaneous rotation-axis line through <span class="math inline">\(O_w\)</span>.</p>
 </section>
 <section id="worked-reference-origin-check" class="level4 unnumbered">
@@ -5709,7 +5709,7 @@ T_{\mathbf I_4}SE(3)
 =
 \mathbf R\boldsymbol\nu_b.
 \]</span></p>
-<p>The spatial-twist velocity field in <a href="#eq-se3-spatial-twist-body-origin-velocity" class="quarto-xref">Equation&nbsp;<span>7.2</span></a> gives the same body-origin velocity as</p>
+<p>The spatial-twist velocity field in <a href="#eq-se3-spatial-twist-body-origin-velocity" class="quarto-xref">Equation&nbsp;<span>7.3</span></a> gives the same body-origin velocity as</p>
 <p><span class="math display">\[
 {}^w\mathbf v_b
 =
@@ -5895,7 +5895,7 @@ T_{\mathbf I_4}SE(3)
 \end{aligned}
 \]</span></p>
 <p>The <span class="math inline">\(6\times6\)</span> matrix in this equation is called the <strong>adjoint representation</strong> of <span class="math inline">\(\mathbf T\)</span>. The word <em>representation</em> means that the finite pose <span class="math inline">\(\mathbf T\in SE(3)\)</span> is represented by a linear operator acting on six-component twist coordinates. For the component order <span class="math inline">\([\,\boldsymbol\nu^\mathsf T\;\boldsymbol\omega^\mathsf T\,]^\mathsf T\)</span> used in this book, define</p>
-<p><span class="math display">\[
+<p><span id="eq-se3-adjoint-linear-first"><span class="math display">\[
 \boxed{
 \operatorname{Ad}_{\mathbf T}
 \mathrel{:=}
@@ -5905,7 +5905,7 @@ T_{\mathbf I_4}SE(3)
 \end{bmatrix}
 \in\mathbb R^{6\times6}
 }.
-\]</span></p>
+\tag{7.4}\]</span></span></p>
 <p>Each block is <span class="math inline">\(3\times3\)</span>. The rotation blocks are dimensionless, whereas <span class="math inline">\([\mathbf p]_\times\mathbf R\)</span> has units of metres. Multiplying that block by <span class="math inline">\(\boldsymbol\omega_b\)</span> in <span class="math inline">\(\mathrm{rad\,s^{-1}}\)</span> produces the required <span class="math inline">\(\mathrm{m\,s^{-1}}\)</span> contribution to <span class="math inline">\(\boldsymbol\nu_w\)</span>. The zero block shows that linear velocity does not contribute to angular velocity, while the upper-right block shows that angular velocity contributes to the linear part whenever the two reference origins differ.</p>
 <p>For <span class="math inline">\(\mathbf T=\mathbf T_{wb}\)</span>, the complete conversion is</p>
 <p><span class="math display">\[
@@ -5917,7 +5917,7 @@ T_{\mathbf I_4}SE(3)
 }.
 \]</span></p>
 <p>Equivalently, the adjoint can be characterised directly by its action on any twist column <span class="math inline">\(\boldsymbol\xi\in\mathbb R^6\)</span>:</p>
-<p><span class="math display">\[
+<p><span id="eq-se3-adjoint-conjugation"><span class="math display">\[
 \boxed{
 \widehat{
 \operatorname{Ad}_{\mathbf T}\boldsymbol\xi
@@ -5925,7 +5925,7 @@ T_{\mathbf I_4}SE(3)
 =
 \mathbf T\widehat{\boldsymbol\xi}\mathbf T^{-1}
 }.
-\]</span></p>
+\tag{7.5}\]</span></span></p>
 </section>
 <section id="inverse-adjoint-operator" class="level4 unnumbered">
 <h4 class="unnumbered anchored" data-anchor-id="inverse-adjoint-operator">Inverse adjoint operator</h4>

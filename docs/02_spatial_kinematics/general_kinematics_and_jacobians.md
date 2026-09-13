@@ -4,7 +4,9 @@
 
 This specification defines space-form and [body-form forward kinematics](#body-form-forward-kinematics) for fixed-base open serial chains. Given one fixed serial-chain model and one allowed joint-coordinate column within the selected evaluator's numerical domain, either operation shall return the pose of the selected end-effector frame relative to the fixed space frame or fail explicitly without returning a plausible-looking pose.
 
-The reviewed theory is documented in [General Robot Kinematics and Jacobians](../../notes/part_01_motion_mechanics_control/10_general_robot_kinematics_and_jacobians.qmd), especially the section on serial-chain pose through products of exponentials. The existing [Spatial Geometry Kernel Capability Specification](spatial_geometry_kernel.md) owns validated $SO(3)$ and $SE(3)$ representations, the linear-first hat map, the $SE(3)$ exponential, transformation composition, numerical policy, and unit-aware pose comparison. This specification reuses those operations rather than redefining them.
+It also defines the [space Jacobian, body Jacobian, and their adjoint relation](#space-and-body-jacobians) for the same model. These operations return the instantaneous joint-rate-to-twist maps, not a new pose or a ROS message. The existing forward-kinematics contracts remain unchanged.
+
+The governing theory is documented in [General Robot Kinematics and Jacobians](../../notes/part_01_motion_mechanics_control/10_general_robot_kinematics_and_jacobians.qmd). The existing [Spatial Geometry Kernel Capability Specification](spatial_geometry_kernel.md) owns validated $SO(3)$ and $SE(3)$ representations, the linear-first hat map, the $SE(3)$ exponential, transformation composition, adjoints, numerical policy, and unit-aware pose comparison. This specification reuses those operations rather than redefining them.
 
 ## Intended behaviour
 
@@ -350,7 +352,7 @@ where $\boldsymbol\phi_\Delta$ is the principal rotation vector of $\mathbf R_\D
 | GK-NUM-001 | Formula thresholds shall only select numerically stable evaluation; the operation shall not wrap, clamp, canonicalize, project, or otherwise change a valid declared joint coordinate. |
 | GK-NUM-002 | `NumericalPolicy` shall be an evaluation input with a default value, shall not be stored in `SerialChainModel`, and shall be applied by `space_form_forward_kinematics`. |
 | GK-API-001 | The core shall be deterministic, non-mutating, reusable across calls, and independent of ROS runtime and simulator state. |
-| GK-API-002 | Success shall return the validated model or `Transform3` directly; failure shall throw `SerialChainException` carrying a `SerialChainError`, useful context including a joint index when applicable, and no geometric value. |
+| GK-API-002 | Success shall return the validated model, `Transform3`, or owning Jacobian matrix required by the operation directly; failure shall throw `SerialChainException` carrying a `SerialChainError`, useful context including a joint index when applicable, and no geometric value. |
 
 ## Library-independent acceptance cases
 
@@ -582,3 +584,241 @@ Use deterministic binary64 inputs. For both geometric cases, require translation
 | GK-BACC-006 | Let $D_{\max}$ be the largest finite binary64 value. Use one revolute joint about $+z_s$ through $[-D_{\max},0,0]^{\mathsf T}$, home rotation $\mathbf I_3$, home position $[D_{\max},0,0]^{\mathsf T}$, and $q_1=0.25\,\mathrm{rad}$.                                                                                                                                                | Model construction succeeds with finite space screw $[0,D_{\max},0,0,0,1]^{\mathsf T}$. Its body screw would require $[0,2D_{\max},0,0,0,1]^{\mathsf T}$, which is unrepresentable. The body evaluator throws `SerialChainException` with `unsupported_magnitude` and joint 1 context, without returning a pose. This is a conversion overflow, distinct from scaling or composition overflow. |
 
 The two RRP queries are the only required geometric scenarios for body-form acceptance; separate single-joint, planar 2R, and spatial 2R fixtures are not required for this evaluator. Preserve existing space-form tests. Detailed shared-validation cases need not be duplicated for the body evaluator while both entry points use the same helper in the specified order; revisit this evidence strategy if either path adds or bypasses validation. Reuse the three dual-entry checks above without copying entire tests. The conversion-overflow case remains separate because it tests a new numerical failure, not nominal geometry. No public body-axis accessor, exhaustive input permutations, or dedicated repeated-call/default-policy test is required. Test count is not an acceptance target.
+
+## Space and body Jacobians
+
+### Scope and public interfaces
+
+Add two C++20 library operations to the existing `rigid_body_kinematics` package, declared in `rigid_body_kinematics/jacobian.hpp` in namespace `rigid_body_kinematics`. Follow the [C++ style guide](../conventions/cpp_style.md). Use the existing model, joint definitions, numerical policy, and error types; do not add a ROS node, topic, message, or runtime dependency.
+
+```cpp
+using JacobianLinearFirst = Eigen::Matrix<double, 6, Eigen::Dynamic>;
+
+[[nodiscard]] JacobianLinearFirst space_jacobian(
+  const SerialChainModel & model,
+  Eigen::Ref<const Eigen::VectorXd> joint_coordinates,
+  const NumericalPolicy & policy = NumericalPolicy{});
+
+[[nodiscard]] JacobianLinearFirst body_jacobian(
+  const SerialChainModel & model,
+  Eigen::Ref<const Eigen::VectorXd> joint_coordinates,
+  const NumericalPolicy & policy = NumericalPolicy{});
+```
+
+For $n\geq1$ model joints, each call receives the current $\mathbf q\in\mathcal Q$ and returns an owning, finite $6\times n$ matrix by value. Column $j$ corresponds to joint $j$ in base-to-end-effector order. Neither call receives joint rates: the caller may multiply the returned matrix by $\dot{\mathbf q}$ when a twist is required. Both operations shall be deterministic and shall not mutate or retain references to their inputs.
+
+Their meanings are
+
+$$
+\boldsymbol\xi_s=\mathbf J_s(\mathbf q)\dot{\mathbf q},
+\qquad
+\boldsymbol\xi_e=\mathbf J_e(\mathbf q)\dot{\mathbf q}.
+$$
+
+Both twists describe end-effector motion relative to fixed $\{s\}$. The space twist uses coordinates in $\{s\}$; the body twist uses coordinates in the attached $\{e\}$ at the supplied configuration. Rows 1–3 are linear and rows 4–6 are angular. Their output units are $\mathrm{m\,s^{-1}}$ and $\mathrm{rad\,s^{-1}}$, respectively. Each Jacobian column carries those output units divided by its joint-rate unit: a revolute column's blocks have units $\mathrm{m\,rad^{-1}}$ and $\mathrm{rad\,rad^{-1}}$; a prismatic column's upper block is dimensionless and its angular block is zero, with units $\mathrm{rad\,m^{-1}}$.
+
+The upper block of $\mathbf J_s\dot{\mathbf q}$ is the linear space-twist component $\boldsymbol\nu_s$, not the tool-origin velocity. For current pose $\mathbf T_{se}=[\mathbf R_{se},{}^{s}\mathbf p_e;\mathbf0_3^{\mathsf T},1]$, the latter is
+
+$$
+{}^{s}\dot{\mathbf p}_e
+=\boldsymbol\nu_s+\boldsymbol\omega_s\times{}^{s}\mathbf p_e
+=\mathbf R_{se}\boldsymbol\nu_e.
+$$
+
+Do not introduce another model, persistent body-axis cache, public per-column evaluator, twist-evaluation wrapper, or new numerical-policy field. Task-coordinate Jacobians, rank analysis, pseudoinverses, inverse kinematics, Jacobian time derivatives, dynamics, URDF parsing, and visualization changes are outside this addition. A singular configuration is not itself an error: these operations evaluate a Jacobian, not its inverse.
+
+### Space-Jacobian calculation
+
+The owning formula is [the space-Jacobian column and rate map](../../notes/part_01_motion_mechanics_control/10_general_robot_kinematics_and_jacobians.qmd#eq-space-jacobian-columns-rate-map). Reuse the stored home space screws ${}^{s}\mathbf S_j$ and $\mathbf E_j(q_j)=\exp(\widehat{{}^{s}\mathbf S_j}q_j)$:
+
+$$
+\begin{aligned}
+\mathbf J_{s,1}(\mathbf q)&={}^{s}\mathbf S_1,\\
+\mathbf J_{s,j}(\mathbf q)
+&=\operatorname{Ad}_{\mathbf E_1(q_1)\cdots\mathbf E_{j-1}(q_{j-1})}
+{}^{s}\mathbf S_j,\qquad j=2,\ldots,n,\\
+\mathbf J_s(\mathbf q)
+&=\begin{bmatrix}\mathbf J_{s,1}(\mathbf q)&\cdots&\mathbf J_{s,n}(\mathbf q)\end{bmatrix}.
+\end{aligned}
+$$
+
+Evaluate the columns with one forward pass. Start the preceding-joint displacement at $\mathbf I_4$, calculate column $j$ using its current adjoint, and append $\mathbf E_j$ on the right only when another column remains. Thus column $j$ uses only joints $1,\ldots,j-1$. The space Jacobian requires neither $\mathbf E_n$ nor multiplication by the home pose; do not calculate a complete forward pose merely to obtain it. For $n=1$, return the single stored space column after query validation.
+
+### Body-Jacobian calculation
+
+The owning formula is [the body-Jacobian column and rate map](../../notes/part_01_motion_mechanics_control/10_general_robot_kinematics_and_jacobians.qmd#eq-body-jacobian-columns-rate-map). Derive finite local home body screws once per call using
+
+$$
+{}^{e}\mathbf B_j=\operatorname{Ad}_{\mathbf M^{-1}}{}^{s}\mathbf S_j,
+\qquad
+\mathbf G_j(q_j)=\exp(\widehat{{}^{e}\mathbf B_j}q_j).
+$$
+
+The superscript $e$ on $\mathbf B_j$ refers to the home frame. These columns remain fixed with respect to the query coordinates; the output columns use $\{e\}$ at the current configuration:
+
+$$
+\begin{aligned}
+\mathbf J_{e,n}(\mathbf q)&={}^{e}\mathbf B_n,\\
+\mathbf J_{e,j}(\mathbf q)
+&=\operatorname{Ad}_{\mathbf G_n(q_n)^{-1}\cdots\mathbf G_{j+1}(q_{j+1})^{-1}}
+{}^{e}\mathbf B_j,\qquad j=1,\ldots,n-1,\\
+\mathbf J_e(\mathbf q)
+&=\begin{bmatrix}\mathbf J_{e,1}(\mathbf q)&\cdots&\mathbf J_{e,n}(\mathbf q)\end{bmatrix}.
+\end{aligned}
+$$
+
+Evaluate in descending joint order, while writing each result to its original column. Start the inverse later-joint displacement at $\mathbf I_4$. After calculating column $j$, append $\mathbf G_j^{-1}=\exp(-\widehat{{}^{e}\mathbf B_j}q_j)$ on the right only when an earlier column remains. For three joints, the displacements used for columns 3, 2, and 1 are respectively $\mathbf I_4$, $\mathbf G_3^{-1}$, and $\mathbf G_3^{-1}\mathbf G_2^{-1}$. Do not reverse the returned column order. For $n=1$, return the single converted home body column after query validation.
+
+Use the kernel's exponential, composition, inverse, and adjoint operations. Implement this body-column calculation independently of `space_jacobian`; do not implement it by calling `space_jacobian` and converting its output. This allows their relationship to provide a useful consistency check. Neither evaluator shall use finite differences as its production algorithm.
+
+### Body–space relationship
+
+For the same model, configuration, joint ordering, and component units, the required relation is [the current-pose adjoint identity](../../notes/part_01_motion_mechanics_control/10_general_robot_kinematics_and_jacobians.qmd#eq-body-space-jacobian-adjoint):
+
+$$
+\begin{aligned}
+\mathbf J_e(\mathbf q)
+&=\operatorname{Ad}_{\mathbf T_{se}(\mathbf q)^{-1}}\mathbf J_s(\mathbf q),\\
+\mathbf J_s(\mathbf q)
+&=\operatorname{Ad}_{\mathbf T_{se}(\mathbf q)}\mathbf J_e(\mathbf q).
+\end{aligned}
+$$
+
+The $6\times6$ inverse adjoint is
+
+$$
+\operatorname{Ad}_{\mathbf T_{se}^{-1}}
+=\begin{bmatrix}
+\mathbf R_{se}^{\mathsf T}&
+-\mathbf R_{se}^{\mathsf T}\left[{}^{s}\mathbf p_e\right]_\times\\
+\mathbf0_{3\times3}&\mathbf R_{se}^{\mathsf T}
+\end{bmatrix}.
+$$
+
+Use the complete current pose, not $\mathbf M^{-1}$ and not rotation alone. At home the relation reduces to $\mathbf J_e(\mathbf0_n)=\operatorname{Ad}_{\mathbf M^{-1}}\mathbf J_s(\mathbf0_n)$. The relation needs no third public function: tests shall obtain the current pose from the existing forward-kinematics operation and use `Transform3::inverse()`, `Transform3::adjoint()`, and matrix multiplication. Do not add another adjoint implementation.
+
+These equalities are exact mathematical statements. Numerical comparisons use the tolerances below and require that both Jacobians, the current pose, and the conversion are supported. Different required intermediates can produce different success domains at extreme magnitudes; do not require bitwise equality or silently fall back to the other algorithm after failure.
+
+### Minimal validation and failure contract
+
+Reuse the existing private serial-chain query validation: policy, coordinate count, a complete coordinate-finiteness pass, then each joint's inclusive interval and revolute angular bound in increasing joint order. Share that implementation internally if a separate source file requires it; do not duplicate the checks or expose a new public validation API. Validate all supplied coordinates even when a particular Jacobian does not depend on one of them. Keep existing error codes and never wrap, clamp, or repair a query. Do not revalidate immutable model geometry.
+
+Require finite body-axis conversions, scaled exponential coordinates, required adjoints and displacements, and returned columns. A non-finite supplied coordinate remains `non_finite`; an unrepresentable required calculation is `unsupported_magnitude`. At each Jacobian boundary, preserve a kernel `invalid_policy` category and translate other kernel calculation failures to `unsupported_magnitude`, with the affected joint index or home-conversion context. Failure throws `SerialChainException`, returns no partial or substitute Jacobian, and leaves inputs unchanged. Checks concern the factors actually required by the selected Jacobian; no unused full-pose calculation is required just to reproduce a forward-kinematics failure.
+
+No new exhaustive invalid-input, extreme-magnitude, or policy-permutation suite is required for this addition. Preserve the existing shared-validation tests and review that both new entry points call the unchanged validator and check their own finite intermediates. Reusing those tests is not a claim that every new arithmetic failure path has been tested. Revisit focused error tests if validation logic changes or a defect is observed; the reduced test scope does not remove the failure contract.
+
+### Minimal mathematical acceptance
+
+Use only the existing [RRP fixture](#essential-and-distinct-acceptance-cases): $L_1=2\,\mathrm m$, $L_2=1\,\mathrm m$, home rotation $\mathbf R_z(\pi/2)$, and the same joint geometry and limits. There are two reference configurations: home and the existing nonzero query. The finite-difference check uses small perturbations around that same nonzero query, not another robot scenario.
+
+All expected matrices below use the declared joint units. Obtain expected values from geometry, not by calling the production Jacobian, exponential, or adjoint to manufacture the oracle. For a revolute hinge through $\mathbf p\in\mathbb R^3$ in metres with dimensionless unit direction $\mathbf a\in\mathbb R^3$, both expressed in $\{s\}$ at the query, the geometric space column is $[-(\mathbf a\times\mathbf p)^{\mathsf T}\;\mathbf a^{\mathsf T}]^{\mathsf T}$. The body's linear column is $\mathbf R_{se}^{\mathsf T}[\mathbf a\times({}^{s}\mathbf p_e-\mathbf p)]$ and its angular column is $\mathbf R_{se}^{\mathsf T}\mathbf a$. For a prismatic joint, rotate its current unit sliding direction into the selected frame and use a zero angular block.
+
+**Home columns.** At $\mathbf q=\mathbf0_3$, the expected matrices are
+
+$$
+\mathbf J_s(\mathbf0_3)
+=\begin{bmatrix}
+0&0&1\\
+0&0&0\\
+0&2&0\\
+0&0&0\\
+0&1&0\\
+1&0&0
+\end{bmatrix},
+\qquad
+\mathbf J_e(\mathbf0_3)
+=\begin{bmatrix}
+3&0&0\\
+0&0&-1\\
+0&-1&0\\
+0&1&0\\
+0&0&0\\
+1&0&0
+\end{bmatrix}.
+$$
+
+They are respectively $[{}^{s}\mathbf S_1\;{}^{s}\mathbf S_2\;{}^{s}\mathbf S_3]$ and $[{}^{e}\mathbf B_1\;{}^{e}\mathbf B_2\;{}^{e}\mathbf B_3]$. The prismatic home coordinate is an included lower endpoint; do not apply central differences at that endpoint.
+
+**Nonzero columns and current pose.** At $q_1=\pi/2\,\mathrm{rad}$, $q_2=-\pi/2\,\mathrm{rad}$, and $q_3=0.5\,\mathrm m$, write the query as $\mathbf q_\star$. The expected matrices are
+
+$$
+\mathbf J_s(\mathbf q_\star)
+=\begin{bmatrix}
+0&0&0\\
+0&0&0\\
+0&2&1\\
+0&-1&0\\
+0&0&0\\
+1&0&0
+\end{bmatrix},
+\qquad
+\mathbf J_e(\mathbf q_\star)
+=\begin{bmatrix}
+2&0&0\\
+0&0&-1\\
+0&-1.5&0\\
+0&1&0\\
+-1&0&0\\
+0&0&0
+\end{bmatrix}.
+$$
+
+The current pose is the independently established GK-BACC-002 value,
+
+$$
+\mathbf T_{se}(\mathbf q_\star)
+=\begin{bmatrix}
+-1&0&0&0\\
+0&0&-1&2\\
+0&-1&0&1.5\\
+0&0&0&1
+\end{bmatrix}.
+$$
+
+This single nonzero configuration exercises both preceding-joint displacements, mixed joint types, the body inverse-factor order, and rotation and translation in the current adjoint. Compare both computed Jacobians with the literal geometric matrices before checking their mutual relation; agreement with each other alone is insufficient.
+
+**One local derivative check.** Construct $\mathbf T_{\mathrm{geo}}(\mathbf q)$ from the RRP position and orientation formulas in the fixture definition, using ordinary trigonometry and matrix assembly, not either production forward-kinematics or Jacobian operation. For $j=1,2,3$, let $\mathbf d_j\in\mathbb R^3$ be the joint-coordinate basis column with entry $j$ equal to one and the other entries zero. Use $h_1=h_2=10^{-6}\,\mathrm{rad}$ and $h_3=10^{-6}\,\mathrm m$:
+
+$$
+\begin{aligned}
+\mathbf D_j
+&=\frac{\mathbf T_{\mathrm{geo}}(\mathbf q_\star+h_j\mathbf d_j)
+-\mathbf T_{\mathrm{geo}}(\mathbf q_\star-h_j\mathbf d_j)}{2h_j},\\
+\mathbf X_{s,j}
+&=\mathbf D_j\mathbf T_{\mathrm{geo}}(\mathbf q_\star)^{-1},\\
+\mathbf X_{e,j}
+&=\mathbf T_{\mathrm{geo}}(\mathbf q_\star)^{-1}\mathbf D_j.
+\end{aligned}
+$$
+
+Each $\mathbf D_j$ and $\mathbf X_{s,j},\mathbf X_{e,j}$ is $4\times4$. The latter two approximate the hat matrices of the corresponding Jacobian columns, not finite transforms. Extract the linear estimate from their top three entries in column 4. For either matrix $\mathbf X$, extract the angular estimate from the skew part of its upper-left block:
+
+$$
+\begin{bmatrix}
+(X_{32}-X_{23})/2\\
+(X_{13}-X_{31})/2\\
+(X_{21}-X_{12})/2
+\end{bmatrix}.
+$$
+
+Indices here are one-based. Taking the skew part handles finite-difference roundoff; it does not project a production pose or repair a query. All perturbed configurations lie inside the fixture's limits. Compare all three columns of each computed Jacobian with these estimates; no extra random configurations, step-size sweep, or separate joint-rate fixture is required.
+
+**Tolerances and required checks.** Use binary64 arithmetic and absolute per-column tolerances at these moderate scales. If $u_j$ denotes the coordinate unit of joint $j$ ($\mathrm{rad}$ or $\mathrm m$), compare the three-entry linear error norm in $\mathrm m/u_j$ and the three-entry angular error norm in $\mathrm{rad}/u_j$ separately. Require each norm to be at most $10^{-12}$ in its stated unit for analytic matrices and adjoint comparisons, and at most $10^{-8}$ in its stated unit for finite differences. Do not use one mixed-unit six-vector norm or whole-matrix relative comparison. Every result must also have six rows, three columns, and finite entries.
+
+| ID | Required mathematical check | Distinct purpose |
+|---|---|---|
+| GK-JACC-001 | Evaluate both Jacobians at home and compare with the two explicit home matrices. | Home screws, linear-first row order, rotated home-frame conversion, and included zero-coordinate boundary. |
+| GK-JACC-002 | At $\mathbf q_\star$, compare both Jacobians with the explicit nonzero matrices. Obtain the current pose using `space_form_forward_kinematics`, retain its established GK-BACC-002 pose check, and verify $\mathbf J_e=\operatorname{Ad}_{\mathbf T_{se}^{-1}}\mathbf J_s$. | Ordered space/body calculations, mixed joints, and agreement using the current frame rather than the fixed home frame. The adjoint assertion reuses this case; it is not another fixture. |
+| GK-JACC-003 | At the same $\mathbf q_\star$, compare every column with the central-difference estimates from $\mathbf T_{\mathrm{geo}}$. | Independent verification that the matrices are the space/body pose-derivative maps, with the correct side of inverse-pose multiplication. |
+
+These three mathematical checks are the complete new acceptance batch. They may share fixture setup and comparison helpers; test-function count is not a target. Do not add separate single-joint or planar fixtures, duplicated input-validation cases, repeated-call tests, a second test of the inverse adjoint direction, or exhaustive boundary/overflow cases for this addition. Existing package regressions remain required, especially if the private query validator is moved for reuse.
+
+### Jacobian requirements and traceability
+
+| ID | Requirement | Mathematical source or existing contract | Acceptance |
+|---|---|---|---|
+| GK-JAC-001 | `space_jacobian` shall return the ordered preceding-joint adjoint columns, with first column ${}^{s}\mathbf S_1$. | [Space-Jacobian formula](../../notes/part_01_motion_mechanics_control/10_general_robot_kinematics_and_jacobians.qmd#eq-space-jacobian-columns-rate-map) | GK-JACC-001–003 |
+| GK-JAC-002 | `body_jacobian` shall independently return the inverse later-joint adjoint columns derived from fixed home body screws, with last column ${}^{e}\mathbf B_n$. | [Body-Jacobian formula](../../notes/part_01_motion_mechanics_control/10_general_robot_kinematics_and_jacobians.qmd#eq-body-jacobian-columns-rate-map) | GK-JACC-001–003 |
+| GK-JAC-003 | Both matrices shall satisfy the current-pose adjoint relation within the declared shared numerical domain and tolerances. | [Body–space relation](../../notes/part_01_motion_mechanics_control/10_general_robot_kinematics_and_jacobians.qmd#eq-body-space-jacobian-adjoint) | GK-JACC-002 |
+| GK-JAC-004 | Return an owning finite $6\times n$ matrix, preserve joint and linear-first order and units, and keep the core deterministic, non-mutating, and ROS-runtime independent. | Shared model and the public interfaces above | GK-JACC-001–003 and interface review |
+| GK-JAC-005 | Reuse shared query validation and typed errors, reject unsupported required intermediates, and return no partial Jacobian. | Existing query contract and the minimal validation section above | Existing validator regressions and focused source review; no claim of exhaustive new-path failure testing |

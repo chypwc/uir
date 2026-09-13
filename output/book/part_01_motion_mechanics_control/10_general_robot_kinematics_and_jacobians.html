@@ -466,10 +466,10 @@ window.Quarto = {
   <li><a href="#sec-general-robot-jacobians" id="toc-sec-general-robot-jacobians" class="nav-link" data-scroll-target="#sec-general-robot-jacobians"><span class="header-section-number">10.3</span> Velocity kinematics and robot Jacobians</a>
   <ul class="collapse">
   <li><a href="#sec-end-effector-pose-rate-space-twist" id="toc-sec-end-effector-pose-rate-space-twist" class="nav-link" data-scroll-target="#sec-end-effector-pose-rate-space-twist"><span class="header-section-number">10.3.1</span> From the end-effector pose to its instantaneous twist</a></li>
-  <li><a href="#task-jacobians" id="toc-task-jacobians" class="nav-link" data-scroll-target="#task-jacobians"><span class="header-section-number">10.3.2</span> Task Jacobians</a></li>
-  <li><a href="#space-jacobians" id="toc-space-jacobians" class="nav-link" data-scroll-target="#space-jacobians"><span class="header-section-number">10.3.3</span> Space Jacobians</a></li>
-  <li><a href="#body-jacobians" id="toc-body-jacobians" class="nav-link" data-scroll-target="#body-jacobians"><span class="header-section-number">10.3.4</span> Body Jacobians</a></li>
-  <li><a href="#the-bodyspace-adjoint-relation" id="toc-the-bodyspace-adjoint-relation" class="nav-link" data-scroll-target="#the-bodyspace-adjoint-relation"><span class="header-section-number">10.3.5</span> The body–space adjoint relation</a></li>
+  <li><a href="#sec-task-jacobians" id="toc-sec-task-jacobians" class="nav-link" data-scroll-target="#sec-task-jacobians"><span class="header-section-number">10.3.2</span> Task Jacobians</a></li>
+  <li><a href="#sec-space-jacobians" id="toc-sec-space-jacobians" class="nav-link" data-scroll-target="#sec-space-jacobians"><span class="header-section-number">10.3.3</span> Space Jacobians</a></li>
+  <li><a href="#sec-body-jacobians" id="toc-sec-body-jacobians" class="nav-link" data-scroll-target="#sec-body-jacobians"><span class="header-section-number">10.3.4</span> Body Jacobians</a></li>
+  <li><a href="#sec-body-space-jacobian-adjoint" id="toc-sec-body-space-jacobian-adjoint" class="nav-link" data-scroll-target="#sec-body-space-jacobian-adjoint"><span class="header-section-number">10.3.5</span> The body–space adjoint relation</a></li>
   </ul></li>
   <li><a href="#sec-robot-jacobian-rank" id="toc-sec-robot-jacobian-rank" class="nav-link" data-scroll-target="#sec-robot-jacobian-rank"><span class="header-section-number">10.4</span> Rank, singularities, and conditioning</a>
   <ul class="collapse">
@@ -485,7 +485,7 @@ window.Quarto = {
   </ul></li>
   <li><a href="#cumulative-chapter-review" id="toc-cumulative-chapter-review" class="nav-link" data-scroll-target="#cumulative-chapter-review">Cumulative chapter review</a>
   <ul class="collapse">
-  <li><a href="#answers-and-hints-3" id="toc-answers-and-hints-3" class="nav-link" data-scroll-target="#answers-and-hints-3">Answers and hints</a></li>
+  <li><a href="#answers-and-hints-7" id="toc-answers-and-hints-7" class="nav-link" data-scroll-target="#answers-and-hints-7">Answers and hints</a></li>
   </ul></li>
   <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
   </ul>
@@ -2126,18 +2126,42 @@ L_1+L_2\\0\\0
 -(L_1+L_2)\\0\\0
 \end{bmatrix}.
 \]</span></p>
-<p>Because <span class="math inline">\(\mathbf R_{es}=\mathbf I_3\)</span>, applying the linear-first adjoint to a screw axis <span class="math inline">\({}^{s}\mathbf S_j=[({}^{s}\mathbf s_{v,j})^{\mathsf T}\;({}^{s}\mathbf s_{\omega,j})^{\mathsf T}]^{\mathsf T}\)</span> gives</p>
+<p>Because <span class="math inline">\(\mathbf R_{es}=\mathbf I_3\)</span> at home, the linear-first adjoint has identity diagonal blocks. Its upper-right block accounts for the shift of origin:</p>
 <p><span class="math display">\[
-{}^{e}\mathbf B_j
-=
-\operatorname{Ad}_{\mathbf M^{-1}}{}^{s}\mathbf S_j
-=
-\begin{bmatrix}
-\mathbf I_3{}^{s}\mathbf s_{v,j}
-+{}^{e}\mathbf p_s\times
-\left(\mathbf I_3{}^{s}\mathbf s_{\omega,j}\right)\\
-\mathbf I_3{}^{s}\mathbf s_{\omega,j}
+\begin{aligned}
+\operatorname{Ad}_{\mathbf M^{-1}}
+&amp;=\begin{bmatrix}
+\mathbf I_3&amp;\left[{}^{e}\mathbf p_s\right]_\times\\
+\mathbf 0_{3\times3}&amp;\mathbf I_3
+\end{bmatrix}\\[6pt]
+&amp;=\begin{bmatrix}
+1&amp;0&amp;0&amp;0&amp;0&amp;0\\
+0&amp;1&amp;0&amp;0&amp;0&amp;L_1+L_2\\
+0&amp;0&amp;1&amp;0&amp;-(L_1+L_2)&amp;0\\
+0&amp;0&amp;0&amp;1&amp;0&amp;0\\
+0&amp;0&amp;0&amp;0&amp;1&amp;0\\
+0&amp;0&amp;0&amp;0&amp;0&amp;1
 \end{bmatrix}.
+\end{aligned}
+\]</span></p>
+<p>Here <span class="math inline">\(\left[{}^{e}\mathbf p_s\right]_\times\)</span> is the <span class="math inline">\(3\times3\)</span> matrix that takes the cross product with <span class="math inline">\({}^{e}\mathbf p_s\)</span>. Multiplying this adjoint by the linear-first screw column <span class="math inline">\({}^{s}\mathbf S_j=[({}^{s}\mathbf s_{v,j})^{\mathsf T}\;({}^{s}\mathbf s_{\omega,j})^{\mathsf T}]^{\mathsf T}\)</span> makes the two output blocks explicit:</p>
+<p><span class="math display">\[
+\begin{aligned}
+{}^{e}\mathbf B_j
+&amp;=\operatorname{Ad}_{\mathbf M^{-1}}{}^{s}\mathbf S_j\\
+&amp;=\begin{bmatrix}
+\mathbf I_3&amp;\left[{}^{e}\mathbf p_s\right]_\times\\
+\mathbf 0_{3\times3}&amp;\mathbf I_3
+\end{bmatrix}
+\begin{bmatrix}{}^{s}\mathbf s_{v,j}\\{}^{s}\mathbf s_{\omega,j}\end{bmatrix}\\
+&amp;=
+\begin{bmatrix}
+{}^{s}\mathbf s_{v,j}
++{}^{e}\mathbf p_s\times
+{}^{s}\mathbf s_{\omega,j}\\
+{}^{s}\mathbf s_{\omega,j}
+\end{bmatrix}.
+\end{aligned}
 \]</span></p>
 <p>Both joints rotate about positive <span class="math inline">\(z_s\)</span>, so their angular blocks are <span class="math inline">\([0\;0\;1]^{\mathsf T}\)</span>. The origin shift contributes the same cross product to both transformed linear blocks:</p>
 <p><span class="math display">\[
@@ -2849,9 +2873,10 @@ L_2\sin(\theta_1+\theta_2)\\
 </section>
 <section id="sec-general-robot-jacobians" class="level2" data-number="10.3">
 <h2 data-number="10.3" class="anchored" data-anchor-id="sec-general-robot-jacobians"><span class="header-section-number">10.3</span> Velocity kinematics and robot Jacobians</h2>
+<p>Throughout this section, <span class="math inline">\(\{s\}\)</span> is the fixed reference frame and <span class="math inline">\(\{e\}\)</span> is rigidly attached to the end effector. Their origins are <span class="math inline">\(O_s\)</span> and <span class="math inline">\(O_e\)</span>. Unless home is stated explicitly, <span class="math inline">\(\{e\}\)</span> means that attached frame at the configuration <span class="math inline">\(\mathbf q\)</span> being evaluated, with pose <span class="math inline">\(\mathbf T_{se}(\mathbf q)\)</span>. Its home placement is at <span class="math inline">\(\mathbf q=\mathbf0_n\)</span>, with pose <span class="math inline">\(\mathbf M\)</span>. Space and body twists both describe motion relative to <span class="math inline">\(\{s\}\)</span>; their components are expressed in <span class="math inline">\(\{s\}\)</span> and <span class="math inline">\(\{e\}\)</span>, respectively.</p>
 <section id="sec-end-effector-pose-rate-space-twist" class="level3" data-number="10.3.1">
 <h3 data-number="10.3.1" class="anchored" data-anchor-id="sec-end-effector-pose-rate-space-twist"><span class="header-section-number">10.3.1</span> From the end-effector pose to its instantaneous twist</h3>
-<p>Forward kinematics tells us where the end effector is. To describe how it is moving, we need both its turning rate and the velocity of its points. Given a differentiable joint trajectory <span class="math inline">\(\mathbf q(t)\in\mathcal Q\)</span> and the forward map <span class="math inline">\(\mathbf T_{se}(\mathbf q)\)</span>, the question is: what instantaneous rigid-body velocity does the changing pose describe? Here <span class="math inline">\(t\)</span> is time in seconds, <span class="math inline">\(\{s\}\)</span> is the fixed space frame, and <span class="math inline">\(\{e\}\)</span> is attached rigidly to the end effector.</p>
+<p>Forward kinematics tells us where the end effector is. To describe how it is moving, we need both its turning rate and the velocity of its points. Given a differentiable joint trajectory <span class="math inline">\(\mathbf q(t)\in\mathcal Q\)</span> and the forward map <span class="math inline">\(\mathbf T_{se}(\mathbf q)\)</span>, the question is: what instantaneous rigid-body velocity does the changing pose describe? Here <span class="math inline">\(t\)</span> is time in seconds.</p>
 <section id="recall-the-pose-rate-relation" class="level4">
 <h4 class="anchored" data-anchor-id="recall-the-pose-rate-relation">Recall the pose-rate relation</h4>
 <p>Write the pose along the trajectory as</p>
@@ -2870,8 +2895,8 @@ L_2\sin(\theta_1+\theta_2)\\
 \mathbf 0_3^{\mathsf T}&amp;0
 \end{bmatrix}.
 \]</span></p>
-<p>The dimensionless rotation <span class="math inline">\(\mathbf R_{se}\in SO(3)\)</span> gives the end-effector orientation, and <span class="math inline">\({}^{s}\mathbf p_e\in\mathbb R^3\)</span> gives its origin’s position in metres, both relative to <span class="math inline">\(\{s\}\)</span>. A dot denotes differentiation with respect to time along the joint trajectory. In particular, <span class="math inline">\({}^{s}\dot{\mathbf p}_e\)</span> is the end-effector origin’s velocity relative to <span class="math inline">\(\{s\}\)</span>, expressed along the fixed space axes, in <span class="math inline">\(\mathrm{m\,s^{-1}}\)</span>. The <span class="math inline">\(4\times4\)</span> matrix <span class="math inline">\(\dot{\mathbf T}_{se}\)</span> is a pose derivative, not a pose or a six-entry twist.</p>
-<p>Recall the space-twist relation derived in <a href="07_degrees_of_freedom_and_spatial_motion_so3_se3.html#sec-se3-spatial-twist" class="quarto-xref"><span>Section 7.9.3</span></a> and reused for pose integration in <a href="08_screw_motion_se3_exponential_and_spatial_integration.html#sec-se3-constant-twist-integration" class="quarto-xref"><span>Section 8.4</span></a>: postmultiplying the pose derivative by the current inverse pose extracts the space-twist matrix. This instantaneous relation does not require the twist to be constant. Applying the block product in <a href="07_degrees_of_freedom_and_spatial_motion_so3_se3.html#eq-se3-spatial-twist-block-product" class="quarto-xref">Equation&nbsp;<span>7.1</span></a> to the end-effector pose, with <span class="math inline">\(\{s\}\)</span> in place of <span class="math inline">\(\{w\}\)</span> and <span class="math inline">\(\{e\}\)</span> in place of <span class="math inline">\(\{b\}\)</span>, gives</p>
+<p>The dimensionless rotation <span class="math inline">\(\mathbf R_{se}\in SO(3)\)</span> gives the end-effector orientation, and <span class="math inline">\({}^{s}\mathbf p_e\in\mathbb R^3\)</span> gives its origin’s position in metres, both relative to <span class="math inline">\(\{s\}\)</span>. A dot denotes differentiation with respect to time along the joint trajectory. In particular, <span class="math inline">\({}^{s}\dot{\mathbf p}_e\)</span> is the end-effector origin’s velocity relative to <span class="math inline">\(\{s\}\)</span>, expressed along the axes of the fixed frame <span class="math inline">\(\{s\}\)</span>, in <span class="math inline">\(\mathrm{m\,s^{-1}}\)</span>. The <span class="math inline">\(4\times4\)</span> matrix <span class="math inline">\(\dot{\mathbf T}_{se}\)</span> is a pose derivative, not a pose or a six-entry twist.</p>
+<p>Recall the space-twist relation derived in <a href="07_degrees_of_freedom_and_spatial_motion_so3_se3.html#sec-se3-spatial-twist" class="quarto-xref"><span>Section 7.9.3</span></a> and reused for pose integration in <a href="08_screw_motion_se3_exponential_and_spatial_integration.html#sec-se3-constant-twist-integration" class="quarto-xref"><span>Section 8.4</span></a>: postmultiplying the pose derivative by the current inverse pose extracts the space-twist matrix. This instantaneous relation does not require the twist to be constant. Applying the block product in <a href="07_degrees_of_freedom_and_spatial_motion_so3_se3.html#eq-se3-spatial-twist-block-product" class="quarto-xref">Equation&nbsp;<span>7.2</span></a> to the end-effector pose, with <span class="math inline">\(\{s\}\)</span> in place of <span class="math inline">\(\{w\}\)</span> and <span class="math inline">\(\{e\}\)</span> in place of <span class="math inline">\(\{b\}\)</span>, gives</p>
 <p><span id="eq-end-effector-space-twist-pose-rate"><span class="math display">\[
 \boxed{
 \widehat{\boldsymbol\xi_s}
@@ -2902,11 +2927,61 @@ L_2\sin(\theta_1+\theta_2)\\
 -\boldsymbol\omega_s\times{}^s\mathbf p_e.
 \end{aligned}
 \]</span></p>
-<p>Here <span class="math inline">\(\boldsymbol\omega_s\in\mathbb R^3\)</span> is the end effector’s angular velocity relative to <span class="math inline">\(\{s\}\)</span>, expressed along the space axes, in <span class="math inline">\(\mathrm{rad\,s^{-1}}\)</span>. The column <span class="math inline">\(\boldsymbol\nu_s\in\mathbb R^3\)</span> is the linear part of its space twist, in <span class="math inline">\(\mathrm{m\,s^{-1}}\)</span>. The operator <span class="math inline">\([\boldsymbol\omega_s]_\times\)</span> performs the cross product with <span class="math inline">\(\boldsymbol\omega_s\)</span>; the hat operator packages these angular and linear blocks into a <span class="math inline">\(4\times4\)</span> matrix in <span class="math inline">\(\mathfrak{se}(3)\)</span>. This is the same convention as Chapter 7, with <span class="math inline">\(s\)</span> replacing <span class="math inline">\(w\)</span> and the end effector replacing the general rigid body.</p>
+<p>Here <span class="math inline">\(\boldsymbol\omega_s\in\mathbb R^3\)</span> is the end effector’s angular velocity relative to <span class="math inline">\(\{s\}\)</span>, expressed along the axes of <span class="math inline">\(\{s\}\)</span>, in <span class="math inline">\(\mathrm{rad\,s^{-1}}\)</span>. The column <span class="math inline">\(\boldsymbol\nu_s\in\mathbb R^3\)</span> is the linear part of its space twist, in <span class="math inline">\(\mathrm{m\,s^{-1}}\)</span>. The operator <span class="math inline">\([\boldsymbol\omega_s]_\times\)</span> performs the cross product with <span class="math inline">\(\boldsymbol\omega_s\)</span>; the hat operator packages these angular and linear blocks into a <span class="math inline">\(4\times4\)</span> matrix in <span class="math inline">\(\mathfrak{se}(3)\)</span>. This is the same convention as Chapter 7, with <span class="math inline">\(s\)</span> replacing <span class="math inline">\(w\)</span> and the end effector replacing the general rigid body.</p>
+</section>
+<section id="physical-meaning-from-a-points-position-to-its-velocity" class="level4">
+<h4 class="anchored" data-anchor-id="physical-meaning-from-a-points-position-to-its-velocity">Physical meaning: from a point’s position to its velocity</h4>
+<p>Consider a point on the end effector. Let <span class="math inline">\({}^{e}\mathbf x\in\mathbb R^3\)</span> be its local coordinates in the attached frame <span class="math inline">\(\{e\}\)</span> and <span class="math inline">\({}^{s}\mathbf x\in\mathbb R^3\)</span> its coordinates in <span class="math inline">\(\{s\}\)</span>. Both position columns are in metres. Append a final entry of one to form their homogeneous coordinates:</p>
+<p><span class="math display">\[
+{}^{e}\bar{\mathbf x}
+=\begin{bmatrix}{}^{e}\mathbf x\\1\end{bmatrix},
+\qquad
+{}^{s}\bar{\mathbf x}
+=\begin{bmatrix}{}^{s}\mathbf x\\1\end{bmatrix}
+=\mathbf T_{se}\,{}^{e}\bar{\mathbf x}.
+\]</span></p>
+<p>Each barred column has four entries. Differentiating the coordinate relation using the full product rule gives</p>
+<p><span class="math display">\[
+{}^{s}\dot{\bar{\mathbf x}}
+=\dot{\mathbf T}_{se}\,{}^{e}\bar{\mathbf x}
++\mathbf T_{se}\,{}^{e}\dot{\bar{\mathbf x}}.
+\]</span></p>
+<p>Choose a <strong>point fixed to the end effector</strong>, such as a painted dot on the tool. Its coordinates in the attached frame <span class="math inline">\(\{e\}\)</span> stay constant, even while the tool moves:</p>
+<p><span class="math display">\[
+{}^{e}\dot{\bar{\mathbf x}}=\mathbf0_4.
+\]</span></p>
+<p>The second term therefore vanishes. Substituting <span class="math inline">\({}^{e}\bar{\mathbf x}=\mathbf T_{se}^{-1}\,{}^{s}\bar{\mathbf x}\)</span> into the remaining term gives</p>
+<p><span class="math display">\[
+{}^{s}\dot{\bar{\mathbf x}}
+=\dot{\mathbf T}_{se}\,{}^{e}\bar{\mathbf x}
+=\underbrace{\dot{\mathbf T}_{se}\mathbf T_{se}^{-1}}
+_{\widehat{\boldsymbol\xi_s}}
+\,{}^{s}\bar{\mathbf x}.
+\]</span></p>
+<p>Read the product from right to left:</p>
+<ol type="1">
+<li><span class="math inline">\(\mathbf T_{se}^{-1}\)</span> finds the point’s coordinates in <span class="math inline">\(\{e\}\)</span> from its coordinates in <span class="math inline">\(\{s\}\)</span>.</li>
+<li><span class="math inline">\(\dot{\mathbf T}_{se}\)</span> calculates how fast that fixed local point is moving, expressed in <span class="math inline">\(\{s\}\)</span>.</li>
+</ol>
+<p>Thus, <strong><span class="math inline">\(\widehat{\boldsymbol\xi_s}\)</span> turns a body point’s current position expressed in <span class="math inline">\(\{s\}\)</span> into its velocity relative to <span class="math inline">\(\{s\}\)</span>, expressed in <span class="math inline">\(\{s\}\)</span></strong>. Writing out its blocks makes the rotation and translation contributions visible:</p>
+<p><span class="math display">\[
+\begin{bmatrix}{}^{s}\dot{\mathbf x}\\0\end{bmatrix}
+=
+\begin{bmatrix}
+\left[\boldsymbol\omega_s\right]_\times&amp;\boldsymbol\nu_s\\
+\mathbf 0_3^{\mathsf T}&amp;0
+\end{bmatrix}
+\begin{bmatrix}{}^{s}\mathbf x\\1\end{bmatrix}
+=
+\begin{bmatrix}
+\boldsymbol\omega_s\times{}^{s}\mathbf x+\boldsymbol\nu_s\\0
+\end{bmatrix}.
+\]</span></p>
+<p>The final entry is zero because the appended one is constant. The inverse pose only changes the point’s coordinate description; it does not physically move the point.</p>
 </section>
 <section id="recover-the-velocity-of-the-end-effector-origin" class="level4">
 <h4 class="anchored" data-anchor-id="recover-the-velocity-of-the-end-effector-origin">Recover the velocity of the end-effector origin</h4>
-<p>The two linear quantities must not be confused. The space-twist block <span class="math inline">\(\boldsymbol\nu_s\)</span> is the value of the end effector’s rigid-motion velocity field at the space-origin location; it is not generally the velocity of the end-effector origin. This does not mean that the fixed space frame moves or that the end effector must contain a point at the space origin.</p>
+<p>The two linear quantities must not be confused. The space-twist block <span class="math inline">\(\boldsymbol\nu_s\)</span> is the value of the end effector’s rigid-motion velocity field at the origin <span class="math inline">\(O_s\)</span> of <span class="math inline">\(\{s\}\)</span>; it is not generally the velocity of the end-effector origin. This does not mean that the fixed frame <span class="math inline">\(\{s\}\)</span> moves or that the end effector must contain a point at the origin <span class="math inline">\(O_s\)</span> of <span class="math inline">\(\{s\}\)</span>.</p>
 <p>To obtain the actual end-effector origin velocity, rearrange the preceding expression:</p>
 <p><span id="eq-end-effector-origin-velocity-from-space-twist"><span class="math display">\[
 \boxed{
@@ -2916,7 +2991,7 @@ L_2\sin(\theta_1+\theta_2)\\
 +\boldsymbol\omega_s\times{}^{s}\mathbf p_e
 }.
 \tag{10.21}\]</span></span></p>
-<p>The rotational term accounts for the end-effector origin’s location relative to the space origin. Thus a space twist answers the complete rigid-motion question, while <span class="math inline">\({}^{s}\dot{\mathbf p}_e\)</span> answers the narrower question of how fast the selected origin moves. They use the same coordinate axes, but their linear quantities refer to different locations. The two linear columns coincide exactly when <span class="math inline">\(\boldsymbol\omega_s\times{}^{s}\mathbf p_e=\mathbf 0_3\)</span>, including pure translation. This distinction follows the twist treatment in Lynch and Park, Chapter 5, Section 5.1, and the moving-point velocity relation in Craig, Chapter 5, Section 5.3.</p>
+<p>The rotational term accounts for the end-effector origin’s location relative to the origin <span class="math inline">\(O_s\)</span> of <span class="math inline">\(\{s\}\)</span>. The linear block <span class="math inline">\(\boldsymbol\nu_s\)</span> is the rigid-motion velocity field evaluated at the <strong>origin <span class="math inline">\(O_s\)</span> of <span class="math inline">\(\{s\}\)</span></strong>, whereas <span class="math inline">\({}^{s}\dot{\mathbf p}_e\)</span> is evaluated at the <strong>origin <span class="math inline">\(O_e\)</span> of <span class="math inline">\(\{e\}\)</span></strong>. Both are expressed along the same axes of <span class="math inline">\(\{s\}\)</span>. The two linear columns coincide exactly when <span class="math inline">\(\boldsymbol\omega_s\times{}^{s}\mathbf p_e=\mathbf 0_3\)</span>, including pure translation. This distinction follows the twist treatment in Lynch and Park, Chapter 5, Section 5.1, and the moving-point velocity relation in Craig, Chapter 5, Section 5.3.</p>
 <div class="callout callout-style-simple callout-note no-icon callout-titled" title="Example: a moving tool with a zero linear space-twist block">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -2927,7 +3002,7 @@ L_2\sin(\theta_1+\theta_2)\\
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Consider one revolute joint through the space origin, directed along <span class="math inline">\(+z_s\)</span>. A rigid link of length <span class="math inline">\(L=3\,\mathrm m\)</span> initially points along <span class="math inline">\(+x_s\)</span>, with its end-effector frame aligned with <span class="math inline">\(\{s\}\)</span>. For a differentiable joint angle <span class="math inline">\(q(t)\)</span> in radians, its pose blocks are</p>
+<p>Consider one revolute joint through the origin <span class="math inline">\(O_s\)</span> of <span class="math inline">\(\{s\}\)</span>, directed along <span class="math inline">\(+z_s\)</span>. A rigid link of length <span class="math inline">\(L=3\,\mathrm m\)</span> initially points along <span class="math inline">\(+x_s\)</span>, with frame <span class="math inline">\(\{e\}\)</span> aligned with <span class="math inline">\(\{s\}\)</span>. For a differentiable joint angle <span class="math inline">\(q(t)\)</span> in radians, its pose blocks are</p>
 <p><span class="math display">\[
 \mathbf R_{se}(q)=\mathbf R_z(q),
 \qquad
@@ -2949,7 +3024,7 @@ L_2\sin(\theta_1+\theta_2)\\
 \begin{bmatrix}-L\sin q\\L\cos q\\0\end{bmatrix}\dot q.
 \end{aligned}
 \]</span></p>
-<p>The two terms in <span class="math inline">\(\boldsymbol\nu_s={}^s\dot{\mathbf p}_e-\boldsymbol\omega_s\times{}^s\mathbf p_e\)</span> cancel, so <span class="math inline">\(\boldsymbol\nu_s=\mathbf 0_3\)</span>. At <span class="math inline">\(q=0\)</span> and <span class="math inline">\(\dot q=1\,\mathrm{rad\,s^{-1}}\)</span>, the end-effector origin nevertheless moves with velocity <span class="math inline">\({}^{s}\dot{\mathbf p}_e=[0\;3\;0]^{\mathsf T}\,\mathrm{m\,s^{-1}}\)</span>. Rotation about the space origin produces zero velocity at that origin but nonzero velocity at the tool, three metres away. A zero linear space-twist block therefore does not mean that the tool is stationary.</p>
+<p>The two terms in <span class="math inline">\(\boldsymbol\nu_s={}^s\dot{\mathbf p}_e-\boldsymbol\omega_s\times{}^s\mathbf p_e\)</span> cancel, so <span class="math inline">\(\boldsymbol\nu_s=\mathbf 0_3\)</span>. At <span class="math inline">\(q=0\)</span> and <span class="math inline">\(\dot q=1\,\mathrm{rad\,s^{-1}}\)</span>, the end-effector origin nevertheless moves with velocity <span class="math inline">\({}^{s}\dot{\mathbf p}_e=[0\;3\;0]^{\mathsf T}\,\mathrm{m\,s^{-1}}\)</span>. Rotation about the origin <span class="math inline">\(O_s\)</span> of <span class="math inline">\(\{s\}\)</span> produces zero velocity at that origin but nonzero velocity at the tool, three metres away. A zero linear space-twist block therefore does not mean that the tool is stationary.</p>
 </div>
 </div>
 </section>
@@ -2965,24 +3040,1435 @@ L_2\sin(\theta_1+\theta_2)\\
 <section id="answers-and-hints-2" class="level4 unnumbered">
 <h4 class="unnumbered anchored" data-anchor-id="answers-and-hints-2">Answers and hints</h4>
 <ol type="1">
-<li>Use <span class="math inline">\(\widehat{\boldsymbol\xi_s}=\dot{\mathbf T}_{se}\mathbf T_{se}^{-1}\)</span>. In the six-entry column <span class="math inline">\(\boldsymbol\xi_s\)</span>, the upper three entries are the space-referenced linear velocity-field coefficient <span class="math inline">\(\boldsymbol\nu_s\)</span> in <span class="math inline">\(\mathrm{m\,s^{-1}}\)</span>; the lower three are angular velocity <span class="math inline">\(\boldsymbol\omega_s\)</span> expressed along space axes in <span class="math inline">\(\mathrm{rad\,s^{-1}}\)</span>.</li>
+<li>Use <span class="math inline">\(\widehat{\boldsymbol\xi_s}=\dot{\mathbf T}_{se}\mathbf T_{se}^{-1}\)</span>. In the six-entry column <span class="math inline">\(\boldsymbol\xi_s\)</span>, the upper three entries are the space-referenced linear velocity-field coefficient <span class="math inline">\(\boldsymbol\nu_s\)</span> in <span class="math inline">\(\mathrm{m\,s^{-1}}\)</span>; the lower three are angular velocity <span class="math inline">\(\boldsymbol\omega_s\)</span> expressed in <span class="math inline">\(\{s\}\)</span> in <span class="math inline">\(\mathrm{rad\,s^{-1}}\)</span>.</li>
 <li>The upper-right block is <span class="math inline">\(-\dot{\mathbf R}_{se}\mathbf R_{se}^{\mathsf T}{}^s\mathbf p_e+{}^s\dot{\mathbf p}_e\)</span>. The minus sign comes from the inverse pose’s translation column; use <span class="math inline">\(\dot{\mathbf R}_{se}\mathbf R_{se}^{\mathsf T}=[\boldsymbol\omega_s]_\times\)</span> to identify the cross product.</li>
 <li>The position is <span class="math inline">\([0\;3\;0]^{\mathsf T}\,\mathrm m\)</span> and its velocity is <span class="math inline">\([-3\;0\;0]^{\mathsf T}\,\mathrm{m\,s^{-1}}\)</span>. The cross product gives that same velocity, so <span class="math inline">\(\boldsymbol\nu_s=\mathbf 0_3\)</span>.</li>
 <li>Only when <span class="math inline">\(\boldsymbol\omega_s\times{}^s\mathbf p_e=\mathbf 0_3\)</span>. Differentiability supplies the instantaneous derivative <span class="math inline">\(\dot{\mathbf T}_{se}\)</span>. Two pose samples alone do not determine a unique intervening motion or its instantaneous velocity.</li>
 </ol>
 </section>
 </section>
-<section id="task-jacobians" class="level3" data-number="10.3.2">
-<h3 data-number="10.3.2" class="anchored" data-anchor-id="task-jacobians"><span class="header-section-number">10.3.2</span> Task Jacobians</h3>
+<section id="sec-task-jacobians" class="level3" data-number="10.3.2">
+<h3 data-number="10.3.2" class="anchored" data-anchor-id="sec-task-jacobians"><span class="header-section-number">10.3.2</span> Task Jacobians</h3>
+<p>A task may ask for the end-effector position, its orientation, or only selected coordinates. Given the current joint coordinates <span class="math inline">\(\mathbf q\)</span> and joint rates <span class="math inline">\(\dot{\mathbf q}\)</span>, we want the rate of change of that chosen output. This tells us what motion a joint-rate command produces in the quantities the task actually uses.</p>
+<section id="name-the-derivative-for-the-selected-task" class="level4">
+<h4 class="anchored" data-anchor-id="name-the-derivative-for-the-selected-task">Name the derivative for the selected task</h4>
+<p>Recall the task map <span class="math inline">\(\mathbf y=\mathbf f(\mathbf q)\)</span>, with <span class="math inline">\(n\)</span> joint coordinates and <span class="math inline">\(m\)</span> output coordinates. Use the same local domain <span class="math inline">\(\mathcal V\subseteq\mathcal Q\subseteq\mathbb R^n\)</span> introduced before <a href="#eq-total-derivative-task-map" class="quarto-xref">Equation&nbsp;<span>10.3</span></a>, and assume <span class="math inline">\(\mathbf f:\mathcal V\rightarrow\mathbb R^m\)</span> is differentiable. The task definition and its reference frame are fixed; time enters through <span class="math inline">\(\mathbf q(t)\)</span>, not through a separately moving target or frame.</p>
+<p>The matrix that collects how each task coordinate changes with each joint coordinate is called the <strong>task Jacobian</strong>. It is the already-derived total derivative, now named for its robotics use:</p>
+<p><span id="eq-task-jacobian-definition"><span class="math display">\[
+\boxed{
+\mathbf J_y(\mathbf q)
+\mathrel{:=}\mathrm D\mathbf f(\mathbf q)
+=
+\left[
+\frac{\partial f_i}{\partial q_j}(\mathbf q)
+\right]_{\substack{i=1,\ldots,m\\j=1,\ldots,n}}
+\in\mathbb R^{m\times n}
+}.
+\tag{10.22}\]</span></span></p>
+<p>Here <span class="math inline">\(i\)</span> indexes the selected task coordinates and <span class="math inline">\(j\)</span> indexes the joint coordinates. The subscript <span class="math inline">\(y\)</span> identifies the output <span class="math inline">\(\mathbf y\)</span>; it is not a frame label. Applying the chain rule in <a href="#eq-task-rate-total-derivative" class="quarto-xref">Equation&nbsp;<span>10.4</span></a> gives</p>
+<p><span id="eq-task-jacobian-rate-map"><span class="math display">\[
+\boxed{
+\dot{\mathbf y}
+=\mathbf J_y(\mathbf q)\dot{\mathbf q}
+}.
+\tag{10.23}\]</span></span></p>
+<p>At a fixed configuration, <span class="math inline">\(\mathbf J_y(\mathbf q)\)</span> is a linear map from the joint-rate column in <span class="math inline">\(\mathbb R^n\)</span> to the task-rate column in <span class="math inline">\(\mathbb R^m\)</span>. This instantaneous rate relation is exact under the stated differentiability assumptions, even when the forward map is nonlinear. In contrast, using <span class="math inline">\(\mathbf J_y(\mathbf q)\Delta\mathbf q\)</span> to predict a finite output change gives only the first-order approximation established in <a href="#eq-total-derivative-first-order-model" class="quarto-xref">Equation&nbsp;<span>10.2</span></a>.</p>
+<p>When the selected task is the end-effector position <span class="math inline">\(\mathbf y={}^s\mathbf p_e\)</span>, expressed in the fixed space frame <span class="math inline">\(\{s\}\)</span>, the equation has this physical meaning:</p>
+<p><span class="math display">\[
+\underbrace{\dot{\mathbf y}}
+_{\substack{\text{end-effector}\\\text{velocity}}}
+=
+\underbrace{\mathbf J_y(\mathbf q)}
+_{\substack{\text{effect of the current}\\\text{arm geometry}}}
+\underbrace{\dot{\mathbf q}}
+_{\text{joint motion rates}}.
+\]</span></p>
+<p>Physically:</p>
+<ul>
+<li><span class="math inline">\(\dot{\mathbf q}\)</span> tells us how fast each joint rotates or slides.</li>
+<li><span class="math inline">\(\mathbf q\)</span> tells us the arm’s current arrangement, including the directions and distances through which joint motion affects the tool.</li>
+<li><span class="math inline">\(\mathbf J_y(\mathbf q)\)</span> converts those joint rates into the resulting task rate.</li>
+</ul>
 </section>
-<section id="space-jacobians" class="level3" data-number="10.3.3">
-<h3 data-number="10.3.3" class="anchored" data-anchor-id="space-jacobians"><span class="header-section-number">10.3.3</span> Space Jacobians</h3>
+<section id="read-one-column-and-one-row" class="level4">
+<h4 class="anchored" data-anchor-id="read-one-column-and-one-row">Read one column and one row</h4>
+<p>To separate the joints’ contributions, denote column <span class="math inline">\(j\)</span> by <span class="math inline">\(\mathbf J_{y,j}(\mathbf q):=\partial\mathbf f/\partial q_j\in\mathbb R^m\)</span>. Expanding the matrix product gives</p>
+<p><span class="math display">\[
+\dot{\mathbf y}
+=\sum_{j=1}^{n}\mathbf J_{y,j}(\mathbf q)\dot q_j.
+\]</span></p>
+<p>If only joint <span class="math inline">\(j\)</span> moves, its contribution is <span class="math inline">\(\mathbf J_{y,j}\dot q_j\)</span>. Thus each column describes the task’s sensitivity to one joint, while each row collects all joints’ effects on one task coordinate. The units of entry <span class="math inline">\((i,j)\)</span> are the unit of <span class="math inline">\(y_i\)</span> divided by the unit of <span class="math inline">\(q_j\)</span>. For example, a position derivative with respect to a revolute angle has units <span class="math inline">\(\mathrm{m\,rad^{-1}}\)</span>; multiplying by a rate in <span class="math inline">\(\mathrm{rad\,s^{-1}}\)</span> gives a position rate in <span class="math inline">\(\mathrm{m\,s^{-1}}\)</span>.</p>
+<div id="example-planar-2r-task-jacobian" class="callout callout-style-simple callout-note no-icon callout-titled" title="Example: adding orientation to the planar 2R task">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Example: adding orientation to the planar 2R task
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This example shows why the same robot can have different task Jacobians. Use the planar 2R arm from <a href="#eq-planar-2r-position-forward-map" class="quarto-xref">Equation&nbsp;<span>10.1</span></a>: <span class="math inline">\(\mathbf q=[\theta_1\;\theta_2]^{\mathsf T}\)</span>, both angles are in radians, and positive rotation is about <span class="math inline">\(+z_s\)</span>. The position-only output is <span class="math inline">\(\mathbf y_{xy}=[x_e\;y_e]^{\mathsf T}\)</span> in metres, expressed along the axes of the fixed frame <span class="math inline">\(\{s\}\)</span>. Its Jacobian is the <span class="math inline">\(2\times2\)</span> matrix already calculated in <a href="#eq-planar-2r-position-total-derivative" class="quarto-xref">Equation&nbsp;<span>10.5</span></a>:</p>
+<p><span class="math display">\[
+\mathbf J_{xy}(\mathbf q)=\mathrm D\mathbf f_{xy}(\mathbf q).
+\]</span></p>
+<p>Now also ask how the end-effector orientation changes. Its angle relative to <span class="math inline">\(+x_s\)</span> is <span class="math inline">\(\phi_e=\theta_1+\theta_2\)</span> on a continuous local angle branch. Choose the three-coordinate output <span class="math inline">\(\mathbf y_{xy\phi}=[x_e\;y_e\;\phi_e]^{\mathsf T}\)</span>. The first two components retain their position derivatives. Differentiating the added orientation component gives the row</p>
+<p><span class="math display">\[
+\mathrm D\phi_e(\mathbf q)
+=\begin{bmatrix}
+\dfrac{\partial(\theta_1+\theta_2)}{\partial\theta_1}
+&amp;\dfrac{\partial(\theta_1+\theta_2)}{\partial\theta_2}
+\end{bmatrix}
+=\begin{bmatrix}1&amp;1\end{bmatrix}.
+\]</span></p>
+<p>Stacking the derivatives in the same order as the output coordinates therefore gives</p>
+<p><span class="math display">\[
+\mathbf J_{xy\phi}(\mathbf q)
+=\begin{bmatrix}
+\mathbf J_{xy}(\mathbf q)\\
+\mathrm D\phi_e(\mathbf q)
+\end{bmatrix}
+\in\mathbb R^{3\times2}.
+\]</span></p>
+<p>The first two rows have units <span class="math inline">\(\mathrm{m\,rad^{-1}}\)</span>; the last row has units <span class="math inline">\(\mathrm{rad\,rad^{-1}}\)</span>. Adding an output row does not add a joint or another independently controllable freedom.</p>
+<p>For the earlier example’s lengths <span class="math inline">\(L_1=L_2=1\,\mathrm m\)</span> and angles <span class="math inline">\((\theta_1,\theta_2)=(0,\pi/2)\)</span>, the position rows were <span class="math inline">\([-1\;-1]\)</span> and <span class="math inline">\([1\;0]\)</span>. With the row units just stated, the complete numerical matrix is</p>
+<p><span class="math display">\[
+\mathbf J_{xy\phi}
+=\begin{bmatrix}
+-1&amp;-1\\
+1&amp;0\\
+1&amp;1
+\end{bmatrix}.
+\]</span></p>
+<p>For <span class="math inline">\(\dot{\mathbf q}=[0.2\;-0.1]^{\mathsf T}\,\mathrm{rad\,s^{-1}}\)</span>, multiply each row by the joint-rate column:</p>
+<p><span class="math display">\[
+\begin{aligned}
+\dot x_e&amp;=\bigl((-1)(0.2)+(-1)(-0.1)\bigr)\,\mathrm{m\,s^{-1}}
+=-0.1\,\mathrm{m\,s^{-1}},\\
+\dot y_e&amp;=\bigl((1)(0.2)+(0)(-0.1)\bigr)\,\mathrm{m\,s^{-1}}
+=0.2\,\mathrm{m\,s^{-1}},\\
+\dot\phi_e&amp;=\bigl((1)(0.2)+(1)(-0.1)\bigr)\,\mathrm{rad\,s^{-1}}
+=0.1\,\mathrm{rad\,s^{-1}}.
+\end{aligned}
+\]</span></p>
+<p>The position-only task reports the first two rates. The position-and-orientation task also reports the turning rate. Both use the same robot configuration and joint-rate command; the difference is the requested output.</p>
+</div>
+</div>
+<p>The output of a task Jacobian is the derivative of the declared task coordinates, not automatically a space twist. In the planar example, <span class="math inline">\(\dot x_e\)</span> and <span class="math inline">\(\dot y_e\)</span> are the end-effector origin’s velocity components, not the linear space-twist components; their relation is <a href="#eq-end-effector-origin-velocity-from-space-twist" class="quarto-xref">Equation&nbsp;<span>10.21</span></a>. Always state the output and frame before interpreting a Jacobian’s rows. To calculate the derivative, use an angle coordinate that changes smoothly with the robot’s motion. If the stored angle wraps from near <span class="math inline">\(+\pi\)</span> to near <span class="math inline">\(-\pi\)</span>, only the number jumps; the robot can continue turning at a finite, steady rate.</p>
 </section>
-<section id="body-jacobians" class="level3" data-number="10.3.4">
-<h3 data-number="10.3.4" class="anchored" data-anchor-id="body-jacobians"><span class="header-section-number">10.3.4</span> Body Jacobians</h3>
+<section id="quick-test-task-jacobians" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="quick-test-task-jacobians">Quick test: task Jacobians</h4>
+<ol type="1">
+<li><strong>Recall:</strong> For a task with <span class="math inline">\(m\)</span> output coordinates and a robot with <span class="math inline">\(n\)</span> joint coordinates, define <span class="math inline">\(\mathbf J_y\)</span>, give its dimensions, and state its input and output in the rate equation.</li>
+<li><strong>Interpretation:</strong> What does column <span class="math inline">\(j\)</span> describe? Expand row <span class="math inline">\(i\)</span> of <span class="math inline">\(\dot{\mathbf y}=\mathbf J_y\dot{\mathbf q}\)</span> as a scalar sum, and state the units of each summand.</li>
+<li><strong>Derivation and application:</strong> Why does the planar orientation task add the row <span class="math inline">\([1\;1]\)</span>? At the example’s configuration, calculate <span class="math inline">\(\dot x_e\)</span>, <span class="math inline">\(\dot y_e\)</span>, and <span class="math inline">\(\dot\phi_e\)</span> for <span class="math inline">\(\dot{\mathbf q}=[0.1\;-0.1]^{\mathsf T}\,\mathrm{rad\,s^{-1}}\)</span>.</li>
+<li><strong>Task choice:</strong> In the preceding planar 2R example, if the task asks only for <span class="math inline">\(y_e\)</span>, which row remains and what are the Jacobian’s dimensions? Does adding <span class="math inline">\(\phi_e\)</span> to that example’s original position task give the arm a third independent joint freedom?</li>
+<li><strong>Validity:</strong> Why is the instantaneous rate equation exact while the finite-increment prediction is generally approximate? Why must a local orientation coordinate avoid an angle-wrap jump?</li>
+</ol>
 </section>
-<section id="the-bodyspace-adjoint-relation" class="level3" data-number="10.3.5">
-<h3 data-number="10.3.5" class="anchored" data-anchor-id="the-bodyspace-adjoint-relation"><span class="header-section-number">10.3.5</span> The body–space adjoint relation</h3>
+<section id="answers-and-hints-3" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="answers-and-hints-3">Answers and hints</h4>
+<ol type="1">
+<li><span class="math inline">\(\mathbf J_y(\mathbf q)=\mathrm D\mathbf f(\mathbf q)\in\mathbb R^{m\times n}\)</span>. At fixed <span class="math inline">\(\mathbf q\)</span>, it maps the <span class="math inline">\(n\)</span> joint rates <span class="math inline">\(\dot{\mathbf q}\)</span> to the <span class="math inline">\(m\)</span> task rates <span class="math inline">\(\dot{\mathbf y}\)</span>. Physically, it uses the arm’s current geometry to turn joint rotation or sliding rates into the motion of the selected task coordinates; for a position task, the result is the tool’s linear velocity.</li>
+<li>Column <span class="math inline">\(j\)</span> gives each output’s derivative with respect to coordinate <span class="math inline">\(q_j\)</span>, holding the other joint coordinates fixed; multiplying this column by <span class="math inline">\(\dot q_j\)</span> gives the task motion caused by that joint alone. Row <span class="math inline">\(i\)</span> gives <span class="math inline">\(\dot y_i=\sum_{j=1}^{n}(\partial f_i/\partial q_j)\dot q_j\)</span>; every summand has the unit of <span class="math inline">\(y_i\)</span> per second. For a position task, this sum adds the joints’ velocity contributions along one selected axis, where they can reinforce or cancel one another.</li>
+<li>Both partial derivatives of <span class="math inline">\(\phi_e=\theta_1+\theta_2\)</span> equal one. The rates are <span class="math inline">\(\dot x_e=0\)</span>, <span class="math inline">\(\dot y_e=0.1\,\mathrm{m\,s^{-1}}\)</span>, and <span class="math inline">\(\dot\phi_e=0\)</span>. The equal and opposite joint rates cancel the tool’s turning rate, but not its position rate: at this instant, the tool moves along <span class="math inline">\(+y_s\)</span> without changing its planar orientation.</li>
+<li>Retain the second position row, giving a <span class="math inline">\(1\times2\)</span> Jacobian, numerically <span class="math inline">\([1\;0]\,\mathrm{m\,rad^{-1}}\)</span> at this configuration. Adding an orientation output produces a <span class="math inline">\(3\times2\)</span> Jacobian but leaves the two joint freedoms unchanged.</li>
+<li>The rate equation is the chain rule for a differentiable motion. A finite increment also includes the higher-order remainder from the nonlinear map. A wrapped angle can jump by <span class="math inline">\(2\pi\)</span> even during smooth motion, so its ordinary derivative is not defined at that coordinate jump.</li>
+</ol>
+</section>
+</section>
+<section id="sec-space-jacobians" class="level3" data-number="10.3.3">
+<h3 data-number="10.3.3" class="anchored" data-anchor-id="sec-space-jacobians"><span class="header-section-number">10.3.3</span> Space Jacobians</h3>
+<p>Given the current joint coordinates and their rates, how can we calculate the end effector’s complete instantaneous motion in the fixed frame <span class="math inline">\(\{s\}\)</span>? A position-task Jacobian gives the velocity of one selected point. Here the required output is the space twist <span class="math inline">\(\boldsymbol\xi_s=[\boldsymbol\nu_s^{\mathsf T}\;\boldsymbol\omega_s^{\mathsf T}]^{\mathsf T}\in\mathbb R^6\)</span>, which also describes the end effector’s turning and its rigid-motion velocity field.</p>
+<p>Use the same serial chain with <span class="math inline">\(n\ge1\)</span> independent revolute or prismatic coordinates, fixed home pose <span class="math inline">\(\mathbf M\in SE(3)\)</span>, and fixed home screw columns <span class="math inline">\({}^{s}\mathbf S_j\in\mathbb R^6\)</span>, where <span class="math inline">\(j\in\{1,\ldots,n\}\)</span> counts joints from base to tool. The joint trajectory <span class="math inline">\(\mathbf q(t)\)</span> is differentiable on a valid local coordinate domain, the space frame <span class="math inline">\(\{s\}\)</span> is fixed, and the tool frame <span class="math inline">\(\{e\}\)</span> is rigidly attached to the end effector. Positive rotations follow the right-hand rule; transformations act on columns in the previously established order. We will differentiate the space-form forward map, extract its space twist, and collect the coefficient of each joint rate.</p>
+<section id="differentiate-one-joint-factor" class="level4">
+<h4 class="anchored" data-anchor-id="differentiate-one-joint-factor">Differentiate one joint factor</h4>
+<p>Recall the <span class="math inline">\(4\times4\)</span> displacement factors from <a href="#eq-serial-space-joint-displacement" class="quarto-xref">Equation&nbsp;<span>10.9</span></a> and their ordered product from <a href="#eq-serial-space-poe" class="quarto-xref">Equation&nbsp;<span>10.10</span></a>:</p>
+<p><span class="math display">\[
+\mathbf E_j(q_j)
+=\exp\!\left(\widehat{{}^{s}\mathbf S_j}\,q_j\right),
+\qquad
+\mathbf T_{se}(\mathbf q)
+=\mathbf E_1(q_1)\cdots\mathbf E_n(q_n)\mathbf M.
+\]</span></p>
+<p>Each factor depends on only its own coordinate. As in the constant-generator exponential calculation in <a href="08_screw_motion_se3_exponential_and_spatial_integration.html#sec-se3-constant-twist-integration" class="quarto-xref"><span>Section 8.4</span></a>, differentiation brings the fixed generator outside the exponential:</p>
+<p><span class="math display">\[
+\frac{\partial\mathbf E_j}{\partial q_j}
+=\widehat{{}^{s}\mathbf S_j}\,\mathbf E_j
+=\mathbf E_j\widehat{{}^{s}\mathbf S_j}.
+\]</span></p>
+<p>The generator commutes with its own exponential because that exponential is a series of powers of the same generator.<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> This does not allow us to exchange different joints’ factors. Suppress the factors’ arguments in the following algebra, but continue to evaluate every <span class="math inline">\(\mathbf E_i\)</span> at its current <span class="math inline">\(q_i\)</span>, for <span class="math inline">\(i\in\{1,\ldots,n\}\)</span>.</p>
+<p>For <span class="math inline">\(j=2,\ldots,n\)</span>, holding the other joint coordinates fixed and differentiating factor <span class="math inline">\(j\)</span> gives</p>
+<p><span class="math display">\[
+\frac{\partial\mathbf T_{se}}{\partial q_j}
+=\mathbf E_1\cdots\mathbf E_{j-1}
+\widehat{{}^{s}\mathbf S_j}
+\mathbf E_j\cdots\mathbf E_n\mathbf M.
+\]</span></p>
+</section>
+<section id="extract-the-space-twist" class="level4">
+<h4 class="anchored" data-anchor-id="extract-the-space-twist">Extract the space twist</h4>
+<p>The matrix-valued chain rule adds the contributions of all joints along the trajectory:</p>
+<p><span class="math display">\[
+\dot{\mathbf T}_{se}
+=\sum_{j=1}^{n}
+\frac{\partial\mathbf T_{se}}{\partial q_j}\dot q_j.
+\]</span></p>
+<p>To extract the space twist using <a href="#eq-end-effector-space-twist-pose-rate" class="quarto-xref">Equation&nbsp;<span>10.20</span></a>, postmultiply by the current inverse pose. Reversing the product gives <span class="math inline">\(\mathbf T_{se}^{-1}=\mathbf M^{-1}\mathbf E_n^{-1}\cdots\mathbf E_1^{-1}\)</span>. For <span class="math inline">\(j\ge2\)</span>, the home pose and the factors from joint <span class="math inline">\(j\)</span> onward cancel. The adjoint identity in <a href="07_degrees_of_freedom_and_spatial_motion_so3_se3.html#eq-se3-adjoint-conjugation" class="quarto-xref">Equation&nbsp;<span>7.5</span></a> then identifies the remaining conjugated screw matrix:</p>
+<p><span class="math display">\[
+\begin{aligned}
+\frac{\partial\mathbf T_{se}}{\partial q_j}
+\mathbf T_{se}^{-1}
+&amp;=\mathbf E_1\cdots\mathbf E_{j-1}
+\widehat{{}^{s}\mathbf S_j}
+\underbrace{
+\left(\mathbf E_j\cdots\mathbf E_n\mathbf M\right)
+\mathbf T_{se}^{-1}
+}_{\mathbf E_{j-1}^{-1}\cdots\mathbf E_1^{-1}}\\
+&amp;=\left(\mathbf E_1\cdots\mathbf E_{j-1}\right)
+\widehat{{}^{s}\mathbf S_j}
+\left(\mathbf E_1\cdots\mathbf E_{j-1}\right)^{-1}\\
+&amp;=\widehat{
+\operatorname{Ad}_{\mathbf E_1\cdots\mathbf E_{j-1}}
+{}^{s}\mathbf S_j
+}.
+\end{aligned}
+\]</span></p>
+<p>For joint 1, the differentiated expression is <span class="math inline">\(\widehat{{}^{s}\mathbf S_1}\mathbf E_1\cdots\mathbf E_n\mathbf M\)</span>, so postmultiplication by <span class="math inline">\(\mathbf T_{se}^{-1}\)</span> leaves just <span class="math inline">\(\widehat{{}^{s}\mathbf S_1}\)</span>. Because the hat operator is linear, we can collect the corresponding six-entry columns and their rates. The space twist is therefore</p>
+<p><span class="math display">\[
+\boldsymbol\xi_s
+={}^{s}\mathbf S_1\dot q_1
++\sum_{j=2}^{n}
+\left(
+\operatorname{Ad}_{\mathbf E_1\cdots\mathbf E_{j-1}}
+{}^{s}\mathbf S_j
+\right)\dot q_j.
+\]</span></p>
+</section>
+<section id="collect-the-space-jacobian-columns" class="level4">
+<h4 class="anchored" data-anchor-id="collect-the-space-jacobian-columns">Collect the space-Jacobian columns</h4>
+<p>The coefficient of <span class="math inline">\(\dot q_j\)</span> describes the motion caused by joint <span class="math inline">\(j\)</span> at the current arrangement, in space-twist coordinates. Denote it by <span class="math inline">\(\mathbf J_{s,j}(\mathbf q)\in\mathbb R^6\)</span>. Collecting these columns defines the <strong>space Jacobian</strong>, <span class="math inline">\(\mathbf J_s(\mathbf q)\in\mathbb R^{6\times n}\)</span>:</p>
+<p><span id="eq-space-jacobian-columns-rate-map"><span class="math display">\[
+\boxed{
+\begin{aligned}
+\mathbf J_{s,j}(\mathbf q)
+&amp;:=\operatorname{Ad}_{\mathbf E_1(q_1)\cdots\mathbf E_{j-1}(q_{j-1})}
+{}^{s}\mathbf S_j\qquad(j=2,\ldots,n),\\
+\mathbf J_s(\mathbf q)
+&amp;:=\begin{bmatrix}
+\mathbf J_{s,1}(\mathbf q)&amp;\cdots&amp;\mathbf J_{s,n}(\mathbf q)
+\end{bmatrix},\\
+\boldsymbol\xi_s&amp;=\mathbf J_s(\mathbf q)\dot{\mathbf q}.
+\end{aligned}
+}
+\tag{10.24}\]</span></span></p>
+<p>The subscript <span class="math inline">\(s\)</span> identifies the space-twist representation, and the second subscript <span class="math inline">\(j\)</span> identifies a joint column. Here a revolute joint’s <strong>axis</strong> means its physical rotation line, not a coordinate frame; for a prismatic joint, the relevant geometry is its sliding direction. Read the three lines of the boxed equation as three physical steps:</p>
+<ol type="1">
+<li><strong>Convert the home screw into the current screw column.</strong> The fixed column <span class="math inline">\({}^{s}\mathbf S_j\)</span> describes the joint’s rotation line or sliding direction at home. For <span class="math inline">\(j\ge2\)</span>, the displacement <span class="math inline">\(\mathbf E_1(q_1)\cdots\mathbf E_{j-1}(q_{j-1})\)</span> accounts for the earlier joints: for joint 2 this is <span class="math inline">\(\mathbf E_1(q_1)\)</span>, and for joint 3 it is <span class="math inline">\(\mathbf E_1(q_1)\mathbf E_2(q_2)\)</span>. Its adjoint gives <span class="math inline">\(\mathbf J_{s,j}(\mathbf q)\)</span>, describing the joint’s current motion geometry in the same fixed frame <span class="math inline">\(\{s\}\)</span>. The robot’s geometry changes, not frame <span class="math inline">\(\{s\}\)</span>.</li>
+<li><strong>Put one column for each joint into the matrix.</strong> The <span class="math inline">\(6\times n\)</span> matrix <span class="math inline">\(\mathbf J_s(\mathbf q)\)</span> stores these current screw columns in joint order. It describes the arm’s current motion geometry, before any joint rates are supplied.</li>
+<li><strong>Scale each joint’s contribution by its rate and add the contributions.</strong> If only joint <span class="math inline">\(j\)</span> moves, the end-effector twist is <span class="math inline">\(\mathbf J_{s,j}(\mathbf q)\dot q_j\)</span>. If several joints move, <span class="math inline">\(\mathbf J_s(\mathbf q)\dot{\mathbf q}\)</span> adds their instantaneous twist contributions. Reversing a joint’s rate reverses its contribution; doubling its rate doubles that contribution at the same configuration.</li>
+</ol>
+<p>Each contribution <span class="math inline">\(\mathbf J_{s,j}\dot q_j\)</span> has a linear block in <span class="math inline">\(\mathrm{m\,s^{-1}}\)</span> and an angular block in <span class="math inline">\(\mathrm{rad\,s^{-1}}\)</span>. Use <span class="math inline">\(\dot q_j\)</span> in <span class="math inline">\(\mathrm{rad\,s^{-1}}\)</span> for a revolute joint and <span class="math inline">\(\mathrm{m\,s^{-1}}\)</span> for a prismatic joint; each column carries the corresponding per-coordinate units. There is no single physical unit for the complete matrix. The output is a space twist, not a column of selected task-coordinate rates such as <span class="math inline">\(\mathbf J_y\dot{\mathbf q}\)</span>.</p>
+</section>
+<section id="the-first-joint-and-the-home-configuration" class="level4">
+<h4 class="anchored" data-anchor-id="the-first-joint-and-the-home-configuration">The first joint and the home configuration</h4>
+<p>For <span class="math inline">\(j=1\)</span>, define the first column directly as</p>
+<p><span class="math display">\[
+\mathbf J_{s,1}
+\mathrel{:=}\operatorname{Ad}_{\mathbf I_4}\,{}^{s}\mathbf S_1
+={}^{s}\mathbf S_1.
+\]</span></p>
+<p>We use <span class="math inline">\(\mathbf I_4\)</span> because no earlier joint displaces joint 1’s rotation line or sliding direction. Joint 1’s own rotation or sliding leaves that geometry unchanged, so <span class="math inline">\({}^{s}\mathbf S_1\)</span> already describes its current motion in <span class="math inline">\(\{s\}\)</span>. The identity adjoint leaves this column unchanged; this does not require <span class="math inline">\(q_1=0\)</span>.</p>
+<p>At the complete home configuration, <span class="math inline">\(\mathbf q=\mathbf0_n\)</span>, every displacement factor is the identity. All current screw columns then equal their stored home values:</p>
+<p><span class="math display">\[
+\mathbf J_{s,j}(\mathbf0_n)={}^{s}\mathbf S_j,
+\qquad
+\mathbf J_s(\mathbf0_n)=
+\begin{bmatrix}{}^{s}\mathbf S_1&amp;\cdots&amp;{}^{s}\mathbf S_n\end{bmatrix}.
+\]</span></p>
+</section>
+<section id="from-home-screws-to-current-columns" class="level4">
+<h4 class="anchored" data-anchor-id="from-home-screws-to-current-columns">From home screws to current columns</h4>
+<p>Away from home, keep the <span class="math inline">\({}^{s}\mathbf S_j\)</span> unchanged and calculate the current columns using the adjoints. The following example explains how the fixed home screw <span class="math inline">\({}^{s}\mathbf S_j\)</span> and the earlier-joint displacement <span class="math inline">\(\mathbf E_1(q_1)\cdots\mathbf E_{j-1}(q_{j-1})\)</span> determine <span class="math inline">\(\mathbf J_{s,j}(\mathbf q)\)</span>.</p>
+<div class="callout callout-style-simple callout-note no-icon callout-titled" title="Example: What the elbow's Jacobian column describes">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Example: What the elbow’s Jacobian column describes
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Consider a fixed-base serial arm with three revolute joints: shoulder 1, elbow 2, and wrist 3, with coordinates <span class="math inline">\(q_1,q_2,q_3\)</span> in radians.</p>
+<section id="start-with-the-twist" class="level5">
+<h5 class="anchored" data-anchor-id="start-with-the-twist">Start with the twist</h5>
+<p>A space twist describes a rigid body’s instantaneous motion relative to the fixed space frame <span class="math inline">\(\{s\}\)</span>:</p>
+<p><span class="math display">\[
+\boldsymbol\xi_s=
+\begin{bmatrix}
+\boldsymbol\nu_s\\
+\boldsymbol\omega_s
+\end{bmatrix}.
+\]</span></p>
+<p>For a point fixed on that body, let <span class="math inline">\({}^{s}\mathbf x\in\mathbb R^3\)</span> be its position relative to <span class="math inline">\(O_s\)</span>, expressed in <span class="math inline">\(\{s\}\)</span> and measured in metres. Its velocity relative to <span class="math inline">\(\{s\}\)</span>, also expressed in <span class="math inline">\(\{s\}\)</span>, is</p>
+<p><span class="math display">\[
+{}^{s}\dot{\mathbf x}
+=\boldsymbol\nu_s+\boldsymbol\omega_s\times{}^{s}\mathbf x.
+\]</span></p>
+<p>All components use <span class="math inline">\(\{s\}\)</span>. The angular block <span class="math inline">\(\boldsymbol\omega_s\in\mathbb R^3\)</span>, in <span class="math inline">\(\mathrm{rad\,s^{-1}}\)</span>, gives the turning rate and direction. The linear block <span class="math inline">\(\boldsymbol\nu_s\in\mathbb R^3\)</span>, in <span class="math inline">\(\mathrm{m\,s^{-1}}\)</span>, combines with the rotational term to give the velocity at each position; it is not generally the velocity of the elbow or tool origin.</p>
+</section>
+<section id="rotate-only-the-elbow" class="level5">
+<h5 class="anchored" data-anchor-id="rotate-only-the-elbow">Rotate only the elbow</h5>
+<p>Hold the shoulder and wrist at their current coordinates, so <span class="math inline">\(\dot q_1=\dot q_3=0\)</span>, and rotate only the elbow at rate <span class="math inline">\(\dot q_2\)</span>. Holding a joint still does not require its coordinate to be zero. With the wrist held fixed, the forearm and tool move together as one rigid assembly.</p>
+<p>Describe the elbow’s physical hinge line using two quantities:</p>
+<ul>
+<li><span class="math inline">\(\mathbf p\in\mathbb R^3\)</span>: the position of a point on the hinge line, relative to the origin <span class="math inline">\(O_s\)</span> of <span class="math inline">\(\{s\}\)</span> and expressed in <span class="math inline">\(\{s\}\)</span>, in metres.</li>
+<li><span class="math inline">\(\mathbf a\in\mathbb R^3\)</span>: the dimensionless unit direction of that line, expressed in <span class="math inline">\(\{s\}\)</span> and chosen so that positive <span class="math inline">\(q_2\)</span> follows the right-hand rule about <span class="math inline">\(\mathbf a\)</span>.</li>
+</ul>
+<p>The forearm rotates around the <strong>line through <span class="math inline">\(\mathbf p\)</span> in direction <span class="math inline">\(\mathbf a\)</span></strong>. Its angular velocity is therefore</p>
+<p><span class="math display">\[
+\boldsymbol\omega_s=\mathbf a\,\dot q_2.
+\]</span></p>
+<p>The selected hinge point is stationary during this elbow-only motion. The velocity of a point fixed on the forearm follows from rotation about that point:</p>
+<p><span class="math display">\[
+\begin{aligned}
+{}^{s}\dot{\mathbf x}
+&amp;=(\mathbf a\dot q_2)\times({}^{s}\mathbf x-\mathbf p)\\
+&amp;=\underbrace{(-\mathbf a\times\mathbf p)\dot q_2}
+_{\boldsymbol\nu_s}
++(\mathbf a\dot q_2)\times{}^{s}\mathbf x.
+\end{aligned}
+\]</span></p>
+<p>Comparing the linear and angular terms with the space-twist definition gives</p>
+<p><span class="math display">\[
+\boldsymbol\xi_s
+=\underbrace{
+\begin{bmatrix}
+-\mathbf a\times\mathbf p\\
+\mathbf a
+\end{bmatrix}
+}_{\mathbf J_{s,2}(\mathbf q)}
+\dot q_2.
+\]</span></p>
+<p>Thus <strong>column 2 describes the elbow’s current hinge line and the instantaneous motion produced by rotating around it</strong>. It is not frame <span class="math inline">\(\{1\}\)</span> or frame <span class="math inline">\(\{2\}\)</span>. If frame <span class="math inline">\(\{2\}\)</span> is attached to the forearm, that frame rotates when the elbow bends, even though the physical hinge line stays fixed.</p>
+</section>
+<section id="connect-the-home-hinge-to-the-current-column" class="level5">
+<h5 class="anchored" data-anchor-id="connect-the-home-hinge-to-the-current-column">Connect the home hinge to the current column</h5>
+<p>Let <span class="math inline">\(\mathbf p_0\)</span> and <span class="math inline">\(\mathbf a_0\)</span> be the selected hinge point and positive unit direction at home, expressed in <span class="math inline">\(\{s\}\)</span>, with the same dimensions and units as <span class="math inline">\(\mathbf p\)</span> and <span class="math inline">\(\mathbf a\)</span>. The subscript <span class="math inline">\(0\)</span> means the home configuration, not a different frame. The stored screw is therefore</p>
+<p><span class="math display">\[
+{}^{s}\mathbf S_2=
+\begin{bmatrix}-\mathbf a_0\times\mathbf p_0\\\mathbf a_0\end{bmatrix}.
+\]</span></p>
+<p>Shoulder motion carries this home hinge to its current placement. Write the displacement <span class="math inline">\(\mathbf E_1(q_1)\)</span> using its dimensionless rotation block <span class="math inline">\(\mathbf R_1\in SO(3)\)</span> and translation block <span class="math inline">\(\mathbf t_1\in\mathbb R^3\)</span> in metres. Both describe an active displacement in the fixed frame <span class="math inline">\(\{s\}\)</span>, not a change to frame <span class="math inline">\(\{1\}\)</span>:</p>
+<p><span class="math display">\[
+\mathbf E_1(q_1)=
+\begin{bmatrix}
+\mathbf R_1&amp;\mathbf t_1\\
+\mathbf0_3^{\mathsf T}&amp;1
+\end{bmatrix},
+\qquad
+\mathbf a=\mathbf R_1\mathbf a_0,
+\qquad
+\mathbf p=\mathbf R_1\mathbf p_0+\mathbf t_1.
+\]</span></p>
+<p>The direction rotates; the selected point rotates and translates. Applying the linear-first adjoint from <a href="07_degrees_of_freedom_and_spatial_motion_so3_se3.html#sec-se3-adjoint-twist" class="quarto-xref"><span>Section 7.9.4</span></a> to the home screw gives</p>
+<p><span class="math display">\[
+\begin{aligned}
+\operatorname{Ad}_{\mathbf E_1}{}^{s}\mathbf S_2
+&amp;=\begin{bmatrix}
+-\mathbf R_1(\mathbf a_0\times\mathbf p_0)
++\mathbf t_1\times(\mathbf R_1\mathbf a_0)\\
+\mathbf R_1\mathbf a_0
+\end{bmatrix}\\
+&amp;=\begin{bmatrix}-\mathbf a\times\mathbf p\\\mathbf a\end{bmatrix}
+=\mathbf J_{s,2}(\mathbf q).
+\end{aligned}
+\]</span></p>
+<p>The second line uses the fact that a rotation preserves cross products and <span class="math inline">\(\mathbf t_1\times\mathbf a=-\mathbf a\times\mathbf t_1\)</span>. Thus the adjoint calculation gives exactly the screw obtained from the current hinge point and direction. We keep <span class="math inline">\({}^{s}\mathbf S_2\)</span> fixed and use <span class="math inline">\(\mathbf E_1(q_1)\)</span> to calculate the current column; both columns use the same frame <span class="math inline">\(\{s\}\)</span>.</p>
+</section>
+<section id="which-joint-changes-the-hinge-line" class="level5">
+<h5 class="anchored" data-anchor-id="which-joint-changes-the-hinge-line">Which joint changes the hinge line?</h5>
+<p>Now compare different arm configurations by changing one joint coordinate at a time:</p>
+<ul>
+<li><strong>Shoulder motion:</strong> carries the elbow elsewhere, changing <span class="math inline">\(\mathbf p\)</span> and possibly <span class="math inline">\(\mathbf a\)</span>. It can therefore change <span class="math inline">\(\mathbf J_{s,2}\)</span>.</li>
+<li><strong>Elbow motion:</strong> rotates the forearm around the same hinge line. The line’s position and direction remain unchanged, so this motion does not change <span class="math inline">\(\mathbf J_{s,2}\)</span>.</li>
+<li><strong>Wrist motion:</strong> moves the hand relative to the forearm without moving the elbow’s hinge line, so it does not change <span class="math inline">\(\mathbf J_{s,2}\)</span> either.</li>
+</ul>
+<p>Consequently, <span class="math inline">\(\mathbf J_{s,2}\)</span> can depend on <span class="math inline">\(q_1\)</span>, but not on <span class="math inline">\(q_2\)</span> or <span class="math inline">\(q_3\)</span>. For a general revolute joint <span class="math inline">\(j\)</span>, only the earlier coordinates <span class="math inline">\(q_1,\ldots,q_{j-1}\)</span> can change its physical rotation line. For a prismatic joint, apply the same reasoning to its sliding direction instead of a hinge line.</p>
+</section>
+</div>
+</div>
+</section>
+<section id="a-fixed-column-can-give-different-tool-origin-velocities" class="level4">
+<h4 class="anchored" data-anchor-id="a-fixed-column-can-give-different-tool-origin-velocities">A fixed column can give different tool-origin velocities</h4>
+<p>Recall that the first space-Jacobian column is fixed:</p>
+<p><span class="math display">\[
+\mathbf J_{s,1}={}^{s}\mathbf S_1.
+\]</span></p>
+<p>The screw <span class="math inline">\({}^{s}\mathbf S_1\)</span> describes the base joint’s fixed rotation line or sliding direction. The configuration is <span class="math inline">\(\mathbf q\)</span>. Joint 1 contributes <span class="math inline">\({}^{s}\mathbf S_1\dot q_1\)</span> to the end-effector space twist. To isolate that contribution, hold all other joint rates at zero:</p>
+<p><span class="math display">\[
+\boldsymbol\xi_s
+=\mathbf J_{s,1}\dot q_1
+={}^{s}\mathbf S_1\dot q_1
+=\begin{bmatrix}\boldsymbol\nu_s\\\boldsymbol\omega_s\end{bmatrix}.
+\]</span></p>
+<p>At the same base rate <span class="math inline">\(\dot q_1\)</span>, this twist is the same even if the other joints are held at different coordinates. But the twist is not the tool origin’s velocity. Using <a href="#eq-end-effector-origin-velocity-from-space-twist" class="quarto-xref">Equation&nbsp;<span>10.21</span></a>, that velocity is</p>
+<p><span class="math display">\[
+{}^{s}\dot{\mathbf p}_e
+=\boldsymbol\nu_s
++\boldsymbol\omega_s\times{}^{s}\mathbf p_e(\mathbf q).
+\]</span></p>
+<p>Changing the arm’s configuration can change the tool position <span class="math inline">\({}^{s}\mathbf p_e(\mathbf q)\)</span> without changing <span class="math inline">\({}^{s}\mathbf S_1\)</span>. For a revolute base joint, this changes where the tool lies relative to the rotation line, so the same twist can give a different tool-origin velocity.</p>
+<p>Use the planar 2R arm from the <a href="#example-planar-2r-task-jacobian">task-Jacobian example</a>, with <span class="math inline">\(L_1=L_2=1\,\mathrm m\)</span>, joint coordinates <span class="math inline">\(\mathbf q=[\theta_1\;\theta_2]^{\mathsf T}\)</span> in radians, and both positive rotation directions along <span class="math inline">\(+z_s\)</span>. Compare two configurations at <span class="math inline">\(\theta_1=0\)</span>: one with the elbow straight and one with it bent through <span class="math inline">\(\pi/2\)</span>. Substituting <span class="math inline">\(\theta_1=0\)</span> into <a href="#eq-planar-2r-position-forward-map" class="quarto-xref">Equation&nbsp;<span>10.1</span></a> gives</p>
+<p><span class="math display">\[
+{}^{s}\mathbf p_e(0,\theta_2)
+=\begin{bmatrix}
+1+\cos\theta_2\\
+\sin\theta_2\\
+0
+\end{bmatrix}\,\mathrm m.
+\]</span></p>
+<p>In each configuration, let the base rotate at <span class="math inline">\(\dot\theta_1=1\,\mathrm{rad\,s^{-1}}\)</span> and hold the elbow still, <span class="math inline">\(\dot\theta_2=0\)</span>. The base rotation line passes through the origin <span class="math inline">\(O_s\)</span> of <span class="math inline">\(\{s\}\)</span>, so <span class="math inline">\({}^{s}\mathbf S_1=[0\;0\;0\;0\;0\;1]^{\mathsf T}\)</span>. Consequently, the twist <span class="math inline">\({}^{s}\mathbf S_1\dot\theta_1\)</span> has the same blocks in both configurations: <span class="math inline">\(\boldsymbol\nu_s=\mathbf0_3\)</span> and <span class="math inline">\(\boldsymbol\omega_s=[0\;0\;1]^{\mathsf T}\,\mathrm{rad\,s^{-1}}\)</span>.</p>
+<p><strong>Straight elbow: <span class="math inline">\(\mathbf q=[0\;0]^{\mathsf T}\)</span>.</strong> Substituting <span class="math inline">\(\theta_2=0\)</span> gives the tool position, then the cross product gives its instantaneous velocity:</p>
+<p><span class="math display">\[
+\begin{aligned}
+{}^{s}\mathbf p_e(0,0)
+&amp;=\begin{bmatrix}2\\0\\0\end{bmatrix}\,\mathrm m,\\
+{}^{s}\dot{\mathbf p}_e
+&amp;=\boldsymbol\omega_s\times{}^{s}\mathbf p_e(0,0)
+=\begin{bmatrix}0\\2\\0\end{bmatrix}\,\mathrm{m\,s^{-1}}.
+\end{aligned}
+\]</span></p>
+<p><strong>Bent elbow: <span class="math inline">\(\mathbf q=[0\;\pi/2]^{\mathsf T}\)</span>.</strong> Substituting <span class="math inline">\(\theta_2=\pi/2\)</span> instead gives</p>
+<p><span class="math display">\[
+\begin{aligned}
+{}^{s}\mathbf p_e(0,\pi/2)
+&amp;=\begin{bmatrix}1\\1\\0\end{bmatrix}\,\mathrm m,\\
+{}^{s}\dot{\mathbf p}_e
+&amp;=\boldsymbol\omega_s\times{}^{s}\mathbf p_e(0,\pi/2)
+=\begin{bmatrix}-1\\1\\0\end{bmatrix}\,\mathrm{m\,s^{-1}}.
+\end{aligned}
+\]</span></p>
+<p>Changing <span class="math inline">\(\theta_2\)</span> between the two configurations changes the tool position from <span class="math inline">\([2\;0\;0]^{\mathsf T}\,\mathrm m\)</span> to <span class="math inline">\([1\;1\;0]^{\mathsf T}\,\mathrm m\)</span>. The tool’s velocity changes in both direction and speed: the speeds are <span class="math inline">\(2\,\mathrm{m\,s^{-1}}\)</span> and <span class="math inline">\(\sqrt2\,\mathrm{m\,s^{-1}}\)</span>, respectively. The first column <span class="math inline">\(\mathbf J_{s,1}={}^{s}\mathbf S_1\)</span> and base rate remain unchanged. The elbow is held still during each velocity calculation; its different angle changes where the tool is, not the base joint’s twist contribution.</p>
+<p>The next example calculates the complete space Jacobian for a planar arm, then checks the resulting tool-origin velocity against the position-task calculation.</p>
+<div id="example-planar-2r-space-jacobian" class="callout callout-style-simple callout-note no-icon callout-titled" title="Example: Space twist of the planar 2R arm">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Example: Space twist of the planar 2R arm
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Reuse the planar arm from the <a href="#example-planar-2r-task-jacobian">example of adding orientation to the planar 2R task</a>: link lengths <span class="math inline">\(L_1,L_2&gt;0\)</span> in metres, joint angles <span class="math inline">\(\mathbf q=[\theta_1\;\theta_2]^{\mathsf T}\)</span> in radians, both positive rotation directions along <span class="math inline">\(+z_s\)</span>, and both links along <span class="math inline">\(+x_s\)</span> at home. The tool origin is at the second link’s tip, and the axes of <span class="math inline">\(\{e\}\)</span> coincide with those of <span class="math inline">\(\{s\}\)</span> at home.</p>
+<p>The previously derived home space columns and the first joint’s pure-rotation displacement are</p>
+<p><span class="math display">\[
+{}^{s}\mathbf S_1=\begin{bmatrix}0\\0\\0\\0\\0\\1\end{bmatrix},
+\qquad
+{}^{s}\mathbf S_2=\begin{bmatrix}0\\-L_1\\0\\0\\0\\1\end{bmatrix},
+\qquad
+\mathbf E_1(\theta_1)=
+\begin{bmatrix}
+\mathbf R_z(\theta_1)&amp;\mathbf0_3\\
+\mathbf0_3^{\mathsf T}&amp;1
+\end{bmatrix}.
+\]</span></p>
+<p>Here <span class="math inline">\(\mathbf R_z\)</span> is the active rotation about <span class="math inline">\(+z_s\)</span>. Because <span class="math inline">\(\mathbf E_1\)</span> has zero translation, its linear-first <span class="math inline">\(6\times6\)</span> adjoint has two rotation blocks and zero off-diagonal blocks:</p>
+<p><span class="math display">\[
+\operatorname{Ad}_{\mathbf E_1}
+=\begin{bmatrix}
+\mathbf R_z(\theta_1)&amp;\mathbf0_{3\times3}\\
+\mathbf0_{3\times3}&amp;\mathbf R_z(\theta_1)
+\end{bmatrix}.
+\]</span></p>
+<p>Thus the adjoint rotates each three-entry screw block separately. Column 1 is <span class="math inline">\({}^{s}\mathbf S_1\)</span>; column 2 is</p>
+<p><span class="math display">\[
+\mathbf J_{s,2}
+=\operatorname{Ad}_{\mathbf E_1}{}^{s}\mathbf S_2\\
+=\begin{bmatrix}
+\mathbf R_z(\theta_1)\begin{bmatrix}0\\-L_1\\0\end{bmatrix}\\
+\mathbf R_z(\theta_1)\begin{bmatrix}0\\0\\1\end{bmatrix}
+\end{bmatrix}
+=\begin{bmatrix}
+L_1\sin\theta_1\\-L_1\cos\theta_1\\0\\0\\0\\1
+\end{bmatrix}.
+\]</span></p>
+<p>Thus the full six-row space Jacobian is</p>
+<p><span class="math display">\[
+\mathbf J_s(\mathbf q)=
+\begin{bmatrix}
+0&amp;L_1\sin\theta_1\\
+0&amp;-L_1\cos\theta_1\\
+0&amp;0\\
+0&amp;0\\
+0&amp;0\\
+1&amp;1
+\end{bmatrix}.
+\]</span></p>
+<p>There is no <span class="math inline">\(\theta_2\)</span> or <span class="math inline">\(L_2\)</span> in this matrix. Neither changes the current rotation lines of the base and elbow joints. They do change the tool origin’s position, which is needed to calculate its velocity from the space twist.</p>
+<p>Set <span class="math inline">\(L_1=L_2=1\,\mathrm m\)</span>, <span class="math inline">\(\theta_1=0\)</span>, <span class="math inline">\(\theta_2=\pi/2\)</span>, and <span class="math inline">\(\dot{\mathbf q}=[0.2\;-0.1]^{\mathsf T}\,\mathrm{rad\,s^{-1}}\)</span>, as in the task-Jacobian example. The upper and lower blocks give</p>
+<p><span class="math display">\[
+\begin{aligned}
+\boldsymbol\nu_s
+&amp;=\begin{bmatrix}0&amp;0\\0&amp;-1\\0&amp;0\end{bmatrix}
+\begin{bmatrix}0.2\\-0.1\end{bmatrix}
+=\begin{bmatrix}0\\0.1\\0\end{bmatrix}\,\mathrm{m\,s^{-1}},\\
+\boldsymbol\omega_s
+&amp;=\begin{bmatrix}0&amp;0\\0&amp;0\\1&amp;1\end{bmatrix}
+\begin{bmatrix}0.2\\-0.1\end{bmatrix}
+=\begin{bmatrix}0\\0\\0.1\end{bmatrix}\,\mathrm{rad\,s^{-1}}.
+\end{aligned}
+\]</span></p>
+<p>The position formula in <a href="#eq-planar-2r-position-forward-map" class="quarto-xref">Equation&nbsp;<span>10.1</span></a> gives <span class="math inline">\({}^{s}\mathbf p_e=[1\;1\;0]^{\mathsf T}\,\mathrm m\)</span>. Evaluate the velocity field there using <a href="#eq-end-effector-origin-velocity-from-space-twist" class="quarto-xref">Equation&nbsp;<span>10.21</span></a>:</p>
+<p><span class="math display">\[
+{}^{s}\dot{\mathbf p}_e
+=\boldsymbol\nu_s+\boldsymbol\omega_s\times{}^{s}\mathbf p_e
+=\left(
+\begin{bmatrix}0\\0.1\\0\end{bmatrix}
++\begin{bmatrix}-0.1\\0.1\\0\end{bmatrix}
+\right)\,\mathrm{m\,s^{-1}}
+=\begin{bmatrix}-0.1\\0.2\\0\end{bmatrix}\,\mathrm{m\,s^{-1}}.
+\]</span></p>
+<p>The result agrees with the independently differentiated position task. The tool moves toward <span class="math inline">\(-x_s\)</span> and <span class="math inline">\(+y_s\)</span> while turning about <span class="math inline">\(+z_s\)</span>. Reading <span class="math inline">\(\boldsymbol\nu_s\)</span> alone as its position rate would miss part of that motion.</p>
+</div>
+</div>
+</section>
+<section id="quick-test-space-jacobians" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="quick-test-space-jacobians">Quick test: space Jacobians</h4>
+<ol type="1">
+<li><strong>Recall:</strong> Give the dimensions, input, output, and component order of <span class="math inline">\(\mathbf J_s\)</span>. What velocity does its upper output block describe?</li>
+<li><strong>Derivation:</strong> Start with the three-joint pose <span class="math inline">\(\mathbf T_{se}=\mathbf E_1\mathbf E_2\mathbf E_3\mathbf M\)</span>. Hold <span class="math inline">\(q_1\)</span> and <span class="math inline">\(q_3\)</span> fixed and let only <span class="math inline">\(q_2\)</span> vary with time. Differentiate with respect to <span class="math inline">\(q_2\)</span>, then form <span class="math inline">\(\dot{\mathbf T}_{se}=(\partial\mathbf T_{se}/\partial q_2)\dot q_2\)</span>. Which factors cancel in <span class="math inline">\(\widehat{\boldsymbol\xi_s}=\dot{\mathbf T}_{se}\mathbf T_{se}^{-1}\)</span>? What is the resulting space twist, and which column multiplies <span class="math inline">\(\dot q_2\)</span>?</li>
+<li><strong>Physical meaning:</strong> Use the result from Question 2, <span class="math inline">\(\mathbf J_{s,2}=\operatorname{Ad}_{\mathbf E_1(q_1)}\,{}^{s}\mathbf S_2\)</span>. Interpret joints 1, 2, and 3 as the shoulder, elbow, and wrist. With <span class="math inline">\(q_1\)</span> held fixed, why does bending the elbow change the forearm frame’s orientation but leave <span class="math inline">\(\mathbf J_{s,2}\)</span> unchanged?</li>
+<li><strong>Application:</strong> In the planar example with <span class="math inline">\(L_1=L_2=1\,\mathrm m\)</span> and <span class="math inline">\(\theta_1=0\)</span>, <span class="math inline">\(\theta_2=\pi/2\)</span>, let only joint 1 rotate at <span class="math inline">\(0.2\,\mathrm{rad\,s^{-1}}\)</span>. Find <span class="math inline">\(\boldsymbol\nu_s\)</span>, <span class="math inline">\(\boldsymbol\omega_s\)</span>, and <span class="math inline">\({}^{s}\dot{\mathbf p}_e\)</span>.</li>
+<li><strong>Validity:</strong> When does simply stacking the fixed home space screws give the space Jacobian? Why must each column be multiplied by the rate in that joint’s declared coordinate units?</li>
+</ol>
+</section>
+<section id="answers-and-hints-4" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="answers-and-hints-4">Answers and hints</h4>
+<ol type="1">
+<li><p><span class="math inline">\(\mathbf J_s\in\mathbb R^{6\times n}\)</span> maps <span class="math inline">\(\dot{\mathbf q}\in\mathbb R^n\)</span> to <span class="math inline">\(\boldsymbol\xi_s=[\boldsymbol\nu_s^{\mathsf T}\;\boldsymbol\omega_s^{\mathsf T}]^{\mathsf T}\)</span>. The upper block is the rigid-motion velocity field evaluated at the origin <span class="math inline">\(O_s\)</span> of <span class="math inline">\(\{s\}\)</span>, not generally the velocity of the tool origin.</p></li>
+<li><p>The coordinate derivative is <span class="math inline">\(\partial\mathbf T_{se}/\partial q_2=\mathbf E_1\widehat{{}^{s}\mathbf S_2}\mathbf E_2\mathbf E_3\mathbf M\)</span>. Multiplying by <span class="math inline">\(\dot q_2\)</span> gives the time derivative. In <span class="math inline">\(\dot{\mathbf T}_{se}\mathbf T_{se}^{-1}\)</span>, the inverse cancels <span class="math inline">\(\mathbf M\)</span>, <span class="math inline">\(\mathbf E_3\)</span>, and <span class="math inline">\(\mathbf E_2\)</span>, leaving</p>
+<p><span class="math display">\[
+\begin{aligned}
+\widehat{\boldsymbol\xi_s}
+&amp;=\mathbf E_1\widehat{{}^{s}\mathbf S_2}\mathbf E_1^{-1}\dot q_2,\\
+\mathbf J_{s,2}
+&amp;=\operatorname{Ad}_{\mathbf E_1}{}^{s}\mathbf S_2,\\
+\boldsymbol\xi_s&amp;=\mathbf J_{s,2}\dot q_2.
+\end{aligned}
+\]</span></p>
+<p>The coordinate derivative followed by the inverse pose gives <span class="math inline">\(\widehat{\mathbf J_{s,2}}\)</span>, the motion per unit joint coordinate. The factor <span class="math inline">\(\dot q_2\)</span> supplies the rate, giving the actual twist when only joint 2 moves.</p></li>
+<li><p>From Question 2, <span class="math inline">\(\mathbf J_{s,2}=\operatorname{Ad}_{\mathbf E_1(q_1)}\,{}^{s}\mathbf S_2\)</span>. The home screw <span class="math inline">\({}^{s}\mathbf S_2\)</span> is fixed, and holding <span class="math inline">\(q_1\)</span> fixed keeps <span class="math inline">\(\mathbf E_1(q_1)\)</span> unchanged. Thus changing <span class="math inline">\(q_2\)</span> does not change <span class="math inline">\(\mathbf J_{s,2}\)</span>. Physically, this column describes the elbow’s hinge line: bending the elbow turns the forearm frame around that unchanged line. Changing <span class="math inline">\(q_1\)</span> can move the hinge and change <span class="math inline">\(\mathbf J_{s,2}\)</span>.</p></li>
+<li><p><span class="math inline">\(\boldsymbol\nu_s=\mathbf0_3\,\mathrm{m\,s^{-1}}\)</span>, <span class="math inline">\(\boldsymbol\omega_s=[0\;0\;0.2]^{\mathsf T}\,\mathrm{rad\,s^{-1}}\)</span>, and <span class="math inline">\({}^{s}\dot{\mathbf p}_e=[-0.2\;0.2\;0]^{\mathsf T}\,\mathrm{m\,s^{-1}}\)</span>. The tool moves because it is away from the base rotation axis, even though the space-twist linear block is zero.</p></li>
+<li><p>Stacking the home screws is guaranteed at <span class="math inline">\(\mathbf q=\mathbf0_n\)</span>; it also works at any other configuration where <span class="math inline">\(\operatorname{Ad}_{\mathbf E_1\cdots\mathbf E_{j-1}}{}^{s}\mathbf S_j={}^{s}\mathbf S_j\)</span> for every <span class="math inline">\(j\ge2\)</span>. It is not a general nonzero-configuration formula. Each column describes motion per unit of its own coordinate, so using degrees per second instead of radians per second, or confusing a sliding rate with an angular rate, changes the predicted physical motion.</p></li>
+</ol>
+</section>
+</section>
+<section id="sec-body-jacobians" class="level3" data-number="10.3.4">
+<h3 data-number="10.3.4" class="anchored" data-anchor-id="sec-body-jacobians"><span class="header-section-number">10.3.4</span> Body Jacobians</h3>
+<p>Sometimes the useful velocity components are along the axes of the moving frame <span class="math inline">\(\{e\}\)</span>: how fast is the tool origin moving along <span class="math inline">\(x_e\)</span>, <span class="math inline">\(y_e\)</span>, and <span class="math inline">\(z_e\)</span>, and how fast is the tool turning about those axes? The inputs remain the fixed serial-chain model, current joint coordinates, and joint rates. The physical motion is still relative to the fixed space frame <span class="math inline">\(\{s\}\)</span>; only its representation changes to frame <span class="math inline">\(\{e\}\)</span> at configuration <span class="math inline">\(\mathbf q\)</span>.</p>
+<section id="recall-the-body-twist-output" class="level4">
+<h4 class="anchored" data-anchor-id="recall-the-body-twist-output">Recall the body-twist output</h4>
+<p>Use the body-twist block product in <a href="07_degrees_of_freedom_and_spatial_motion_so3_se3.html#eq-se3-body-twist-block-product" class="quarto-xref">Equation&nbsp;<span>7.1</span></a> from <a href="07_degrees_of_freedom_and_spatial_motion_so3_se3.html#sec-se3-body-twist" class="quarto-xref"><span>Section 7.9.2</span></a>, with <span class="math inline">\(\{s\}\)</span> replacing <span class="math inline">\(\{w\}\)</span> and <span class="math inline">\(\{e\}\)</span> replacing <span class="math inline">\(\{b\}\)</span>. Premultiplying the pose derivative by the inverse pose gives</p>
+<p><span id="eq-end-effector-body-twist-pose-rate"><span class="math display">\[
+\widehat{\boldsymbol\xi_e}
+=\mathbf T_{se}^{-1}\dot{\mathbf T}_{se}
+=\begin{bmatrix}
+\mathbf R_{se}^{\mathsf T}\dot{\mathbf R}_{se}
+&amp;\mathbf R_{se}^{\mathsf T}{}^{s}\dot{\mathbf p}_e\\
+\mathbf0_3^{\mathsf T}&amp;0
+\end{bmatrix}.
+\tag{10.25}\]</span></span></p>
+<p>Here <span class="math inline">\(\boldsymbol\xi_e=[\boldsymbol\nu_e^{\mathsf T}\;\boldsymbol\omega_e^{\mathsf T}]^{\mathsf T}\in\mathbb R^6\)</span> is the end effector’s <strong>body twist</strong> in linear-first order. Reading its blocks gives</p>
+<p><span class="math display">\[
+\boldsymbol\nu_e
+=\mathbf R_{se}^{\mathsf T}{}^{s}\dot{\mathbf p}_e,
+\qquad
+\left[\boldsymbol\omega_e\right]_\times
+=\mathbf R_{se}^{\mathsf T}\dot{\mathbf R}_{se}.
+\]</span></p>
+<p>The three-entry column <span class="math inline">\(\boldsymbol\nu_e\)</span> is the tool origin’s velocity relative to <span class="math inline">\(\{s\}\)</span> expressed along the axes of <span class="math inline">\(\{e\}\)</span> at configuration <span class="math inline">\(\mathbf q\)</span>, in <span class="math inline">\(\mathrm{m\,s^{-1}}\)</span>. The three-entry column <span class="math inline">\(\boldsymbol\omega_e\)</span> is its angular velocity relative to <span class="math inline">\(\{s\}\)</span> expressed along the axes of <span class="math inline">\(\{e\}\)</span>, in <span class="math inline">\(\mathrm{rad\,s^{-1}}\)</span>. Although the tool origin has constant coordinates <span class="math inline">\(\mathbf0_3\)</span> in frame <span class="math inline">\(\{e\}\)</span>, <span class="math inline">\(\boldsymbol\nu_e\)</span> need not be zero: we are expressing its motion relative to <span class="math inline">\(\{s\}\)</span>, not differentiating its coordinates relative to itself.</p>
+</section>
+<section id="sec-body-twist-point-velocity" class="level4">
+<h4 class="anchored" data-anchor-id="sec-body-twist-point-velocity">Physical meaning: a point’s velocity expressed along the axes of <span class="math inline">\(\{e\}\)</span></h4>
+<p>What does <span class="math inline">\(\widehat{\boldsymbol\xi_e}=\mathbf T_{se}^{-1}\dot{\mathbf T}_{se}\)</span> calculate for a point fixed to the tool? Choose a point <span class="math inline">\(P\)</span> painted on the end effector’s rigid body. Its coordinates <span class="math inline">\({}^{e}\mathbf x\)</span> in the attached frame <span class="math inline">\(\{e\}\)</span> stay constant, while its coordinates <span class="math inline">\({}^{s}\mathbf x\)</span> in <span class="math inline">\(\{s\}\)</span> change as the end effector moves. Thus <span class="math inline">\({}^{s}\dot{\mathbf x}\)</span> is point <span class="math inline">\(P\)</span>’s velocity relative to <span class="math inline">\(\{s\}\)</span>, expressed in <span class="math inline">\(\{s\}\)</span>, whereas <span class="math inline">\({}^{e}\dot{\mathbf x}\)</span> is its velocity relative to <span class="math inline">\(\{e\}\)</span>, expressed in <span class="math inline">\(\{e\}\)</span>, and equals <span class="math inline">\(\mathbf0_3\)</span> because <span class="math inline">\(P\)</span> is fixed to the end effector. Both position columns belong to <span class="math inline">\(\mathbb R^3\)</span> and are in metres; their derivatives are in <span class="math inline">\(\mathrm{m\,s^{-1}}\)</span>. Using their four-entry homogeneous columns, the fixed-point coordinate relation and its time derivative are</p>
+<p><span class="math display">\[
+\begin{aligned}
+{}^{s}\bar{\mathbf x}
+&amp;=\mathbf T_{se}\,{}^{e}\bar{\mathbf x},
+&amp;{}^{e}\bar{\mathbf x}&amp;=\begin{bmatrix}{}^{e}\mathbf x\\1\end{bmatrix},\\
+{}^{s}\dot{\bar{\mathbf x}}
+&amp;=\dot{\mathbf T}_{se}\,{}^{e}\bar{\mathbf x},
+&amp;{}^{e}\dot{\bar{\mathbf x}}&amp;=\mathbf0_4.
+\end{aligned}
+\]</span></p>
+<p>The product-rule term <span class="math inline">\(\mathbf T_{se}\,{}^{e}\dot{\bar{\mathbf x}}\)</span> vanishes because the point is fixed to the tool. The remaining term gives its velocity relative to <span class="math inline">\(\{s\}\)</span>, expressed along the axes of <span class="math inline">\(\{s\}\)</span>. To express that same velocity along the axes of <span class="math inline">\(\{e\}\)</span> at configuration <span class="math inline">\(\mathbf q\)</span>, premultiply by the inverse pose. A homogeneous position ends in one, but its time derivative ends in zero because the appended one is constant:</p>
+<p><span class="math display">\[
+\begin{aligned}
+\mathbf T_{se}^{-1}\,{}^{s}\dot{\bar{\mathbf x}}
+&amp;=\begin{bmatrix}
+\mathbf R_{se}^{\mathsf T}&amp;-\mathbf R_{se}^{\mathsf T}{}^{s}\mathbf p_e\\
+\mathbf0_3^{\mathsf T}&amp;1
+\end{bmatrix}
+\begin{bmatrix}{}^{s}\dot{\mathbf x}\\0\end{bmatrix}\\
+&amp;=\begin{bmatrix}
+\mathbf R_{se}^{\mathsf T}{}^{s}\dot{\mathbf x}
++\underbrace{\bigl(-\mathbf R_{se}^{\mathsf T}{}^{s}\mathbf p_e\bigr)\,0}_{\mathbf0_3}\\
+0
+\end{bmatrix}\\
+&amp;=\begin{bmatrix}\mathbf R_{se}^{\mathsf T}{}^{s}\dot{\mathbf x}\\0\end{bmatrix}.
+\end{aligned}
+\]</span></p>
+<p>The inverse pose’s translation column multiplies zero, leaving only <span class="math inline">\(\mathbf R_{se}^{\mathsf T}\)</span> acting on the velocity components. This does not discard the tool’s translational motion: that motion is already included in <span class="math inline">\({}^{s}\dot{\mathbf x}\)</span>.</p>
+<p>The upper three entries of the result are the point’s velocity relative to <span class="math inline">\(\{s\}\)</span> expressed along the axes of <span class="math inline">\(\{e\}\)</span>. Give this calculated velocity the name</p>
+<p><span class="math display">\[
+{}^{e}\mathbf v_P
+\mathrel{:=}\mathbf R_{se}^{\mathsf T}{}^{s}\dot{\mathbf x}
+\in\mathbb R^3.
+\]</span></p>
+<p>Its components are in <span class="math inline">\(\mathrm{m\,s^{-1}}\)</span>. The superscript <span class="math inline">\(e\)</span> identifies the axes used, and the subscript <span class="math inline">\(P\)</span> identifies the point. This is not <span class="math inline">\({}^{e}\dot{\mathbf x}\)</span>: the local-coordinate derivative is zero for the painted point, but its velocity relative to <span class="math inline">\(\{s\}\)</span> need not be zero.</p>
+<p>Now substitute the fixed-point relation <span class="math inline">\({}^{s}\dot{\bar{\mathbf x}}=\dot{\mathbf T}_{se}\,{}^{e}\bar{\mathbf x}\)</span>. The matrix multiplying the local position is exactly the body-twist matrix from <a href="#eq-end-effector-body-twist-pose-rate" class="quarto-xref">Equation&nbsp;<span>10.25</span></a>:</p>
+<p><span class="math display">\[
+\begin{aligned}
+\begin{bmatrix}{}^{e}\mathbf v_P\\0\end{bmatrix}
+&amp;=\mathbf T_{se}^{-1}\,{}^{s}\dot{\bar{\mathbf x}}\\
+&amp;=\underbrace{\mathbf T_{se}^{-1}\dot{\mathbf T}_{se}}
+_{\widehat{\boldsymbol\xi_e}}
+\,{}^{e}\bar{\mathbf x}.
+\end{aligned}
+\]</span></p>
+<p>Read the last line from right to left:</p>
+<ol type="1">
+<li><span class="math inline">\(\dot{\mathbf T}_{se}\)</span> takes the point’s local coordinates and calculates its velocity relative to <span class="math inline">\(\{s\}\)</span>, expressed in <span class="math inline">\(\{s\}\)</span>.</li>
+<li><span class="math inline">\(\mathbf T_{se}^{-1}\)</span> re-expresses that velocity along the axes of <span class="math inline">\(\{e\}\)</span> at configuration <span class="math inline">\(\mathbf q\)</span>.</li>
+</ol>
+<p>Thus, <strong><span class="math inline">\(\widehat{\boldsymbol\xi_e}\)</span> turns a body point’s position expressed in <span class="math inline">\(\{e\}\)</span> into its velocity relative to <span class="math inline">\(\{s\}\)</span>, expressed in <span class="math inline">\(\{e\}\)</span></strong>. Expanding its blocks gives</p>
+<p><span id="eq-body-twist-point-velocity"><span class="math display">\[
+\begin{bmatrix}{}^{e}\mathbf v_P\\0\end{bmatrix}
+=\begin{bmatrix}
+\left[\boldsymbol\omega_e\right]_\times&amp;\boldsymbol\nu_e\\
+\mathbf0_3^{\mathsf T}&amp;0
+\end{bmatrix}
+\begin{bmatrix}{}^{e}\mathbf x\\1\end{bmatrix}
+=\begin{bmatrix}
+\boldsymbol\nu_e+\boldsymbol\omega_e\times{}^{e}\mathbf x\\0
+\end{bmatrix}.
+\tag{10.26}\]</span></span></p>
+<p>At the tool origin, <span class="math inline">\({}^{e}\mathbf x=\mathbf0_3\)</span>, so its velocity relative to <span class="math inline">\(\{s\}\)</span> expressed along the axes of <span class="math inline">\(\{e\}\)</span> is <span class="math inline">\(\boldsymbol\nu_e\)</span>. For a point away from that origin, <span class="math inline">\(\boldsymbol\omega_e\times{}^{e}\mathbf x\)</span> adds the velocity due to the tool’s rotation. The point stays fixed on the tool while moving relative to <span class="math inline">\(\{s\}\)</span>.</p>
+</section>
+<section id="differentiate-the-body-form-product" class="level4">
+<h4 class="anchored" data-anchor-id="differentiate-the-body-form-product">Differentiate the body-form product</h4>
+<p>Recall the fixed home body screws and displacement factors from <a href="#eq-serial-body-screw-axis" class="quarto-xref">Equation&nbsp;<span>10.12</span></a> and <a href="#eq-serial-body-joint-displacement" class="quarto-xref">Equation&nbsp;<span>10.13</span></a>:</p>
+<p><span class="math display">\[
+{}^{e}\mathbf B_j
+=\operatorname{Ad}_{\mathbf M^{-1}}{}^{s}\mathbf S_j,
+\qquad
+\mathbf G_j(q_j)
+=\exp\!\left(\widehat{{}^{e}\mathbf B_j}\,q_j\right).
+\]</span></p>
+<p>Each <span class="math inline">\({}^{e}\mathbf B_j\in\mathbb R^6\)</span> is fixed model data expressed using the frame <span class="math inline">\(\{e\}\)</span> at the home configuration <span class="math inline">\(\mathbf q=\mathbf0_n\)</span>; each <span class="math inline">\(\mathbf G_j\in SE(3)\)</span> is its joint displacement factor in the body-form product. Equation <a href="#eq-serial-body-poe" class="quarto-xref">Equation&nbsp;<span>10.14</span></a> gives <span class="math inline">\(\mathbf T_{se}=\mathbf M\mathbf G_1\cdots\mathbf G_n\)</span>. Suppress the factors’ arguments during the derivation, evaluating each at its current coordinate. The same exponential derivative now gives <span class="math inline">\(\partial\mathbf G_j/\partial q_j=\mathbf G_j\widehat{{}^{e}\mathbf B_j}\)</span>, so</p>
+<p><span class="math display">\[
+\frac{\partial\mathbf T_{se}}{\partial q_j}
+=\mathbf M\mathbf G_1\cdots\mathbf G_j
+\widehat{{}^{e}\mathbf B_j}
+\mathbf G_{j+1}\cdots\mathbf G_n.
+\]</span></p>
+<p>For a body twist, the inverse pose multiplies on the left. Its factors are <span class="math inline">\(\mathbf T_{se}^{-1}=\mathbf G_n^{-1}\cdots\mathbf G_1^{-1}\mathbf M^{-1}\)</span>. This time the home pose and the factors through joint <span class="math inline">\(j\)</span> cancel:</p>
+<p><span class="math display">\[
+\begin{aligned}
+\mathbf T_{se}^{-1}
+\frac{\partial\mathbf T_{se}}{\partial q_j}
+&amp;=\underbrace{
+\mathbf T_{se}^{-1}
+\left(\mathbf M\mathbf G_1\cdots\mathbf G_j\right)
+}_{\mathbf G_n^{-1}\cdots\mathbf G_{j+1}^{-1}}
+\widehat{{}^{e}\mathbf B_j}
+\mathbf G_{j+1}\cdots\mathbf G_n\\
+&amp;=\left(\mathbf G_{j+1}\cdots\mathbf G_n\right)^{-1}
+\widehat{{}^{e}\mathbf B_j}
+\left(\mathbf G_{j+1}\cdots\mathbf G_n\right).
+\end{aligned}
+\]</span></p>
+<p>Apply the chain rule and the same adjoint matrix relation as in the space derivation. Taking the six coordinates of <span class="math inline">\(\mathbf T_{se}^{-1}\dot{\mathbf T}_{se}\)</span> gives</p>
+<p><span class="math display">\[
+\boldsymbol\xi_e
+=\sum_{j=1}^{n}
+\left(
+\operatorname{Ad}_{(\mathbf G_{j+1}\cdots\mathbf G_n)^{-1}}
+{}^{e}\mathbf B_j
+\right)\dot q_j.
+\]</span></p>
+<p>Define the coefficient of <span class="math inline">\(\dot q_j\)</span> as the body-expressed column <span class="math inline">\(\mathbf J_{e,j}(\mathbf q)\in\mathbb R^6\)</span>. Collecting the columns defines the <strong>body Jacobian</strong>, <span class="math inline">\(\mathbf J_e(\mathbf q)\in\mathbb R^{6\times n}\)</span>:</p>
+<p><span id="eq-body-jacobian-columns-rate-map"><span class="math display">\[
+\boxed{
+\begin{aligned}
+\mathbf J_{e,j}(\mathbf q)
+&amp;:=\operatorname{Ad}_{(\mathbf G_{j+1}(q_{j+1})\cdots\mathbf G_n(q_n))^{-1}}
+{}^{e}\mathbf B_j,\\
+\mathbf J_e(\mathbf q)
+&amp;:=\begin{bmatrix}
+\mathbf J_{e,1}(\mathbf q)&amp;\cdots&amp;\mathbf J_{e,n}(\mathbf q)
+\end{bmatrix},\\
+\boldsymbol\xi_e&amp;=\mathbf J_e(\mathbf q)\dot{\mathbf q}.
+\end{aligned}
+}
+\tag{10.27}\]</span></span></p>
+<p>In <span class="math inline">\(\mathbf J_{e,j}(\mathbf q)\)</span>, the subscript <span class="math inline">\(e\)</span> means that the joint’s twist contribution is expressed in frame <span class="math inline">\(\{e\}\)</span> at configuration <span class="math inline">\(\mathbf q\)</span>. The home screw <span class="math inline">\({}^{e}\mathbf B_j\)</span> is the fixed column expressed in <span class="math inline">\(\{e\}\)</span> at <span class="math inline">\(\mathbf q=\mathbf0_n\)</span>. As the arm moves, keep <span class="math inline">\({}^{e}\mathbf B_j\)</span> unchanged; the adjoint in the column formula accounts for the later joints to obtain <span class="math inline">\(\mathbf J_{e,j}(\mathbf q)\)</span>.</p>
+<p>For the last joint, <span class="math inline">\(j=n\)</span>, there are no later-joint displacements to undo, so its column is simply</p>
+<p><span class="math display">\[
+\mathbf J_{e,n}
+=\operatorname{Ad}_{\mathbf I_4}\,{}^{e}\mathbf B_n
+={}^{e}\mathbf B_n.
+\]</span></p>
+<p>After multiplying by the joint rates, the first three entries of <span class="math inline">\(\boldsymbol\xi_e=\mathbf J_e\dot{\mathbf q}\)</span> are <span class="math inline">\(\boldsymbol\nu_e=\mathbf R_{se}^{\mathsf T}{}^{s}\dot{\mathbf p}_e\)</span>: the tool origin’s velocity relative to <span class="math inline">\(\{s\}\)</span>, expressed along <span class="math inline">\(x_e,y_e,z_e\)</span> of <span class="math inline">\(\{e\}\)</span>, in <span class="math inline">\(\mathrm{m\,s^{-1}}\)</span>. The last three entries are <span class="math inline">\(\boldsymbol\omega_e\)</span>, the tool’s angular velocity relative to <span class="math inline">\(\{s\}\)</span> expressed along those same axes, in <span class="math inline">\(\mathrm{rad\,s^{-1}}\)</span>. Supply revolute joint rates in <span class="math inline">\(\mathrm{rad\,s^{-1}}\)</span> and prismatic joint rates in <span class="math inline">\(\mathrm{m\,s^{-1}}\)</span>.</p>
+</section>
+<section id="sec-body-jacobian-inverse-geometry" class="level4">
+<h4 class="anchored" data-anchor-id="sec-body-jacobian-inverse-geometry">Why a moved frame requires an inverse coordinate change</h4>
+<p>The inverse in the body-Jacobian column answers a geometric question: <strong>where is joint <span class="math inline">\(j\)</span>’s hinge line, and which way does it point, when described from the tool’s new origin and along its new axes?</strong> The hinge line need not move in <span class="math inline">\(\{s\}\)</span> for its coordinates in <span class="math inline">\(\{e\}\)</span> to change. Moving the tool frame and re-expressing an unchanged geometric object in that moved frame are different operations.</p>
+<p><strong>First consider rotation alone.</strong> Define <span class="math inline">\(\{e'\}\)</span> as a fixed copy of the tool frame at home. Initially <span class="math inline">\(\{e\}\)</span> and <span class="math inline">\(\{e'\}\)</span> coincide. For this first illustration, keep their origins together and rotate <span class="math inline">\(\{e\}\)</span> while leaving <span class="math inline">\(\{e'\}\)</span> fixed. Let <span class="math inline">\(\mathbf R_{e'e}\in SO(3)\)</span> describe the orientation of <span class="math inline">\(\{e\}\)</span> relative to <span class="math inline">\(\{e'\}\)</span>; its columns are the unit axes of <span class="math inline">\(\{e\}\)</span> expressed in <span class="math inline">\(\{e'\}\)</span>. Let <span class="math inline">\({}^{e'}\mathbf a,{}^{e}\mathbf a\in\mathbb R^3\)</span> be the dimensionless components of the same unchanged unit direction in the two frames. Combining the axes in <span class="math inline">\(\mathbf R_{e'e}\)</span> with the components <span class="math inline">\({}^{e}\mathbf a\)</span> reconstructs that direction in <span class="math inline">\(\{e'\}\)</span>:</p>
+<p><span class="math display">\[
+{}^{e'}\mathbf a=\mathbf R_{e'e}\,{}^{e}\mathbf a.
+\]</span></p>
+<p>To find its components along the moved axes instead, solve for <span class="math inline">\({}^{e}\mathbf a\)</span>:</p>
+<p><span class="math display">\[
+\boxed{
+{}^{e}\mathbf a
+=\mathbf R_{e'e}^{-1}{}^{e'}\mathbf a
+=\mathbf R_{e'e}^{\mathsf T}{}^{e'}\mathbf a.
+}
+\]</span></p>
+<p>For example, let <span class="math inline">\(+x_{e'}\)</span> point right and <span class="math inline">\(+y_{e'}\)</span> point up. Rotate <span class="math inline">\(\{e\}\)</span> counterclockwise by <span class="math inline">\(90^\circ\)</span> about their common positive <span class="math inline">\(z\)</span> direction, so <span class="math inline">\(\mathbf R_{e'e}=\mathbf R_z(\pi/2)\)</span>. Its <span class="math inline">\(+x_e\)</span> axis now points up, and its <span class="math inline">\(+y_e\)</span> axis points left. An unchanged arrow pointing right therefore points along <span class="math inline">\(-y_e\)</span>:</p>
+<p><span class="math display">\[
+\begin{aligned}
+{}^{e'}\mathbf a&amp;=\begin{bmatrix}1\\0\\0\end{bmatrix},\\
+{}^{e}\mathbf a
+&amp;=\mathbf R_z(-\pi/2)\begin{bmatrix}1\\0\\0\end{bmatrix}
+=\begin{bmatrix}0\\-1\\0\end{bmatrix}.
+\end{aligned}
+\]</span></p>
+<p>The arrow has not turned clockwise. Its angle measured from the new <span class="math inline">\(+x_e\)</span> direction is <span class="math inline">\(-90^\circ\)</span>, so its coordinate column changes by the inverse rotation. Physically rotating the arrow while keeping the reference axes fixed would be a different operation.</p>
+<p><strong>Now allow the origin to move too.</strong> Let <span class="math inline">\(\mathbf t\in\mathbb R^3\)</span> be the position of the moved origin of <span class="math inline">\(\{e\}\)</span> relative to the origin of <span class="math inline">\(\{e'\}\)</span>, expressed in <span class="math inline">\(\{e'\}\)</span> in metres. Let <span class="math inline">\({}^{e'}\mathbf p_P,{}^{e}\mathbf p_P\in\mathbb R^3\)</span> locate the same stationary point <span class="math inline">\(P\)</span> relative to the respective frame origins, with both columns in metres. Their relation and its inverse are</p>
+<p><span class="math display">\[
+\begin{aligned}
+{}^{e'}\mathbf p_P
+&amp;=\mathbf t+\mathbf R_{e'e}\,{}^{e}\mathbf p_P,\\
+{}^{e}\mathbf p_P
+&amp;=\mathbf R_{e'e}^{\mathsf T}\bigl({}^{e'}\mathbf p_P-\mathbf t\bigr).
+\end{aligned}
+\]</span></p>
+<p>Read the inverse in two steps:</p>
+<ol type="1">
+<li>Subtract <span class="math inline">\(\mathbf t\)</span>: form the vector from the <strong>new origin</strong> to <span class="math inline">\(P\)</span>, still using the axes of <span class="math inline">\(\{e'\}\)</span>.</li>
+<li>Multiply by <span class="math inline">\(\mathbf R_{e'e}^{\mathsf T}\)</span>: express that vector along the <strong>new axes</strong> of <span class="math inline">\(\{e\}\)</span>.</li>
+</ol>
+<p>Neither step moves <span class="math inline">\(P\)</span>. Together they are the inverse homogeneous coordinate transformation from <span class="math inline">\(\{e'\}\)</span> to <span class="math inline">\(\{e\}\)</span>. A direction needs only the rotation; locating a hinge line also requires accounting for its position relative to the new origin.</p>
+<p><strong>Apply this viewpoint to the later joints.</strong> To see the geometry with the fewest moving parts, start at home, hold <span class="math inline">\(q_1,\ldots,q_j\)</span> at zero, and set the later coordinates <span class="math inline">\(q_{j+1},\ldots,q_n\)</span> to their chosen values. Joint <span class="math inline">\(j\)</span>’s hinge line stays fixed while the downstream links move <span class="math inline">\(\{e\}\)</span>. The fixed copy <span class="math inline">\(\{e'\}\)</span> remains at home, where the column <span class="math inline">\({}^{e}\mathbf B_j\)</span> describes that hinge line. From the body-form pose product <a href="#eq-serial-body-poe" class="quarto-xref">Equation&nbsp;<span>10.14</span></a>,</p>
+<p><span class="math display">\[
+\mathbf T_{se}=\mathbf M\mathbf G_{j+1}\cdots\mathbf G_n,
+\qquad
+\mathbf T_{se'}=\mathbf M.
+\]</span></p>
+<p>Consequently, the pose of the moved frame <span class="math inline">\(\{e\}\)</span> relative to <span class="math inline">\(\{e'\}\)</span> is</p>
+<p><span class="math display">\[
+\mathbf T_{e'e}
+=\mathbf T_{se'}^{-1}\mathbf T_{se}
+=\mathbf G_{j+1}\cdots\mathbf G_n.
+\]</span></p>
+<p>This transform maps coordinates <strong>from <span class="math inline">\(\{e\}\)</span> to <span class="math inline">\(\{e'\}\)</span></strong>. Our question goes the other way: the hinge line is known in <span class="math inline">\(\{e'\}\)</span>, and we want its description in <span class="math inline">\(\{e\}\)</span>. Therefore we need <span class="math inline">\(\mathbf T_{e'e}^{-1}\)</span>. For the six-entry screw column, the adjoint performs this coordinate change:</p>
+<p><span class="math display">\[
+\mathbf J_{e,j}
+=\operatorname{Ad}_{\mathbf T_{e'e}^{-1}}{}^{e}\mathbf B_j
+=\operatorname{Ad}_{(\mathbf G_{j+1}\cdots\mathbf G_n)^{-1}}{}^{e}\mathbf B_j.
+\]</span></p>
+<p>The superscript <span class="math inline">\(e\)</span> in <span class="math inline">\({}^{e}\mathbf B_j\)</span> refers to the frame at home, where <span class="math inline">\(\{e\}\)</span> and <span class="math inline">\(\{e'\}\)</span> coincide. The output <span class="math inline">\(\mathbf J_{e,j}\)</span> describes the same joint motion in the moved frame <span class="math inline">\(\{e\}\)</span>. Setting <span class="math inline">\(q_1,\ldots,q_j\)</span> to zero only simplifies this illustration; the following subsection explains why these coordinates do not affect the body column.</p>
+<p>The inverse therefore <strong>changes the coordinate description of the permitted motion; it does not physically reverse the later joints</strong>. The following factor-order calculation implements this geometric change of reference.</p>
+</section>
+<section id="why-the-later-joints-appear-in-reverse-inverse-order" class="level4">
+<h4 class="anchored" data-anchor-id="why-the-later-joints-appear-in-reverse-inverse-order">Why the later joints appear in reverse inverse order</h4>
+<p>The geometric argument in <a href="#sec-body-jacobian-inverse-geometry" class="quarto-xref"><span>Section 10.3.4.4</span></a> explains why the inverse is needed. To evaluate it, invert the later-joint product, which reverses the factor order:</p>
+<p><span class="math display">\[
+\begin{aligned}
+\left(\mathbf G_{j+1}\cdots\mathbf G_n\right)^{-1}
+&amp;=\mathbf G_n^{-1}\cdots\mathbf G_{j+1}^{-1}\\
+&amp;=\exp\!\left(-\widehat{{}^{e}\mathbf B_n}\,q_n\right)
+\cdots
+\exp\!\left(-\widehat{{}^{e}\mathbf B_{j+1}}\,q_{j+1}\right).
+\end{aligned}
+\]</span></p>
+<p>The minus signs invert individual exponential factors; the reversed order inverts their product. Both are required. The Jacobian’s columns themselves remain in joint order <span class="math inline">\(1,\ldots,n\)</span>, matching <span class="math inline">\(\dot{\mathbf q}\)</span>.</p>
+<p>Focus on the motion caused by joint <span class="math inline">\(j\)</span> alone: hold all other joint rates at zero, so the end-effector body twist is <span class="math inline">\(\mathbf J_{e,j}(\mathbf q)\dot q_j\)</span>. To calculate this column, we must describe joint <span class="math inline">\(j\)</span>’s permitted motion in frame <span class="math inline">\(\{e\}\)</span>. For a revolute joint, this means describing its physical hinge line in <span class="math inline">\(\{e\}\)</span>, not describing a joint coordinate frame.</p>
+<p>The <strong>later joints are joints <span class="math inline">\(j+1,\ldots,n\)</span></strong>, between joint <span class="math inline">\(j\)</span> and the end effector. Their coordinate values <span class="math inline">\(q_{j+1},\ldots,q_n\)</span> determine how those intervening links are arranged. Changing one of these values can change the position or direction of joint <span class="math inline">\(j\)</span>’s hinge line relative to frame <span class="math inline">\(\{e\}\)</span>.</p>
+<p>For the same nonzero rotation rate <span class="math inline">\(\dot q_j\)</span>, this can change the body-twist components:</p>
+<ul>
+<li><strong>Linear part <span class="math inline">\(\boldsymbol\nu_e\)</span>:</strong> changing the hinge line’s offset from <span class="math inline">\(O_e\)</span> changes the tool origin’s velocity produced by rotation about that line, expressed in <span class="math inline">\(\{e\}\)</span>.</li>
+<li><strong>Angular part <span class="math inline">\(\boldsymbol\omega_e\)</span>:</strong> changing the hinge line’s direction expressed in <span class="math inline">\(\{e\}\)</span> changes the angular-velocity components along <span class="math inline">\(x_e,y_e,z_e\)</span>.</li>
+</ul>
+<p>Because the body twist is <span class="math inline">\(\boldsymbol\xi_e=\mathbf J_{e,j}(\mathbf q)\dot q_j\)</span>, a change in these components at the same nonzero <span class="math inline">\(\dot q_j\)</span> means that <span class="math inline">\(\mathbf J_{e,j}\)</span> changes. The later joints are held still during each calculation; their different coordinate values change how joint <span class="math inline">\(j\)</span>’s motion is described in <span class="math inline">\(\{e\}\)</span>. They do not need to move joint <span class="math inline">\(j\)</span>’s hinge line in <span class="math inline">\(\{s\}\)</span> for its coordinates in <span class="math inline">\(\{e\}\)</span> to change.</p>
+<p>With <span class="math inline">\(q_{j+1},\ldots,q_n\)</span> fixed, the links between joint <span class="math inline">\(j\)</span> and the end effector cannot bend or slide relative to one another. Rotating revolute joint <span class="math inline">\(j\)</span> therefore turns these links and their attached frame <span class="math inline">\(\{e\}\)</span> as one rigid assembly around its hinge line. The hinge line stays at the same position and direction when described in <span class="math inline">\(\{e\}\)</span>: for example, an elbow remains at the same end of a rigid forearm while the forearm and its attached frame turn around it.</p>
+<p>If an earlier joint, one of <span class="math inline">\(1,\ldots,j-1\)</span>, moves while the other joint coordinates are held fixed, it moves joint <span class="math inline">\(j\)</span> and the end effector together. It does not change the arrangement between joint <span class="math inline">\(j\)</span> and <span class="math inline">\(\{e\}\)</span>, so the hinge line’s coordinates in <span class="math inline">\(\{e\}\)</span> remain unchanged. For a prismatic joint <span class="math inline">\(j\)</span>, the relevant quantity is its sliding direction expressed in <span class="math inline">\(\{e\}\)</span>; sliding along that direction does not change it.</p>
+<p>Consequently, <span class="math inline">\(\mathbf J_{e,j}\)</span> depends only on <span class="math inline">\(q_{j+1},\ldots,q_n\)</span>. In particular, <span class="math inline">\(\mathbf J_{e,n}={}^{e}\mathbf B_n\)</span> is fixed: there are no joints between the last joint and the rigidly attached tool. At home, every factor is the identity, giving <span class="math inline">\(\mathbf J_e(\mathbf0_n)=[{}^{e}\mathbf B_1\;\cdots\;{}^{e}\mathbf B_n]\)</span>.</p>
+<div id="example-planar-2r-body-jacobian" class="callout callout-style-simple callout-note no-icon callout-titled" title="Example: The same planar 2R motion expressed in ${e}$">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Example: The same planar 2R motion expressed in <span class="math inline">\({e}\)</span>
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Use the same arm and conventions as in <a href="#example-planar-2r-space-jacobian">the space-Jacobian example, “Space twist of the planar 2R arm”</a>. This example checks the body columns through joint-axis geometry, then expresses the same physical velocity of <span class="math inline">\(O_e\)</span> relative to <span class="math inline">\(\{s\}\)</span> along the axes of <span class="math inline">\(\{e\}\)</span>. The home body columns were already derived from the two lever arms:</p>
+<p><span class="math display">\[
+{}^{e}\mathbf B_1=\begin{bmatrix}0\\L_1+L_2\\0\\0\\0\\1\end{bmatrix},
+\qquad
+{}^{e}\mathbf B_2=\begin{bmatrix}0\\L_2\\0\\0\\0\\1\end{bmatrix}.
+\]</span></p>
+<p>For two joints, the general formula becomes <span class="math inline">\(\mathbf J_{e,1}=\operatorname{Ad}_{\mathbf G_2^{-1}}{}^{e}\mathbf B_1\)</span> and <span class="math inline">\(\mathbf J_{e,2}={}^{e}\mathbf B_2\)</span>. We can obtain their entries independently by locating the current joint hinge lines in <span class="math inline">\(\{e\}\)</span>. First describe the two forward link vectors: <strong>base to elbow</strong> for link 1, and <strong>elbow to tool</strong> for link 2. The tool’s <span class="math inline">\(+x_e\)</span> direction points from the elbow towards the tool, along the forward link-2 vector.</p>
+<p><strong>Measuring a direction from <span class="math inline">\(+x_e\)</span>.</strong> Here, a link’s angle expressed in <span class="math inline">\(\{e\}\)</span> means its signed angle measured from <span class="math inline">\(+x_e\)</span>, rather than from <span class="math inline">\(+x_s\)</span>. Counterclockwise is positive in the plane shown. Changing the reference direction does not physically rotate the link. From <span class="math inline">\(+x_s\)</span>, link 1 has angle <span class="math inline">\(\theta_1\)</span>, while <span class="math inline">\(+x_e\)</span> has angle <span class="math inline">\(\theta_1+\theta_2\)</span>. Subtracting the reference direction’s angle gives</p>
+<p><span class="math display">\[
+\theta_1-(\theta_1+\theta_2)
+=-\theta_2.
+\]</span></p>
+<p>The following diagram illustrates this change of reference direction with <span class="math inline">\(\theta_1=30^\circ\)</span> and <span class="math inline">\(\theta_2=60^\circ\)</span>; these angles are only for the direction illustration.</p>
+<div id="fig-planar-2r-link-directions-tool-frame" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-planar-2r-link-directions-tool-frame-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../figures/planar_2r_link_directions_in_tool_frame.png" class="img-fluid figure-img" style="width:100.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-planar-2r-link-directions-tool-frame-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;10.1: The same forward link-1 direction measured from <span class="math inline">\(+x_s\)</span> and <span class="math inline">\(+x_e\)</span>. The right panel copies the directions to a common starting point without rotating them; link lengths are schematic.
+</figcaption>
+</figure>
+</div>
+<ol type="1">
+<li>Starting from <span class="math inline">\(+x_s\)</span>, turn counterclockwise <span class="math inline">\(30^\circ\)</span> to point from the base to the elbow.</li>
+<li>The tool’s <span class="math inline">\(+x_e\)</span> direction is at <span class="math inline">\(30^\circ+60^\circ=90^\circ\)</span> from <span class="math inline">\(+x_s\)</span>.</li>
+<li>Starting instead from <span class="math inline">\(+x_e\)</span>, turn clockwise <span class="math inline">\(60^\circ\)</span> to point along the same forward link-1 vector. Its angle measured from <span class="math inline">\(+x_e\)</span> is therefore <span class="math inline">\(30^\circ-90^\circ=-60^\circ\)</span>.</li>
+</ol>
+<p><strong>From directions to vector components.</strong> Expressing a link vector in <span class="math inline">\(\{e\}\)</span> means giving its signed components along <span class="math inline">\(x_e,y_e,z_e\)</span>. Its length times the cosine of its angle from <span class="math inline">\(+x_e\)</span> gives the <span class="math inline">\(x_e\)</span> component; its length times the sine gives the <span class="math inline">\(y_e\)</span> component. Both links lie in the <span class="math inline">\(x_e y_e\)</span> plane, so their <span class="math inline">\(z_e\)</span> components are zero. Consequently, the forward link vectors, with components in metres, are</p>
+<p><span class="math display">\[
+\begin{aligned}
+\text{base to elbow:}\quad
+&amp;\begin{bmatrix}
+L_1\cos(-\theta_2)\\L_1\sin(-\theta_2)\\0
+\end{bmatrix}
+=\begin{bmatrix}
+L_1\cos\theta_2\\-L_1\sin\theta_2\\0
+\end{bmatrix},\\[6pt]
+\text{elbow to tool:}\quad
+&amp;\begin{bmatrix}L_2\cos 0\\L_2\sin 0\\0\end{bmatrix}
+=\begin{bmatrix}L_2\\0\\0\end{bmatrix}.
+\end{aligned}
+\]</span></p>
+<p>For link 1, <span class="math inline">\(\cos(-\theta_2)=\cos\theta_2\)</span> and <span class="math inline">\(\sin(-\theta_2)=-\sin\theta_2\)</span>. In the illustrated configuration, the forward link-1 vector has a positive <span class="math inline">\(x_e\)</span> component and a negative <span class="math inline">\(y_e\)</span> component. Link 2 points entirely along <span class="math inline">\(+x_e\)</span>, so its components are <span class="math inline">\(L_2,0,0\)</span>. These columns describe displacements between the stated endpoints, not positions measured from <span class="math inline">\(O_e\)</span>; using the axes of <span class="math inline">\(\{e\}\)</span> does not change those endpoints.</p>
+<p><strong>Return from the tool to the base.</strong> The vector <span class="math inline">\({}^{e}\mathbf p_s\)</span> goes from <span class="math inline">\(O_e\)</span> back to <span class="math inline">\(O_s\)</span>, opposite to the sum of the two forward link vectors. Reverse both vectors to obtain</p>
+<p><span class="math display">\[
+{}^{e}\mathbf p_s
+=-\begin{bmatrix}L_1\cos\theta_2\\-L_1\sin\theta_2\\0\end{bmatrix}
+-\begin{bmatrix}L_2\\0\\0\end{bmatrix}
+=\begin{bmatrix}-L_1\cos\theta_2-L_2\\L_1\sin\theta_2\\0\end{bmatrix}.
+\]</span></p>
+<p>Here <span class="math inline">\({}^{e}\mathbf p_s\)</span> is the current position of the base origin relative to <span class="math inline">\(O_e\)</span>, expressed in <span class="math inline">\(\{e\}\)</span> at configuration <span class="math inline">\(\mathbf q\)</span>. The elbow is one second-link length behind the tool, so its position expressed in <span class="math inline">\(\{e\}\)</span> at <span class="math inline">\(\mathbf q\)</span> is <span class="math inline">\({}^{e}\mathbf p_\ell=[-L_2\;0\;0]^{\mathsf T}\)</span>. Both joint axes still point along <span class="math inline">\(+z_e\)</span>, with unit direction <span class="math inline">\([0\;0\;1]^{\mathsf T}\)</span>. The revolute screw rule from <a href="#eq-serial-space-screw-axis" class="quarto-xref">Equation&nbsp;<span>10.7</span></a>, now applied to axis points expressed in <span class="math inline">\(\{e\}\)</span>, gives the two linear blocks:</p>
+<p><span class="math display">\[
+\begin{aligned}
+-\begin{bmatrix}0\\0\\1\end{bmatrix}\times{}^{e}\mathbf p_s
+&amp;=\begin{bmatrix}L_1\sin\theta_2\\L_1\cos\theta_2+L_2\\0\end{bmatrix},\\
+-\begin{bmatrix}0\\0\\1\end{bmatrix}\times{}^{e}\mathbf p_\ell
+&amp;=\begin{bmatrix}0\\L_2\\0\end{bmatrix}.
+\end{aligned}
+\]</span></p>
+<p>Appending the angular direction for each column gives</p>
+<p><span class="math display">\[
+\mathbf J_e(\mathbf q)=
+\begin{bmatrix}
+L_1\sin\theta_2&amp;0\\
+L_1\cos\theta_2+L_2&amp;L_2\\
+0&amp;0\\
+0&amp;0\\
+0&amp;0\\
+1&amp;1
+\end{bmatrix}.
+\]</span></p>
+<p><strong>Evaluate the same columns using the body-form adjoint.</strong> The geometric calculation above provides an independent check of <a href="#eq-body-jacobian-columns-rate-map" class="quarto-xref">Equation&nbsp;<span>10.27</span></a>. To apply that formula directly, we need the inverse displacement <span class="math inline">\(\mathbf G_2(\theta_2)^{-1}\)</span>, not just the fixed screw column <span class="math inline">\({}^{e}\mathbf B_2\)</span>. Recall that <span class="math inline">\(\mathbf G_2(\theta_2)=\exp(\widehat{{}^{e}\mathbf B_2}\theta_2)\)</span> is a transform, whereas <span class="math inline">\({}^{e}\mathbf B_2\)</span> is its six-entry home screw column.</p>
+<p><strong>Obtain the displacement from the exponential.</strong> The fixed home screw <span class="math inline">\({}^{e}\mathbf B_2=[0\;L_2\;0\;0\;0\;1]^{\mathsf T}\)</span> has linear block <span class="math inline">\([0\;L_2\;0]^{\mathsf T}\)</span> and angular block <span class="math inline">\([0\;0\;1]^{\mathsf T}\)</span>. Its hat matrix is therefore</p>
+<p><span class="math display">\[
+\widehat{{}^{e}\mathbf B_2}
+=\begin{bmatrix}
+0&amp;-1&amp;0&amp;0\\
+1&amp;0&amp;0&amp;L_2\\
+0&amp;0&amp;0&amp;0\\
+0&amp;0&amp;0&amp;0
+\end{bmatrix}
+=\begin{bmatrix}
+\mathbf W_2&amp;\mathbf v_2\\
+\mathbf0_3^{\mathsf T}&amp;0
+\end{bmatrix}.
+\]</span></p>
+<p>Here <span class="math inline">\(\mathbf W_2\in\mathbb R^{3\times3}\)</span> denotes the upper-left cross-product matrix, and <span class="math inline">\(\mathbf v_2=[0\;L_2\;0]^{\mathsf T}\in\mathbb R^3\)</span> denotes the linear screw block, not a physical velocity. Both come from the screw expressed in the home frame <span class="math inline">\(\{e\}\)</span>. Write <span class="math inline">\(\mathbf t_2(\theta_2)\in\mathbb R^3\)</span> for the exponential’s translation column, in metres. Expanding the matrix exponential in powers of <span class="math inline">\(\theta_2\)</span> gives</p>
+<p><span class="math display">\[
+\begin{aligned}
+\mathbf G_2(\theta_2)
+&amp;=\exp\!\left(\widehat{{}^{e}\mathbf B_2}\theta_2\right)\\
+&amp;=\begin{bmatrix}
+e^{\mathbf W_2\theta_2}&amp;\mathbf t_2(\theta_2)\\
+\mathbf0_3^{\mathsf T}&amp;1
+\end{bmatrix},\\[6pt]
+\mathbf t_2(\theta_2)
+&amp;=\theta_2\mathbf v_2
++\frac{\theta_2^2}{2!}\mathbf W_2\mathbf v_2
++\frac{\theta_2^3}{3!}\mathbf W_2^2\mathbf v_2+\cdots\\
+&amp;=\int_0^{\theta_2}e^{\mathbf W_2 u}\mathbf v_2\,du.
+\end{aligned}
+\]</span></p>
+<p>The integration variable <span class="math inline">\(u\)</span> is a joint angle in radians, not time. Thus translation is generally not just <span class="math inline">\(\theta_2\mathbf v_2\)</span>: the higher-order terms account for the coupled rotation.</p>
+<p>Since <span class="math inline">\(\mathbf W_2\)</span> generates rotation about <span class="math inline">\(+z_e\)</span>, <span class="math inline">\(e^{\mathbf W_2 u}=\mathbf R_z(u)\)</span>. Substituting the linear block and integrating gives</p>
+<p><span class="math display">\[
+\begin{aligned}
+\mathbf t_2(\theta_2)
+&amp;=\int_0^{\theta_2}
+\mathbf R_z(u)\begin{bmatrix}0\\L_2\\0\end{bmatrix}\,du\\
+&amp;=\int_0^{\theta_2}
+\begin{bmatrix}-L_2\sin u\\L_2\cos u\\0\end{bmatrix}\,du\\
+&amp;=\begin{bmatrix}
+L_2(\cos\theta_2-1)\\L_2\sin\theta_2\\0
+\end{bmatrix}.
+\end{aligned}
+\]</span></p>
+<p>For the remaining calculation, abbreviate <span class="math inline">\(c_2:=\cos\theta_2\)</span> and <span class="math inline">\(s_2:=\sin\theta_2\)</span>, both dimensionless. Combining the rotation and translation blocks yields</p>
+<p><span class="math display">\[
+\mathbf G_2(\theta_2)
+=\begin{bmatrix}
+c_2&amp;-s_2&amp;0&amp;L_2(c_2-1)\\
+s_2&amp;c_2&amp;0&amp;L_2s_2\\
+0&amp;0&amp;1&amp;0\\
+0&amp;0&amp;0&amp;1
+\end{bmatrix}.
+\]</span></p>
+<p><strong>What motion the matrix represents.</strong> To interpret <span class="math inline">\(\mathbf G_2\)</span> on its own, start with both joint angles at zero and define <span class="math inline">\(\{e'\}\)</span> as a <strong>fixed copy of <span class="math inline">\(\{e\}\)</span> at home</strong>. The two frames initially coincide: they have the same origin and axis directions. Hold joint 1 at zero and bend joint 2. The tool frame <span class="math inline">\(\{e\}\)</span> moves, while <span class="math inline">\(\{e'\}\)</span> keeps its initial position and orientation. Let <span class="math inline">\(\mathbf x,\mathbf x'\in\mathbb R^3\)</span> describe a point fixed on link 2 before and after bending, both in metres relative to the origin of <span class="math inline">\(\{e'\}\)</span> and expressed along its axes.<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a> The prime on <span class="math inline">\(\mathbf x'\)</span> means the moved position; both point columns use <span class="math inline">\(\{e'\}\)</span>, not different frames.</p>
+<p>The stored screw <span class="math inline">\({}^{e}\mathbf B_2\)</span> uses <span class="math inline">\(\{e\}\)</span> at home, so its entries also describe the elbow’s rotation line and positive direction in the coincident fixed frame <span class="math inline">\(\{e'\}\)</span>. We retain its established notation. In the following point calculation, <span class="math inline">\(\mathbf R_z\)</span> rotates about the <span class="math inline">\(z_{e'}\)</span> direction, and <span class="math inline">\(\mathbf t_2\)</span> has components along the axes of <span class="math inline">\(\{e'\}\)</span>. The matrix <span class="math inline">\(\mathbf G_2(\theta_2)\)</span> packages the complete displacement into one matrix:</p>
+<p><span class="math display">\[
+\boxed{
+\mathbf G_2(\theta_2)
+=\begin{bmatrix}
+\mathbf R_z(\theta_2)&amp;\mathbf t_2(\theta_2)\\
+\mathbf0_3^{\mathsf T}&amp;1
+\end{bmatrix}.
+}
+\]</span></p>
+<p>Multiplying a homogeneous point makes its role explicit:</p>
+<p><span class="math display">\[
+\begin{aligned}
+\begin{bmatrix}\mathbf x'\\1\end{bmatrix}
+&amp;=\mathbf G_2(\theta_2)\begin{bmatrix}\mathbf x\\1\end{bmatrix}\\
+&amp;=\begin{bmatrix}
+\mathbf R_z(\theta_2)\mathbf x+\mathbf t_2(\theta_2)\\1
+\end{bmatrix}.
+\end{aligned}
+\]</span></p>
+<p>The calculation <span class="math inline">\(\mathbf x'=\mathbf R_z(\theta_2)\mathbf x+\mathbf t_2(\theta_2)\)</span> can be read in two steps:</p>
+<ol type="1">
+<li><span class="math inline">\(\mathbf R_z(\theta_2)\mathbf x\)</span> rotates the point about the <strong>fixed origin of <span class="math inline">\(\{e'\}\)</span></strong>, around its <span class="math inline">\(z_{e'}\)</span> axis.</li>
+<li>Adding <span class="math inline">\(\mathbf t_2(\theta_2)\)</span> shifts that result so the combined operation equals rotation about the <strong>elbow</strong> instead.</li>
+</ol>
+<p>These are two calculation steps for one physical rotation, not a rotation followed by a separate sliding motion.</p>
+<p><strong>Obtain the translation from elbow-centred geometry.</strong> Let <span class="math inline">\(\mathbf p=[-L_2\;0\;0]^{\mathsf T}\in\mathbb R^3\)</span> be the elbow’s position relative to the origin of <span class="math inline">\(\{e'\}\)</span>, expressed in <span class="math inline">\(\{e'\}\)</span> in metres. The diagram compares the fixed reference <span class="math inline">\(\{e'\}\)</span> with the moved tool frame <span class="math inline">\(\{e\}\)</span> and shows all three position vectors from the same reference origin.</p>
+<div id="fig-planar-2r-fixed-moving-tool-frames" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-planar-2r-fixed-moving-tool-frames-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../figures/planar_2r_fixed_and_moving_tool_frames.png" class="img-fluid figure-img" style="width:100.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-planar-2r-fixed-moving-tool-frames-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;10.2: Joint 2 shown at <span class="math inline">\(\theta_2=60^\circ\)</span>. The marked point <span class="math inline">\(P\)</span> lies on link 2: <span class="math inline">\(\mathbf x\)</span> locates it before rotation and <span class="math inline">\(\mathbf x'\)</span> after rotation; <span class="math inline">\(\mathbf p\)</span> locates the stationary elbow. All three columns are expressed in the fixed frame <span class="math inline">\(\{e'\}\)</span>. Frame <span class="math inline">\(\{e\}\)</span> follows the tool; both positive <span class="math inline">\(z\)</span> directions point out of the page. Curved arrows separate overlapping position vectors for readability; they are not motion paths.
+</figcaption>
+</figure>
+</div>
+<p>The vector <span class="math inline">\(\mathbf x-\mathbf p\)</span> points from the elbow to the initial point. Rotate this vector about the elbow’s hinge line, whose positive direction is <span class="math inline">\(+z_{e'}\)</span>, then add the elbow position back:</p>
+<p><span class="math display">\[
+\boxed{
+\mathbf x'=\mathbf p+\mathbf R_z(\theta_2)(\mathbf x-\mathbf p).
+}
+\]</span></p>
+<p>Read this construction geometrically:</p>
+<ol type="1">
+<li>Start at the elbow, <span class="math inline">\(\mathbf p\)</span>.</li>
+<li>Follow the rotated elbow-to-point vector, <span class="math inline">\(\mathbf R_z(\theta_2)(\mathbf x-\mathbf p)\)</span>.</li>
+<li>Arrive at the moved point, <span class="math inline">\(\mathbf x'\)</span>.</li>
+</ol>
+<p>Expanding this expression identifies the translation column of <span class="math inline">\(\mathbf G_2\)</span>:</p>
+<p><span class="math display">\[
+\begin{aligned}
+\mathbf x'
+&amp;=\mathbf R_z(\theta_2)\mathbf x
++\mathbf p-\mathbf R_z(\theta_2)\mathbf p\\
+&amp;=\mathbf R_z(\theta_2)\mathbf x+\mathbf t_2(\theta_2),\\[4pt]
+\mathbf t_2(\theta_2)
+&amp;=\mathbf p-\mathbf R_z(\theta_2)\mathbf p.
+\end{aligned}
+\]</span></p>
+<p>Substituting the elbow position gives</p>
+<p><span class="math display">\[
+\begin{aligned}
+\mathbf t_2(\theta_2)
+&amp;=\begin{bmatrix}-L_2\\0\\0\end{bmatrix}
+-\begin{bmatrix}-L_2c_2\\-L_2s_2\\0\end{bmatrix}\\
+&amp;=\begin{bmatrix}L_2(c_2-1)\\L_2s_2\\0\end{bmatrix}.
+\end{aligned}
+\]</span></p>
+<p>As a check, rotation about the elbow must leave the elbow itself fixed. Setting <span class="math inline">\(\mathbf x=\mathbf p\)</span> gives</p>
+<p><span class="math display">\[
+\mathbf R_z(\theta_2)\mathbf p+\mathbf t_2(\theta_2)
+=\mathbf R_z(\theta_2)\mathbf p
++\mathbf p-\mathbf R_z(\theta_2)\mathbf p
+=\mathbf p.
+\]</span></p>
+<p>Thus the geometric construction and the matrix exponential give the same translation column, and both describe a rotation that keeps the elbow fixed.</p>
+<p><strong>Undo the displacement.</strong> The forward relation is <span class="math inline">\(\mathbf x'=\mathbf R_z(\theta_2)\mathbf x+\mathbf t_2(\theta_2)\)</span>, with both point columns expressed in <span class="math inline">\(\{e'\}\)</span>. To recover <span class="math inline">\(\mathbf x\)</span>, first subtract the translation and then undo the rotation:</p>
+<p><span class="math display">\[
+\begin{aligned}
+\mathbf x
+&amp;=\mathbf R_z(-\theta_2)
+\bigl(\mathbf x'-\mathbf t_2(\theta_2)\bigr)\\
+&amp;=\mathbf R_z(-\theta_2)\mathbf x'
+-\mathbf R_z(-\theta_2)\mathbf t_2(\theta_2).
+\end{aligned}
+\]</span></p>
+<p>Thus the inverse has rotation <span class="math inline">\(\mathbf R_z(-\theta_2)\)</span> and translation <span class="math inline">\(\mathbf t_{2,-}:=-\mathbf R_z(-\theta_2)\mathbf t_2(\theta_2)\in\mathbb R^3\)</span>, in metres. The subscript <span class="math inline">\(2,-\)</span> identifies joint 2’s inverse displacement. This column is not the elbow’s position, and it is not generally just <span class="math inline">\(-\mathbf t_2\)</span>: the negative translation must also be rotated. Substituting the known entries gives</p>
+<p><span class="math display">\[
+\begin{aligned}
+\mathbf t_{2,-}
+&amp;=-\begin{bmatrix}
+c_2&amp;s_2&amp;0\\
+-s_2&amp;c_2&amp;0\\
+0&amp;0&amp;1
+\end{bmatrix}
+\begin{bmatrix}L_2(c_2-1)\\L_2s_2\\0\end{bmatrix}\\
+&amp;=-\begin{bmatrix}
+L_2(c_2^2-c_2+s_2^2)\\
+L_2(-s_2c_2+s_2+s_2c_2)\\0
+\end{bmatrix}\\
+&amp;=\begin{bmatrix}L_2(c_2-1)\\-L_2s_2\\0\end{bmatrix},
+\end{aligned}
+\]</span></p>
+<p>where <span class="math inline">\(c_2^2+s_2^2=1\)</span>. Packaging the inverse rotation and translation gives</p>
+<p><span class="math display">\[
+\mathbf G_2(\theta_2)^{-1}
+=\begin{bmatrix}
+\mathbf R_z(-\theta_2)&amp;\mathbf t_{2,-}\\
+\mathbf0_3^{\mathsf T}&amp;1
+\end{bmatrix}.
+\]</span></p>
+<p>Geometrically, this undoes the original motion by rotating through <span class="math inline">\(-\theta_2\)</span> about the same elbow, with all point positions still described in <span class="math inline">\(\{e'\}\)</span>.</p>
+<p><strong>Apply the inverse displacement’s adjoint.</strong> Its linear-first block structure is</p>
+<p><span class="math display">\[
+\operatorname{Ad}_{\mathbf G_2^{-1}}
+=\begin{bmatrix}
+\mathbf R_z(-\theta_2)&amp;
+\left[\mathbf t_{2,-}\right]_\times\mathbf R_z(-\theta_2)\\
+\mathbf0_{3\times3}&amp;\mathbf R_z(-\theta_2)
+\end{bmatrix}.
+\]</span></p>
+<p>The upper block row rotates the input screw’s linear block and adds the cross product of <span class="math inline">\(\mathbf t_{2,-}\)</span> with its rotated angular block. The lower block row only rotates the angular block. For <span class="math inline">\({}^{e}\mathbf B_1\)</span>, the input linear block is <span class="math inline">\([0\;L_1+L_2\;0]^{\mathsf T}\)</span> and the angular block is <span class="math inline">\([0\;0\;1]^{\mathsf T}\)</span>. Rotation about <span class="math inline">\(z\)</span> leaves this angular direction unchanged:</p>
+<p><span class="math display">\[
+\mathbf R_z(-\theta_2)\begin{bmatrix}0\\0\\1\end{bmatrix}
+=\begin{bmatrix}
+c_2&amp;s_2&amp;0\\-s_2&amp;c_2&amp;0\\0&amp;0&amp;1
+\end{bmatrix}\begin{bmatrix}0\\0\\1\end{bmatrix}
+=\begin{bmatrix}0\\0\\1\end{bmatrix}.
+\]</span></p>
+<p>This explains why <span class="math inline">\([0\;0\;1]^{\mathsf T}\)</span> appears twice in the calculation below. Combining this correction with the rotated linear block gives the first body-Jacobian column:</p>
+<p><span class="math display">\[
+\begin{aligned}
+\mathbf J_{e,1}
+&amp;=\operatorname{Ad}_{\mathbf G_2^{-1}}{}^{e}\mathbf B_1\\
+&amp;=\begin{bmatrix}
+\mathbf R_z(-\theta_2)\begin{bmatrix}0\\L_1+L_2\\0\end{bmatrix}
++\mathbf t_{2,-}\times\begin{bmatrix}0\\0\\1\end{bmatrix}\\
+\begin{bmatrix}0\\0\\1\end{bmatrix}
+\end{bmatrix}\\[6pt]
+&amp;=\begin{bmatrix}
+\begin{bmatrix}(L_1+L_2)s_2\\(L_1+L_2)c_2\\0\end{bmatrix}
++\begin{bmatrix}-L_2s_2\\L_2(1-c_2)\\0\end{bmatrix}\\
+\begin{bmatrix}0\\0\\1\end{bmatrix}
+\end{bmatrix}\\[6pt]
+&amp;=\begin{bmatrix}L_1s_2\\L_1c_2+L_2\\0\\0\\0\\1\end{bmatrix}.
+\end{aligned}
+\]</span></p>
+<p>Joint 2 is the last joint, so <span class="math inline">\(\mathbf J_{e,2}={}^{e}\mathbf B_2=[0\;L_2\;0\;0\;0\;1]^{\mathsf T}\)</span>. Placing these two columns side by side reproduces exactly the matrix obtained from hinge-line geometry.</p>
+<p>Column 1 changes with the elbow angle because bending the elbow changes the base axis’s location relative to the tool. Column 2 is fixed because the elbow-to-tool geometry is fixed. Neither column depends on <span class="math inline">\(\theta_1\)</span>: base rotation carries the arm and frame <span class="math inline">\(\{e\}\)</span> together.</p>
+<p>For the same <span class="math inline">\(L_1=L_2=1\,\mathrm m\)</span>, <span class="math inline">\(\theta_1=0\)</span>, <span class="math inline">\(\theta_2=\pi/2\)</span>, and <span class="math inline">\(\dot{\mathbf q}=[0.2\;-0.1]^{\mathsf T}\,\mathrm{rad\,s^{-1}}\)</span>, the matrix gives</p>
+<p><span class="math display">\[
+\begin{aligned}
+\boldsymbol\nu_e
+&amp;=\begin{bmatrix}1&amp;0\\1&amp;1\\0&amp;0\end{bmatrix}
+\begin{bmatrix}0.2\\-0.1\end{bmatrix}
+=\begin{bmatrix}0.2\\0.1\\0\end{bmatrix}\,\mathrm{m\,s^{-1}},\\
+\boldsymbol\omega_e
+&amp;=\begin{bmatrix}0\\0\\0.1\end{bmatrix}\,\mathrm{rad\,s^{-1}}.
+\end{aligned}
+\]</span></p>
+<p>At this configuration, <span class="math inline">\(\mathbf R_{se}=\mathbf R_z(\theta_1+\theta_2)=\mathbf R_z(\pi/2)\)</span>: <span class="math inline">\(+x_e\)</span> points along <span class="math inline">\(+y_s\)</span>, and <span class="math inline">\(+y_e\)</span> points along <span class="math inline">\(-x_s\)</span>. Rearranging <span class="math inline">\(\boldsymbol\nu_e=\mathbf R_{se}^{\mathsf T}{}^{s}\dot{\mathbf p}_e\)</span> therefore gives</p>
+<p><span class="math display">\[
+{}^{s}\dot{\mathbf p}_e
+=\mathbf R_{se}\boldsymbol\nu_e
+=\begin{bmatrix}0&amp;-1&amp;0\\1&amp;0&amp;0\\0&amp;0&amp;1\end{bmatrix}
+\begin{bmatrix}0.2\\0.1\\0\end{bmatrix}\,\mathrm{m\,s^{-1}}
+=\begin{bmatrix}-0.1\\0.2\\0\end{bmatrix}\,\mathrm{m\,s^{-1}}.
+\]</span></p>
+<p>This is exactly the tool-origin velocity found from both the position task and the space-twist field. The body components report <span class="math inline">\(0.2\,\mathrm{m\,s^{-1}}\)</span> along the tool’s <span class="math inline">\(+x_e\)</span> direction and <span class="math inline">\(0.1\,\mathrm{m\,s^{-1}}\)</span> along its <span class="math inline">\(+y_e\)</span> direction; they do not describe a different motion.</p>
+</div>
+</div>
+</section>
+<section id="quick-test-body-jacobians" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="quick-test-body-jacobians">Quick test: body Jacobians</h4>
+<ol type="1">
+<li><p><strong>Recall and interpretation:</strong> Define the input and output of <span class="math inline">\(\mathbf J_e\in\mathbb R^{6\times n}\)</span>. Its linear output <span class="math inline">\(\boldsymbol\nu_e\)</span> gives the tool origin’s velocity relative to the fixed frame <span class="math inline">\(\{s\}\)</span>, expressed along the axes of <span class="math inline">\(\{e\}\)</span>. Why can this velocity be nonzero even though the tool origin’s coordinates within its attached frame <span class="math inline">\(\{e\}\)</span> are always <span class="math inline">\(\mathbf0_3\)</span>?</p></li>
+<li><p><strong>Derivation:</strong> For three joints, write column 1 using <span class="math inline">\(\mathbf G_2\)</span> and <span class="math inline">\(\mathbf G_3\)</span>. Explain both the inverse signs and the factor order.</p></li>
+<li><p><strong>Physical meaning:</strong> Which coordinates can change column <span class="math inline">\(j\)</span>? Why is the last column fixed, and what does the whole matrix become at home?</p></li>
+<li><p><strong>Application:</strong> At the planar example’s configuration, let only joint 2 rotate at <span class="math inline">\(0.1\,\mathrm{rad\,s^{-1}}\)</span>. Find <span class="math inline">\(\boldsymbol\nu_e\)</span>, <span class="math inline">\(\boldsymbol\omega_e\)</span>, and the tool-origin velocity expressed in <span class="math inline">\(\{s\}\)</span>.</p></li>
+<li><p><strong>Validity:</strong> The body twist is extracted using the current inverse pose:</p>
+<p><span class="math display">\[
+\widehat{\boldsymbol\xi_e}
+=\mathbf T_{se}(\mathbf q)^{-1}\dot{\mathbf T}_{se}.
+\]</span></p>
+<p>At an arbitrary configuration <span class="math inline">\(\mathbf q\)</span>, can we replace this with <span class="math inline">\(\mathbf M^{-1}\dot{\mathbf T}_{se}\)</span>, using the fixed inverse home pose? Explain which frame each inverse converts coordinates into.</p></li>
+</ol>
+</section>
+<section id="answers-and-hints-5" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="answers-and-hints-5">Answers and hints</h4>
+<ol type="1">
+<li><p>At configuration <span class="math inline">\(\mathbf q\)</span>, <span class="math inline">\(\mathbf J_e\)</span> maps the <span class="math inline">\(n\)</span> joint rates <span class="math inline">\(\dot{\mathbf q}\)</span> to the six-entry body twist <span class="math inline">\(\boldsymbol\xi_e=\mathbf J_e(\mathbf q)\dot{\mathbf q}=[\boldsymbol\nu_e^{\mathsf T}\;\boldsymbol\omega_e^{\mathsf T}]^{\mathsf T}\)</span>. Both blocks describe motion relative to <span class="math inline">\(\{s\}\)</span> using the axes of <span class="math inline">\(\{e\}\)</span>. The tool origin stays at local coordinates <span class="math inline">\(\mathbf0_3\)</span> because <span class="math inline">\(\{e\}\)</span> moves with the tool, not because the tool is stationary in <span class="math inline">\(\{s\}\)</span>. Its position <span class="math inline">\({}^{s}\mathbf p_e\)</span> can change, giving <span class="math inline">\(\boldsymbol\nu_e=\mathbf R_{se}^{\mathsf T}{}^{s}\dot{\mathbf p}_e\ne\mathbf0_3\)</span>. This rotates the space-relative velocity into components along <span class="math inline">\(\{e\}\)</span>; it does not differentiate the local zero coordinates. For example, if the two frames’ axes are aligned and the tool translates along <span class="math inline">\(+x_s\)</span> at <span class="math inline">\(1\,\mathrm{m\,s^{-1}}\)</span>, then <span class="math inline">\(\boldsymbol\nu_e=[1\;0\;0]^{\mathsf T}\,\mathrm{m\,s^{-1}}\)</span>, while the tool origin still has coordinates <span class="math inline">\(\mathbf0_3\)</span> within <span class="math inline">\(\{e\}\)</span>.</p></li>
+<li><p><span class="math inline">\(\mathbf J_{e,1}=\operatorname{Ad}_{(\mathbf G_2\mathbf G_3)^{-1}}{}^{e}\mathbf B_1=\operatorname{Ad}_{\mathbf G_3^{-1}\mathbf G_2^{-1}}{}^{e}\mathbf B_1\)</span>. Each inverse exponential negates its own joint coordinate, and inverting the product reverses the factors. Using <span class="math inline">\(\mathbf G_2^{-1}\mathbf G_3^{-1}\)</span> is generally wrong because the two joint displacements need not commute.</p></li>
+<li><p>Only <span class="math inline">\(q_{j+1},\ldots,q_n\)</span> can change column <span class="math inline">\(j\)</span>. These later joints move frame <span class="math inline">\(\{e\}\)</span> relative to joint <span class="math inline">\(j\)</span>’s axis. There is no later joint after <span class="math inline">\(n\)</span>, so <span class="math inline">\(\mathbf J_{e,n}={}^{e}\mathbf B_n\)</span>. At home the entire matrix is <span class="math inline">\([{}^{e}\mathbf B_1\;\cdots\;{}^{e}\mathbf B_n]\)</span>.</p></li>
+<li><p><span class="math inline">\(\boldsymbol\nu_e=[0\;0.1\;0]^{\mathsf T}\,\mathrm{m\,s^{-1}}\)</span> and <span class="math inline">\(\boldsymbol\omega_e=[0\;0\;0.1]^{\mathsf T}\,\mathrm{rad\,s^{-1}}\)</span>. Rotating the linear velocity into <span class="math inline">\(\{s\}\)</span> gives <span class="math inline">\({}^{s}\dot{\mathbf p}_e=[-0.1\;0\;0]^{\mathsf T}\,\mathrm{m\,s^{-1}}\)</span>: positive elbow rotation moves the upward-pointing second link’s tip toward <span class="math inline">\(-x_s\)</span>.</p></li>
+<li><p><strong>Generally, no.</strong> The two inverse poses convert coordinates into different frames:</p>
+<ul>
+<li><span class="math inline">\(\mathbf T_{se}(\mathbf q)^{-1}\)</span> converts from <span class="math inline">\(\{s\}\)</span> to the <strong>current tool frame <span class="math inline">\(\{e\}\)</span></strong>.</li>
+<li><span class="math inline">\(\mathbf M^{-1}\)</span> converts from <span class="math inline">\(\{s\}\)</span> to the <strong>fixed home copy <span class="math inline">\(\{e'\}\)</span></strong>.</li>
+</ul>
+<p>Body-twist extraction requires the current inverse because its output describes motion along the tool’s current axes, not its home axes. At home, <span class="math inline">\(\mathbf T_{se}(\mathbf0_n)=\mathbf M\)</span>, so the inverses agree. At a general configuration, <span class="math inline">\(\mathbf M^{-1}\dot{\mathbf T}_{se}\)</span> cannot replace <span class="math inline">\(\mathbf T_{se}(\mathbf q)^{-1}\dot{\mathbf T}_{se}\)</span>.</p></li>
+</ol>
+</section>
+</section>
+<section id="sec-body-space-jacobian-adjoint" class="level3" data-number="10.3.5">
+<h3 data-number="10.3.5" class="anchored" data-anchor-id="sec-body-space-jacobian-adjoint"><span class="header-section-number">10.3.5</span> The body–space adjoint relation</h3>
+<p>If we already know the space Jacobian at a configuration, how can we obtain the body Jacobian without differentiating the forward map again? The two matrices describe the same end-effector motion relative to the fixed frame <span class="math inline">\(\{s\}\)</span>. We need to convert its description from <span class="math inline">\(\{s\}\)</span> to the attached frame <span class="math inline">\(\{e\}\)</span>, using the current pose rather than the home pose.</p>
+<p>Consider the same differentiable serial-chain pose map as before. At a joint configuration <span class="math inline">\(\mathbf q\in\mathcal V\)</span>, the known inputs are <span class="math inline">\(\mathbf T_{se}(\mathbf q)\in SE(3)\)</span> and either <span class="math inline">\(\mathbf J_s(\mathbf q)\)</span> or <span class="math inline">\(\mathbf J_e(\mathbf q)\)</span>, each in <span class="math inline">\(\mathbb R^{6\times n}\)</span>. The required output is the other Jacobian at that same configuration. Both use linear-first twist order and the same ordered joint coordinates, including their declared angular or linear units.</p>
+<section id="from-the-two-twists-to-the-two-jacobians" class="level4">
+<h4 class="anchored" data-anchor-id="from-the-two-twists-to-the-two-jacobians">From the two twists to the two Jacobians</h4>
+<p>We first relate the two twist matrices, then use their joint-rate maps to relate the Jacobians. Recall the pose-rate identities in <a href="#eq-end-effector-space-twist-pose-rate" class="quarto-xref">Equation&nbsp;<span>10.20</span></a> and <a href="#eq-end-effector-body-twist-pose-rate" class="quarto-xref">Equation&nbsp;<span>10.25</span></a>:</p>
+<p><span class="math display">\[
+\widehat{\boldsymbol\xi_s}
+=\dot{\mathbf T}_{se}\mathbf T_{se}^{-1},
+\qquad
+\widehat{\boldsymbol\xi_e}
+=\mathbf T_{se}^{-1}\dot{\mathbf T}_{se}.
+\]</span></p>
+<p>All pose factors below are evaluated at the same current <span class="math inline">\(\mathbf q\)</span>. Inserting <span class="math inline">\(\mathbf T_{se}\mathbf T_{se}^{-1}=\mathbf I_4\)</span> before the pose derivative gives</p>
+<p><span class="math display">\[
+\begin{aligned}
+\widehat{\boldsymbol\xi_s}
+&amp;=\mathbf T_{se}
+\underbrace{\left(\mathbf T_{se}^{-1}\dot{\mathbf T}_{se}\right)}
+_{\widehat{\boldsymbol\xi_e}}
+\mathbf T_{se}^{-1}\\
+&amp;=\mathbf T_{se}\widehat{\boldsymbol\xi_e}\mathbf T_{se}^{-1}.
+\end{aligned}
+\]</span></p>
+<p>The conjugation identity in <a href="07_degrees_of_freedom_and_spatial_motion_so3_se3.html#eq-se3-adjoint-conjugation" class="quarto-xref">Equation&nbsp;<span>7.5</span></a> converts this matrix equality into a six-entry column equality. Multiplying the matrix equality on the left by <span class="math inline">\(\mathbf T_{se}^{-1}\)</span> and on the right by <span class="math inline">\(\mathbf T_{se}\)</span> gives the reverse conversion:</p>
+<p><span id="eq-end-effector-body-space-twist-adjoint"><span class="math display">\[
+\boxed{
+\boldsymbol\xi_s
+=\operatorname{Ad}_{\mathbf T_{se}}\boldsymbol\xi_e,
+\qquad
+\boldsymbol\xi_e
+=\operatorname{Ad}_{\mathbf T_{se}^{-1}}\boldsymbol\xi_s
+}.
+\tag{10.28}\]</span></span></p>
+<p>Now substitute <span class="math inline">\(\boldsymbol\xi_s=\mathbf J_s(\mathbf q)\dot{\mathbf q}\)</span> and <span class="math inline">\(\boldsymbol\xi_e=\mathbf J_e(\mathbf q)\dot{\mathbf q}\)</span> from <a href="#eq-space-jacobian-columns-rate-map" class="quarto-xref">Equation&nbsp;<span>10.24</span></a> and <a href="#eq-body-jacobian-columns-rate-map" class="quarto-xref">Equation&nbsp;<span>10.27</span></a>:</p>
+<p><span class="math display">\[
+\mathbf J_s(\mathbf q)\dot{\mathbf q}
+=\operatorname{Ad}_{\mathbf T_{se}(\mathbf q)}
+\mathbf J_e(\mathbf q)\dot{\mathbf q}.
+\]</span></p>
+<p>At fixed <span class="math inline">\(\mathbf q\)</span>, this equality holds for every joint-rate column in the local coordinate domain. In particular, we can vary each joint rate separately, so the corresponding columns on the two sides must agree. Applying the inverse adjoint also gives the reverse relation:</p>
+<p><span id="eq-body-space-jacobian-adjoint"><span class="math display">\[
+\boxed{
+\begin{aligned}
+\mathbf J_s(\mathbf q)
+&amp;=\operatorname{Ad}_{\mathbf T_{se}(\mathbf q)}\mathbf J_e(\mathbf q),\\
+\mathbf J_e(\mathbf q)
+&amp;=\operatorname{Ad}_{\mathbf T_{se}(\mathbf q)^{-1}}\mathbf J_s(\mathbf q).
+\end{aligned}
+}
+\tag{10.29}\]</span></span></p>
+<p>The <span class="math inline">\(6\times6\)</span> adjoint acts on each six-entry joint column; it does not change the joint order or <span class="math inline">\(\dot{\mathbf q}\)</span>. Thus column <span class="math inline">\(j\)</span> still describes the motion caused by the same joint rate <span class="math inline">\(\dot q_j\)</span>, but in the other twist representation. This is a conversion at one instant, not a time differentiation of the adjoint, so no derivative of <span class="math inline">\(\operatorname{Ad}_{\mathbf T_{se}(\mathbf q)}\)</span> appears.</p>
+</section>
+<section id="what-the-adjoint-changes-physically" class="level4">
+<h4 class="anchored" data-anchor-id="what-the-adjoint-changes-physically">What the adjoint changes physically</h4>
+<p>Write the current pose as</p>
+<p><span class="math display">\[
+\mathbf T_{se}
+=\begin{bmatrix}
+\mathbf R_{se}&amp;{}^{s}\mathbf p_e\\
+\mathbf0_3^{\mathsf T}&amp;1
+\end{bmatrix},
+\]</span></p>
+<p>where <span class="math inline">\(\mathbf R_{se}\in SO(3)\)</span> gives the axes of <span class="math inline">\(\{e\}\)</span> expressed in <span class="math inline">\(\{s\}\)</span>, and <span class="math inline">\({}^{s}\mathbf p_e\in\mathbb R^3\)</span> is the position of its origin in metres. Using the linear-first adjoint from <a href="07_degrees_of_freedom_and_spatial_motion_so3_se3.html#eq-se3-adjoint-linear-first" class="quarto-xref">Equation&nbsp;<span>7.4</span></a> makes the forward conversion explicit:</p>
+<p><span class="math display">\[
+\begin{aligned}
+\begin{bmatrix}\boldsymbol\nu_s\\\boldsymbol\omega_s\end{bmatrix}
+&amp;=\underbrace{\begin{bmatrix}
+\mathbf R_{se}&amp;
+\left[{}^{s}\mathbf p_e\right]_\times\mathbf R_{se}\\
+\mathbf0_{3\times3}&amp;\mathbf R_{se}
+\end{bmatrix}}_{\operatorname{Ad}_{\mathbf T_{se}}}
+\begin{bmatrix}\boldsymbol\nu_e\\\boldsymbol\omega_e\end{bmatrix},\\
+\boldsymbol\omega_s&amp;=\mathbf R_{se}\boldsymbol\omega_e,\\
+\boldsymbol\nu_s&amp;=\mathbf R_{se}\boldsymbol\nu_e
++{}^{s}\mathbf p_e\times\boldsymbol\omega_s.
+\end{aligned}
+\]</span></p>
+<p>The angular blocks differ only by rotation of their coordinates. The linear blocks also refer to different locations: <span class="math inline">\(\boldsymbol\nu_e\)</span> is the tool origin’s velocity relative to <span class="math inline">\(\{s\}\)</span>, expressed in <span class="math inline">\(\{e\}\)</span>, while <span class="math inline">\(\boldsymbol\nu_s\)</span> is the same rigid-motion velocity field evaluated at the origin of <span class="math inline">\(\{s\}\)</span>. The cross product accounts for that difference of location.</p>
+<p><strong>Start at the tool origin.</strong> The tool origin is at <span class="math inline">\({}^{s}\mathbf p_e\)</span>. Its velocity is</p>
+<p><span class="math display">\[
+{}^{s}\dot{\mathbf p}_e=\mathbf R_{se}\boldsymbol\nu_e.
+\]</span></p>
+<p>Here, <span class="math inline">\(\mathbf R_{se}\)</span> only changes the velocity’s coordinates from <span class="math inline">\(\{e\}\)</span> to <span class="math inline">\(\{s\}\)</span>; it does not change the point whose velocity we describe.</p>
+<p>Choose a point <span class="math inline">\(P\)</span> fixed to the end effector’s rigid body, with current position <span class="math inline">\({}^{s}\mathbf x\in\mathbb R^3\)</span> in metres. At this instant, <span class="math inline">\(\mathbf v({}^{s}\mathbf x)\in\mathbb R^3\)</span> is its velocity relative to <span class="math inline">\(\{s\}\)</span>, expressed in <span class="math inline">\(\{s\}\)</span>, in <span class="math inline">\(\mathrm{m\,s^{-1}}\)</span>. The parentheses mean “evaluate the rigid-motion velocity field at this position”; they do not mean multiplication. The space-twist formula adds the same contribution <span class="math inline">\(\boldsymbol\nu_s\)</span> at every position to the rotation-dependent contribution <span class="math inline">\(\boldsymbol\omega_s\times{}^{s}\mathbf x\)</span>.</p>
+<p>To express this velocity using the tool origin as the starting point, first evaluate the same field at <span class="math inline">\({}^{s}\mathbf x={}^{s}\mathbf p_e\)</span>. By <a href="#eq-end-effector-origin-velocity-from-space-twist" class="quarto-xref">Equation&nbsp;<span>10.21</span></a>,</p>
+<p><span class="math display">\[
+\begin{aligned}
+{}^{s}\dot{\mathbf p}_e
+&amp;=\mathbf v({}^{s}\mathbf p_e)
+=\boldsymbol\nu_s+\boldsymbol\omega_s\times{}^{s}\mathbf p_e,\\
+\boldsymbol\nu_s
+&amp;={}^{s}\dot{\mathbf p}_e-\boldsymbol\omega_s\times{}^{s}\mathbf p_e.
+\end{aligned}
+\]</span></p>
+<p>Substitute this expression for <span class="math inline">\(\boldsymbol\nu_s\)</span> into the velocity at <span class="math inline">\(P\)</span>, then combine the cross products:</p>
+<p><span class="math display">\[
+\begin{aligned}
+\mathbf v({}^{s}\mathbf x)
+&amp;=\boldsymbol\nu_s+\boldsymbol\omega_s\times{}^{s}\mathbf x\\
+&amp;=\left({}^{s}\dot{\mathbf p}_e
+-\boldsymbol\omega_s\times{}^{s}\mathbf p_e\right)
++\boldsymbol\omega_s\times{}^{s}\mathbf x\\
+&amp;={}^{s}\dot{\mathbf p}_e
++\boldsymbol\omega_s\times
+\underbrace{\left({}^{s}\mathbf x-{}^{s}\mathbf p_e\right)}
+_{\substack{\text{vector from the tool origin}\\\text{to that position}}}.
+\end{aligned}
+\]</span></p>
+<p>The first and last lines calculate the same velocity of <span class="math inline">\(P\)</span>. The last line makes the geometry relative to the tool origin explicit:</p>
+<ul>
+<li><span class="math inline">\({}^{s}\dot{\mathbf p}_e\)</span> supplies the velocity of the tool origin.</li>
+<li><span class="math inline">\({}^{s}\mathbf x-{}^{s}\mathbf p_e\)</span> is the vector from the tool origin to <span class="math inline">\(P\)</span>, expressed in <span class="math inline">\(\{s\}\)</span>.</li>
+<li><span class="math inline">\(\boldsymbol\omega_s\times({}^{s}\mathbf x-{}^{s}\mathbf p_e)\)</span> supplies the difference between <span class="math inline">\(P\)</span>’s velocity and the tool-origin velocity caused by their shared rigid-body rotation.</li>
+</ul>
+<p>Thus, start with the tool-origin velocity and add the rotational contribution for the offset to <span class="math inline">\(P\)</span>. All components still use <span class="math inline">\(\{s\}\)</span>; this rearrangement does not change coordinate frames. If <span class="math inline">\(P\)</span> is the tool origin itself, <span class="math inline">\({}^{s}\mathbf x={}^{s}\mathbf p_e\)</span>, the offset vanishes and the formula returns <span class="math inline">\({}^{s}\dot{\mathbf p}_e\)</span>.</p>
+<p><strong>Evaluate at the space origin.</strong> Set <span class="math inline">\({}^{s}\mathbf x=\mathbf0_3\)</span>, we have</p>
+<p><span class="math display">\[
+\begin{aligned}
+\boldsymbol\nu_s
+&amp;=\mathbf v(\mathbf0_3)\\
+&amp;=\mathbf R_{se}\boldsymbol\nu_e
++\boldsymbol\omega_s\times\left(\mathbf 0 -{}^{s}\mathbf p_e\right)\\
+&amp;=\mathbf R_{se}\boldsymbol\nu_e
++{}^{s}\mathbf p_e\times\boldsymbol\omega_s.
+\end{aligned}
+\]</span></p>
+<p>Read the two terms as follows:</p>
+<ul>
+<li><span class="math inline">\(\mathbf R_{se}\boldsymbol\nu_e\)</span>: start with the tool-origin velocity, expressed in <span class="math inline">\(\{s\}\)</span>.</li>
+<li><span class="math inline">\({}^{s}\mathbf p_e\times\boldsymbol\omega_s\)</span>: correct that velocity for evaluating the same rigid motion at the space origin instead.</li>
+</ul>
+<p>This evaluates the end effector’s velocity field at the space origin; <span class="math inline">\(\boldsymbol\nu_s\)</span> is not the velocity of the stationary frame <span class="math inline">\(\{s\}\)</span> itself.</p>
+<p>In the opposite direction, to recover the body components, solve the forward adjoint relations for <span class="math inline">\(\boldsymbol\omega_e\)</span> and <span class="math inline">\(\boldsymbol\nu_e\)</span>:</p>
+<p><span class="math display">\[
+\begin{aligned}
+\boldsymbol\omega_e
+&amp;=\mathbf R_{se}^{\mathsf T}\boldsymbol\omega_s,\\
+\boldsymbol\nu_e
+&amp;=\mathbf R_{se}^{\mathsf T}
+\left(\boldsymbol\nu_s-{}^{s}\mathbf p_e\times\boldsymbol\omega_s\right)\\
+&amp;=\mathbf R_{se}^{\mathsf T}
+\underbrace{\left(\boldsymbol\nu_s+\boldsymbol\omega_s\times{}^{s}\mathbf p_e\right)}
+_{{}^{s}\dot{\mathbf p}_e}.
+\end{aligned}
+\]</span></p>
+<p>The underbraced expression is exactly the tool-origin velocity from <a href="#eq-end-effector-origin-velocity-from-space-twist" class="quarto-xref">Equation&nbsp;<span>10.21</span></a>. First evaluate the space-twist field at the tool origin; then rotate that velocity into components along <span class="math inline">\(\{e\}\)</span>. In matrix form, these equations give</p>
+<p><span id="eq-end-effector-inverse-adjoint-blocks"><span class="math display">\[
+\boxed{
+\operatorname{Ad}_{\mathbf T_{se}^{-1}}
+=\begin{bmatrix}
+\mathbf R_{se}^{\mathsf T}&amp;
+-\mathbf R_{se}^{\mathsf T}\left[{}^{s}\mathbf p_e\right]_\times\\
+\mathbf0_{3\times3}&amp;\mathbf R_{se}^{\mathsf T}
+\end{bmatrix}
+}.
+\tag{10.30}\]</span></span></p>
+<p>Consequently, rotating <span class="math inline">\(\boldsymbol\nu_s\)</span> alone generally does not give <span class="math inline">\(\boldsymbol\nu_e\)</span>: it omits the velocity contribution <span class="math inline">\(\boldsymbol\omega_s\times{}^{s}\mathbf p_e\)</span>. Each rotation block is dimensionless, and the upper-right block contains distances in metres. The resulting linear and angular twist blocks retain units of <span class="math inline">\(\mathrm{m\,s^{-1}}\)</span> and <span class="math inline">\(\mathrm{rad\,s^{-1}}\)</span>, respectively, with radian angles used in the cross-product kinematics.</p>
+<div id="example-planar-2r-body-space-adjoint" class="callout callout-style-simple callout-note no-icon callout-titled" title="Example: converting the planar 2R Jacobian">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Example: converting the planar 2R Jacobian
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This example checks that the adjoint converts the independently derived <a href="#example-planar-2r-space-jacobian">space Jacobian</a> into the <a href="#example-planar-2r-body-jacobian">body Jacobian</a>, and shows the effect of the translation block. Reuse their planar arm with <span class="math inline">\(L_1=L_2=1\,\mathrm m\)</span> at <span class="math inline">\(\mathbf q=[0\;\pi/2]^{\mathsf T}\,\mathrm{rad}\)</span>. The current position and orientation are</p>
+<p><span class="math display">\[
+{}^{s}\mathbf p_e=\begin{bmatrix}1\\1\\0\end{bmatrix}\,\mathrm m,
+\qquad
+\mathbf R_{se}=\mathbf R_z(\pi/2)
+=\begin{bmatrix}0&amp;-1&amp;0\\1&amp;0&amp;0\\0&amp;0&amp;1\end{bmatrix}.
+\]</span></p>
+<p>The space columns are <span class="math inline">\(\mathbf J_{s,1}=[0\;0\;0\;0\;0\;1]^{\mathsf T}\)</span> and <span class="math inline">\(\mathbf J_{s,2}=[0\;-1\;0\;0\;0\;1]^{\mathsf T}\)</span>. Their upper entries have units of <span class="math inline">\(\mathrm{m\,rad^{-1}}\)</span> and their lower entries are dimensionless. Both lower blocks equal <span class="math inline">\([0\;0\;1]^{\mathsf T}\)</span>, so the upper-right inverse-adjoint block contributes the same column correction:</p>
+<p><span class="math display">\[
+-\mathbf R_{se}^{\mathsf T}
+\left({}^{s}\mathbf p_e\times\begin{bmatrix}0\\0\\1\end{bmatrix}\right)
+=-\begin{bmatrix}0&amp;1&amp;0\\-1&amp;0&amp;0\\0&amp;0&amp;1\end{bmatrix}
+\begin{bmatrix}1\\-1\\0\end{bmatrix}
+=\begin{bmatrix}1\\1\\0\end{bmatrix}.
+\]</span></p>
+<p>The numerical entries use metres and radians as above. To apply <a href="#eq-end-effector-inverse-adjoint-blocks" class="quarto-xref">Equation&nbsp;<span>10.30</span></a> to each space column, first rotate its upper and lower three entries by <span class="math inline">\(\mathbf R_{se}^{\mathsf T}\)</span>. Then add the correction <span class="math inline">\([1\;1\;0]^{\mathsf T}\)</span> to the upper block only. The required rotations are</p>
+<p><span class="math display">\[
+\begin{aligned}
+\mathbf R_{se}^{\mathsf T}\begin{bmatrix}0\\0\\0\end{bmatrix}
+&amp;=\begin{bmatrix}0\\0\\0\end{bmatrix},\\
+\mathbf R_{se}^{\mathsf T}\begin{bmatrix}0\\-1\\0\end{bmatrix}
+&amp;=\begin{bmatrix}0&amp;1&amp;0\\-1&amp;0&amp;0\\0&amp;0&amp;1\end{bmatrix}
+\begin{bmatrix}0\\-1\\0\end{bmatrix}
+=\begin{bmatrix}-1\\0\\0\end{bmatrix},\\
+\mathbf R_{se}^{\mathsf T}\begin{bmatrix}0\\0\\1\end{bmatrix}
+&amp;=\begin{bmatrix}0&amp;1&amp;0\\-1&amp;0&amp;0\\0&amp;0&amp;1\end{bmatrix}
+\begin{bmatrix}0\\0\\1\end{bmatrix}
+=\begin{bmatrix}0\\0\\1\end{bmatrix}.
+\end{aligned}
+\]</span></p>
+<p>The first two lines rotate the distinct upper blocks of <span class="math inline">\(\mathbf J_{s,1}\)</span> and <span class="math inline">\(\mathbf J_{s,2}\)</span>. The third rotates their common angular direction: rotation about <span class="math inline">\(z\)</span> leaves <span class="math inline">\([0\;0\;1]^{\mathsf T}\)</span> unchanged. To connect <span class="math inline">\(\mathbf J_{e,j}=\operatorname{Ad}_{\mathbf T_{se}^{-1}}\mathbf J_{s,j}\)</span> to these calculations, write out the <span class="math inline">\(6\times6\)</span> adjoint and the <span class="math inline">\(6\times1\)</span> input column. Each displayed adjoint block is <span class="math inline">\(3\times3\)</span>. Multiply each block row by the input’s upper and lower three-entry blocks, then substitute the already-calculated correction:</p>
+<p><span class="math display">\[
+\begin{aligned}
+\mathbf J_{e,1}
+&amp;=\operatorname{Ad}_{\mathbf T_{se}^{-1}}\mathbf J_{s,1}\\
+&amp;=\begin{bmatrix}
+\mathbf R_{se}^{\mathsf T}&amp;
+-\mathbf R_{se}^{\mathsf T}\left[{}^{s}\mathbf p_e\right]_\times\\
+\mathbf0_{3\times3}&amp;\mathbf R_{se}^{\mathsf T}
+\end{bmatrix}
+\begin{bmatrix}
+\begin{bmatrix}0\\0\\0\end{bmatrix}\\
+\begin{bmatrix}0\\0\\1\end{bmatrix}
+\end{bmatrix}\\
+&amp;=\begin{bmatrix}
+\mathbf R_{se}^{\mathsf T}\begin{bmatrix}0\\0\\0\end{bmatrix}
+-\mathbf R_{se}^{\mathsf T}\left[{}^{s}\mathbf p_e\right]_\times
+\begin{bmatrix}0\\0\\1\end{bmatrix}\\
+\mathbf0_{3\times3}\begin{bmatrix}0\\0\\0\end{bmatrix}
++\mathbf R_{se}^{\mathsf T}\begin{bmatrix}0\\0\\1\end{bmatrix}
+\end{bmatrix}\\
+&amp;=\begin{bmatrix}
+\begin{bmatrix}0\\0\\0\end{bmatrix}
++\begin{bmatrix}1\\1\\0\end{bmatrix}\\
+\begin{bmatrix}0\\0\\1\end{bmatrix}
+\end{bmatrix}
+=\begin{bmatrix}1\\1\\0\\0\\0\\1\end{bmatrix}.
+\end{aligned}
+\]</span></p>
+<p>For column 2, the adjoint is unchanged; the input’s upper block is now <span class="math inline">\([0\;-1\;0]^{\mathsf T}\)</span>. The same block-row multiplication gives</p>
+<p><span class="math display">\[
+\begin{aligned}
+\mathbf J_{e,2}
+&amp;=\operatorname{Ad}_{\mathbf T_{se}^{-1}}\mathbf J_{s,2}\\
+&amp;=\begin{bmatrix}
+\mathbf R_{se}^{\mathsf T}&amp;
+-\mathbf R_{se}^{\mathsf T}\left[{}^{s}\mathbf p_e\right]_\times\\
+\mathbf0_{3\times3}&amp;\mathbf R_{se}^{\mathsf T}
+\end{bmatrix}
+\begin{bmatrix}
+\begin{bmatrix}0\\-1\\0\end{bmatrix}\\
+\begin{bmatrix}0\\0\\1\end{bmatrix}
+\end{bmatrix}\\
+&amp;=\begin{bmatrix}
+\mathbf R_{se}^{\mathsf T}\begin{bmatrix}0\\-1\\0\end{bmatrix}
+-\mathbf R_{se}^{\mathsf T}\left[{}^{s}\mathbf p_e\right]_\times
+\begin{bmatrix}0\\0\\1\end{bmatrix}\\
+\mathbf0_{3\times3}\begin{bmatrix}0\\-1\\0\end{bmatrix}
++\mathbf R_{se}^{\mathsf T}\begin{bmatrix}0\\0\\1\end{bmatrix}
+\end{bmatrix}\\
+&amp;=\begin{bmatrix}
+\begin{bmatrix}-1\\0\\0\end{bmatrix}
++\begin{bmatrix}1\\1\\0\end{bmatrix}\\
+\begin{bmatrix}0\\0\\1\end{bmatrix}
+\end{bmatrix}
+=\begin{bmatrix}0\\1\\0\\0\\0\\1\end{bmatrix}.
+\end{aligned}
+\]</span></p>
+<p>These reproduce the body Jacobian obtained earlier from both hinge-line geometry and the inverse later-joint displacement:</p>
+<p><span class="math display">\[
+\mathbf J_e(\mathbf q)
+=\operatorname{Ad}_{\mathbf T_{se}(\mathbf q)^{-1}}\mathbf J_s(\mathbf q)
+=\begin{bmatrix}1&amp;0\\1&amp;1\\0&amp;0\\0&amp;0\\0&amp;0\\1&amp;1\end{bmatrix}.
+\]</span></p>
+<p>For the same joint rates <span class="math inline">\(\dot{\mathbf q}=[0.2\;-0.1]^{\mathsf T}\,\mathrm{rad\,s^{-1}}\)</span>, the space Jacobian gives <span class="math inline">\(\boldsymbol\nu_s=[0\;0.1\;0]^{\mathsf T}\,\mathrm{m\,s^{-1}}\)</span> and <span class="math inline">\(\boldsymbol\omega_s=[0\;0\;0.1]^{\mathsf T}\,\mathrm{rad\,s^{-1}}\)</span>. Evaluate at the tool origin and rotate into <span class="math inline">\(\{e\}\)</span>:</p>
+<p><span class="math display">\[
+\begin{aligned}
+{}^{s}\dot{\mathbf p}_e
+&amp;=\begin{bmatrix}0\\0.1\\0\end{bmatrix}
++\begin{bmatrix}0\\0\\0.1\end{bmatrix}
+\times\begin{bmatrix}1\\1\\0\end{bmatrix}
+=\begin{bmatrix}-0.1\\0.2\\0\end{bmatrix}\,\mathrm{m\,s^{-1}},\\
+\boldsymbol\nu_e
+&amp;=\mathbf R_{se}^{\mathsf T}{}^{s}\dot{\mathbf p}_e
+=\begin{bmatrix}0.2\\0.1\\0\end{bmatrix}\,\mathrm{m\,s^{-1}},\\
+\boldsymbol\omega_e
+&amp;=\mathbf R_{se}^{\mathsf T}\boldsymbol\omega_s
+=\begin{bmatrix}0\\0\\0.1\end{bmatrix}\,\mathrm{rad\,s^{-1}}.
+\end{aligned}
+\]</span></p>
+<p>The body Jacobian produces exactly these body components. Rotating only <span class="math inline">\(\boldsymbol\nu_s\)</span> would instead give <span class="math inline">\([0.1\;0\;0]^{\mathsf T}\,\mathrm{m\,s^{-1}}\)</span>, missing the contribution of the tool’s rotation at its offset position.</p>
+</div>
+</div>
+</section>
+<section id="the-current-pose-and-the-fixed-home-pose" class="level4">
+<h4 class="anchored" data-anchor-id="the-current-pose-and-the-fixed-home-pose">The current pose and the fixed home pose</h4>
+<p>At home, <span class="math inline">\(\mathbf T_{se}(\mathbf0_n)=\mathbf M\)</span>. Substituting the home columns into <a href="#eq-body-space-jacobian-adjoint" class="quarto-xref">Equation&nbsp;<span>10.29</span></a> recovers the original space-to-body screw conversion:</p>
+<p><span class="math display">\[
+\begin{aligned}
+\mathbf J_e(\mathbf0_n)
+&amp;=\operatorname{Ad}_{\mathbf M^{-1}}\mathbf J_s(\mathbf0_n),\\
+\begin{bmatrix}{}^{e}\mathbf B_1&amp;\cdots&amp;{}^{e}\mathbf B_n\end{bmatrix}
+&amp;=\operatorname{Ad}_{\mathbf M^{-1}}
+\begin{bmatrix}{}^{s}\mathbf S_1&amp;\cdots&amp;{}^{s}\mathbf S_n\end{bmatrix}.
+\end{aligned}
+\]</span></p>
+<p>The fixed <span class="math inline">\(\mathbf M^{-1}\)</span> converts coordinates from <span class="math inline">\(\{s\}\)</span> into the fixed home copy <span class="math inline">\(\{e'\}\)</span>. The current <span class="math inline">\(\mathbf T_{se}(\mathbf q)^{-1}\)</span> converts them into the attached frame <span class="math inline">\(\{e\}\)</span> at the chosen configuration. In general these are different frames, so <span class="math inline">\(\operatorname{Ad}_{\mathbf M^{-1}}\mathbf J_s(\mathbf q)\)</span> is not the current body Jacobian. They agree at home, or whenever the current pose equals the home pose.</p>
+<p>To compare calculated space and body Jacobians, use the same configuration, pose, joint order, component order, and units in <a href="#eq-body-space-jacobian-adjoint" class="quarto-xref">Equation&nbsp;<span>10.29</span></a>. Check the linear and angular blocks separately. Agreement tests consistency of the two descriptions; it does not by itself establish correctness, because shared errors could satisfy the conversion too. The independently derived planar matrices provide a separate geometric check here.</p>
+</section>
+<section id="quick-test-the-bodyspace-adjoint-relation" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="quick-test-the-bodyspace-adjoint-relation">Quick test: the body–space adjoint relation</h4>
+<ol type="1">
+<li><strong>Recall:</strong> Given <span class="math inline">\(\mathbf J_s(\mathbf q)\in\mathbb R^{6\times n}\)</span> and <span class="math inline">\(\mathbf T_{se}(\mathbf q)\in SE(3)\)</span>, write the expression for <span class="math inline">\(\mathbf J_e(\mathbf q)\)</span> and the reverse conversion for <span class="math inline">\(\mathbf J_s(\mathbf q)\)</span>. Which matrix acts on the six twist components, and does it reorder the joints?</li>
+<li><strong>Derivation:</strong> Starting from <span class="math inline">\(\widehat{\boldsymbol\xi_s}=\dot{\mathbf T}_{se}\mathbf T_{se}^{-1}\)</span> and <span class="math inline">\(\widehat{\boldsymbol\xi_e}=\mathbf T_{se}^{-1}\dot{\mathbf T}_{se}\)</span>, obtain <span class="math inline">\(\boldsymbol\xi_s=\operatorname{Ad}_{\mathbf T_{se}}\boldsymbol\xi_e\)</span>. Why must <span class="math inline">\(\mathbf J_s=\operatorname{Ad}_{\mathbf T_{se}}\mathbf J_e\)</span> hold as a matrix equality, rather than only for one selected <span class="math inline">\(\dot{\mathbf q}\)</span>?</li>
+<li><strong>Physical meaning:</strong> Why does <span class="math inline">\(\boldsymbol\nu_e=\mathbf R_{se}^{\mathsf T}\boldsymbol\nu_s\)</span> generally fail? Write the missing term and explain which point’s velocity must be evaluated before rotating its components into <span class="math inline">\(\{e\}\)</span>.</li>
+<li><strong>Application:</strong> In the <a href="#example-planar-2r-body-space-adjoint">adjoint example</a>, keep <span class="math inline">\(\mathbf q=[0\;\pi/2]^{\mathsf T}\,\mathrm{rad}\)</span> but use <span class="math inline">\(\dot{\mathbf q}=[0.3\;-0.3]^{\mathsf T}\,\mathrm{rad\,s^{-1}}\)</span>. Find <span class="math inline">\(\boldsymbol\nu_s\)</span>, <span class="math inline">\(\boldsymbol\omega_s\)</span>, <span class="math inline">\(\boldsymbol\nu_e\)</span>, and <span class="math inline">\(\boldsymbol\omega_e\)</span>. Explain why the different linear columns describe the same physical translation.</li>
+<li><strong>Validity:</strong> At home, <span class="math inline">\(\mathbf J_e(\mathbf0_n)=\operatorname{Ad}_{\mathbf M^{-1}}\mathbf J_s(\mathbf0_n)\)</span>. Can we therefore use <span class="math inline">\(\mathbf J_e(\mathbf q)=\operatorname{Ad}_{\mathbf M^{-1}}\mathbf J_s(\mathbf q)\)</span> at every configuration? State which frame the proposed right-hand side uses, and which pose is required for the general conversion.</li>
+</ol>
+</section>
+<section id="answers-and-hints-6" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="answers-and-hints-6">Answers and hints</h4>
+<ol type="1">
+<li><span class="math inline">\(\mathbf J_e(\mathbf q)=\operatorname{Ad}_{\mathbf T_{se}(\mathbf q)^{-1}}\mathbf J_s(\mathbf q)\)</span> and <span class="math inline">\(\mathbf J_s(\mathbf q)=\operatorname{Ad}_{\mathbf T_{se}(\mathbf q)}\mathbf J_e(\mathbf q)\)</span>. Each <span class="math inline">\(6\times6\)</span> adjoint premultiplies a <span class="math inline">\(6\times n\)</span> Jacobian. It changes the twist description in every column, not the joint indexing or rates.</li>
+<li><span class="math inline">\(\widehat{\boldsymbol\xi_s}=\mathbf T_{se}(\mathbf T_{se}^{-1}\dot{\mathbf T}_{se})\mathbf T_{se}^{-1}=\mathbf T_{se}\widehat{\boldsymbol\xi_e}\mathbf T_{se}^{-1}\)</span>, so the adjoint identity gives the column relation. Substitution gives <span class="math inline">\(\mathbf J_s\dot{\mathbf q}=\operatorname{Ad}_{\mathbf T_{se}}\mathbf J_e\dot{\mathbf q}\)</span> for every local joint-rate column. Varying each rate separately establishes equality of every corresponding Jacobian column; one chosen rate column alone would not establish that result.</li>
+<li>The correct expression is <span class="math inline">\(\boldsymbol\nu_e=\mathbf R_{se}^{\mathsf T}(\boldsymbol\nu_s+\boldsymbol\omega_s\times{}^{s}\mathbf p_e)\)</span>. The term <span class="math inline">\(\boldsymbol\omega_s\times{}^{s}\mathbf p_e\)</span> changes the evaluation location of the space-twist field from the origin of <span class="math inline">\(\{s\}\)</span> to the tool origin. The rotation then expresses that tool-origin velocity along <span class="math inline">\(\{e\}\)</span>.</li>
+<li><span class="math inline">\(\boldsymbol\nu_s=[0\;0.3\;0]^{\mathsf T}\,\mathrm{m\,s^{-1}}\)</span> and <span class="math inline">\(\boldsymbol\omega_s=\mathbf0_3\)</span>. The angular rates cancel, so <span class="math inline">\({}^{s}\dot{\mathbf p}_e=\boldsymbol\nu_s\)</span> and <span class="math inline">\(\boldsymbol\nu_e=\mathbf R_{se}^{\mathsf T}\boldsymbol\nu_s=[0.3\;0\;0]^{\mathsf T}\,\mathrm{m\,s^{-1}}\)</span>, with <span class="math inline">\(\boldsymbol\omega_e=\mathbf0_3\)</span>. At this configuration <span class="math inline">\(+x_e\)</span> points along <span class="math inline">\(+y_s\)</span>: both columns describe translation in that same direction at <span class="math inline">\(0.3\,\mathrm{m\,s^{-1}}\)</span>.</li>
+<li>No.&nbsp;<span class="math inline">\(\operatorname{Ad}_{\mathbf M^{-1}}\mathbf J_s(\mathbf q)\)</span> expresses the twist columns using the fixed home copy <span class="math inline">\(\{e'\}\)</span>, not generally the current <span class="math inline">\(\{e\}\)</span>. The required conversion uses <span class="math inline">\(\operatorname{Ad}_{\mathbf T_{se}(\mathbf q)^{-1}}\)</span>. When <span class="math inline">\(\mathbf T_{se}(\mathbf q)=\mathbf M\)</span>, including at home, the inverses agree and the home relation recovers <span class="math inline">\(\mathbf J_e(\mathbf0_n)=[{}^{e}\mathbf B_1\;\cdots\;{}^{e}\mathbf B_n]\)</span>.</li>
+</ol>
+</section>
 </section>
 </section>
 <section id="sec-robot-jacobian-rank" class="level2" data-number="10.4">
@@ -3011,14 +4497,14 @@ L_2\sin(\theta_1+\theta_2)\\
 </section>
 <section id="cumulative-chapter-review" class="level2 unnumbered">
 <h2 class="unnumbered anchored" data-anchor-id="cumulative-chapter-review">Cumulative chapter review</h2>
-<section id="answers-and-hints-3" class="level3 unnumbered">
-<h3 class="unnumbered anchored" data-anchor-id="answers-and-hints-3">Answers and hints</h3>
+<section id="answers-and-hints-7" class="level3 unnumbered">
+<h3 class="unnumbered anchored" data-anchor-id="answers-and-hints-7">Answers and hints</h3>
 </section>
 </section>
 <section id="references" class="level2 unnumbered">
 <h2 class="unnumbered anchored" data-anchor-id="references">References</h2>
-<p><span class="citation" data-cites="lynch2017">Lynch, Kevin M., and Frank C. Park. 2017. <em>Modern Robotics: Mechanics, Planning, and Control</em>. 1st ed. Cambridge University Press. <strong>Chaps. 2, 4–5.</strong></span></p>
-<p><span class="citation" data-cites="craig2022">Craig, John J. 2022. <em>Introduction to Robotics: Mechanics and Control</em>. 4th ed. Pearson Education Limited. <strong>Chaps. 3, 5.</strong></span></p>
+<p><span class="citation" data-cites="lynch2017">Lynch, Kevin M., and Frank C. Park. 2017. <em>Modern Robotics: Mechanics, Planning, and Control</em>. 1st ed. Cambridge University Press. <strong>Chaps. 2–5.</strong></span></p>
+<p><span class="citation" data-cites="craig2022">Craig, John J. 2022. <em>Introduction to Robotics: Mechanics and Control</em>. 4th ed. Pearson Education Limited. <strong>Chaps. 2–3, 5.</strong></span></p>
 <p><span class="citation" data-cites="corke2023">Corke, Peter. 2023. <em>Robotics, Vision and Control: Fundamental Algorithms in <span>Python</span></em>. 3rd ed. Springer. <a href="https://doi.org/10.1007/978-3-031-06469-2">https://doi.org/10.1007/978-3-031-06469-2</a>. <strong>Chaps. 7–8.</strong></span></p>
 
 
@@ -3116,6 +4602,42 @@ L_1\\0\\0
 }.
 \]</span></p>
 <p>Both sides evaluate to <span class="math inline">\([L_1(1-\cos\theta_2)\;-L_1\sin\theta_2\;0]^{\mathsf T}\)</span>, the translation column used by the explicit <span class="math inline">\(\mathbf E_2(\theta_2)\)</span> matrix in the main text.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>The home screw matrix <span class="math inline">\(\widehat{{}^{s}\mathbf S_j}\)</span> is constant, so only the powers of <span class="math inline">\(q_j\)</span> change when we differentiate the exponential series:</p>
+<p><span class="math display">\[
+\begin{aligned}
+\mathbf E_j
+&amp;=\mathbf I_4+q_j\widehat{{}^{s}\mathbf S_j}
++\frac{q_j^2}{2!}\left(\widehat{{}^{s}\mathbf S_j}\right)^2+\cdots,\\
+\frac{\partial\mathbf E_j}{\partial q_j}
+&amp;=\widehat{{}^{s}\mathbf S_j}
++q_j\left(\widehat{{}^{s}\mathbf S_j}\right)^2
++\frac{q_j^2}{2!}\left(\widehat{{}^{s}\mathbf S_j}\right)^3+\cdots\\
+&amp;=\widehat{{}^{s}\mathbf S_j}\,\mathbf E_j
+=\mathbf E_j\widehat{{}^{s}\mathbf S_j}.
+\end{aligned}
+\]</span></p>
+<p>We can factor the screw matrix out on either side because every term contains a power of that same matrix. The derivative describes the displacement matrix’s change per unit joint coordinate: per radian for a revolute joint or per metre for a prismatic joint. Multiplying by <span class="math inline">\(\dot q_j\)</span> gives its change per second.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p><strong>Imagine leaving the reference arrows on the floor.</strong> View the planar arm from above and imagine this procedure:</p>
+<ol type="1">
+<li>Set both joint angles to zero. The arm is straight.</li>
+<li>At the tool tip, draw the axes of <span class="math inline">\(\{e'\}\)</span>: <span class="math inline">\(+x_{e'}\)</span> points along the straight arm towards the tool tip, and <span class="math inline">\(+y_{e'}\)</span> points <span class="math inline">\(90^\circ\)</span> counterclockwise from <span class="math inline">\(+x_{e'}\)</span> in the arm’s plane.</li>
+<li>Leave those arrows at that location, as though they were drawn on the floor. This is the fixed frame <span class="math inline">\(\{e'\}\)</span>.</li>
+<li>Keep joint 1 at zero and bend joint 2. The tool and its attached frame <span class="math inline">\(\{e\}\)</span> move, but <span class="math inline">\(\{e'\}\)</span> does not.</li>
+</ol>
+<p>Describe both the before and after positions using those same floor-drawn axes of <span class="math inline">\(\{e'\}\)</span>:</p>
+<ul>
+<li><span class="math inline">\(\mathbf x\)</span> is the point’s position before bending.</li>
+<li><span class="math inline">\(\mathbf x'\)</span> is the point’s position after bending.</li>
+</ul>
+<p>For example, choose the tool tip itself. Initially it is exactly at the drawn origin:</p>
+<p><span class="math display">\[
+\mathbf x=\begin{bmatrix}0\\0\\0\end{bmatrix}\,\mathrm m.
+\]</span></p>
+<p>After bending joint 2 by <span class="math inline">\(+90^\circ\)</span>, it lies <span class="math inline">\(L_2\)</span> along <span class="math inline">\(-x_{e'}\)</span> and <span class="math inline">\(L_2\)</span> along <span class="math inline">\(+y_{e'}\)</span>: left and up if <span class="math inline">\(+x_{e'}\)</span> points right on the page. Relative to the unchanged origin of <span class="math inline">\(\{e'\}\)</span>,</p>
+<p><span class="math display">\[
+\mathbf x'=\begin{bmatrix}-L_2\\L_2\\0\end{bmatrix},
+\]</span></p>
+<p>with entries in metres expressed in <span class="math inline">\(\{e'\}\)</span>. The actual frame <span class="math inline">\(\{e\}\)</span> attached to the tool moves with it; <span class="math inline">\(\{e'\}\)</span> remains a fixed copy of where <span class="math inline">\(\{e\}\)</span> was at home.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section>
 
